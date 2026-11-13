@@ -198,142 +198,32 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Logo Upload -->
-                            <div
-                                class="p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 space-y-3"
-                            >
-                                <label
-                                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ t('tenant_site.admin.fields.logo') }}
-                                </label>
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="h-20 w-20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner"
-                                    >
-                                        <img
-                                            v-if="logoPreview"
-                                            :src="logoPreview"
-                                            class="h-full w-full object-contain p-2"
-                                            alt="Logo preview"
-                                        />
-                                        <svg
-                                            v-else
-                                            class="w-8 h-8 text-gray-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.5"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div class="space-y-2 flex-1">
-                                        <input
-                                            type="file"
-                                            accept="image/png,image/jpeg,image/webp"
-                                            @change="onLogoChange"
-                                            class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-pink-50 file:text-pink-700 dark:file:bg-pink-900/40 dark:file:text-pink-300 cursor-pointer"
-                                        />
-                                        <button
-                                            v-if="logoPreview"
-                                            type="button"
-                                            @click="removeImage('logo')"
-                                            class="text-xs text-rose-500 hover:text-rose-700 font-medium inline-flex items-center gap-1"
-                                        >
-                                            <svg
-                                                class="w-3.5 h-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                            {{ t('tenant_site.admin.remove_image') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                <p v-if="errors.logo" class="text-xs text-rose-500">
-                                    {{ errors.logo }}
-                                </p>
-                            </div>
+                            <AppFileUpload
+                                v-model="form.logo"
+                                variant="image"
+                                :label="t('tenant_site.admin.fields.logo')"
+                                :existing-url="logoPreview || ''"
+                                :reset-button-text="t('tenant_site.admin.remove_image')"
+                                accept="image/png,image/jpeg,image/webp"
+                                :max-size-mb="2"
+                                :error="errors.logo"
+                                @select="onLogoChange"
+                                @remove-existing="removeImage('logo')"
+                            />
 
                             <!-- Cover Upload -->
-                            <div
-                                class="p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 space-y-3"
-                            >
-                                <label
-                                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ t('tenant_site.admin.fields.cover') }}
-                                </label>
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="h-20 w-36 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner"
-                                    >
-                                        <img
-                                            v-if="coverPreview"
-                                            :src="coverPreview"
-                                            class="h-full w-full object-cover"
-                                            alt="Cover preview"
-                                        />
-                                        <svg
-                                            v-else
-                                            class="w-8 h-8 text-gray-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.5"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div class="space-y-2 flex-1">
-                                        <input
-                                            type="file"
-                                            accept="image/png,image/jpeg,image/webp"
-                                            @change="onCoverChange"
-                                            class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-pink-50 file:text-pink-700 dark:file:bg-pink-900/40 dark:file:text-pink-300 cursor-pointer"
-                                        />
-                                        <button
-                                            v-if="coverPreview"
-                                            type="button"
-                                            @click="removeImage('cover')"
-                                            class="text-xs text-rose-500 hover:text-rose-700 font-medium inline-flex items-center gap-1"
-                                        >
-                                            <svg
-                                                class="w-3.5 h-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                            {{ t('tenant_site.admin.remove_image') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                <p v-if="errors.cover" class="text-xs text-rose-500">
-                                    {{ errors.cover }}
-                                </p>
-                            </div>
+                            <AppFileUpload
+                                v-model="form.cover"
+                                variant="image"
+                                :label="t('tenant_site.admin.fields.cover')"
+                                :existing-url="coverPreview || ''"
+                                :reset-button-text="t('tenant_site.admin.remove_image')"
+                                accept="image/png,image/jpeg,image/webp"
+                                :max-size-mb="5"
+                                :error="errors.cover"
+                                @select="onCoverChange"
+                                @remove-existing="removeImage('cover')"
+                            />
                         </div>
                     </section>
 
@@ -562,7 +452,7 @@
                             >
                                 <!-- Banner Header bar -->
                                 <div
-                                    class="px-5 py-3.5 bg-gray-100/70 dark:bg-gray-750 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
+                                    class="px-5 py-3.5 bg-gray-100/70 dark:bg-gray-800 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
                                 >
                                     <div class="flex items-center gap-3">
                                         <span
@@ -751,53 +641,25 @@
                                                     )
                                                 }}
                                             </label>
-                                            <div class="flex items-center gap-3">
-                                                <img
-                                                    v-if="banner.image_url"
-                                                    :src="banner.image_url"
-                                                    class="h-12 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
-                                                    alt="Banner thumb"
-                                                />
-                                                <label
-                                                    class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                                >
-                                                    <svg
-                                                        class="w-3.5 h-3.5 text-pink-500"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                        />
-                                                    </svg>
-                                                    {{
-                                                        t(
-                                                            'tenant_site.admin.banners_manager.upload_banner_image'
-                                                        )
-                                                    }}
-                                                    <input
-                                                        type="file"
-                                                        accept="image/png,image/jpeg,image/webp"
-                                                        class="hidden"
-                                                        @change="(e) => uploadBannerImg(e, banner)"
-                                                    />
-                                                </label>
-                                                <button
-                                                    v-if="banner.image_url || banner.image_path"
-                                                    type="button"
-                                                    @click="
+                                            <AppFileUpload
+                                                variant="image"
+                                                compact-preview
+                                                :existing-url="banner.image_url || ''"
+                                                :upload-button-text="
+                                                    t(
+                                                        'tenant_site.admin.banners_manager.upload_banner_image'
+                                                    )
+                                                "
+                                                accept="image/png,image/jpeg,image/webp"
+                                                :max-size-mb="5"
+                                                @select="(file) => uploadBannerImg(file, banner)"
+                                                @remove-existing="
+                                                    () => {
                                                         banner.image_url = null;
                                                         banner.image_path = null;
-                                                    "
-                                                    class="text-xs text-rose-500 hover:text-rose-700"
-                                                >
-                                                    حذف
-                                                </button>
-                                            </div>
+                                                    }
+                                                "
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -1710,6 +1572,7 @@ import ColorField from '@/Components/ColorField.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';
@@ -2040,8 +1903,8 @@ const errors = form.errors;
 const logoPreview = ref(w.logo_url || null);
 const coverPreview = ref(w.cover_url || null);
 
-function onLogoChange(e) {
-    const file = e.target.files?.[0];
+function onLogoChange(fileOrEvent) {
+    const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
     if (!file) return;
     form.logo = file;
     const reader = new FileReader();
@@ -2049,8 +1912,8 @@ function onLogoChange(e) {
     reader.readAsDataURL(file);
 }
 
-function onCoverChange(e) {
-    const file = e.target.files?.[0];
+function onCoverChange(fileOrEvent) {
+    const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
     if (!file) return;
     form.cover = file;
     const reader = new FileReader();
@@ -2108,8 +1971,8 @@ function removeBanner(index) {
     form.banners.splice(index, 1);
 }
 
-async function uploadBannerImg(e, banner) {
-    const file = e.target.files?.[0];
+async function uploadBannerImg(fileOrEvent, banner) {
+    const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
     if (!file) return;
 
     const fd = new FormData();

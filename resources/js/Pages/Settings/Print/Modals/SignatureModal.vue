@@ -158,56 +158,18 @@
 
             <!-- ── Upload tab ─────────────────────────────────────── -->
             <div v-show="activeTab === 'upload'" class="space-y-3">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ $t('print_settings.upload_hint') }}
-                </p>
-
-                <label
-                    class="block cursor-pointer rounded-2xl border-2 border-dashed border-action-primary/25 hover:border-action-primary bg-selection-bg p-6 text-center transition-all"
-                    :class="{ 'pointer-events-none opacity-50': uploading }"
-                >
-                    <input
-                        ref="fileInputEl"
-                        type="file"
-                        accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
-                        class="sr-only"
-                        @change="onFileSelected"
-                    />
-                    <svg
-                        class="w-10 h-10 mx-auto text-action-primary mb-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                    </svg>
-                    <p class="text-sm font-bold text-action-primary">
-                        {{ $t('print_settings.click_to_choose_file') }}
-                    </p>
-                    <p class="text-[10px] text-gray-400 mt-1 font-mono">
-                        PNG · JPG · SVG — max 2 MB
-                    </p>
-                </label>
-
-                <div
-                    v-if="uploadPreviewUrl"
-                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/30 p-3 flex items-center justify-center"
-                >
-                    <img
-                        :src="uploadPreviewUrl"
-                        alt="preview"
-                        class="max-h-32 max-w-full object-contain"
-                    />
-                </div>
-
-                <p v-if="uploadError" class="text-[10px] text-red-500 font-bold">
-                    {{ uploadError }}
-                </p>
+                <AppFileUpload
+                    v-model="uploadFile"
+                    variant="image"
+                    accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
+                    :max-size-mb="2"
+                    :disabled="uploading"
+                    :hint="$t('print_settings.upload_hint')"
+                    :upload-button-text="$t('print_settings.click_to_choose_file')"
+                    :error="uploadError"
+                    @select="onFileSelected"
+                    @invalid="(msg) => (uploadError = msg)"
+                />
             </div>
 
             <!-- ── Library tab ────────────────────────────────────── -->
@@ -574,6 +536,7 @@
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -1021,26 +984,10 @@ const ALLOWED_MIME = ['image/png', 'image/jpeg', 'image/svg+xml'];
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg', 'svg'];
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
-function onFileSelected(e) {
+function onFileSelected(file) {
     uploadError.value = '';
-    const file = e.target.files?.[0];
     if (!file) return;
-
-    const ext = (file.name.split('.').pop() || '').toLowerCase();
-    if (!ALLOWED_MIME.includes(file.type) && !ALLOWED_EXT.includes(ext)) {
-        uploadError.value = t('print_settings.signature_invalid_file_type');
-        clearUploadSelection();
-        return;
-    }
-    if (file.size > MAX_BYTES) {
-        uploadError.value = t('print_settings.upload_failed');
-        clearUploadSelection();
-        return;
-    }
-
     uploadFile.value = file;
-    if (uploadPreviewUrl.value) URL.revokeObjectURL(uploadPreviewUrl.value);
-    uploadPreviewUrl.value = URL.createObjectURL(file);
 }
 
 // ── Library state ─────────────────────────────────────────────────────

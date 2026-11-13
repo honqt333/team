@@ -437,241 +437,57 @@
 
                     <!-- Branding Tab -->
                     <div v-if="activeTab === 'branding'" class="space-y-6">
-                        <!-- Logo Light Mode -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
-                        >
-                            <div class="flex items-start gap-4">
-                                <div
-                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
-                                >
-                                    <img
-                                        v-if="props.branding?.logo_light_url"
-                                        :src="props.branding.logo_light_url"
-                                        class="w-full h-full object-contain"
-                                    />
-                                    <svg
-                                        v-else
-                                        class="w-8 h-8 text-gray-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ $t('center_settings.branding.logo_light') }}
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        {{ $t('center_settings.branding.logo_light_hint') }}
-                                    </p>
-                                    <div class="flex items-center gap-2">
-                                        <label
-                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
-                                        >
-                                            <input
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png,image/jpeg,image/webp"
-                                                @change="(e) => handleLogoUpload(e, 'light')"
-                                            />
-                                            {{ $t('company_profile.logo.upload') }}
-                                        </label>
-                                        <button
-                                            v-if="props.branding?.logo_light_url"
-                                            @click="handleLogoDelete('light')"
-                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
-                                        >
-                                            {{ $t('company_profile.logo.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <AppFileUpload
+                            variant="image"
+                            :label="$t('center_settings.branding.logo_light')"
+                            :hint="$t('center_settings.branding.logo_light_hint')"
+                            :existing-url="props.branding?.logo_light_url || ''"
+                            :upload-button-text="$t('company_profile.logo.upload')"
+                            :reset-button-text="$t('company_profile.logo.remove')"
+                            accept="image/png,image/jpeg,image/webp"
+                            :max-size-mb="2"
+                            @select="(file) => handleLogoUpload(file, 'light')"
+                            @remove-existing="handleLogoDelete('light')"
+                        />
 
-                        <!-- Logo Dark Mode -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
-                        >
-                            <div class="flex items-start gap-4">
-                                <div
-                                    class="w-20 h-20 rounded-lg bg-gray-800 dark:bg-gray-900 border border-gray-600 flex items-center justify-center overflow-hidden"
-                                >
-                                    <img
-                                        v-if="props.branding?.logo_dark_url"
-                                        :src="props.branding.logo_dark_url"
-                                        class="w-full h-full object-contain"
-                                    />
-                                    <svg
-                                        v-else
-                                        class="w-8 h-8 text-gray-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ $t('center_settings.branding.logo_dark') }}
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        {{ $t('center_settings.branding.logo_dark_hint') }}
-                                    </p>
-                                    <div class="flex items-center gap-2">
-                                        <label
-                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
-                                        >
-                                            <input
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png,image/jpeg,image/webp"
-                                                @change="(e) => handleLogoUpload(e, 'dark')"
-                                            />
-                                            {{ $t('company_profile.logo.upload') }}
-                                        </label>
-                                        <button
-                                            v-if="props.branding?.logo_dark_url"
-                                            @click="handleLogoDelete('dark')"
-                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
-                                        >
-                                            {{ $t('company_profile.logo.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <AppFileUpload
+                            variant="image"
+                            :label="$t('center_settings.branding.logo_dark')"
+                            :hint="$t('center_settings.branding.logo_dark_hint')"
+                            :existing-url="props.branding?.logo_dark_url || ''"
+                            :upload-button-text="$t('company_profile.logo.upload')"
+                            :reset-button-text="$t('company_profile.logo.remove')"
+                            accept="image/png,image/jpeg,image/webp"
+                            :max-size-mb="2"
+                            @select="(file) => handleLogoUpload(file, 'dark')"
+                            @remove-existing="handleLogoDelete('dark')"
+                        />
 
-                        <!-- Logo Invoice -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
-                        >
-                            <div class="flex items-start gap-4">
-                                <div
-                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
-                                >
-                                    <img
-                                        v-if="props.branding?.logo_invoice_url"
-                                        :src="props.branding.logo_invoice_url"
-                                        class="w-full h-full object-contain"
-                                    />
-                                    <svg
-                                        v-else
-                                        class="w-8 h-8 text-gray-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ $t('center_settings.branding.logo_invoice') }}
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        {{ $t('center_settings.branding.logo_invoice_hint') }}
-                                    </p>
-                                    <div class="flex items-center gap-2">
-                                        <label
-                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
-                                        >
-                                            <input
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png,image/jpeg,image/webp"
-                                                @change="(e) => handleLogoUpload(e, 'invoice')"
-                                            />
-                                            {{ $t('company_profile.logo.upload') }}
-                                        </label>
-                                        <button
-                                            v-if="props.branding?.logo_invoice_url"
-                                            @click="handleLogoDelete('invoice')"
-                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
-                                        >
-                                            {{ $t('company_profile.logo.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <AppFileUpload
+                            variant="image"
+                            :label="$t('center_settings.branding.logo_invoice')"
+                            :hint="$t('center_settings.branding.logo_invoice_hint')"
+                            :existing-url="props.branding?.logo_invoice_url || ''"
+                            :upload-button-text="$t('company_profile.logo.upload')"
+                            :reset-button-text="$t('company_profile.logo.remove')"
+                            accept="image/png,image/jpeg,image/webp"
+                            :max-size-mb="2"
+                            @select="(file) => handleLogoUpload(file, 'invoice')"
+                            @remove-existing="handleLogoDelete('invoice')"
+                        />
 
-                        <!-- Stamp -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
-                        >
-                            <div class="flex items-start gap-4">
-                                <div
-                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
-                                >
-                                    <img
-                                        v-if="props.branding?.stamp_url"
-                                        :src="props.branding.stamp_url"
-                                        class="w-full h-full object-contain"
-                                    />
-                                    <svg
-                                        v-else
-                                        class="w-8 h-8 text-gray-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ $t('center_settings.branding.stamp') }}
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        {{ $t('center_settings.branding.stamp_hint') }}
-                                    </p>
-                                    <div class="flex items-center gap-2">
-                                        <label
-                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
-                                        >
-                                            <input
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png,image/jpeg,image/webp"
-                                                @change="handleStampUpload"
-                                            />
-                                            {{ $t('company_profile.logo.upload') }}
-                                        </label>
-                                        <button
-                                            v-if="props.branding?.stamp_url"
-                                            @click="handleStampDelete"
-                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
-                                        >
-                                            {{ $t('company_profile.logo.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <AppFileUpload
+                            variant="image"
+                            :label="$t('center_settings.branding.stamp')"
+                            :hint="$t('center_settings.branding.stamp_hint')"
+                            :existing-url="props.branding?.stamp_url || ''"
+                            :upload-button-text="$t('company_profile.logo.upload')"
+                            :reset-button-text="$t('company_profile.logo.remove')"
+                            accept="image/png,image/jpeg,image/webp"
+                            :max-size-mb="2"
+                            @select="handleStampUpload"
+                            @remove-existing="handleStampDelete"
+                        />
                     </div>
 
                     <!-- Working Hours Tab -->
@@ -756,7 +572,7 @@
                     <!-- Center Invoices Tab -->
                     <div v-if="activeTab === 'invoices'" class="space-y-6">
                         <div
-                            class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4"
+                            class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700/50 pb-4"
                         >
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -770,7 +586,7 @@
 
                         <!-- Sub Tab Toggle for Sales vs Purchases -->
                         <div
-                            class="flex items-center gap-2 border-b border-gray-150 dark:border-gray-750"
+                            class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700"
                         >
                             <button
                                 type="button"
@@ -810,14 +626,14 @@
 
                         <!-- Sub-tab contents -->
                         <div
-                            class="bg-white dark:bg-gray-855 border border-gray-155 dark:border-gray-750 rounded-2xl overflow-hidden shadow-sm"
+                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm"
                         >
                             <!-- 1. Sales Invoices -->
                             <div v-if="subInvoiceTab === 'sales'" class="overflow-x-auto">
                                 <DataTable structured class="w-full text-right border-collapse">
                                     <thead>
                                         <tr
-                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-750"
+                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700"
                                         >
                                             <th
                                                 class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
@@ -867,7 +683,7 @@
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700/50">
                                         <tr
                                             v-for="(inv, index) in props.center_invoices.sales"
                                             :key="inv.id"
@@ -952,7 +768,7 @@
                                 <DataTable structured class="w-full text-right border-collapse">
                                     <thead>
                                         <tr
-                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-155 dark:border-gray-750"
+                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700"
                                         >
                                             <th
                                                 class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
@@ -1002,7 +818,7 @@
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700/50">
                                         <tr
                                             v-for="(inv, index) in props.center_invoices.purchases"
                                             :key="inv.id"
@@ -1103,6 +919,7 @@ import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -1326,8 +1143,8 @@ function saveWorkingHours() {
     );
 }
 
-function handleLogoUpload(event, type) {
-    const file = event.target.files[0];
+function handleLogoUpload(fileOrEvent, type) {
+    const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
@@ -1358,8 +1175,8 @@ function handleLogoDelete(type) {
     });
 }
 
-function handleStampUpload(event) {
-    const file = event.target.files[0];
+function handleStampUpload(fileOrEvent) {
+    const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
     if (!file) return;
 
     const formData = new FormData();

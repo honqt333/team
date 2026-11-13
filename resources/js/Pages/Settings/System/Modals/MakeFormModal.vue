@@ -44,31 +44,15 @@
             </div>
 
             <!-- Logo -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('system_settings.form.logo') }}
-                </label>
-                <div class="flex items-center gap-4">
-                    <div
-                        v-if="form.logo_path || previewUrl"
-                        class="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center p-2 bg-white dark:bg-gray-800"
-                    >
-                        <img
-                            :src="previewUrl || `/storage/${form.logo_path}`"
-                            class="w-full h-full object-contain"
-                        />
-                    </div>
-                    <input
-                        type="file"
-                        @change="handleFileChange"
-                        accept="image/*"
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-selection-bg file:text-selection-text hover:file:bg-selection-bg"
-                    />
-                </div>
-                <p v-if="form.errors.logo" class="mt-1 text-sm text-red-500">
-                    {{ form.errors.logo }}
-                </p>
-            </div>
+            <AppFileUpload
+                v-model="form.logo"
+                variant="image"
+                :label="$t('system_settings.form.logo')"
+                :existing-url="form.logo_path ? `/storage/${form.logo_path}` : ''"
+                accept="image/*"
+                :max-size-mb="2"
+                :error="form.errors.logo"
+            />
 
             <!-- Is Active -->
             <div
@@ -105,9 +89,9 @@
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
-import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 
 const props = defineProps({
     make: Object,
@@ -123,16 +107,6 @@ const form = useForm({
     logo_path: props.make?.logo_path || '',
     _method: props.make ? 'put' : undefined,
 });
-
-const previewUrl = ref(null);
-
-function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-        form.logo = file;
-        previewUrl.value = URL.createObjectURL(file);
-    }
-}
 
 function submit() {
     const url = props.make ? `/app/settings/makes/${props.make.id}` : '/app/settings/makes';

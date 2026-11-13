@@ -363,82 +363,13 @@
                 </div>
 
                 <!-- File Input / Drag & Drop -->
-                <div class="relative">
-                    <input
-                        ref="fileInputRef"
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp,.pdf"
-                        class="hidden"
-                        @change="handleFileSelected"
-                    />
-                    <div
-                        @click="$refs.fileInputRef?.click()"
-                        class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10"
-                    >
-                        <div
-                            v-if="selectedFileName"
-                            class="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            <span class="truncate max-w-xs">{{ selectedFileName }}</span>
-                            <button
-                                type="button"
-                                @click.stop="clearSelectedFile"
-                                class="text-rose-500 hover:text-rose-700 p-1"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                        <div v-else class="space-y-1">
-                            <svg
-                                class="w-7 h-7 mx-auto text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                />
-                            </svg>
-                            <p class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{ $t('company_profile.transactions.form.drop_file') }}
-                            </p>
-                            <p class="text-2xs text-gray-400 dark:text-gray-500">
-                                {{ $t('company_profile.transactions.form.attachment_hint') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <p v-if="form.errors.attachment" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.attachment }}
-                </p>
+                <AppFileUpload
+                    v-model="form.attachment"
+                    accept=".jpg,.jpeg,.png,.webp,.pdf"
+                    :max-size-mb="10"
+                    :error="form.errors.attachment"
+                    @select="() => (form.remove_attachment = false)"
+                />
             </div>
 
             <!-- Notes -->
@@ -508,6 +439,7 @@ import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 
 const { t } = useI18n();
 
