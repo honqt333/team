@@ -221,115 +221,17 @@
             </template>
 
             <div class="space-y-4">
-                <!-- Drop Zone -->
-                <div
-                    class="relative border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all cursor-pointer"
-                    :class="[
-                        isDragging
-                            ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-900/20'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 bg-gray-50/30 dark:bg-gray-900/20',
-                    ]"
-                    @dragover.prevent="isDragging = true"
-                    @dragleave.prevent="isDragging = false"
-                    @drop.prevent="handleDrop"
-                    @click="triggerFileInput"
-                >
-                    <input
-                        ref="fileInputRef"
-                        type="file"
-                        :multiple="allowMultiple"
-                        :accept="acceptedTypes"
-                        class="hidden"
-                        @click.stop
-                        @change="handleFileInputChange"
-                    />
-
-                    <div class="flex flex-col items-center gap-3">
-                        <div
-                            class="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center"
-                        >
-                            <svg
-                                class="w-7 h-7"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                />
-                            </svg>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                {{ $t('common.drag_and_drop_files') }}
-                                <span class="text-blue-600 dark:text-blue-400 underline">
-                                    {{ $t('common.click_to_browse') }}
-                                </span>
-                            </p>
-                            <p class="text-xs text-gray-400 font-mono">
-                                {{
-                                    $t('common.supported_formats', {
-                                        formats: formatLabel,
-                                    })
-                                }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Selected Files Pending Upload -->
-                <div v-if="selectedFiles.length > 0" class="space-y-2">
-                    <h4 class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {{ $t('common.upload_files') }} ({{ selectedFiles.length }})
-                    </h4>
-                    <div class="space-y-2 max-h-60 overflow-y-auto">
-                        <div
-                            v-for="(file, index) in selectedFiles"
-                            :key="index"
-                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700"
-                        >
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xs font-black uppercase text-gray-500 shrink-0"
-                                >
-                                    {{ file.name.split('.').pop() }}
-                                </div>
-                                <div class="min-w-0">
-                                    <p
-                                        class="text-xs font-bold text-gray-900 dark:text-white truncate"
-                                    >
-                                        {{ file.name }}
-                                    </p>
-                                    <p class="text-[10px] text-gray-400 font-mono">
-                                        {{ formatFileSize(file.size) }}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                @click="removePendingFile(index)"
-                                class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <AppFileUpload
+                    v-model="selectedFiles"
+                    :multiple="allowMultiple"
+                    :accept="acceptedTypes"
+                    :max-size-mb="maxSizeMb"
+                    :disabled="isReadOnly || isUploading"
+                    :hint="$t('common.supported_formats', { formats: formatLabel })"
+                    @invalid="
+                        (payload) => error(payload?.message || t('common.errors.invalid_file_type'))
+                    "
+                />
             </div>
 
             <template #footer>
@@ -382,9 +284,9 @@ import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
-import { useFormatters } from '@/Composables/useFormatters';
 
 const props = defineProps({
     attachments: { type: Array, default: () => [] },
@@ -405,54 +307,10 @@ const emit = defineEmits(['upload', 'delete', 'change', 'files-selected']);
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success, error } = useToast();
-const { formatFileSize } = useFormatters();
 
 const showUploadModal = ref(false);
-const isDragging = ref(false);
 const isUploading = ref(false);
 const selectedFiles = ref([]);
-const fileInputRef = ref(null);
-
-function triggerFileInput() {
-    fileInputRef.value?.click();
-}
-
-function handleFileInputChange(event) {
-    const files = Array.from(event.target.files || []);
-    processFiles(files);
-    event.target.value = '';
-}
-
-function handleDrop(event) {
-    isDragging.value = false;
-    const files = Array.from(event.dataTransfer.files || []);
-    processFiles(files);
-}
-
-function processFiles(files) {
-    if (props.isReadOnly || isUploading.value) return;
-    const maxBytes = props.maxSizeMb * 1024 * 1024;
-    for (const file of files) {
-        if (file.size > maxBytes) {
-            error(t('common.file_too_large', { file: file.name, size: props.maxSizeMb + ' MB' }));
-            continue;
-        }
-        if (props.uploadField && !props.acceptedTypes.split(',').includes(file.type)) {
-            error(t('common.errors.invalid_file_type'));
-            continue;
-        }
-        if (!props.allowMultiple) {
-            selectedFiles.value = [file];
-            break;
-        }
-        selectedFiles.value.push(file);
-    }
-}
-
-function removePendingFile(index) {
-    if (isUploading.value) return;
-    selectedFiles.value.splice(index, 1);
-}
 
 function closeModal() {
     if (isUploading.value) return;

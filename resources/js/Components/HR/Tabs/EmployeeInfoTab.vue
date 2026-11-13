@@ -32,35 +32,14 @@
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
                 <!-- Photo -->
-                <div class="lg:col-span-3 flex items-center gap-4">
-                    <div
-                        class="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden"
-                    >
-                        <img
-                            v-if="employee.photo_path"
-                            :src="`/storage/${employee.photo_path}`"
-                            class="w-full h-full object-cover"
-                        />
-                        <svg
-                            v-else
-                            class="w-12 h-12 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                        </svg>
-                    </div>
-                    <input
-                        type="file"
-                        @change="handlePhotoUpload"
+                <div class="lg:col-span-3">
+                    <AppFileUpload
+                        variant="image"
+                        compact-preview
+                        :existing-url="employee.photo_path ? `/storage/${employee.photo_path}` : ''"
                         accept="image/*"
-                        class="text-sm text-gray-500"
+                        :max-size-mb="2"
+                        @select="handlePhotoUpload"
                     />
                 </div>
 
@@ -675,6 +654,7 @@ import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import DocumentsTab from '@/Components/HR/Tabs/DocumentsTab.vue';
 import ContractsTab from '@/Components/HR/Tabs/ContractsTab.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { useToast } from '@/Composables/useToast';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
@@ -823,8 +803,8 @@ const form = useForm({
     insurance_details: props.employee.insurance_details || '',
 });
 
-function handlePhotoUpload(event) {
-    const file = event.target.files[0];
+function handlePhotoUpload(payload) {
+    const file = payload?.target?.files?.[0] || payload;
     if (file) {
         const formData = new FormData();
         formData.append('photo', file);

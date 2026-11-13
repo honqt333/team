@@ -184,18 +184,13 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('hr.documents.file') }}
-                    </label>
-                    <input
-                        type="file"
-                        @input="form.file = $event.target.files[0]"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-selection-bg file:text-selection-text hover:file:bg-selection-bg"
-                        required
-                    />
-                </div>
+                <AppFileUpload
+                    v-model="form.file"
+                    :label="$t('hr.documents.file')"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    :max-size-mb="10"
+                    :error="form.errors.file"
+                />
 
                 <div class="flex justify-end gap-3 mt-6">
                     <button
@@ -226,6 +221,7 @@ import { useToast } from '@/Composables/useToast';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 
 const props = defineProps({
     employee: Object,
