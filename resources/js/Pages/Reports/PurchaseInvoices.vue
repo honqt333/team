@@ -1142,9 +1142,9 @@ const paymentStatusOptions = computed(() => [
 ]);
 
 const statusOptions = computed(() => [
-    { id: 'all', label: t('reports.purchase_invoices_report.all_payment_statuses') },
+    { id: 'all', label: t('common.all_statuses') },
     { id: 'paid', label: t('reports.purchase_invoices_report.status_paid') },
-    { id: 'open', label: t('reports.purchase_invoices_report.status_partial') },
+    { id: 'open', label: t('common.status_open') },
     { id: 'draft', label: t('reports.purchase_invoices_report.status_draft') },
     { id: 'cancelled', label: t('reports.purchase_invoices_report.status_cancelled') },
 ]);

@@ -280,6 +280,28 @@ class WorkOrderController
             ];
         }
 
+        $filters = request()->only(['search', 'date_from', 'date_to', 'status', 'sub_filter']);
+
+        if (request()->boolean('print')) {
+            $printRows = $status
+                ? $this->buildWorkOrderQuery($status, $subFilter)
+                    ->orderByDesc('created_at')
+                    ->limit(5000)
+                    ->get()
+                    ->each->append(['total', 'total_paid', 'balance', 'bad_debt'])
+                    ->values()
+                : collect();
+
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'work_orders',
+                'backRoute' => 'work-orders.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $printRows,
+                'companyInfo' => [],
+            ]);
+        }
+
         if ($status) {
             $workOrders = $this->buildWorkOrderQuery($status, $subFilter)
                 ->orderByDesc('created_at')

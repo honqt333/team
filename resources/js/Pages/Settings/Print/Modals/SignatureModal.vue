@@ -893,8 +893,10 @@ function isCanvasBlank() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return true;
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    for (let i = 3; i < data.length; i += 4) {
-        if (data[i] !== 0) return false;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] !== 0 && (data[i] < 250 || data[i + 1] < 250 || data[i + 2] < 250)) {
+            return false;
+        }
     }
     return true;
 }

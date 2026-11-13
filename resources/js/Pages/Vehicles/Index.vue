@@ -688,9 +688,10 @@ function closeModal() {
 }
 
 function handleSaved(vehicle) {
+    const isNew = !selectedVehicle.value;
     closeModal();
     success(t('common.saved_success'));
-    if (!selectedVehicle.value && vehicle && vehicle.id) {
+    if (isNew && vehicle && vehicle.id) {
         router.visit(route('vehicles.show', vehicle.id));
     } else {
         router.reload({ only: ['vehicles'] });

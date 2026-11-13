@@ -1183,12 +1183,16 @@ async function deleteDevice(device) {
     });
 }
 
-function showDeviceToken(device) {
+async function showDeviceToken(device) {
     // The device token is stored as a hash, so it cannot be read back
     // from the database. Asking for it therefore issues a fresh token
     // and invalidates the previous one — the device has to be
     // re-provisioned with the new value.
-    if (!confirm(t('hr.settings.biometric_devices.token_rotate_confirm'))) {
+    const confirmed = await confirm(
+        t('hr.settings.biometric_devices.token_rotate_confirm'),
+        t('common.confirm')
+    );
+    if (!confirmed) {
         return;
     }
 

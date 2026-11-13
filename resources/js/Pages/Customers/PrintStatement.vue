@@ -2,6 +2,7 @@
     <StandardReportLayout
         :title="$t('customers.statement.title')"
         :subtitle="customerSummary"
+        :custom-company="companyInfo"
         back-route="customers.show"
         :back-route-params="customer?.id ? [customer.id] : []"
     >

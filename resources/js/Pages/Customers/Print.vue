@@ -46,11 +46,6 @@
                         {{ $t('customers.print.no_customers') }}
                     </td>
                 </tr>
-                <tr v-if="customers.length === 0">
-                    <td colspan="8" class="py-6 px-4 border border-gray-300 text-gray-500">
-                        {{ $t('common.no_data') }}
-                    </td>
-                </tr>
                 <tr
                     v-for="(customer, index) in customers"
                     :key="customer.id"
@@ -69,11 +64,7 @@
                         {{ customer.phone || '—' }}
                     </td>
                     <td class="py-2 px-2 border border-gray-300">
-                        {{
-                            customer.customer_type
-                                ? $t(`customers.type.${customer.customer_type}`)
-                                : '—'
-                        }}
+                        {{ customer.type ? $t(`customers.type.${customer.type}`) : '—' }}
                     </td>
                     <td class="py-2 px-2 border border-gray-300 font-mono">
                         {{ customer.vehicles_count || 0 }}

@@ -575,10 +575,10 @@ const props = defineProps({
 
 const { formatCurrency, toEnglish } = useNumberFormat();
 const { confirm } = useConfirm();
-const { toast } = useToast();
+const { success } = useToast();
 
 const totalAmount = computed(() => {
-    return props.grn.items.reduce(
+    return (props.grn.items || []).reduce(
         (sum, item) => sum + parseFloat(item.qty_received) * parseFloat(item.unit_cost),
         0
     );
@@ -613,57 +613,55 @@ const formatDateTime = (date) => {
     });
 };
 
-const postGrn = () => {
-    confirm({
+const postGrn = async () => {
+    const confirmed = await confirm({
         title: t('purchasing.grn.post_receipt'),
         message: t('purchasing.grn.post_confirm'),
         type: 'success',
-        onConfirm: () => {
-            router.post(
-                route('app.purchasing.grn.post', props.grn.id),
-                {},
-                {
-                    onSuccess: () =>
-                        toast({ message: t('purchasing.grn.posted_success'), type: 'success' }),
-                }
-            );
-        },
     });
+    if (!confirmed) return;
+
+    router.post(
+        route('app.purchasing.grn.post', props.grn.id),
+        {},
+        {
+            onSuccess: () => success(t('purchasing.grn.posted_success')),
+        }
+    );
 };
 
-const cancelGrn = () => {
-    confirm({
+const cancelGrn = async () => {
+    const confirmed = await confirm({
         title: t('purchasing.grn.cancel_receipt'),
         message: t('purchasing.grn.cancel_confirm'),
         type: 'danger',
-        onConfirm: () => {
-            router.post(
-                route('app.purchasing.grn.cancel', props.grn.id),
-                {},
-                {
-                    onSuccess: () =>
-                        toast({ message: t('purchasing.grn.cancelled'), type: 'info' }),
-                }
-            );
-        },
     });
+    if (!confirmed) return;
+
+    router.post(
+        route('app.purchasing.grn.cancel', props.grn.id),
+        {},
+        {
+            onSuccess: () => success(t('purchasing.grn.cancelled')),
+        }
+    );
 };
 
-const createInvoice = () => {
-    confirm({
+const createInvoice = async () => {
+    const confirmed = await confirm({
         title: t('purchasing.grn.create_purchase_invoice'),
         message: t('purchasing.grn.create_invoice_confirm'),
         type: 'info',
-        onConfirm: () => {
-            router.post(
-                route('app.purchasing.grn.create-invoice', props.grn.id),
-                {},
-                {
-                    onSuccess: () => toast({ message: t('invoices.created'), type: 'success' }),
-                }
-            );
-        },
     });
+    if (!confirmed) return;
+
+    router.post(
+        route('app.purchasing.grn.create-invoice', props.grn.id),
+        {},
+        {
+            onSuccess: () => success(t('invoices.created')),
+        }
+    );
 };
 
 const printGrn = () => {

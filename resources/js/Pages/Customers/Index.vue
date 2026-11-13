@@ -774,9 +774,10 @@ function goToCustomer(customer) {
 }
 
 function handleSaved(customer) {
+    const isNew = !selectedCustomer.value;
     closeModal();
     success(t('common.saved_success'));
-    if (!selectedCustomer.value && customer && customer.id) {
+    if (isNew && customer && customer.id) {
         router.visit(route('customers.show', customer.id));
     } else {
         router.reload({ only: ['customers'] });

@@ -598,7 +598,7 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
@@ -637,6 +637,10 @@ const typeFilterOptions = computed(() => [
 
 const currentPage = ref(1);
 const pageSize = 50;
+
+watch([searchQuery, filterType], () => {
+    currentPage.value = 1;
+});
 
 const filteredTransactions = computed(() => {
     let list = props.transactions || [];

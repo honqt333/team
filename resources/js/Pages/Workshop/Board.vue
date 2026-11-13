@@ -336,12 +336,20 @@ const props = defineProps({
     canManageAppointments: { type: Boolean, default: false },
 });
 
-const localColumns = ref({ ...props.columns });
+const cloneColumns = (cols) =>
+    Object.fromEntries(
+        Object.entries(cols || {}).map(([key, items]) => [
+            key,
+            Array.isArray(items) ? [...items] : [],
+        ])
+    );
+
+const localColumns = ref(cloneColumns(props.columns));
 
 watch(
     () => props.columns,
     (newVal) => {
-        localColumns.value = { ...newVal };
+        localColumns.value = cloneColumns(newVal);
     },
     { deep: true }
 );
@@ -463,10 +471,18 @@ const STATUS_META = {
 };
 
 const boardColumns = computed(() =>
-    props.statuses.map((status) => ({
-        ...STATUS_META[status],
-        label: t(STATUS_META[status].labelKey),
-    }))
+    (props.statuses || []).map((status) => {
+        const meta = STATUS_META[status] || {
+            key: status,
+            labelKey: status,
+            dotClass: 'bg-gray-500',
+            badgeClass: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+        };
+        return {
+            ...meta,
+            label: meta.labelKey ? t(meta.labelKey) : status,
+        };
+    })
 );
 
 // Format seconds as a compact HH:MM:SS / MM:SS string for the

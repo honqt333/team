@@ -80,7 +80,7 @@
                     {{ $t('inventory.transfers.receive') }}
                 </button>
                 <button
-                    @click="showCancelModal = true"
+                    @click="cancelTransfer"
                     class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30"
                 >
                     {{ $t('common.cancel') }}
@@ -275,16 +275,19 @@ import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     transfer: Object,
     parts: Array,
 });
 
+const { t } = useI18n();
+const { confirm } = useConfirm();
 const { formatQuantity } = useNumberFormat();
 
 const showAddModal = ref(false);
-const showCancelModal = ref(false);
 const newItem = ref({ part_id: '', qty_requested: '' });
 
 const statusClass = (status) =>
@@ -307,10 +310,32 @@ const addItem = () => {
     });
 };
 
-const removeItem = (item) => {
+const removeItem = async (item) => {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete'),
+        message: t('common.delete_confirm_message'),
+        type: 'danger',
+    });
+    if (!confirmed) return;
+
     router.delete(route('app.inventory.transfers.items.destroy', [props.transfer.id, item.id]), {
         preserveScroll: true,
     });
+};
+
+const cancelTransfer = async () => {
+    const confirmed = await confirm({
+        title: t('common.cancel'),
+        message: t('common.delete_confirm_message'),
+        type: 'danger',
+    });
+    if (!confirmed) return;
+
+    router.post(
+        route('app.inventory.transfers.cancel', props.transfer.id),
+        {},
+        { preserveScroll: true }
+    );
 };
 
 const sendTransfer = () => {

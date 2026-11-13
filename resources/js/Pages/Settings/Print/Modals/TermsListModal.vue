@@ -151,7 +151,7 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button
-                                        @click="editTerm(index)"
+                                        @click="editTerm(term)"
                                         class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
                                     >
                                         <svg
@@ -169,7 +169,7 @@
                                         </svg>
                                     </button>
                                     <button
-                                        @click="deleteTerm(index)"
+                                        @click="deleteTerm(term)"
                                         class="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                                     >
                                         <svg
@@ -306,8 +306,10 @@ function openAddTerm() {
     showingEditModal.value = true;
 }
 
-function editTerm(index) {
-    editingTermIndex.value = index;
+function editTerm(term) {
+    const idx = localTerms.value.indexOf(term);
+    if (idx === -1) return;
+    editingTermIndex.value = idx;
     showingEditModal.value = true;
 }
 
@@ -332,9 +334,11 @@ function saveTerm(term) {
     }
 }
 
-function deleteTerm(index) {
+function deleteTerm(term) {
+    const idx = localTerms.value.indexOf(term);
+    if (idx === -1) return;
     if (confirm(t('common.unsaved_changes_message'))) {
-        localTerms.value.splice(index, 1);
+        localTerms.value.splice(idx, 1);
     }
 }
 
