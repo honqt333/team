@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('purchasing.orders.title')">
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header -->
             <PageHeader
                 :title="$t('purchasing.orders.title')"
@@ -357,7 +357,7 @@
                     </DataTable>
                 </div>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Create/Edit Modal -->
         <PurchaseOrderFormModal
@@ -434,7 +434,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
@@ -554,7 +553,10 @@ const navigateToOrder = (order) => {
 };
 
 const printOrders = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const formatDate = (date) => {

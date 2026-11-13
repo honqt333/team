@@ -467,8 +467,6 @@ const searchResults = ref([]);
 const selectedContactKey = ref(null);
 const initialContact = ref(null);
 const enteredAmount = ref('');
-const fileInputRef = ref(null);
-const selectedFileName = ref('');
 
 const form = useForm({
     title: '',
@@ -639,7 +637,6 @@ watch(
         form.clearErrors();
         form.attachment = null;
         form.remove_attachment = false;
-        selectedFileName.value = '';
 
         if (props.transaction) {
             form.title = props.transaction.title || '';
@@ -698,24 +695,6 @@ watch(
         }
     }
 );
-
-// File upload handling
-function handleFileSelected(event) {
-    const file = event.target.files?.[0];
-    if (file) {
-        form.attachment = file;
-        selectedFileName.value = `${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
-        form.remove_attachment = false;
-    }
-}
-
-function clearSelectedFile() {
-    form.attachment = null;
-    selectedFileName.value = '';
-    if (fileInputRef.value) {
-        fileInputRef.value.value = '';
-    }
-}
 
 // Debounced async contact search
 function debounce(fn, delay) {

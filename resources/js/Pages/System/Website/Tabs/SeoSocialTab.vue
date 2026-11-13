@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 defineProps({ form: Object, addItem: Function, removeItem: Function });
@@ -35,12 +37,11 @@ const platformOptions = computed(() => [
                         {{ $t('tenant_site.seo.meta_description') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_description_ar"
-                        rows="3"
-                        class="input-enterprise"
+                        :rows="3"
                         placeholder="Meta Description"
-                    ></textarea>
+                    />
                 </div>
                 <div>
                     <label
@@ -50,20 +51,18 @@ const platformOptions = computed(() => [
                         Meta Description
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_description_en"
-                        rows="3"
-                        class="input-enterprise text-left"
+                        :rows="3"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.seo.keywords') }}
-                    </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.website_keywords"
-                        class="input-enterprise"
+                        type="text"
+                        :label="$t('tenant_site.seo.keywords')"
                         :placeholder="$t('system.website.keyword_another_keyword_keywords')"
                     />
                 </div>
@@ -76,38 +75,28 @@ const platformOptions = computed(() => [
                 {{ $t('tenant_site.seo.contact_details') }}
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('center_settings.contact.email') }}
-                    </label>
-                    <input
-                        v-model="form.settings.website_contact_email"
-                        type="email"
-                        class="input-enterprise text-left font-mono"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('center_settings.contact.phone') }}
-                    </label>
-                    <input
-                        v-model="form.settings.website_contact_phone"
-                        class="input-enterprise text-left font-mono"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.seo.whatsapp_number') }}
-                    </label>
-                    <input
-                        v-model="form.settings.website_whatsapp_number"
-                        class="input-enterprise text-left font-mono"
-                        dir="ltr"
-                        placeholder="+966"
-                    />
-                </div>
+                <AppInput
+                    v-model="form.settings.website_contact_email"
+                    type="email"
+                    :label="$t('center_settings.contact.email')"
+                    class="text-left font-mono"
+                    dir="ltr"
+                />
+                <AppInput
+                    v-model="form.settings.website_contact_phone"
+                    type="text"
+                    :label="$t('center_settings.contact.phone')"
+                    class="text-left font-mono"
+                    dir="ltr"
+                />
+                <AppInput
+                    v-model="form.settings.website_whatsapp_number"
+                    type="text"
+                    :label="$t('tenant_site.seo.whatsapp_number')"
+                    class="text-left font-mono"
+                    dir="ltr"
+                    placeholder="+966"
+                />
                 <div class="sm:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label
@@ -116,10 +105,7 @@ const platformOptions = computed(() => [
                             {{ $t('tenant_site.seo.headquarters_address') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <input
-                            v-model="form.settings.website_address_ar"
-                            class="input-enterprise"
-                        />
+                        <AppInput v-model="form.settings.website_address_ar" type="text" />
                     </div>
                     <div>
                         <label
@@ -129,9 +115,10 @@ const platformOptions = computed(() => [
                             Address
                             <span class="badge-lang">EN</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.website_address_en"
-                            class="input-enterprise text-left"
+                            type="text"
+                            class="text-left"
                             dir="ltr"
                         />
                     </div>
@@ -174,14 +161,11 @@ const platformOptions = computed(() => [
                             />
                         </div>
                         <div class="sm:col-span-8">
-                            <label
-                                class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1 block"
-                            >
-                                {{ $t('tenant_site.seo.full_url') }}
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="link.url"
-                                class="input-enterprise text-left font-mono"
+                                type="url"
+                                :label="$t('tenant_site.seo.full_url')"
+                                class="text-left font-mono"
                                 dir="ltr"
                                 placeholder="https://..."
                             />

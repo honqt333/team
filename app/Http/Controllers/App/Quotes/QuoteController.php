@@ -110,6 +110,26 @@ class QuoteController extends Controller
             $quotes->orderByDesc('quotes.created_at');
         }
 
+        $filters = array_merge(
+            $request->only(['search', 'date_range', 'date_from', 'date_to']),
+            [
+                'status' => $status,
+                'sort' => $sort ?: null,
+                'direction' => $sort ? $direction : null,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'quotes',
+                'backRoute' => 'app.quotes.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $quotes->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $quotes = $quotes->paginate(20)
             ->withQueryString();
 
@@ -198,6 +218,26 @@ class QuoteController extends Controller
             $quotes->orderBy("quotes.{$column}", $direction);
         } else {
             $quotes->orderByDesc('quotes.created_at');
+        }
+
+        $filters = array_merge(
+            $request->only(['search', 'date_range', 'date_from', 'date_to']),
+            [
+                'status' => $status,
+                'sort' => $sort ?: null,
+                'direction' => $sort ? $direction : null,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'quotes',
+                'backRoute' => 'app.quotes.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $quotes->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
         }
 
         $quotes = $quotes->paginate(20)

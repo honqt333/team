@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('departments.title')">
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('departments.title')"
@@ -391,7 +391,7 @@
                     </DataTable>
                 </div>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Department Form Modal -->
         <DepartmentFormModal
@@ -460,7 +460,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -638,6 +637,9 @@ async function handleDelete(dept) {
 }
 
 function handlePrint() {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 }
 </script>

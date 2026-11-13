@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="pageTitle"
@@ -890,7 +890,7 @@
                     </template>
                 </DataTable>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Create Modal -->
         <WorkOrderFormModal
@@ -976,7 +976,6 @@
 
 <script setup>
 import AppTabs from '@/Components/Common/AppTabs.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch, h } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -1305,7 +1304,10 @@ const columns = computed(() => [
 
 // Print & Export
 function printWorkOrders() {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 }
 
 async function exportWorkOrders() {

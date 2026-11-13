@@ -50,6 +50,16 @@ const reportTitle = computed(() => {
         employees: t('reports.employees_report.title'),
         cash_register: t('reports.cash_register_report.title'),
         financial_summary: t('reports.financial_summary_report.title'),
+        work_orders: t('work_orders.title'),
+        quotes: t('quotes.title'),
+        departments: t('departments.title'),
+        purchasing_suppliers: t('purchasing.suppliers.title'),
+        purchasing_sales: t('invoices.title'),
+        purchasing_orders: t('purchasing.orders.title'),
+        inventory_moves: t('inventory.moves.title'),
+        inventory_transfers: t('inventory.transfers.title'),
+        inventory_parts: t('inventory.parts.title'),
+        inventory_stock: t('inventory.stock.title'),
     };
     return map[props.reportType] || t('reports.title');
 });
@@ -628,6 +638,105 @@ const columns = computed(() => {
                     align: 'end',
                 },
             ];
+        case 'work_orders':
+            return [
+                { key: 'code', label: t('work_orders.columns.code') },
+                { key: 'date', label: t('common.date') },
+                { key: 'vehicle', label: t('work_orders.columns.vehicle') },
+                { key: 'customer', label: t('work_orders.columns.customer') },
+                { key: 'status', label: t('work_orders.columns.status'), align: 'center' },
+                { key: 'total', label: t('work_orders.columns.total'), align: 'end' },
+                { key: 'paid', label: t('work_orders.columns.paid'), align: 'end' },
+                { key: 'balance', label: t('work_orders.columns.balance'), align: 'end' },
+            ];
+        case 'quotes':
+            return [
+                { key: 'code', label: t('quotes.columns.code') },
+                { key: 'date', label: t('common.date') },
+                { key: 'vehicle', label: t('quotes.columns.vehicle') },
+                { key: 'customer', label: t('quotes.columns.customer') },
+                { key: 'services', label: t('quotes.card.services'), align: 'center' },
+                { key: 'total', label: t('quotes.columns.total'), align: 'end' },
+            ];
+        case 'departments':
+            return [
+                { key: 'name', label: t('departments.columns.name') },
+                { key: 'description', label: t('departments.columns.description') },
+                {
+                    key: 'services_count',
+                    label: t('departments.columns.services_count'),
+                    align: 'center',
+                },
+                { key: 'status', label: t('departments.columns.status'), align: 'center' },
+            ];
+        case 'purchasing_suppliers':
+            return [
+                { key: 'name', label: t('purchasing.suppliers.name') },
+                { key: 'phone', label: t('purchasing.suppliers.phone') },
+                { key: 'email', label: t('purchasing.suppliers.email') },
+                { key: 'type', label: t('purchasing.suppliers.type'), align: 'center' },
+                { key: 'balance', label: t('purchasing.suppliers.balance'), align: 'end' },
+                { key: 'status', label: t('common.status'), align: 'center' },
+            ];
+        case 'purchasing_sales':
+            return [
+                { key: 'invoice_number', label: t('invoices.invoice_number') },
+                { key: 'customer', label: t('common.customer') },
+                { key: 'issue_date', label: t('invoices.issue_date') },
+                { key: 'total', label: t('invoices.grand_total'), align: 'end' },
+                { key: 'status', label: t('common.status'), align: 'center' },
+            ];
+        case 'purchasing_orders':
+            return [
+                { key: 'code', label: t('purchasing.orders.code') },
+                { key: 'supplier', label: t('purchasing.orders.supplier') },
+                { key: 'order_date', label: t('purchasing.orders.date') },
+                { key: 'total', label: t('purchasing.orders.total'), align: 'end' },
+                { key: 'status', label: t('common.status'), align: 'center' },
+            ];
+        case 'inventory_moves':
+            return [
+                { key: 'part', label: t('inventory.moves.columns.part') },
+                { key: 'action', label: t('inventory.moves.columns.action') },
+                { key: 'qty', label: t('inventory.moves.columns.qty'), align: 'end' },
+                {
+                    key: 'stock_after',
+                    label: t('inventory.moves.columns.stock_after'),
+                    align: 'end',
+                },
+                { key: 'cost_price', label: t('inventory.moves.columns.cost_price'), align: 'end' },
+                {
+                    key: 'posted_at',
+                    label: t('inventory.moves.columns.updated_at'),
+                    align: 'center',
+                },
+            ];
+        case 'inventory_transfers':
+            return [
+                { key: 'code', label: t('inventory.transfers.code') },
+                { key: 'from', label: t('inventory.transfers.from') },
+                { key: 'to', label: t('inventory.transfers.to') },
+                { key: 'items', label: t('inventory.transfers.items'), align: 'center' },
+                { key: 'status', label: t('common.status'), align: 'center' },
+                { key: 'created_at', label: t('common.created_at'), align: 'center' },
+            ];
+        case 'inventory_parts':
+            return [
+                { key: 'sku', label: t('inventory.parts.sku'), align: 'center' },
+                { key: 'name', label: t('inventory.parts.name') },
+                { key: 'category', label: t('inventory.parts.category'), align: 'center' },
+                { key: 'unit', label: t('inventory.parts.unit'), align: 'center' },
+                { key: 'qty', label: t('inventory.stock.qty'), align: 'end' },
+            ];
+        case 'inventory_stock':
+            return [
+                { key: 'sku', label: t('inventory.parts.part_number'), align: 'center' },
+                { key: 'name', label: t('inventory.parts.name') },
+                { key: 'category', label: t('inventory.parts.category'), align: 'center' },
+                { key: 'available', label: t('inventory.stock.available'), align: 'end' },
+                { key: 'avg_cost', label: t('inventory.stock.avg_cost'), align: 'end' },
+                { key: 'price', label: t('inventory.parts.price'), align: 'end' },
+            ];
         default:
             return [];
     }
@@ -1014,6 +1123,203 @@ const getCell = (row, key) => {
             }
             break;
         }
+        case 'work_orders':
+            switch (key) {
+                case 'code':
+                    return row.code || '-';
+                case 'date':
+                    return formatDate(row.entry_date || row.created_at);
+                case 'vehicle':
+                    return row.vehicle?.plate_number || '-';
+                case 'customer':
+                    return row.customer?.name || '-';
+                case 'status':
+                    return row.status ? t(`work_orders.status.${row.status}`) : '-';
+                case 'total':
+                    return formatNum(row.total);
+                case 'paid':
+                    return formatNum(row.total_paid ?? row.paid_amount);
+                case 'balance':
+                    return formatNum(
+                        row.balance ??
+                            (Number(row.total) || 0) -
+                                (Number(row.total_paid ?? row.paid_amount) || 0)
+                    );
+            }
+            break;
+        case 'quotes':
+            switch (key) {
+                case 'code':
+                    return row.code || '-';
+                case 'date':
+                    return formatDate(row.created_at);
+                case 'vehicle':
+                    return row.vehicle?.plate_number || '-';
+                case 'customer':
+                    return row.customer?.name || '-';
+                case 'services':
+                    return formatQty(row.lines_count || 0);
+                case 'total':
+                    return formatNum(row.total);
+            }
+            break;
+        case 'departments':
+            switch (key) {
+                case 'name':
+                    return (
+                        (locale.value === 'en'
+                            ? row.name_en || row.name_ar
+                            : row.name_ar || row.name_en) ||
+                        row.name ||
+                        '-'
+                    );
+                case 'description':
+                    return row.description || '-';
+                case 'services_count':
+                    return formatQty(row.services_count || 0);
+                case 'status':
+                    return row.is_active ? t('common.active') : t('common.inactive');
+            }
+            break;
+        case 'purchasing_suppliers':
+            switch (key) {
+                case 'name':
+                    return row.name || '-';
+                case 'phone':
+                    return row.phone || '-';
+                case 'email':
+                    return row.email || '-';
+                case 'type':
+                    return row.type === 'parts'
+                        ? t('purchasing.suppliers.type_parts')
+                        : t('purchasing.suppliers.type_services');
+                case 'balance':
+                    return formatNum(row.balance);
+                case 'status':
+                    return row.is_active ? t('common.active') : t('common.inactive');
+            }
+            break;
+        case 'purchasing_sales':
+            switch (key) {
+                case 'invoice_number':
+                    return row.invoice_number || '-';
+                case 'customer':
+                    return row.customer_name_snapshot || row.customer?.name || '-';
+                case 'issue_date':
+                    return formatDate(row.issue_date || row.created_at);
+                case 'total':
+                    return formatNum(row.total_incl_tax ?? row.total);
+                case 'status':
+                    return row.payment_status
+                        ? t(`invoices.payment_status.${row.payment_status}`)
+                        : row.status || '-';
+            }
+            break;
+        case 'purchasing_orders':
+            switch (key) {
+                case 'code':
+                    return row.code || '-';
+                case 'supplier':
+                    return row.supplier?.name || '-';
+                case 'order_date':
+                    return formatDate(row.order_date || row.created_at);
+                case 'total':
+                    return formatNum(row.total);
+                case 'status':
+                    return row.status || '-';
+            }
+            break;
+        case 'inventory_moves':
+            switch (key) {
+                case 'part':
+                    return (
+                        [
+                            locale.value === 'en'
+                                ? row.part?.name_en || row.part?.name_ar
+                                : row.part?.name_ar || row.part?.name_en,
+                            row.part?.sku,
+                        ]
+                            .filter(Boolean)
+                            .join(' - ') || '-'
+                    );
+                case 'action':
+                    return row.move_type || '-';
+                case 'qty':
+                    return `${Number(row.qty) > 0 ? '+' : ''}${formatQty(row.qty)}`;
+                case 'stock_after':
+                    return formatQty(row.balance_after);
+                case 'cost_price':
+                    return formatNum(row.unit_cost);
+                case 'posted_at':
+                    return formatDate(row.posted_at || row.created_at);
+            }
+            break;
+        case 'inventory_transfers':
+            switch (key) {
+                case 'code':
+                    return row.code || '-';
+                case 'from':
+                    return row.from_warehouse?.name || '-';
+                case 'to':
+                    return row.to_warehouse?.name || '-';
+                case 'items':
+                    return formatQty(row.items_count ?? 0);
+                case 'status':
+                    return row.status || '-';
+                case 'created_at':
+                    return formatDate(row.created_at);
+            }
+            break;
+        case 'inventory_parts':
+            switch (key) {
+                case 'sku':
+                    return row.sku || '-';
+                case 'name':
+                    return (
+                        (locale.value === 'en'
+                            ? row.name_en || row.name_ar
+                            : row.name_ar || row.name_en) || '-'
+                    );
+                case 'category':
+                    return (
+                        (locale.value === 'en'
+                            ? row.category?.name_en || row.category?.name_ar
+                            : row.category?.name_ar || row.category?.name_en) || '-'
+                    );
+                case 'unit':
+                    return (
+                        (locale.value === 'en'
+                            ? row.unit?.name_en || row.unit?.name_ar
+                            : row.unit?.name_ar || row.unit?.name_en) || '-'
+                    );
+                case 'qty':
+                    return formatQty(row.qty_on_hand ?? row.total_qty ?? 0);
+            }
+            break;
+        case 'inventory_stock':
+            switch (key) {
+                case 'sku':
+                    return row.part?.sku || '-';
+                case 'name':
+                    return (
+                        (locale.value === 'en'
+                            ? row.part?.name_en || row.part?.name_ar
+                            : row.part?.name_ar || row.part?.name_en) || '-'
+                    );
+                case 'category':
+                    return (
+                        (locale.value === 'en'
+                            ? row.part?.category?.name_en || row.part?.category?.name_ar
+                            : row.part?.category?.name_ar || row.part?.category?.name_en) || '-'
+                    );
+                case 'available':
+                    return `${formatQty(row.qty_on_hand)} ${row.part?.unit?.name_ar || ''}`.trim();
+                case 'avg_cost':
+                    return formatNum(row.wac_cost);
+                case 'price':
+                    return formatNum(row.sale_price);
+            }
+            break;
     }
     return '-';
 };

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -60,32 +61,25 @@ async function onBannerFileSelect(file, banner, index) {
                     class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 flex gap-4 items-start group"
                 >
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('tenant_site.lists.name_arabic') }}
-                            </label>
-                            <input v-model="item.label_ar" class="input-enterprise" />
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('system.website.label_en') }}
-                            </label>
-                            <input
-                                v-model="item.label_en"
-                                class="input-enterprise text-left"
-                                dir="ltr"
-                            />
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('tenant_site.lists.path_url') }}
-                            </label>
-                            <input
-                                v-model="item.url"
-                                class="input-enterprise text-left font-mono"
-                                dir="ltr"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="item.label_ar"
+                            type="text"
+                            :label="$t('tenant_site.lists.name_arabic')"
+                        />
+                        <AppInput
+                            v-model="item.label_en"
+                            type="text"
+                            :label="$t('system.website.label_en')"
+                            class="text-left"
+                            dir="ltr"
+                        />
+                        <AppInput
+                            v-model="item.url"
+                            type="text"
+                            :label="$t('tenant_site.lists.path_url')"
+                            class="text-left font-mono"
+                            dir="ltr"
+                        />
                     </div>
                     <button
                         @click="removeItem('website_header_menu', index)"
@@ -135,32 +129,25 @@ async function onBannerFileSelect(file, banner, index) {
                     class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 flex gap-4 items-start group"
                 >
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('tenant_site.lists.name_arabic') }}
-                            </label>
-                            <input v-model="item.label_ar" class="input-enterprise" />
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('system.website.label_en') }}
-                            </label>
-                            <input
-                                v-model="item.label_en"
-                                class="input-enterprise text-left"
-                                dir="ltr"
-                            />
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                {{ $t('tenant_site.lists.path_url') }}
-                            </label>
-                            <input
-                                v-model="item.url"
-                                class="input-enterprise text-left font-mono"
-                                dir="ltr"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="item.label_ar"
+                            type="text"
+                            :label="$t('tenant_site.lists.name_arabic')"
+                        />
+                        <AppInput
+                            v-model="item.label_en"
+                            type="text"
+                            :label="$t('system.website.label_en')"
+                            class="text-left"
+                            dir="ltr"
+                        />
+                        <AppInput
+                            v-model="item.url"
+                            type="text"
+                            :label="$t('tenant_site.lists.path_url')"
+                            class="text-left font-mono"
+                            dir="ltr"
+                        />
                     </div>
                     <button
                         @click="removeItem('website_footer_menu', index)"
@@ -236,13 +223,15 @@ async function onBannerFileSelect(file, banner, index) {
                             @invalid="toastError"
                             @remove-existing="banner.image = ''"
                         />
-                        <input
-                            v-model="banner.image"
-                            type="text"
-                            :placeholder="$t('system.website.image_url_placeholder')"
-                            class="input-enterprise text-xs py-1 font-mono mt-2"
-                            dir="ltr"
-                        />
+                        <div class="mt-2">
+                            <AppInput
+                                v-model="banner.image"
+                                type="text"
+                                :placeholder="$t('system.website.image_url_placeholder')"
+                                class="font-mono"
+                                dir="ltr"
+                            />
+                        </div>
                     </div>
                     <div class="flex-1 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -253,7 +242,7 @@ async function onBannerFileSelect(file, banner, index) {
                                     {{ $t('center_settings.address.title') }}
                                     <span class="badge-lang">AR</span>
                                 </label>
-                                <input v-model="banner.title_ar" class="input-enterprise" />
+                                <AppInput v-model="banner.title_ar" type="text" />
                             </div>
                             <div>
                                 <label
@@ -263,19 +252,19 @@ async function onBannerFileSelect(file, banner, index) {
                                     {{ $t('system.website.title_en') }}
                                     <span class="badge-lang">EN</span>
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="banner.title_en"
-                                    class="input-enterprise text-left"
+                                    type="text"
+                                    class="text-left"
                                     dir="ltr"
                                 />
                             </div>
                             <div class="md:col-span-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                    {{ $t('tenant_site.lists.target_url') }}
-                                </label>
-                                <input
+                                <AppInput
                                     v-model="banner.link"
-                                    class="input-enterprise text-left font-mono"
+                                    type="url"
+                                    :label="$t('tenant_site.lists.target_url')"
+                                    class="text-left font-mono"
                                     dir="ltr"
                                     placeholder="https://"
                                 />

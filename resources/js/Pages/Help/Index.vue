@@ -459,14 +459,14 @@
                         <a
                             v-if="contactSupport.phone"
                             :href="`tel:${contactSupport.phone}`"
-                            class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-sm text-white transition-colors flex items-center gap-2 backdrop-blur"
+                            class="px-5 py-3 rounded-xl bg-surface-secondary hover:bg-surface-tertiary font-bold text-sm text-content-primary border border-border-subtle transition-colors flex items-center gap-2"
                         >
                             <span>{{ contactSupport.phone }}</span>
                         </a>
                         <a
                             v-if="contactSupport.email"
                             :href="`mailto:${contactSupport.email}`"
-                            class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-sm text-white transition-colors flex items-center gap-2 backdrop-blur"
+                            class="px-5 py-3 rounded-xl bg-surface-secondary hover:bg-surface-tertiary font-bold text-sm text-content-primary border border-border-subtle transition-colors flex items-center gap-2"
                         >
                             <span>{{ contactSupport.email }}</span>
                         </a>

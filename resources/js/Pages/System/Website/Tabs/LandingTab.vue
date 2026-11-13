@@ -1,4 +1,6 @@
 <script setup>
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 
 defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String });
@@ -21,7 +23,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.marketing_headline') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input v-model="form.settings.landing_hero_title_ar" class="input-enterprise" />
+                    <AppInput v-model="form.settings.landing_hero_title_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -31,9 +33,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Hero Title
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.landing_hero_title_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -44,11 +47,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.intro_text') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.landing_hero_subtitle_ar"
-                        rows="3"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.landing_hero_subtitle_ar" :rows="3" />
                 </div>
                 <div>
                     <label
@@ -58,12 +57,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Hero Subtitle
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.landing_hero_subtitle_en"
-                        rows="3"
-                        class="input-enterprise text-left"
+                        :rows="3"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
                 <div>
                     <label
@@ -72,10 +71,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.cta_button') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.landing_hero_cta_text_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.landing_hero_cta_text_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -85,9 +81,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         CTA Button
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.landing_hero_cta_text_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -121,9 +118,9 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             {{ $t('tenant_site.landing.first_text') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.landing_hero_typed_prefix_ar"
-                            class="input-enterprise"
+                            type="text"
                             :placeholder="$t('system.website.manage')"
                         />
                     </div>
@@ -135,9 +132,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             Prefix Text
                             <span class="badge-lang">EN</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.landing_hero_typed_prefix_en"
-                            class="input-enterprise text-left"
+                            type="text"
+                            class="text-left"
                             dir="ltr"
                             placeholder="Elevate"
                         />
@@ -149,9 +147,9 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             {{ $t('tenant_site.landing.last_text') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.landing_hero_typed_suffix_ar"
-                            class="input-enterprise"
+                            type="text"
                             :placeholder="$t('system.website.with_real_intelligence')"
                         />
                     </div>
@@ -163,9 +161,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             Suffix Text
                             <span class="badge-lang">EN</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.landing_hero_typed_suffix_en"
-                            class="input-enterprise text-left"
+                            type="text"
+                            class="text-left"
                             dir="ltr"
                             placeholder="With Real Intelligence"
                         />
@@ -177,10 +176,9 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             {{ $t('tenant_site.landing.typed_words') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.settings.landing_hero_typed_phrases_ar"
-                            rows="3"
-                            class="input-enterprise"
+                            :rows="3"
                             :placeholder="
                                 $t(
                                     'system.website.your_center_nowyour_revenue_todayyour_team_with_'
@@ -199,10 +197,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             Typed Phrases
                             <span class="badge-lang">EN</span>
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.settings.landing_hero_typed_phrases_en"
-                            rows="3"
-                            class="input-enterprise text-left"
+                            :rows="3"
+                            class="text-left"
                             dir="ltr"
                             placeholder="Your Workshop|Your Revenue|Your Team|Your Future"
                         />
@@ -222,10 +220,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.login_button_text') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.website_login_button_text_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.website_login_button_text_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -235,9 +230,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Login Button
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.website_login_button_text_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -273,10 +269,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.section_title') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.landing_features_title_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.landing_features_title_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -286,9 +279,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Section Title
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.landing_features_title_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -299,10 +293,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.section_description') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.landing_features_subtitle_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.landing_features_subtitle_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -312,9 +303,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Section Subtitle
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.landing_features_subtitle_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -351,7 +343,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 {{ $t('tenant_site.landing.feature') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <input v-model="feature.title_ar" class="input-enterprise" />
+                            <AppInput v-model="feature.title_ar" type="text" />
                         </div>
                         <div>
                             <label
@@ -361,9 +353,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 Feature
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <input
+                            <AppInput
                                 v-model="feature.title_en"
-                                class="input-enterprise text-left"
+                                type="text"
+                                class="text-left"
                                 dir="ltr"
                             />
                         </div>
@@ -374,11 +367,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 {{ $t('common.details') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <textarea
-                                v-model="feature.desc_ar"
-                                rows="2"
-                                class="input-enterprise"
-                            ></textarea>
+                            <AppTextarea v-model="feature.desc_ar" :rows="2" />
                         </div>
                         <div>
                             <label
@@ -388,12 +377,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 Details
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <textarea
+                            <AppTextarea
                                 v-model="feature.desc_en"
-                                rows="2"
-                                class="input-enterprise text-left"
+                                :rows="2"
+                                class="text-left"
                                 dir="ltr"
-                            ></textarea>
+                            />
                         </div>
                     </div>
                     <button
@@ -449,10 +438,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.section_title') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.landing_pricing_title_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.landing_pricing_title_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -462,9 +448,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Title
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.landing_pricing_title_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -475,11 +462,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.intro_text') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.landing_pricing_subtitle_ar"
-                        rows="2"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.landing_pricing_subtitle_ar" :rows="2" />
                 </div>
                 <div>
                     <label
@@ -489,12 +472,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         Subtitle
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.landing_pricing_subtitle_en"
-                        rows="2"
-                        class="input-enterprise text-left"
+                        :rows="2"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
             </div>
             <p
@@ -557,10 +540,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                             {{ $t('tenant_site.landing.number_value') }}
                         </label>
-                        <input
+                        <AppInput
                             v-model="stat.value"
+                            type="text"
                             placeholder="100+"
-                            class="input-enterprise font-mono text-center"
+                            class="font-mono text-center"
                             dir="ltr"
                         />
                     </div>
@@ -571,7 +555,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             {{ $t('common.description') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <input v-model="stat.label_ar" class="input-enterprise" />
+                        <AppInput v-model="stat.label_ar" type="text" />
                     </div>
                     <div class="flex-1">
                         <label
@@ -581,11 +565,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             Label
                             <span class="badge-lang">EN</span>
                         </label>
-                        <input
-                            v-model="stat.label_en"
-                            class="input-enterprise text-left"
-                            dir="ltr"
-                        />
+                        <AppInput v-model="stat.label_en" type="text" class="text-left" dir="ltr" />
                     </div>
                     <button
                         @click="removeItem('landing_stats_list', index)"
@@ -669,15 +649,16 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_company_name') }}
                             </label>
-                            <input v-model="client.name" class="input-enterprise" />
+                            <AppInput v-model="client.name" type="text" />
                         </div>
                         <div class="flex-1">
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.logo_url') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="client.logo_url"
-                                class="input-enterprise text-left font-mono"
+                                type="text"
+                                class="text-left font-mono"
                                 dir="ltr"
                                 placeholder="https://"
                             />
@@ -686,9 +667,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_photo_url') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="client.photo_url"
-                                class="input-enterprise text-left font-mono"
+                                type="text"
+                                class="text-left font-mono"
                                 dir="ltr"
                                 placeholder="https://"
                             />
@@ -718,9 +700,9 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_role_ar') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="client.role_ar"
-                                class="input-enterprise"
+                                type="text"
                                 :placeholder="$t('tenant_site.landing.client_role_ar')"
                             />
                         </div>
@@ -728,9 +710,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_role_en') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="client.role_en"
-                                class="input-enterprise text-left"
+                                type="text"
+                                class="text-left"
                                 dir="ltr"
                                 :placeholder="$t('tenant_site.landing.client_role_en')"
                             />
@@ -742,22 +725,18 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_quote_ar') }}
                             </label>
-                            <textarea
-                                v-model="client.quote_ar"
-                                rows="3"
-                                class="input-enterprise"
-                            ></textarea>
+                            <AppTextarea v-model="client.quote_ar" :rows="3" />
                         </div>
                         <div>
                             <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                                 {{ $t('tenant_site.landing.client_quote_en') }}
                             </label>
-                            <textarea
+                            <AppTextarea
                                 v-model="client.quote_en"
-                                rows="3"
-                                class="input-enterprise text-left"
+                                :rows="3"
+                                class="text-left"
                                 dir="ltr"
-                            ></textarea>
+                            />
                         </div>
                     </div>
                 </div>
@@ -821,7 +800,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 {{ $t('tenant_site.landing.question') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <input v-model="faq.q_ar" class="input-enterprise" />
+                            <AppInput v-model="faq.q_ar" type="text" />
                         </div>
                         <div>
                             <label
@@ -831,11 +810,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 Question
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <input
-                                v-model="faq.q_en"
-                                class="input-enterprise text-left"
-                                dir="ltr"
-                            />
+                            <AppInput v-model="faq.q_en" type="text" class="text-left" dir="ltr" />
                         </div>
                         <div>
                             <label
@@ -844,11 +819,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 {{ $t('tenant_site.landing.answer') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <textarea
-                                v-model="faq.a_ar"
-                                rows="3"
-                                class="input-enterprise"
-                            ></textarea>
+                            <AppTextarea v-model="faq.a_ar" :rows="3" />
                         </div>
                         <div>
                             <label
@@ -858,12 +829,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                 Answer
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <textarea
-                                v-model="faq.a_en"
-                                rows="3"
-                                class="input-enterprise text-left"
-                                dir="ltr"
-                            ></textarea>
+                            <AppTextarea v-model="faq.a_en" :rows="3" class="text-left" dir="ltr" />
                         </div>
                     </div>
                 </div>

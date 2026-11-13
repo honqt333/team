@@ -1,5 +1,7 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 
 defineProps({ form: Object, tab: String });
 </script>
@@ -41,10 +43,7 @@ defineProps({ form: Object, tab: String });
                         {{ $t('tenant_site.advanced.maintenance_title') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.website_maintenance_title_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.website_maintenance_title_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -54,9 +53,10 @@ defineProps({ form: Object, tab: String });
                         {{ $t('system.website.maintenance_title_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.website_maintenance_title_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -67,11 +67,7 @@ defineProps({ form: Object, tab: String });
                         {{ $t('tenant_site.advanced.explanatory_note') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.website_maintenance_message_ar"
-                        rows="3"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.website_maintenance_message_ar" :rows="3" />
                 </div>
                 <div class="sm:col-span-2">
                     <label
@@ -81,12 +77,12 @@ defineProps({ form: Object, tab: String });
                         {{ $t('system.website.maintenance_message_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_maintenance_message_en"
-                        rows="3"
-                        class="input-enterprise text-left"
+                        :rows="3"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
             </div>
         </div>
@@ -106,11 +102,7 @@ defineProps({ form: Object, tab: String });
                         {{ $t('tenant_site.advanced.about') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.website_footer_about_ar"
-                        rows="3"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.website_footer_about_ar" :rows="3" />
                 </div>
                 <div>
                     <label
@@ -120,12 +112,12 @@ defineProps({ form: Object, tab: String });
                         {{ $t('system.website.footer_about_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_footer_about_en"
-                        rows="3"
-                        class="input-enterprise text-left"
+                        :rows="3"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
                 <div>
                     <label
@@ -134,10 +126,7 @@ defineProps({ form: Object, tab: String });
                         {{ $t('tenant_site.advanced.copyright') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <input
-                        v-model="form.settings.website_copyright_text_ar"
-                        class="input-enterprise"
-                    />
+                    <AppInput v-model="form.settings.website_copyright_text_ar" type="text" />
                 </div>
                 <div>
                     <label
@@ -147,9 +136,10 @@ defineProps({ form: Object, tab: String });
                         {{ $t('system.website.copyright_text_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.settings.website_copyright_text_en"
-                        class="input-enterprise text-left"
+                        type="text"
+                        class="text-left"
                         dir="ltr"
                     />
                 </div>
@@ -193,9 +183,9 @@ defineProps({ form: Object, tab: String });
                             {{ $t('tenant_site.advanced.ad_text') }}
                             <span class="badge-lang">AR</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.website_announcement_text_ar"
-                            class="input-enterprise"
+                            type="text"
                             :placeholder="$t('system.website.e.g._20_off_for_a_limited_time')"
                         />
                     </div>
@@ -207,25 +197,23 @@ defineProps({ form: Object, tab: String });
                             {{ $t('system.website.announcement_text_en') }}
                             <span class="badge-lang">EN</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.settings.website_announcement_text_en"
-                            class="input-enterprise text-left"
+                            type="text"
+                            class="text-left"
                             dir="ltr"
                             placeholder="Example: 20% Discount!"
                         />
                     </div>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.advanced.ad_link') }}
-                    </label>
-                    <input
-                        v-model="form.settings.website_announcement_url"
-                        class="input-enterprise text-left"
-                        dir="ltr"
-                        placeholder="https://..."
-                    />
-                </div>
+                <AppInput
+                    v-model="form.settings.website_announcement_url"
+                    type="url"
+                    :label="$t('tenant_site.advanced.ad_link')"
+                    class="text-left"
+                    dir="ltr"
+                    placeholder="https://..."
+                />
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label
@@ -233,16 +221,20 @@ defineProps({ form: Object, tab: String });
                         >
                             {{ $t('tenant_site.advanced.background_color') }}
                         </label>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-center">
                             <input
                                 type="color"
                                 v-model="form.settings.website_announcement_bg_color"
                                 class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                             />
-                            <input
-                                v-model="form.settings.website_announcement_bg_color"
-                                class="input-enterprise font-mono"
-                            />
+                            <div class="flex-1">
+                                <AppInput
+                                    v-model="form.settings.website_announcement_bg_color"
+                                    type="text"
+                                    class="font-mono"
+                                    dir="ltr"
+                                />
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -251,16 +243,20 @@ defineProps({ form: Object, tab: String });
                         >
                             {{ $t('tenant_site.advanced.text_color') }}
                         </label>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-center">
                             <input
                                 type="color"
                                 v-model="form.settings.website_announcement_text_color"
                                 class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                             />
-                            <input
-                                v-model="form.settings.website_announcement_text_color"
-                                class="input-enterprise font-mono"
-                            />
+                            <div class="flex-1">
+                                <AppInput
+                                    v-model="form.settings.website_announcement_text_color"
+                                    type="text"
+                                    class="font-mono"
+                                    dir="ltr"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

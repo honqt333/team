@@ -1191,7 +1191,7 @@
                                             Points to / Target
                                         </span>
                                         <span class="font-bold text-gray-800 dark:text-gray-200">
-                                            sites.carag.app
+                                            sites.khidmh.pro
                                         </span>
                                     </div>
                                 </div>
@@ -1275,7 +1275,7 @@
                             >
                                 {{
                                     form.custom_domain ||
-                                    `https://carag.app/site/${w.tenant_slug || 'workshop'}`
+                                    `https://khidmh.pro/site/${w.tenant_slug || 'workshop'}`
                                 }}
                             </div>
                             <div
@@ -1578,8 +1578,10 @@ import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { activeCurrencySymbol } = useNumberFormat();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     website: { type: Object, default: () => ({}) },
@@ -1924,7 +1926,7 @@ function onCoverChange(fileOrEvent) {
 }
 
 async function removeImage(key) {
-    if (!confirm(t('tenant_site.admin.confirm_remove_image'))) return;
+    if (!(await confirm(t('tenant_site.admin.confirm_remove_image')))) return;
     try {
         const res = await fetch(route('settings.website.image.delete'), {
             method: 'DELETE',

@@ -93,6 +93,19 @@ class PartsController extends Controller
             $query->orderBy('name_ar', 'asc');
         }
 
+        $filters = $request->only(['search', 'status', 'category', 'vehicle_make_id', 'vehicle_model_id', 'manufacture_year', 'sort', 'direction']);
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'inventory_parts',
+                'backRoute' => 'app.inventory.parts.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $query->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $parts = $query->paginate(25)->withQueryString();
 
         $units = InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();

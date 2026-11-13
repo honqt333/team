@@ -395,7 +395,7 @@ async function handleNavigate(url) {
         });
         emit('page-update', response.data);
     } catch (e) {
-        console.error('[DEBUG] Failed to navigate page', e);
+        console.error(e);
     }
 }
 
@@ -414,7 +414,6 @@ async function submit() {
         closeModal();
         emit('refresh', true);
     } catch (e) {
-        console.error('[DEBUG] Submit error:', e);
         if (e.response?.status === 422) {
             Object.assign(errors, e.response.data.errors);
         } else {

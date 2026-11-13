@@ -263,9 +263,11 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/Composables/useConfirm';
 import TermEditModal from './TermEditModal.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     show: Boolean,
@@ -334,10 +336,10 @@ function saveTerm(term) {
     }
 }
 
-function deleteTerm(term) {
+async function deleteTerm(term) {
     const idx = localTerms.value.indexOf(term);
     if (idx === -1) return;
-    if (confirm(t('common.unsaved_changes_message'))) {
+    if (await confirm(t('common.unsaved_changes_message'))) {
         localTerms.value.splice(idx, 1);
     }
 }

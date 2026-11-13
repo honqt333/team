@@ -42,6 +42,22 @@ class DepartmentController
 
         $query->orderBy($sort, $direction);
 
+        $filters = array_merge($request->only(['search', 'status']), [
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'departments',
+                'backRoute' => 'departments.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $query->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $departments = $query->paginate(25)->withQueryString();
 
         return Inertia::render('Departments/Index', [

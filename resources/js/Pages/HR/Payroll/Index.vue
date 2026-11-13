@@ -667,7 +667,7 @@ async function fetchOtherPayments(force = false) {
         });
         otherPaymentsData.value = response.data;
     } catch (e) {
-        console.error('[DEBUG] Failed to fetch other payments', e);
+        console.error(e);
     } finally {
         loadingOtherPayments.value = false;
     }

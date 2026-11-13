@@ -64,6 +64,25 @@ class InventoryMoveController extends Controller
             $query->orderBy("inventory_moves.{$sort}", $order);
         }
 
+        $filters = array_merge(
+            $request->only(['search', 'type', 'part_id', 'date_from', 'date_to']),
+            [
+                'sort' => $sort,
+                'direction' => $order,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'inventory_moves',
+                'backRoute' => 'app.inventory.moves.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $query->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $moves = $query->paginate(25)->withQueryString();
 
         $moveTypes = [

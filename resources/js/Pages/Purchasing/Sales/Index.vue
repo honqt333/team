@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('nav.sales') + ' - ' + $t('purchasing.title')">
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('nav.sales') + ' (' + $t('inventory.title') + ')'"
@@ -588,7 +588,7 @@
                     </div>
                 </div>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Create Modal -->
         <SalesInvoiceFormModal
@@ -683,7 +683,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
@@ -800,7 +799,11 @@ const handleSaved = () => {
 };
 
 const handlePrint = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('invoices_page');
+    url.searchParams.delete('returns_page');
+    window.open(url.toString(), '_blank');
 };
 
 const formatDate = (date) => {

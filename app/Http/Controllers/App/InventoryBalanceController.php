@@ -104,6 +104,23 @@ class InventoryBalanceController extends Controller
                 ];
             });
 
+        $filters = array_merge($request->only(['search', 'category', 'stock_status', 'warehouse_id']), [
+            'sort' => $sort,
+            'direction' => $order,
+            'order' => $order,
+        ]);
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'inventory_stock',
+                'backRoute' => 'app.inventory.stock.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => (clone $query)->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         // Combined summary stats query (1 query instead of 4)
         // NOTE: alias 'stock_value' (not 'total_value') to avoid InventoryBalance::getTotalValueAttribute() accessor
         $statsRaw = InventoryBalance::forWarehouse($warehouse->id)

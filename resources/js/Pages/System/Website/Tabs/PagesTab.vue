@@ -1,4 +1,7 @@
 <script setup>
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+
 defineProps({ form: Object, addItem: Function, removeItem: Function });
 </script>
 
@@ -18,11 +21,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         {{ $t('center_settings.print.terms_and_conditions') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.website_page_terms_ar"
-                        rows="6"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.website_page_terms_ar" :rows="6" />
                 </div>
                 <div>
                     <label
@@ -32,12 +31,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         {{ $t('system.website.terms_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_page_terms_en"
-                        rows="6"
-                        class="input-enterprise text-left"
+                        :rows="6"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
                 <div>
                     <label
@@ -46,11 +45,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         {{ $t('tenant_site.pages.privacy') }}
                         <span class="badge-lang">AR</span>
                     </label>
-                    <textarea
-                        v-model="form.settings.website_page_privacy_ar"
-                        rows="6"
-                        class="input-enterprise"
-                    ></textarea>
+                    <AppTextarea v-model="form.settings.website_page_privacy_ar" :rows="6" />
                 </div>
                 <div>
                     <label
@@ -60,12 +55,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         {{ $t('system.website.privacy_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_page_privacy_en"
-                        rows="6"
-                        class="input-enterprise text-left"
+                        :rows="6"
+                        class="text-left"
                         dir="ltr"
-                    ></textarea>
+                    />
                 </div>
             </div>
         </div>
@@ -119,19 +114,22 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                             <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
                                 {{ $t('tenant_site.pages.page_slug') }}
                             </label>
-                            <div class="flex rounded-md shadow-sm">
+                            <div class="flex rounded-md shadow-sm items-stretch">
                                 <span
                                     class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 sm:text-sm"
                                     dir="ltr"
                                 >
                                     /page/
                                 </span>
-                                <input
-                                    v-model="page.slug"
-                                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md sm:text-sm border-gray-300 dark:border-gray-600 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-700 dark:text-white text-left font-mono"
-                                    dir="ltr"
-                                    placeholder="about-us"
-                                />
+                                <div class="flex-1 min-w-0">
+                                    <AppInput
+                                        v-model="page.slug"
+                                        type="text"
+                                        class="text-left font-mono"
+                                        dir="ltr"
+                                        placeholder="about-us"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -141,7 +139,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 {{ $t('tenant_site.pages.page_title') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <input v-model="page.title_ar" class="input-enterprise" />
+                            <AppInput v-model="page.title_ar" type="text" />
                         </div>
                         <div>
                             <label
@@ -151,9 +149,10 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 {{ $t('system.website.page_title_en') }}
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <input
+                            <AppInput
                                 v-model="page.title_en"
-                                class="input-enterprise text-left"
+                                type="text"
+                                class="text-left"
                                 dir="ltr"
                             />
                         </div>
@@ -164,11 +163,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 {{ $t('common.content') }}
                                 <span class="badge-lang">AR</span>
                             </label>
-                            <textarea
-                                v-model="page.content_ar"
-                                rows="5"
-                                class="input-enterprise"
-                            ></textarea>
+                            <AppTextarea v-model="page.content_ar" :rows="5" />
                         </div>
                         <div>
                             <label
@@ -178,12 +173,12 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 {{ $t('system.website.content_en') }}
                                 <span class="badge-lang">EN</span>
                             </label>
-                            <textarea
+                            <AppTextarea
                                 v-model="page.content_en"
-                                rows="5"
-                                class="input-enterprise text-left"
+                                :rows="5"
+                                class="text-left"
                                 dir="ltr"
-                            ></textarea>
+                            />
                         </div>
                     </div>
                 </div>

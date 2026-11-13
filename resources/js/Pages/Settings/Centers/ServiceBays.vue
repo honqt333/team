@@ -217,12 +217,16 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import { useConfirm } from '@/Composables/useConfirm';
+import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
     bays: { type: Array, default: () => [] },
 });
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const { error: toastError } = useToast();
 const busy = ref(false);
 
 const backUrl = computed(() => {
@@ -287,10 +291,10 @@ async function save() {
 
 async function remove(bay) {
     if (bay.has_active_appointments) {
-        alert(t('service_bays.has_active_appointments'));
+        toastError(t('service_bays.has_active_appointments'));
         return;
     }
-    if (!confirm(t('service_bays.confirm_delete'))) return;
+    if (!(await confirm(t('service_bays.confirm_delete')))) return;
     busy.value = true;
     try {
         await axios.delete(route('service-bays.destroy', { serviceBay: bay.id }));

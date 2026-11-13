@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -23,6 +24,7 @@ const props = defineProps({
 });
 
 const toast = useToast();
+const { confirm } = useConfirm();
 
 const currentUserId = computed(() => Number(props.authUserId || props.employee?.user_id));
 
@@ -388,7 +390,7 @@ const completeItem = async (workOrder, item) => {
         confirmMsg = `هذه الخدمة مشتركة مع فنيين آخرين (${names}).\nهل تؤكد إنهاء دورك فيها؟`;
     }
 
-    if (!confirm(confirmMsg)) return;
+    if (!(await confirm(confirmMsg))) return;
 
     const itemId = `${workOrder.id}-${item.id}`;
     setItemLoading(itemId, true);
@@ -485,7 +487,6 @@ const photoType = ref('general');
 const selectedFiles = ref([]);
 const isUploadingPhotos = ref(false);
 const isDeletingPhotoId = ref(null);
-const fileInputRef = ref(null);
 
 const photoTypeOptions = computed(() => [
     { value: 'general', label: t('employee_portal.photo_types.general') },
@@ -509,11 +510,6 @@ const closePhotosModal = () => {
     selectedFiles.value = [];
 };
 
-const onFileSelect = (event) => {
-    const files = Array.from(event.target.files || []);
-    selectedFiles.value = files;
-};
-
 const uploadPhotos = async () => {
     if (!activeItem.value || !activeWorkOrder.value || !selectedFiles.value.length) return;
     isUploadingPhotos.value = true;
@@ -532,7 +528,6 @@ const uploadPhotos = async () => {
         );
         activeItem.value.photos = response.data.photos || [];
         selectedFiles.value = [];
-        if (fileInputRef.value) fileInputRef.value.value = '';
         toast.success(response.data.success || 'تم رفع الصور بنجاح');
     } catch (error) {
         toast.error(
@@ -544,7 +539,7 @@ const uploadPhotos = async () => {
 };
 
 const deletePhoto = async (photo) => {
-    if (!confirm('هل أنت متأكد من حذف هذه الصورة؟')) return;
+    if (!(await confirm(t('common.delete_confirm_message')))) return;
     isDeletingPhotoId.value = photo.id;
 
     try {

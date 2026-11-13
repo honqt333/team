@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header -->
             <PageHeader
                 :title="$t('purchasing.suppliers.title')"
@@ -687,12 +687,11 @@
                     <StandardReportFooter class="mt-8 border-t pt-4" />
                 </div>
             </Teleport>
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
@@ -825,7 +824,10 @@ function exportSuppliers() {
 }
 
 function printSuppliers() {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 }
 </script>
 

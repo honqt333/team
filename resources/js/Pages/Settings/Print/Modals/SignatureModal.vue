@@ -967,24 +967,13 @@ function canvasToBlob() {
 }
 
 // ── Upload tab state ──────────────────────────────────────────────────
-const fileInputEl = ref(null);
 const uploadFile = ref(null);
-const uploadPreviewUrl = ref('');
 const uploadError = ref('');
 
 function clearUploadSelection() {
     uploadFile.value = null;
-    if (uploadPreviewUrl.value) {
-        URL.revokeObjectURL(uploadPreviewUrl.value);
-        uploadPreviewUrl.value = '';
-    }
     uploadError.value = '';
-    if (fileInputEl.value) fileInputEl.value.value = '';
 }
-
-const ALLOWED_MIME = ['image/png', 'image/jpeg', 'image/svg+xml'];
-const ALLOWED_EXT = ['png', 'jpg', 'jpeg', 'svg'];
-const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 function onFileSelected(file) {
     uploadError.value = '';
@@ -1010,9 +999,7 @@ onMounted(() => {
     });
 });
 
-onBeforeUnmount(() => {
-    if (uploadPreviewUrl.value) URL.revokeObjectURL(uploadPreviewUrl.value);
-});
+onBeforeUnmount(() => {});
 
 // Reset state each time the modal opens
 watch(

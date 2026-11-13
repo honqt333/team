@@ -84,6 +84,25 @@ class InventoryTransfersController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
+        $filters = array_merge(
+            $request->only(['status', 'search', 'warehouse_id']),
+            [
+                'sort' => $sort ?: null,
+                'direction' => $sort ? $direction : null,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'inventory_transfers',
+                'backRoute' => 'app.inventory.transfers.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $query->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $transfers = $query->paginate(25)->withQueryString();
 
         $warehouses = Warehouse::where('is_active', true)

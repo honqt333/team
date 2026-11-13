@@ -894,6 +894,7 @@ import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useI18n } from 'vue-i18n';
 import { usePermission } from '@/Composables/usePermission';
+import { useToast } from '@/Composables/useToast';
 import CreateModal from './CreateModal.vue';
 import StockModal from './StockModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -919,6 +920,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
+const { info: toastInfo } = useToast();
 const { formatQuantity, formatCurrency, toEnglish, activeCurrencySymbol } = useNumberFormat();
 const { can: hasPermission, isAnyAdmin } = usePermission();
 const can = (permission) => hasPermission(permission) || isAnyAdmin();
@@ -1064,7 +1066,7 @@ const getAllMoveTypeBadgeClass = (type) => {
 };
 
 const printBarcode = () => {
-    alert(t('inventory.print_coming_soon'));
+    toastInfo(t('inventory.print_coming_soon'));
 };
 // Helper to check if move involves sales logic
 const isSalesMove = (move) => {

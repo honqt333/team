@@ -857,7 +857,7 @@ async function reverseGeocode(lat, lng) {
         const lang = locale.value === 'ar' ? 'ar' : 'en';
         const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
-            { headers: { 'User-Agent': 'Carag-App/1.0' } }
+            { headers: { 'User-Agent': 'KhidmhPro-App/1.0' } }
         );
         if (!response.ok) throw new Error('Geocoding failed');
         const data = await response.json();

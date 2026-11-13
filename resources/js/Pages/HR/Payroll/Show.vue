@@ -530,8 +530,10 @@ import BackButton from '@/Components/BackButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { success, error } = useToast();
+const { confirm } = useConfirm();
 const processing = ref(false);
 
 const props = defineProps({
@@ -618,8 +620,8 @@ function submitMarkPaid() {
     });
 }
 
-function regeneratePayroll() {
-    if (!confirm(t('hr.payroll.recreate_confirm'))) return;
+async function regeneratePayroll() {
+    if (!(await confirm(t('hr.payroll.recreate_confirm')))) return;
 
     processing.value = true;
     router.put(
@@ -644,8 +646,8 @@ function approvePayroll() {
     );
 }
 
-function deleteItem(item) {
-    if (!confirm(t('hr.payroll.exclude_employee_confirm'))) return;
+async function deleteItem(item) {
+    if (!(await confirm(t('hr.payroll.exclude_employee_confirm')))) return;
 
     router.delete(route('app.hr.payroll.items.destroy', [props.payrollRun.id, item.id]), {
         onSuccess: () => success(t('hr.payroll.employee_excluded')),

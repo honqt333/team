@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('quotes.title')"
@@ -595,7 +595,7 @@
                     </template>
                 </DataTable>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Quote Form Modal -->
         <QuoteFormModal
@@ -668,7 +668,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
@@ -963,7 +962,10 @@ function exportQuotes() {
 }
 
 function printQuotes() {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 }
 
 function handleSaved() {

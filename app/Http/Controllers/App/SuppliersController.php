@@ -61,6 +61,33 @@ class SuppliersController extends Controller
             $query->orderBy('suppliers.name', 'asc');
         }
 
+        $filters = array_merge(
+            $request->only(['search', 'status', 'type']),
+            [
+                'sort' => $sort ?: null,
+                'direction' => $sort ? $direction : null,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            $printSuppliers = $query->limit(5000)->get()->transform(function ($supplier) {
+                $balance = $supplier->calculateBalance();
+                $supplier->balance = $balance;
+                $supplier->amount_due_from_supplier = $balance < 0.0 ? round(abs($balance), 2) : 0.0;
+
+                return $supplier;
+            });
+
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'purchasing_suppliers',
+                'backRoute' => 'app.purchasing.suppliers.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $printSuppliers,
+                'companyInfo' => [],
+            ]);
+        }
+
         $suppliers = $query->paginate(25)->withQueryString();
 
         // Calculate real balance using calculateBalance helper

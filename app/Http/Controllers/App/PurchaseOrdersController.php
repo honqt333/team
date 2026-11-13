@@ -62,6 +62,25 @@ class PurchaseOrdersController extends Controller
             $query->orderByDesc('created_at');
         }
 
+        $filters = array_merge(
+            $request->only(['search', 'status', 'supplier_id']),
+            [
+                'sort' => $sort ?: null,
+                'direction' => $sort ? $direction : null,
+            ]
+        );
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'purchasing_orders',
+                'backRoute' => 'app.purchasing.orders.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $query->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
+
         $orders = $query->paginate(25)->withQueryString();
 
         $suppliers = Supplier::forTenant($user->tenant_id)->forCenter($centerId)->active()->get(['id', 'name']);

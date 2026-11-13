@@ -1,5 +1,7 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 
 defineProps({
     form: Object,
@@ -43,18 +45,15 @@ defineProps({
                 }"
                 class="grid grid-cols-1 gap-4 transition-opacity"
             >
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                    {{ $t('tenant_site.integrations.target_whatsapp_number') }}
-                </label>
-                <input
+                <AppInput
                     v-model="form.settings.website_whatsapp_floating_number"
-                    class="input-enterprise text-left font-mono"
+                    type="text"
+                    :label="$t('tenant_site.integrations.target_whatsapp_number')"
+                    :hint="$t('tenant_site.integrations.country_code_note')"
+                    class="text-left font-mono"
                     dir="ltr"
                     placeholder="+966"
                 />
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                    {{ $t('tenant_site.integrations.country_code_note') }}
-                </p>
             </div>
         </div>
 
@@ -90,19 +89,15 @@ defineProps({
                 class="grid grid-cols-1 gap-4 transition-opacity"
             >
                 <template v-if="canManageScripts">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.integrations.widget_script') }}
-                    </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.settings.website_chatbot_script"
-                        rows="8"
-                        class="input-enterprise font-mono text-left"
+                        :rows="8"
+                        :label="$t('tenant_site.integrations.widget_script')"
+                        :hint="$t('tenant_site.integrations.paste_warning')"
+                        class="font-mono text-left"
                         dir="ltr"
                         placeholder="<!-- Paste your script code here -->"
-                    ></textarea>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                        {{ $t('tenant_site.integrations.paste_warning') }}
-                    </p>
+                    />
                 </template>
                 <p
                     v-else
@@ -131,36 +126,24 @@ defineProps({
                 {{ $t('tenant_site.integrations.custom_scripts') }}
             </h3>
             <div v-if="canManageScripts" class="space-y-6">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.integrations.header_scripts') }}
-                    </label>
-                    <textarea
-                        v-model="form.settings.website_scripts_header"
-                        rows="5"
-                        class="input-enterprise font-mono text-left"
-                        dir="ltr"
-                        placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->"
-                    ></textarea>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
-                        {{ $t('tenant_site.integrations.head_scripts_desc') }}
-                    </p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                        {{ $t('tenant_site.integrations.footer_scripts') }}
-                    </label>
-                    <textarea
-                        v-model="form.settings.website_scripts_footer"
-                        rows="5"
-                        class="input-enterprise font-mono text-left"
-                        dir="ltr"
-                        placeholder="<!-- Tracking pixels, custom widgets, etc. -->"
-                    ></textarea>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
-                        {{ $t('tenant_site.integrations.footer_scripts_desc') }}
-                    </p>
-                </div>
+                <AppTextarea
+                    v-model="form.settings.website_scripts_header"
+                    :rows="5"
+                    :label="$t('tenant_site.integrations.header_scripts')"
+                    :hint="$t('tenant_site.integrations.head_scripts_desc')"
+                    class="font-mono text-left"
+                    dir="ltr"
+                    placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->"
+                />
+                <AppTextarea
+                    v-model="form.settings.website_scripts_footer"
+                    :rows="5"
+                    :label="$t('tenant_site.integrations.footer_scripts')"
+                    :hint="$t('tenant_site.integrations.footer_scripts_desc')"
+                    class="font-mono text-left"
+                    dir="ltr"
+                    placeholder="<!-- Tracking pixels, custom widgets, etc. -->"
+                />
             </div>
             <p
                 v-else

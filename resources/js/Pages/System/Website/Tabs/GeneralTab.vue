@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({ form: Object, uploadImage: Function });
@@ -70,11 +71,10 @@ async function onFaviconSelect(file) {
                     @invalid="toastError"
                     @remove-existing="form.settings.website_logo = ''"
                 />
-                <input
+                <AppInput
                     v-model="form.settings.website_logo"
                     type="text"
                     :placeholder="$t('system.website.logo_url_placeholder')"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
                     dir="ltr"
                 />
             </div>
@@ -86,11 +86,7 @@ async function onFaviconSelect(file) {
                     <span>{{ $t('tenant_site.admin.fields.site_name') }}</span>
                     <span class="badge-lang">AR</span>
                 </label>
-                <input
-                    v-model="form.settings.website_title_ar"
-                    type="text"
-                    class="input-enterprise"
-                />
+                <AppInput v-model="form.settings.website_title_ar" type="text" />
             </div>
             <div class="sm:col-span-3">
                 <label
@@ -100,10 +96,10 @@ async function onFaviconSelect(file) {
                     <span>{{ $t('system.website.site_title_en') }}</span>
                     <span class="badge-lang">EN</span>
                 </label>
-                <input
+                <AppInput
                     v-model="form.settings.website_title_en"
                     type="text"
-                    class="input-enterprise text-left"
+                    class="text-left"
                     dir="ltr"
                 />
             </div>
@@ -132,18 +128,20 @@ async function onFaviconSelect(file) {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('tenant_site.general.brand_color') }}
                 </label>
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
                     <input
                         v-model="form.settings.website_primary_color"
                         type="color"
                         class="h-10 w-12 p-0.5 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer bg-white"
                     />
-                    <input
-                        v-model="form.settings.website_primary_color"
-                        type="text"
-                        class="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white font-mono"
-                        dir="ltr"
-                    />
+                    <div class="flex-1">
+                        <AppInput
+                            v-model="form.settings.website_primary_color"
+                            type="text"
+                            class="font-mono"
+                            dir="ltr"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
