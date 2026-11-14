@@ -1,22 +1,18 @@
 <template>
     <div class="space-y-6">
         <!-- Summary & Action Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
+        <div
+            class="bg-surface rounded-2xl border border-border p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4"
+        >
             <div class="flex flex-wrap items-center gap-3">
-                <div
-                    class="px-3.5 py-2 rounded-xl bg-surface-secondary border border-border-subtle text-xs"
-                >
-                    <span class="text-content-muted">{{ $t('hr.custody.issued_count') }}:</span>
-                    <span class="ms-1.5 font-mono font-bold text-content-primary">
+                <div class="px-3.5 py-2 rounded-xl bg-surface-muted border border-border text-xs">
+                    <span class="text-text-muted">{{ $t('hr.custody.issued_count') }}:</span>
+                    <span class="ms-1.5 font-mono font-bold text-text-primary">
                         {{ toEnglish(activeCustodies.length) }}
                     </span>
                 </div>
-                <div
-                    class="px-3.5 py-2 rounded-xl bg-surface-secondary border border-border-subtle text-xs"
-                >
-                    <span class="text-content-muted">
-                        {{ $t('hr.custody.total_issued_value') }}:
-                    </span>
+                <div class="px-3.5 py-2 rounded-xl bg-surface-muted border border-border text-xs">
+                    <span class="text-text-muted">{{ $t('hr.custody.total_issued_value') }}:</span>
                     <span class="ms-1.5 font-mono font-bold text-action-primary">
                         {{ formatMoney(activeCustodiesValue) }}
                     </span>
@@ -29,32 +25,37 @@
         </div>
 
         <!-- Custody Records Table -->
-        <DataTable :columns="columns" :items="custodies" :empty-text="$t('hr.custody.empty')">
+        <DataTable
+            :columns="columns"
+            :items="custodies"
+            :empty-title="$t('hr.custody.empty')"
+            striped
+        >
             <template #cell-asset_name="{ item }">
                 <div class="space-y-0.5">
-                    <p class="font-semibold text-sm text-content-primary">
+                    <p class="font-semibold text-sm text-text-primary">
                         {{ item.asset_name }}
                     </p>
-                    <p v-if="item.serial_number" class="text-xs font-mono text-content-muted">
+                    <p v-if="item.serial_number" class="text-xs font-mono text-text-muted">
                         SN: {{ item.serial_number }}
                     </p>
                 </div>
             </template>
 
             <template #cell-category="{ item }">
-                <span class="text-xs text-content-secondary">
+                <span class="text-xs text-text-secondary">
                     {{ $t(`hr.custody.categories.${item.category}`) }}
                 </span>
             </template>
 
             <template #cell-estimated_value="{ item }">
-                <span class="font-mono text-xs">
+                <span class="font-mono text-xs text-text-primary">
                     {{ formatMoney(item.estimated_value || 0) }}
                 </span>
             </template>
 
             <template #cell-issued_date="{ item }">
-                <span class="font-mono text-xs">{{ item.issued_date }}</span>
+                <span class="font-mono text-xs text-text-secondary">{{ item.issued_date }}</span>
             </template>
 
             <template #cell-status="{ item }">
@@ -67,7 +68,7 @@
             </template>
 
             <template #cell-actions="{ item }">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-end gap-2">
                     <AppButton
                         v-if="item.status === 'issued'"
                         variant="secondary"
@@ -87,10 +88,10 @@
         <BaseModal
             :show="showIssueModal"
             :title="$t('hr.custody.add')"
-            max-width="2xl"
+            size="lg"
             @close="showIssueModal = false"
         >
-            <form @submit.prevent="submitIssue" class="space-y-4">
+            <form id="custody-issue-form" @submit.prevent="submitIssue" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         :label="$t('hr.custody.asset_name')"
@@ -165,26 +166,33 @@
                 >
                     <SignaturePad v-model="issueForm.issue_signature" />
                 </FormField>
+            </form>
 
-                <div class="flex justify-end gap-2 pt-2">
+            <template #footer>
+                <div class="flex justify-end gap-2">
                     <AppButton type="button" variant="secondary" @click="showIssueModal = false">
                         {{ $t('common.cancel') }}
                     </AppButton>
-                    <AppButton type="submit" variant="primary" :loading="issueForm.processing">
+                    <AppButton
+                        type="submit"
+                        form="custody-issue-form"
+                        variant="primary"
+                        :loading="issueForm.processing"
+                    >
                         {{ $t('common.save') }}
                     </AppButton>
                 </div>
-            </form>
+            </template>
         </BaseModal>
 
         <!-- Return Custody Modal -->
         <BaseModal
             :show="showReturnModal"
             :title="$t('hr.custody.return_modal_title')"
-            max-width="xl"
+            size="md"
             @close="showReturnModal = false"
         >
-            <form @submit.prevent="submitReturn" class="space-y-4">
+            <form id="custody-return-form" @submit.prevent="submitReturn" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         :label="$t('common.status')"
@@ -216,16 +224,23 @@
                 >
                     <SignaturePad v-model="returnForm.return_signature" />
                 </FormField>
+            </form>
 
-                <div class="flex justify-end gap-2 pt-2">
+            <template #footer>
+                <div class="flex justify-end gap-2">
                     <AppButton type="button" variant="secondary" @click="showReturnModal = false">
                         {{ $t('common.cancel') }}
                     </AppButton>
-                    <AppButton type="submit" variant="primary" :loading="returnForm.processing">
+                    <AppButton
+                        type="submit"
+                        form="custody-return-form"
+                        variant="primary"
+                        :loading="returnForm.processing"
+                    >
                         {{ $t('common.save') }}
                     </AppButton>
                 </div>
-            </form>
+            </template>
         </BaseModal>
     </div>
 </template>
@@ -246,6 +261,7 @@ import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     employee: {
@@ -262,6 +278,7 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success } = useToast();
 const { formatMoney, toEnglish } = useNumberFormat();
+const { scrollToError } = useFormScrollToError();
 
 const showIssueModal = ref(false);
 const showReturnModal = ref(false);
@@ -279,7 +296,7 @@ const columns = computed(() => [
     { key: 'estimated_value', label: t('hr.custody.estimated_value') },
     { key: 'issued_date', label: t('hr.custody.issued_date') },
     { key: 'status', label: t('common.status') },
-    { key: 'actions', label: t('common.actions') },
+    { key: 'actions', label: t('common.actions'), align: 'end' },
 ]);
 
 const categoryOptions = computed(() => [
@@ -337,6 +354,7 @@ function submitIssue() {
             showIssueModal.value = false;
             success(t('common.saved_success'));
         },
+        onError: () => scrollToError(),
     });
 }
 
@@ -361,6 +379,7 @@ function submitReturn() {
                 showReturnModal.value = false;
                 success(t('common.saved_success'));
             },
+            onError: () => scrollToError(),
         }
     );
 }
@@ -396,7 +415,7 @@ function statusClass(status) {
         case 'lost':
             return 'bg-danger-soft text-danger';
         default:
-            return 'bg-surface-secondary text-content-muted';
+            return 'bg-surface-muted text-text-muted';
     }
 }
 </script>

@@ -277,7 +277,8 @@
                         <DataTable
                             :columns="attendanceColumns"
                             :items="recentAttendances || []"
-                            :empty-text="$t('hr.employees.profile.attendance_empty')"
+                            :empty-title="$t('hr.employees.profile.attendance_empty')"
+                            striped
                         >
                             <template #cell-date="{ item }">
                                 <span class="font-mono text-xs">{{ item.date }}</span>
@@ -314,7 +315,8 @@
                         <DataTable
                             :columns="payrollColumns"
                             :items="payrollItems || []"
-                            :empty-text="$t('hr.employees.profile.payroll_empty')"
+                            :empty-title="$t('hr.employees.profile.payroll_empty')"
+                            striped
                         >
                             <template #cell-period="{ item }">
                                 <Link
@@ -399,7 +401,8 @@
                             <DataTable
                                 :columns="workOrderColumns"
                                 :items="recentWorkOrders || []"
-                                :empty-text="$t('hr.employees.profile.work_orders_empty')"
+                                :empty-title="$t('hr.employees.profile.work_orders_empty')"
+                                striped
                             >
                                 <template #cell-work_order_number="{ item }">
                                     <Link
