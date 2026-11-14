@@ -381,4 +381,31 @@ class EmployeesCrudTest extends TestCase
             ->where('employees.data.1.no_permissions_set', true)
         );
     }
+
+    public function test_authorized_user_can_view_employee_profile_linked_to_user(): void
+    {
+        $emp = Employee::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'user_id' => $this->user->id,
+            'employee_number' => 'EMP-SHOW-1',
+            'name_ar' => 'فني صيانة',
+            'name_en' => 'Maintenance Tech',
+            'phone' => '0509998877',
+            'email' => 'tech-show@example.com',
+            'gender' => 'male',
+            'nationality_id' => $this->nationality->id,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('app.hr.employees.show', $emp));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('HR/Employees/Show')
+            ->has('attendanceSummary')
+            ->has('workOrdersSummary')
+            ->has('recentWorkOrders')
+        );
+    }
 }

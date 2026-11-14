@@ -399,7 +399,7 @@
                                         :href="route('work-orders.show', item.id)"
                                         class="font-mono text-xs font-semibold text-action-primary hover:underline"
                                     >
-                                        {{ item.work_order_number }}
+                                        {{ item.work_order_number || item.code }}
                                     </Link>
                                 </template>
                                 <template #cell-vehicle="{ item }">

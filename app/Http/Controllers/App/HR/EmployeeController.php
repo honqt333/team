@@ -349,7 +349,7 @@ class EmployeeController extends Controller
             ->with(['customer:id,name', 'vehicle.make:id,name_ar,name_en', 'vehicle.model:id,name_ar,name_en'])
             ->orderByDesc('created_at')
             ->take(15)
-            ->get(['id', 'work_order_number', 'customer_id', 'vehicle_id', 'status', 'created_at']);
+            ->get(['id', 'code', 'customer_id', 'vehicle_id', 'status', 'created_at']);
 
         return [
             'recentWorkOrders' => $recentWorkOrders,
