@@ -364,6 +364,10 @@ return [
     'shifts' => [
         'cannot_delete_in_use' => 'Cannot Delete In Use',
     ],
+    'offboarding_draft_saved' => 'Offboarding settlement draft saved successfully',
+    'offboarding_finalized_success' => 'Offboarding clearance finalized and employee access deactivated',
+    'offboarding_already_finalized' => 'Final clearance has already been finalized for this employee',
+    'offboarding_unreturned_custody_error' => 'Cannot finalize clearance while unreturned assets remain assigned without custody deduction',
     'subtitle' => 'Subtitle',
     'title' => 'Title',
 ];

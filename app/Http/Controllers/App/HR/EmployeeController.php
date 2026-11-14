@@ -12,6 +12,7 @@ use App\Models\HR\Deduction;
 use App\Models\HR\Employee;
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
+use App\Models\HR\OtherPayment;
 use App\Models\HR\Shift;
 use App\Models\Nationality;
 use App\Models\Role;
@@ -280,6 +281,18 @@ class EmployeeController extends Controller
             'attendanceSummary' => $this->buildAttendanceSummary($employee),
             // Work Orders & Technician Productivity Data
             ...$this->buildWorkOrdersData($employee),
+            // Offboarding & EOSB Clearance
+            'latestOffboarding' => $employee->offboardings()
+                ->with(['createdBy:id,name', 'finalizedBy:id,name'])
+                ->latest('id')
+                ->first(),
+            'offboardingDefaults' => [
+                'allowances_amount' => $employee->calculateTotalAllowances(),
+                'unpaid_advances' => (float) $employee->otherPayments()
+                    ->where('type', OtherPayment::TYPE_ADVANCE)
+                    ->whereIn('status', [OtherPayment::STATUS_APPROVED, OtherPayment::STATUS_PAID])
+                    ->sum('amount'),
+            ],
         ]);
     }
 

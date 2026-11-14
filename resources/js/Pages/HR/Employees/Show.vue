@@ -227,6 +227,15 @@
                         :custodies="employee.asset_custodies || []"
                     />
 
+                    <!-- Offboarding & EOSB Clearance Tab -->
+                    <EmployeeOffboardingTab
+                        v-show="activeTab === 'offboarding'"
+                        :employee="employee"
+                        :latest-offboarding="latestOffboarding"
+                        :offboarding-defaults="offboardingDefaults"
+                        :custodies="employee.asset_custodies || []"
+                    />
+
                     <!-- Attendance Tab -->
                     <div v-show="activeTab === 'attendance'" class="space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -457,6 +466,7 @@ import EmployeeScheduleTab from '@/Components/HR/Tabs/EmployeeScheduleTab.vue';
 import LeavesTab from '@/Components/HR/Tabs/LeavesTab.vue';
 import PermissionsTab from '@/Components/HR/Tabs/PermissionsTab.vue';
 import EmployeeCustodyTab from '@/Components/HR/Tabs/EmployeeCustodyTab.vue';
+import EmployeeOffboardingTab from '@/Components/HR/Tabs/EmployeeOffboardingTab.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -496,6 +506,14 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    latestOffboarding: {
+        type: Object,
+        default: null,
+    },
+    offboardingDefaults: {
+        type: Object,
+        default: () => ({ allowances_amount: 0, unpaid_advances: 0 }),
+    },
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'info');
@@ -510,6 +528,7 @@ const tabs = computed(() => [
     { id: 'attendance', label: t('hr.employees.tabs.attendance'), emoji: '📅' },
     { id: 'payroll', label: t('hr.employees.tabs.payroll'), emoji: '💰' },
     { id: 'work_orders', label: t('hr.employees.tabs.work_orders'), emoji: '🔧' },
+    { id: 'offboarding', label: t('hr.offboarding.tab_title'), emoji: '📄' },
 ]);
 
 watch(activeTab, (newTab) => {

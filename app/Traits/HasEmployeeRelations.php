@@ -12,6 +12,7 @@ use App\Models\HR\Deduction;
 use App\Models\HR\EmployeeAssetCustody;
 use App\Models\HR\EmployeeContract;
 use App\Models\HR\EmployeeDocument;
+use App\Models\HR\EmployeeOffboarding;
 use App\Models\HR\EmployeeShift;
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
@@ -90,6 +91,11 @@ trait HasEmployeeRelations
     public function assetCustodies(): HasMany
     {
         return $this->hasMany(EmployeeAssetCustody::class);
+    }
+
+    public function offboardings(): HasMany
+    {
+        return $this->hasMany(EmployeeOffboarding::class);
     }
 
     public function payrollItems(): HasMany

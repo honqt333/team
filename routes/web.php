@@ -32,6 +32,7 @@ use App\Http\Controllers\App\HR\EmployeeController;
 use App\Http\Controllers\App\HR\EmployeeCustodyController;
 use App\Http\Controllers\App\HR\EmployeeDocumentsController;
 use App\Http\Controllers\App\HR\EmployeeFinancialsController;
+use App\Http\Controllers\App\HR\EmployeeOffboardingController;
 use App\Http\Controllers\App\HR\EmployeePermissionsController;
 use App\Http\Controllers\App\HR\EmployeeShiftController;
 use App\Http\Controllers\App\HR\HRController;
@@ -670,7 +671,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/settings/company', [CompanyProfileController::class, 'index'])->name('settings.company');
         Route::put('/settings/company', [CompanyProfileController::class, 'update'])->name('settings.company.update');
         Route::put('/settings/company/admin-user', [CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
-        Route::post('/settings/company/verify-password', [CompanyProfileController::class, 'verifyPassword'])->name('settings.company.verify-password');
+        Route::post('/settings/company/verify-password', [CompanyProfileController::class, 'verifyPassword'])
+            ->middleware('throttle:6,1')
+            ->name('settings.company.verify-password');
         Route::post('/settings/company/logo', [CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
         Route::delete('/settings/company/logo', [CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
     });
@@ -1048,6 +1051,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/employees/{employee}/custodies/{custody}/print', [EmployeeCustodyController::class, 'print'])->name('employees.custodies.print');
         Route::put('/employees/{employee}/custodies/{custody}/return', [EmployeeCustodyController::class, 'returnAsset'])->name('employees.custodies.return');
         Route::delete('/employees/{employee}/custodies/{custody}', [EmployeeCustodyController::class, 'destroy'])->name('employees.custodies.destroy');
+
+        // Employee Offboarding & EOSB Clearance
+        Route::post('/employees/{employee}/offboarding', [EmployeeOffboardingController::class, 'store'])->name('employees.offboarding.store');
+        Route::post('/employees/{employee}/offboarding/{offboarding}/finalize', [EmployeeOffboardingController::class, 'finalize'])->name('employees.offboarding.finalize');
+        Route::get('/employees/{employee}/offboarding/{offboarding}/print', [EmployeeOffboardingController::class, 'print'])->name('employees.offboarding.print');
 
         // Contracts
         Route::post('/employees/{employee}/contracts', [EmployeeContractsController::class, 'store'])->name('employees.contracts.store');
