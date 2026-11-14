@@ -62,6 +62,12 @@ Schedule::command('appointments:send-reminders')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/appointment-reminders.log'));
 
+// HR proactive document & contract expiry alerts (60, 30, 7 days) - runs daily at 8 AM
+Schedule::command('hr:send-expiry-alerts')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/hr-expiry-alerts.log'));
+
 // Phase 10 recovery — every 10 minutes, look for
 // rows stuck in `sending` (worker died mid-job) and
 // reset them to `queued` so a future scan can pick

@@ -384,4 +384,15 @@ return [
     'offboarding_unreturned_custody_error' => 'Cannot finalize clearance while unreturned assets remain assigned without custody deduction',
     'subtitle' => 'Subtitle',
     'title' => 'Title',
+    'expiry_alerts' => [
+        'types' => [
+            'national_id' => 'National ID / Iqama',
+            'passport' => 'Passport',
+            'insurance' => 'Medical Insurance',
+            'contract' => 'Employment Contract',
+            'document' => 'Employee Document',
+        ],
+        'title' => ':type expiring in :days days',
+        'body' => ':type for :employee expires on :date (:days days remaining).',
+    ],
 ];
