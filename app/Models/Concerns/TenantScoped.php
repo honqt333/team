@@ -23,7 +23,17 @@ trait TenantScoped
 
             // Only apply scope if tenant context is available
             if ($tenantId !== null) {
-                $builder->where($table.'.tenant_id', $tenantId);
+                $hasSourceColumn = in_array('source', $model->getFillable())
+                    || (property_exists($model, 'hasSourceColumn') && $model->hasSourceColumn);
+
+                if ($hasSourceColumn) {
+                    $builder->where(function ($query) use ($table, $tenantId) {
+                        $query->where($table.'.tenant_id', $tenantId)
+                            ->orWhere($table.'.source', 'system');
+                    });
+                } else {
+                    $builder->where($table.'.tenant_id', $tenantId);
+                }
             }
         });
 

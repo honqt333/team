@@ -15,6 +15,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPurchaseAllocation;
 use App\Services\Inventory\InventoryService;
+use App\Services\Optimization\TaxCalculator;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -380,6 +381,7 @@ class PurchasingService
                 'center_id' => $po->center_id,
                 'supplier_id' => $po->supplier_id,
                 'purchase_order_id' => $po->id,
+                'source_type' => 'warehouse',
                 'invoice_number' => $grn->delivery_note, // Use delivery note as reference
                 'code' => PurchaseInvoice::generateCode($po->tenant_id),
                 'issue_date' => $grn->received_date,
@@ -648,5 +650,131 @@ class PurchasingService
 
             return $invoice->fresh(['supplier', 'purchaseOrder']);
         });
+    }
+
+    /**
+     * Create a quick purchase invoice for a work order with server-calculated VAT
+     * via TaxCalculator, persisted PurchaseInvoiceLine items, and allocations.
+     *
+     * @return array{invoice: PurchaseInvoice, allocations: array<int, WorkOrderPurchaseAllocation>}
+     */
+    public function createQuickWorkOrderPurchaseInvoice(
+        WorkOrder $workOrder,
+        array $validated,
+        array $rawLines,
+        string $allocationType
+    ): array {
+        $taxCalculator = app(TaxCalculator::class);
+        $defaultTaxRate = (float) ($workOrder->tenant?->taxSettings?->default_tax_rate ?? 15.0);
+        $createdAllocations = [];
+
+        $invoice = DB::transaction(function () use (
+            $workOrder,
+            $validated,
+            $rawLines,
+            $allocationType,
+            $taxCalculator,
+            $defaultTaxRate,
+            &$createdAllocations
+        ) {
+            $subtotal = 0.0;
+            $taxAmount = 0.0;
+            $computedLines = [];
+
+            foreach ($rawLines as $line) {
+                $qty = (float) ($line['allocated_qty'] ?? 1);
+                $cost = (float) ($line['unit_cost'] ?? 0);
+                $taxRate = isset($line['tax_rate']) ? (float) $line['tax_rate'] : $defaultTaxRate;
+
+                $calc = $taxCalculator->calculateLine($cost, $qty, 0.0, $taxRate, false);
+                $lineSubtotal = (float) $calc['line_total_excl_tax'];
+                $lineTax = (float) $calc['tax_amount'];
+                $lineTotal = (float) $calc['line_total_incl_tax'];
+
+                $subtotal = round($subtotal + $lineSubtotal, 2);
+                $taxAmount = round($taxAmount + $lineTax, 2);
+
+                $computedLines[] = [
+                    'raw' => $line,
+                    'qty' => $qty,
+                    'unit_cost' => $cost,
+                    'tax_rate' => $taxRate,
+                    'subtotal' => $lineSubtotal,
+                    'tax_amount' => $lineTax,
+                    'total' => $lineTotal,
+                ];
+            }
+
+            $total = round($subtotal + $taxAmount, 2);
+
+            $invoiceNumber = $validated['invoice_number'] ?? null;
+
+            if (empty($invoiceNumber)) {
+                $invoiceNumber = 'PINV-'.now()->format('YmdHis');
+            }
+
+            $sourceType = $allocationType === WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE
+                ? 'supplier_service'
+                : 'external';
+
+            $purchaseInvoice = PurchaseInvoice::create([
+                'tenant_id' => $workOrder->tenant_id,
+                'center_id' => $workOrder->center_id,
+                'supplier_id' => $validated['supplier_id'],
+                'work_order_id' => $workOrder->id,
+                'source_type' => $sourceType,
+                'invoice_number' => $invoiceNumber,
+                'code' => PurchaseInvoice::generateCode($workOrder->tenant_id),
+                'issue_date' => $validated['issue_date'],
+                'due_date' => $validated['due_date'] ?? null,
+                'status' => PurchaseInvoice::STATUS_OPEN,
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'total' => $total,
+                'balance' => ($validated['is_deferred'] ?? false) ? $total : 0.0,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            foreach ($computedLines as $entry) {
+                $line = $entry['raw'];
+                $description = (string) ($line['item_description'] ?? '');
+
+                $invoiceLine = PurchaseInvoiceLine::create([
+                    'purchase_invoice_id' => $purchaseInvoice->id,
+                    'tenant_id' => $workOrder->tenant_id,
+                    'center_id' => $workOrder->center_id,
+                    'part_id' => $line['part_id'] ?? null,
+                    'description' => $description,
+                    'qty' => $entry['qty'],
+                    'unit_cost' => $entry['unit_cost'],
+                    'tax_rate' => $entry['tax_rate'],
+                    'tax_amount' => $entry['tax_amount'],
+                    'total' => $entry['total'],
+                ]);
+
+                $createdAllocations[] = $workOrder->purchaseAllocations()->create([
+                    'tenant_id' => $workOrder->tenant_id,
+                    'center_id' => $workOrder->center_id,
+                    'purchase_invoice_id' => $purchaseInvoice->id,
+                    'purchase_invoice_line_id' => $invoiceLine->id,
+                    'work_order_item_part_id' => $line['work_order_item_part_id'] ?? null,
+                    'work_order_item_id' => $line['work_order_item_id'] ?? null,
+                    'type' => $allocationType,
+                    'item_description' => $description,
+                    'allocated_qty' => $entry['qty'],
+                    'unit_cost' => $entry['unit_cost'],
+                    'tax_amount' => $entry['tax_amount'],
+                    'total_cost' => $entry['total'],
+                    'notes' => $line['notes'] ?? null,
+                ]);
+            }
+
+            return $purchaseInvoice;
+        });
+
+        return [
+            'invoice' => $invoice,
+            'allocations' => $createdAllocations,
+        ];
     }
 }

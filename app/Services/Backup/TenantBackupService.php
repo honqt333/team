@@ -99,7 +99,6 @@ class TenantBackupService
         'center_working_hours',
         'center_sequences',
         'customers',
-        'users',
         'vehicle_makes',
         'vehicle_models',
         'vehicle_colors',
@@ -110,7 +109,6 @@ class TenantBackupService
         // tenant root
         'tenants',
         'tenant_addresses',
-        'tenant_zatca_settings',
         'tenant_tax_settings',
     ];
 

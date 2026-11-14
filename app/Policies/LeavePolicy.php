@@ -36,21 +36,44 @@ class LeavePolicy
 
     public function create(User $user): bool
     {
-        return $user->can(Permissions::LEAVES_CREATE);
+        return $user->can(Permissions::LEAVES_CREATE)
+            || $user->can(Permissions::HR_LEAVES_MANAGE);
+    }
+
+    public function update(User $user, Leave $leave): bool
+    {
+        if ((int) $leave->tenant_id !== (int) $user->tenant_id) {
+            return false;
+        }
+
+        return $user->can(Permissions::HR_LEAVES_MANAGE)
+            || $user->can(Permissions::LEAVES_CREATE);
+    }
+
+    public function delete(User $user, Leave $leave): bool
+    {
+        if ((int) $leave->tenant_id !== (int) $user->tenant_id) {
+            return false;
+        }
+
+        return $user->can(Permissions::HR_LEAVES_MANAGE)
+            || $this->cancel($user, $leave);
     }
 
     public function approve(User $user, Leave $leave): bool
     {
-        if (! $user->can(Permissions::LEAVES_APPROVE)) {
+        if ((int) $leave->tenant_id !== (int) $user->tenant_id) {
             return false;
         }
 
         // Cannot approve own leave
-        if ($leave->employee_id === $user->employee?->id) {
+        if ($leave->employee_id !== null && $leave->employee_id === $user->employee?->id) {
             return false;
         }
 
-        return $leave->tenant_id === $user->tenant_id;
+        return $user->can(Permissions::LEAVES_APPROVE)
+            || $user->can(Permissions::HR_LEAVES_APPROVE)
+            || $user->can(Permissions::HR_LEAVES_MANAGE);
     }
 
     public function reject(User $user, Leave $leave): bool

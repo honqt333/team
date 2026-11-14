@@ -148,7 +148,7 @@ class TestingEnvironmentSeeder extends Seeder
             'legal_name' => 'ورشة الانطلاقة السريعة',
             'trade_name' => 'New Horizon Workshop',
             'phone' => '+966502223344',
-            'email' => 'new@carag.test',
+            'email' => 'new@khidmh.test',
             'status' => 'active',
             'trial_ends_at' => now()->addDays(14),
         ]);
@@ -176,7 +176,7 @@ class TestingEnvironmentSeeder extends Seeder
         $this->setupTenantRolesAndUser(
             $tenant,
             $center,
-            'new@carag.test',
+            'new@khidmh.test',
             'مدير الورشة الجديدة',
             '11223344'
         );
@@ -190,7 +190,7 @@ class TestingEnvironmentSeeder extends Seeder
             'legal_name' => 'مركز الأفق المتميز',
             'trade_name' => 'Expiring Soon Auto',
             'phone' => '+966503334455',
-            'email' => 'expiring@carag.test',
+            'email' => 'expiring@khidmh.test',
             'status' => 'active',
             'trial_ends_at' => now()->addDays(3),
         ]);
@@ -218,7 +218,7 @@ class TestingEnvironmentSeeder extends Seeder
         $this->setupTenantRolesAndUser(
             $tenant,
             $center,
-            'expiring@carag.test',
+            'expiring@khidmh.test',
             'مدير ورشة الأفق',
             '11223344'
         );
@@ -232,7 +232,7 @@ class TestingEnvironmentSeeder extends Seeder
             'legal_name' => 'ورشة الدقة القديمة',
             'trade_name' => 'Expired Auto Care',
             'phone' => '+966504445566',
-            'email' => 'expired@carag.test',
+            'email' => 'expired@khidmh.test',
             'status' => 'readonly',
             'suspension_reason' => 'subscription_expired',
         ]);
@@ -260,7 +260,7 @@ class TestingEnvironmentSeeder extends Seeder
         $this->setupTenantRolesAndUser(
             $tenant,
             $center,
-            'expired@carag.test',
+            'expired@khidmh.test',
             'مدير الورشة المنتهية',
             '11223344'
         );

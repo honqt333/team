@@ -394,10 +394,10 @@ class PurchasingInvoicesController extends Controller
                 }
             }
 
-            $invoice->update([
+            $invoice->forceFill([
                 'total_paid' => $totalPaid,
                 'payment_status' => $paymentStatus,
-            ]);
+            ])->save();
 
             return $invoice;
         });

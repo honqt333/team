@@ -252,7 +252,7 @@ class ZatcaOnboardingService
             throw new InvalidArgumentException($errorMsg);
         }
 
-        $isMockOtp = ($cleanOtp === '123456' && ! $isProduction);
+        $isMockOtp = ($cleanOtp === '123456' && ! $isProduction && app()->environment(['local', 'testing']));
 
         $endpoint = (self::ENDPOINTS[$setting->environment] ?? self::ENDPOINTS['simulation']).'/compliance';
         $csid = '';

@@ -30,7 +30,7 @@ use Tests\TestCase;
  * the second tab to lose its session on the next request.
  *
  * The fix is a dedicated cookie for the portal:
- * `carag_customer_portal_session`. The
+ * `khidmh_customer_portal_session`. The
  * UsePortalSessionCookie middleware rewrites the session
  * cookie name for portal requests. The admin cookie
  * (`khidmh-pro-session` in this project, derived from
@@ -463,7 +463,7 @@ class PortalSessionCookieIsolationTest extends TestCase
     public function test_cookie_name_constant_is_stable(): void
     {
         $this->assertSame(
-            'carag_customer_portal_session',
+            'khidmh_customer_portal_session',
             UsePortalSessionCookie::COOKIE_NAME,
             'COOKIE_NAME must not change without a coordinated migration'
         );

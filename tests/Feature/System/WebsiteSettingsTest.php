@@ -154,9 +154,9 @@ class WebsiteSettingsTest extends TestCase
 
         $payload = [
             'settings' => [
-                'website_title_ar' => 'منصة كراج لايف التجريبية',
-                'website_title_en' => 'Carag Live Platform Test',
-                'website_contact_email' => 'admin@carag.test',
+                'website_title_ar' => 'منصة خدمة برو التجريبية',
+                'website_title_en' => 'Khidmh Pro Live Platform Test',
+                'website_contact_email' => 'admin@khidmh.test',
                 'website_primary_color' => '#4f46e5',
                 'website_announcement_bg_color' => '#6366f1',
                 'website_announcement_text_color' => '#ffffff',
@@ -170,9 +170,9 @@ class WebsiteSettingsTest extends TestCase
 
         $response->assertSessionHas('success');
 
-        $this->assertSame('منصة كراج لايف التجريبية', Setting::get('website.title.ar'));
-        $this->assertSame('Carag Live Platform Test', Setting::get('website.title.en'));
-        $this->assertSame('admin@carag.test', Setting::get('website.contact.email'));
+        $this->assertSame('منصة خدمة برو التجريبية', Setting::get('website.title.ar'));
+        $this->assertSame('Khidmh Pro Live Platform Test', Setting::get('website.title.en'));
+        $this->assertSame('admin@khidmh.test', Setting::get('website.contact.email'));
         $this->assertSame('#4f46e5', Setting::get('website.primary.color'));
         $this->assertSame('#6366f1', Setting::get('website.announcement.bg.color'));
     }
@@ -259,8 +259,8 @@ class WebsiteSettingsTest extends TestCase
                 'slug' => 'about-us',
                 'title_ar' => 'عن المنصة',
                 'title_en' => 'About Us',
-                'content_ar' => 'نظام كاراج السحابي المتكامل لإدارة الورش ومراكز الصيانة.',
-                'content_en' => 'Carag cloud system for auto repair workshops.',
+                'content_ar' => 'نظام خدمة برو السحابي المتكامل لإدارة الورش ومراكز الصيانة.',
+                'content_en' => 'Khidmh Pro cloud system for auto repair workshops.',
             ],
         ];
 

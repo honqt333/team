@@ -74,7 +74,7 @@ class ProfileController extends Controller
             abort(403, 'Unauthorized access to center');
         }
 
-        $user->update(['current_center_id' => $validated['center_id']]);
+        $user->forceFill(['current_center_id' => $validated['center_id']])->save();
 
         Inertia::clearHistory();
 

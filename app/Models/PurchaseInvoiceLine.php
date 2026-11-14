@@ -13,7 +13,7 @@ class PurchaseInvoiceLine extends Model
     use CenterScoped;
 
     protected $fillable = [
-        'purchase_invoice_id', 'tenant_id', 'center_id', 'part_id',
+        'purchase_invoice_id', 'tenant_id', 'center_id', 'part_id', 'description',
         'qty', 'unit_cost', 'tax_rate', 'tax_amount', 'total',
     ];
 

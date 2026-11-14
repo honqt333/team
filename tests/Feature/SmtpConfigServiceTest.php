@@ -43,7 +43,7 @@ class SmtpConfigServiceTest extends TestCase
                 'password' => 'secret',
                 'encryption' => 'tls',
                 'from_address' => 'noreply@example.com',
-                'from_name' => 'Carag',
+                'from_name' => 'Khidmh Pro',
             ],
             'is_active' => true,
             'is_default' => true,
@@ -58,7 +58,7 @@ class SmtpConfigServiceTest extends TestCase
         $this->assertEquals('secret', config('mail.mailers.smtp.password'));
         $this->assertEquals('tls', config('mail.mailers.smtp.encryption'));
         $this->assertEquals('noreply@example.com', config('mail.from.address'));
-        $this->assertEquals('Carag', config('mail.from.name'));
+        $this->assertEquals('Khidmh Pro', config('mail.from.name'));
     }
 
     public function test_apply_ignores_non_default_integrations(): void

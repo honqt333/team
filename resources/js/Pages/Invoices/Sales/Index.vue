@@ -191,7 +191,12 @@
                             v-for="invoice in activeRows"
                             :key="invoice.id"
                             :href="route('app.invoices.show', invoice.id)"
-                            class="group relative flex flex-col bg-surface rounded-2xl border border-border hover:border-action-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
+                            class="group relative flex flex-col bg-surface rounded-2xl border hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
+                            :class="
+                                isOverdueInvoice(invoice)
+                                    ? 'border-danger/60 hover:border-danger'
+                                    : 'border-border hover:border-action-primary'
+                            "
                         >
                             <!-- Top status stripe -->
                             <div class="h-1 w-full" :class="stripeClass(invoice.payment_status)" />
@@ -232,6 +237,30 @@
                                         <span>{{ $t('invoices.original_invoice') }}:</span>
                                         <span class="text-action-primary font-semibold">
                                             #{{ invoice.original_invoice.invoice_number }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Overdue Alert Badge -->
+                                    <div
+                                        v-if="isOverdueInvoice(invoice)"
+                                        class="mb-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-danger-soft text-danger border border-danger/30 text-[11px] font-bold"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        <span>
+                                            {{ toEnglish(getOverdueDays(invoice.due_date)) }}
+                                            {{ $t('purchasing.days_overdue') }}
                                         </span>
                                     </div>
 
@@ -434,12 +463,21 @@
 
                         <!-- Payment Status Column -->
                         <template #cell-payment_status="{ item }">
-                            <span
-                                :class="statusClass(item.payment_status)"
-                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
-                            >
-                                {{ $t(`invoices.status.${item.payment_status}`) }}
-                            </span>
+                            <div class="flex flex-col items-center gap-1">
+                                <span
+                                    :class="statusClass(item.payment_status)"
+                                    class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
+                                >
+                                    {{ $t(`invoices.status.${item.payment_status}`) }}
+                                </span>
+                                <span
+                                    v-if="isOverdueInvoice(item)"
+                                    class="text-[10px] font-bold text-danger"
+                                >
+                                    {{ toEnglish(getOverdueDays(item.due_date)) }}
+                                    {{ $t('purchasing.days_overdue') }}
+                                </span>
+                            </div>
                         </template>
 
                         <!-- Actions Column -->
@@ -751,4 +789,19 @@ const stripeClass = (status) => {
     };
     return map[status] || 'bg-border';
 };
+
+const getOverdueDays = (dueDate) => {
+    if (!dueDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today - due) / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+};
+
+const isOverdueInvoice = (invoice) =>
+    invoice?.type !== 'credit_note' &&
+    Number(invoice?.balance) > 0 &&
+    getOverdueDays(invoice?.due_date) > 0;
 </script>

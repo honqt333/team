@@ -75,10 +75,10 @@ class HelpSettingsTest extends TestCase
         $updateData = [
             'contact_whatsapp' => '+966500000000',
             'contact_whatsapp_enabled' => true,
-            'contact_email' => 'custom-support@carag.sa',
+            'contact_email' => 'custom-support@khidmh.sa',
             'contact_phone' => '8001234567',
             'contact_hours' => 'الأحد - الخميس: 9:00 ص - 6:00 م',
-            'contact_ticket_url' => 'https://support.carag.sa/tickets/new',
+            'contact_ticket_url' => 'https://support.khidmh.sa/tickets/new',
             'video_tutorials' => [
                 [
                     'id' => 'v1',
@@ -135,7 +135,7 @@ class HelpSettingsTest extends TestCase
         $helpResponse->assertOk();
         $helpResponse->assertInertia(fn ($page) => $page
             ->where('contactSupport.whatsapp', '+966500000000')
-            ->where('contactSupport.email', 'custom-support@carag.sa')
+            ->where('contactSupport.email', 'custom-support@khidmh.sa')
             ->where('videoTutorials.0.title', 'فيديو تجريبي جديد')
             ->where('categories.0.name', 'إرشادات عامة')
             ->where('topics.0.title', 'عنوان المقال التجريبي')
@@ -160,7 +160,7 @@ class HelpSettingsTest extends TestCase
 
         Http::fake([
             'https://www.youtube.com/watch?v=*' => Http::response(
-                '<html><head><title>Carag Video Tutorial - YouTube</title></head><body>"lengthSeconds":"185"</body></html>',
+                '<html><head><title>Khidmh Pro Video Tutorial - YouTube</title></head><body>"lengthSeconds":"185"</body></html>',
                 200
             ),
         ]);
@@ -174,7 +174,7 @@ class HelpSettingsTest extends TestCase
             'success' => true,
             'duration' => '03:05',
             'duration_seconds' => 185,
-            'title' => 'Carag Video Tutorial',
+            'title' => 'Khidmh Pro Video Tutorial',
         ]);
     }
 }

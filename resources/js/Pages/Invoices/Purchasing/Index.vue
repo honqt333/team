@@ -43,9 +43,9 @@
 
                 <template #actions>
                     <div class="flex items-center gap-3">
-                        <!-- Glass Toolbar -->
+                        <!-- Actions Toolbar -->
                         <div
-                            class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/80 dark:bg-surface-secondary/40 backdrop-blur-md rounded-2xl border border-border-subtle shadow-inner"
+                            class="flex items-center gap-1.5 p-1 bg-surface-muted rounded-xl border border-border"
                         >
                             <AppPrintButton
                                 :url="
@@ -57,8 +57,11 @@
                                 variant="icon"
                                 :title="$t('common.print')"
                             />
-                            <div class="w-px h-5 bg-border-subtle mx-0.5"></div>
-                            <AppViewModeToggle v-model="viewMode" />
+                            <div class="w-px h-5 bg-border mx-0.5"></div>
+                            <AppViewModeToggle
+                                v-model="viewMode"
+                                storage-key="purchaseInvoicesViewMode"
+                            />
                         </div>
 
                         <!-- Add Direct Purchase Invoice Button (Outer Left in RTL) -->
@@ -66,7 +69,7 @@
                             v-if="can('purchasing.invoices.create') || isAnyAdmin()"
                             @click="showCreateModal = true"
                             type="button"
-                            class="btn btn-primary shadow-sm hover:shadow transition-all text-sm font-semibold inline-flex items-center gap-2"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on rounded-xl font-bold shadow-xs transition-colors cursor-pointer text-sm"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -91,7 +94,7 @@
                         <!-- Search -->
                         <div class="relative group min-w-[200px] flex-1 sm:flex-initial sm:w-64">
                             <div
-                                class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-content-muted group-focus-within:text-action-primary transition-colors"
+                                class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-text-muted group-focus-within:text-action-primary transition-colors"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -117,9 +120,7 @@
 
                         <!-- Date From -->
                         <div class="w-full sm:w-40">
-                            <label
-                                class="block text-[11px] font-medium text-content-muted mb-1 px-1"
-                            >
+                            <label class="block text-[11px] font-medium text-text-muted mb-1 px-1">
                                 {{ $t('common.date_from') }}
                             </label>
                             <CustomDatePicker
@@ -131,9 +132,7 @@
 
                         <!-- Date To -->
                         <div class="w-full sm:w-40">
-                            <label
-                                class="block text-[11px] font-medium text-content-muted mb-1 px-1"
-                            >
+                            <label class="block text-[11px] font-medium text-text-muted mb-1 px-1">
                                 {{ $t('common.date_to') }}
                             </label>
                             <CustomDatePicker
@@ -145,9 +144,7 @@
 
                         <!-- Status Filter (Only relevant for invoices tab) -->
                         <div v-if="activeTab === 'invoices'" class="w-full sm:w-44">
-                            <label
-                                class="block text-[11px] font-medium text-content-muted mb-1 px-1"
-                            >
+                            <label class="block text-[11px] font-medium text-text-muted mb-1 px-1">
                                 {{ $t('common.status') }}
                             </label>
                             <SearchableSelect
@@ -203,7 +200,7 @@
                 <div v-if="viewMode === 'grid'">
                     <div
                         v-if="!activeRows.length"
-                        class="bg-surface-primary rounded-2xl border border-border-subtle p-12"
+                        class="bg-surface rounded-2xl border border-border p-12"
                     >
                         <AppEmptyState
                             :title="
@@ -238,26 +235,31 @@
                             v-for="invoice in activeRows"
                             :key="invoice.id"
                             :href="route('app.invoices.purchases.show', invoice.id)"
-                            class="group relative flex flex-col bg-surface-primary rounded-2xl border border-border-subtle hover:border-border-strong hover:shadow-md transition-all duration-300 overflow-hidden"
+                            class="group relative flex flex-col bg-surface rounded-2xl border hover:shadow-md transition-all duration-300 overflow-hidden"
+                            :class="
+                                isOverdueInvoice(invoice)
+                                    ? 'border-danger/60 hover:border-danger'
+                                    : 'border-border hover:border-action-primary'
+                            "
                         >
                             <!-- Header Bar -->
                             <div
-                                class="bg-surface-secondary/50 p-4 pe-5 flex justify-between items-start border-b border-border-subtle"
+                                class="bg-surface-muted/50 p-4 pe-5 flex justify-between items-start border-b border-border"
                             >
                                 <span
-                                    class="text-[11px] font-semibold text-content-secondary font-mono bg-surface-secondary px-2 py-0.5 rounded-lg border border-border-subtle"
+                                    class="text-[11px] font-semibold text-text-secondary font-mono bg-surface-muted px-2 py-0.5 rounded-lg border border-border"
                                 >
                                     {{ formatDate(invoice.issue_date) }}
                                 </span>
                                 <div class="text-end">
                                     <span
-                                        class="text-sm font-bold font-mono tracking-tight text-content-primary group-hover:text-action-primary transition-colors"
+                                        class="text-sm font-bold font-mono tracking-tight text-text-primary group-hover:text-action-primary transition-colors"
                                     >
                                         #{{ invoice.code }}
                                     </span>
                                     <p
                                         v-if="invoice.invoice_number"
-                                        class="text-[10px] text-content-muted font-mono truncate max-w-[120px]"
+                                        class="text-[10px] text-text-muted font-mono truncate max-w-[120px]"
                                     >
                                         {{ invoice.invoice_number }}
                                     </p>
@@ -268,9 +270,7 @@
                             <div class="p-4 flex-1 flex flex-col justify-between gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <p
-                                            class="text-xs font-semibold text-content-primary truncate"
-                                        >
+                                        <p class="text-xs font-semibold text-text-primary truncate">
                                             {{ invoice.supplier?.name || '—' }}
                                         </p>
                                         <span
@@ -284,22 +284,44 @@
                                     </div>
                                     <div
                                         v-if="invoice.purchase_order"
-                                        class="text-[10px] text-content-muted font-mono"
+                                        class="text-[10px] text-text-muted font-mono"
                                     >
                                         {{ $t('purchasing.order') }}: #{{
                                             invoice.purchase_order.code
                                         }}
                                     </div>
+                                    <div
+                                        v-if="isOverdueInvoice(invoice)"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-danger-soft text-danger border border-danger/30 text-[11px] font-bold"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        <span>
+                                            {{ toEnglish(getOverdueDays(invoice.due_date)) }}
+                                            {{ $t('purchasing.days_overdue') }}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <!-- Financial Info -->
-                                <div class="space-y-2 pt-2 border-t border-border-subtle">
+                                <div class="space-y-2 pt-2 border-t border-border">
                                     <div class="flex justify-between items-center text-xs">
-                                        <span class="text-content-muted">
+                                        <span class="text-text-muted">
                                             {{ $t('common.total') }}
                                         </span>
                                         <span
-                                            class="font-bold text-content-primary font-mono"
+                                            class="font-bold text-text-primary font-mono"
                                             dir="ltr"
                                         >
                                             {{ formatCurrency(invoice.total) }}
@@ -330,20 +352,20 @@
                             v-for="ret in activeRows"
                             :key="ret.id"
                             :href="route('app.invoices.purchases.returns.show', ret.id)"
-                            class="group relative flex flex-col bg-surface-primary rounded-2xl border border-border-subtle hover:border-border-strong hover:shadow-md transition-all duration-300 overflow-hidden"
+                            class="group relative flex flex-col bg-surface rounded-2xl border border-border hover:border-action-primary hover:shadow-md transition-all duration-300 overflow-hidden"
                         >
                             <!-- Header Bar -->
                             <div
-                                class="bg-surface-secondary/50 p-4 pe-5 flex justify-between items-start border-b border-border-subtle"
+                                class="bg-surface-muted/50 p-4 pe-5 flex justify-between items-start border-b border-border"
                             >
                                 <span
-                                    class="text-[11px] font-semibold text-content-secondary font-mono bg-surface-secondary px-2 py-0.5 rounded-lg border border-border-subtle"
+                                    class="text-[11px] font-semibold text-text-secondary font-mono bg-surface-muted px-2 py-0.5 rounded-lg border border-border"
                                 >
                                     {{ formatDate(ret.return_date) }}
                                 </span>
                                 <div class="text-end">
                                     <span
-                                        class="text-sm font-bold font-mono tracking-tight text-content-primary group-hover:text-action-primary transition-colors"
+                                        class="text-sm font-bold font-mono tracking-tight text-text-primary group-hover:text-action-primary transition-colors"
                                     >
                                         #{{ ret.code }}
                                     </span>
@@ -359,10 +381,10 @@
                             <!-- Body Content -->
                             <div class="p-4 flex-1 flex flex-col justify-between gap-4">
                                 <div class="space-y-1">
-                                    <p class="text-xs font-semibold text-content-primary truncate">
+                                    <p class="text-xs font-semibold text-text-primary truncate">
                                         {{ ret.purchase_invoice?.supplier?.name || '—' }}
                                     </p>
-                                    <p class="text-[10px] text-content-muted">
+                                    <p class="text-[10px] text-text-muted">
                                         {{ $t('invoices.original_invoice') }}: #{{
                                             ret.purchase_invoice?.code || '—'
                                         }}
@@ -370,9 +392,9 @@
                                 </div>
 
                                 <!-- Financial Info -->
-                                <div class="space-y-2 pt-2 border-t border-border-subtle">
+                                <div class="space-y-2 pt-2 border-t border-border">
                                     <div class="flex justify-between items-center text-xs">
-                                        <span class="text-content-muted">
+                                        <span class="text-text-muted">
                                             {{ $t('common.total') }}
                                         </span>
                                         <span class="font-bold text-danger font-mono" dir="ltr">
@@ -427,7 +449,7 @@
                     >
                         <!-- Index Column -->
                         <template #cell-index="{ index }">
-                            <span class="text-xs text-content-muted font-mono">
+                            <span class="text-xs text-text-muted font-mono">
                                 {{ toEnglish((activeData.from || 1) + index) }}
                             </span>
                         </template>
@@ -452,7 +474,7 @@
 
                         <!-- Invoice Number Column (for invoices) -->
                         <template #cell-invoice_number="{ item }">
-                            <span class="text-xs text-content-secondary font-mono">
+                            <span class="text-xs text-text-secondary font-mono">
                                 {{ item.invoice_number ? '#' + item.invoice_number : '—' }}
                             </span>
                         </template>
@@ -468,25 +490,25 @@
                             >
                                 #{{ item.purchase_invoice.code }}
                             </Link>
-                            <span v-else class="text-content-muted text-xs">—</span>
+                            <span v-else class="text-text-muted text-xs">—</span>
                         </template>
 
                         <!-- Issue Date / Return Date Column -->
                         <template #cell-issue_date="{ item }">
-                            <span class="text-xs text-content-secondary font-mono">
+                            <span class="text-xs text-text-secondary font-mono">
                                 {{ formatDate(item.issue_date) }}
                             </span>
                         </template>
 
                         <template #cell-return_date="{ item }">
-                            <span class="text-xs text-content-secondary font-mono">
+                            <span class="text-xs text-text-secondary font-mono">
                                 {{ formatDate(item.return_date) }}
                             </span>
                         </template>
 
                         <!-- Supplier Column -->
                         <template #cell-supplier="{ item }">
-                            <p class="font-medium text-content-primary truncate max-w-[200px]">
+                            <p class="font-medium text-text-primary truncate max-w-[200px]">
                                 {{
                                     (activeTab === 'invoices'
                                         ? item.supplier?.name
@@ -498,7 +520,7 @@
                         <!-- Subtotal Column -->
                         <template #cell-subtotal="{ item }">
                             <span
-                                class="text-sm font-semibold text-content-primary font-mono"
+                                class="text-sm font-semibold text-text-primary font-mono"
                                 dir="ltr"
                             >
                                 {{ formatCurrency(item.subtotal) }}
@@ -507,10 +529,7 @@
 
                         <!-- Tax Amount Column -->
                         <template #cell-tax_amount="{ item }">
-                            <span
-                                class="text-sm font-medium text-content-muted font-mono"
-                                dir="ltr"
-                            >
+                            <span class="text-sm font-medium text-text-muted font-mono" dir="ltr">
                                 {{ formatCurrency(item.tax_amount) }}
                             </span>
                         </template>
@@ -519,7 +538,7 @@
                         <template #cell-total="{ item }">
                             <span
                                 :class="
-                                    activeTab === 'returns' ? 'text-danger' : 'text-content-primary'
+                                    activeTab === 'returns' ? 'text-danger' : 'text-text-primary'
                                 "
                                 class="text-sm font-bold font-mono"
                                 dir="ltr"
@@ -566,7 +585,7 @@
                                     <Link
                                         v-if="activeTab === 'invoices'"
                                         :href="route('app.invoices.purchases.show', item.id)"
-                                        class="p-2 rounded-lg text-content-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors"
+                                        class="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -593,7 +612,7 @@
                                         :href="
                                             route('app.invoices.purchases.returns.show', item.id)
                                         "
-                                        class="p-2 rounded-lg text-content-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors"
+                                        class="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -623,7 +642,7 @@
                                     <Link
                                         :href="route('app.invoices.purchases.print', item.id)"
                                         target="_blank"
-                                        class="p-2 rounded-lg text-content-muted hover:text-success hover:bg-success-soft transition-colors"
+                                        class="p-2 rounded-lg text-text-muted hover:text-success hover:bg-success-soft transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -901,19 +920,28 @@ const invoiceStatusClass = (status) => {
     const map = {
         paid: 'bg-success-soft text-success border border-success/20',
         open: 'bg-action-primary-soft text-action-primary border border-action-primary/20',
-        draft: 'bg-surface-secondary text-content-secondary border border-border-subtle',
+        draft: 'bg-surface-muted text-text-secondary border border-border',
         cancelled: 'bg-danger-soft text-danger border border-danger/20',
     };
-    return map[status] || 'bg-surface-secondary text-content-secondary border border-border-subtle';
+    return map[status] || 'bg-surface-muted text-text-secondary border border-border';
 };
+
+const getOverdueDays = (dueDate) => {
+    if (!dueDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today - due) / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+};
+
+const isOverdueInvoice = (invoice) =>
+    Number(invoice?.balance) > 0 && getOverdueDays(invoice?.due_date) > 0;
 
 const getOverdueLabel = (dueDate) => {
     if (!dueDate) return t('invoices.due_amount');
-    const today = new Date();
-    const due = new Date(dueDate);
-    const diffTime = today - due;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+    const diffDays = getOverdueDays(dueDate);
     if (diffDays > 0) {
         return toEnglish(diffDays) + ' ' + t('purchasing.days_overdue');
     }

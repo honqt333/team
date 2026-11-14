@@ -16,6 +16,7 @@ use App\Models\HR\Employee;
 use App\Models\InventoryUnit;
 use App\Models\Part;
 use App\Models\PurchaseInvoice;
+use App\Models\PurchaseInvoiceLine;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Supplier;
@@ -25,6 +26,8 @@ use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPurchaseAllocation;
+use App\Services\Optimization\TaxCalculator;
+use App\Services\Purchasing\PurchasingService;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -668,9 +671,13 @@ class WorkOrderController
         $purchaseInvoice->update(['work_order_id' => $workOrder->id]);
 
         $qty = (float) ($validated['allocated_qty'] ?? 1);
+        $invoiceLine = null;
 
         if (! empty($validated['purchase_invoice_line_id'])) {
-            $invoiceLine = $purchaseInvoice->lines()->whereKey($validated['purchase_invoice_line_id'])->first();
+            $invoiceLine = PurchaseInvoiceLine::query()
+                ->where('purchase_invoice_id', $purchaseInvoice->id)
+                ->whereKey($validated['purchase_invoice_line_id'])
+                ->first();
 
             if ($invoiceLine) {
                 $alreadyAllocatedQty = (float) WorkOrderPurchaseAllocation::query()
@@ -690,11 +697,18 @@ class WorkOrderController
 
         $unitCost = isset($validated['unit_cost'])
             ? (float) $validated['unit_cost']
-            : (isset($validated['allocated_amount']) ? (float) $validated['allocated_amount'] / max(1, $qty) : (float) $purchaseInvoice->total);
-        $taxAmount = isset($validated['tax_amount']) ? (float) $validated['tax_amount'] : 0.00;
-        $totalCost = isset($validated['total_cost']) && (float) $validated['total_cost'] > 0
-            ? (float) $validated['total_cost']
-            : round(($qty * $unitCost) + $taxAmount, 2);
+            : ($invoiceLine !== null
+                ? (float) $invoiceLine->unit_cost
+                : (isset($validated['allocated_amount']) ? (float) $validated['allocated_amount'] / max(1, $qty) : (float) $purchaseInvoice->subtotal));
+
+        $defaultTaxRate = (float) ($workOrder->tenant?->taxSettings?->default_tax_rate ?? 15.0);
+        $taxRate = $invoiceLine !== null
+            ? (float) ($invoiceLine->tax_rate ?? $defaultTaxRate)
+            : $defaultTaxRate;
+
+        $taxCalc = app(TaxCalculator::class)->calculateLine($unitCost, $qty, 0.0, $taxRate, false);
+        $taxAmount = (float) $taxCalc['tax_amount'];
+        $totalCost = (float) $taxCalc['line_total_incl_tax'];
 
         $type = $validated['type'] ?? (
             $purchaseInvoice->source_type === 'supplier_service'
@@ -914,71 +928,15 @@ class WorkOrderController
             ? WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE
             : WorkOrderPurchaseAllocation::TYPE_EXTERNAL_PART;
 
-        $createdAllocations = [];
+        $result = app(PurchasingService::class)->createQuickWorkOrderPurchaseInvoice(
+            $workOrder,
+            $validated,
+            $rawLines,
+            $allocationType
+        );
 
-        $invoice = DB::transaction(function () use ($workOrder, $validated, $rawLines, $allocationType, &$createdAllocations) {
-            $subtotal = 0.0;
-            $taxAmount = 0.0;
-
-            foreach ($rawLines as $line) {
-                $qty = (float) ($line['allocated_qty'] ?? 1);
-                $cost = (float) ($line['unit_cost'] ?? 0);
-                $lineSubtotal = round($qty * $cost, 2);
-                $lineTax = isset($line['tax_amount']) ? (float) $line['tax_amount'] : 0.0;
-                $subtotal += $lineSubtotal;
-                $taxAmount += $lineTax;
-            }
-            $total = round($subtotal + $taxAmount, 2);
-
-            $invoiceNumber = $validated['invoice_number'] ?? null;
-
-            if (empty($invoiceNumber)) {
-                $invoiceNumber = 'PINV-'.now()->format('YmdHis');
-            }
-
-            $purchaseInvoice = PurchaseInvoice::create([
-                'tenant_id' => $workOrder->tenant_id,
-                'center_id' => $workOrder->center_id,
-                'supplier_id' => $validated['supplier_id'],
-                'work_order_id' => $workOrder->id,
-                'invoice_number' => $invoiceNumber,
-                'code' => PurchaseInvoice::generateCode($workOrder->tenant_id),
-                'issue_date' => $validated['issue_date'],
-                'due_date' => $validated['due_date'] ?? null,
-                'status' => PurchaseInvoice::STATUS_OPEN,
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'total' => $total,
-                'balance' => ($validated['is_deferred'] ?? false) ? $total : 0.0,
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            foreach ($rawLines as $line) {
-                $qty = (float) ($line['allocated_qty'] ?? 1);
-                $cost = (float) ($line['unit_cost'] ?? 0);
-                $lineSubtotal = round($qty * $cost, 2);
-                $lineTax = isset($line['tax_amount']) ? round(max(0.0, (float) $line['tax_amount']), 2) : 0.0;
-                $lineTotal = round($lineSubtotal + $lineTax, 2);
-
-                $createdAllocations[] = $workOrder->purchaseAllocations()->create([
-                    'tenant_id' => $workOrder->tenant_id,
-                    'center_id' => $workOrder->center_id,
-                    'purchase_invoice_id' => $purchaseInvoice->id,
-                    'purchase_invoice_line_id' => null,
-                    'work_order_item_part_id' => $line['work_order_item_part_id'] ?? null,
-                    'work_order_item_id' => $line['work_order_item_id'] ?? null,
-                    'type' => $allocationType,
-                    'item_description' => $line['item_description'] ?? '',
-                    'allocated_qty' => $qty,
-                    'unit_cost' => $cost,
-                    'tax_amount' => $lineTax,
-                    'total_cost' => $lineTotal,
-                    'notes' => $line['notes'] ?? null,
-                ]);
-            }
-
-            return $purchaseInvoice;
-        });
+        $invoice = $result['invoice'];
+        $createdAllocations = $result['allocations'];
 
         $workOrder->logActivity(
             'quick_purchase_invoice_created',

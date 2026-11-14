@@ -299,13 +299,13 @@ class InvoiceService
             $icv = CenterSequence::getNextValue($tenantId, $centerId, 'icv');
 
             // 3. Update Invoice
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'valid',
                 'invoice_number' => $invoiceNumber,
                 'issue_date' => $issuedAt,
                 'currency_code' => $invoice->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant),
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
-            ]);
+            ])->save();
 
             // 4. Generate ZATCA Phase 1 QR TLV strictly when VAT is enabled and tenant country is SA
             if ($invoice->tax_enabled_snapshot && CountryCurrencyRegistry::isZatcaApplicable($tenant?->country)) {

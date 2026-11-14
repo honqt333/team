@@ -132,7 +132,7 @@ class EmployeeObserver
 
             // Update current center if not set
             if (! $user->current_center_id && $employee->center_id) {
-                $user->update(['current_center_id' => $employee->center_id]);
+                $user->forceFill(['current_center_id' => $employee->center_id])->save();
             }
         }
 

@@ -64,8 +64,8 @@ class UploadSignatureRequest extends FormRequest
                     $clientExt = strtolower($value->getClientOriginalExtension());
 
                     if ($clientExt === 'svg' || str_contains($clientMime, 'svg')) {
-                        // Reject SVGs that try to include executable JS
-                        $head = file_get_contents($value->getRealPath(), false, null, 0, 4096) ?: '';
+                        // Read the entire SVG file so payloads padded past 4KB/64KB cannot bypass inspection
+                        $head = file_get_contents($value->getRealPath()) ?: '';
 
                         if (! str_contains($head, '<svg')) {
                             $fail(__('validation.mimes', [
@@ -151,10 +151,8 @@ class UploadSignatureRequest extends FormRequest
                         return;
                     }
 
-                    // Read the whole file (cap at 64KB; signatures are small).
-                    // Reading 64KB instead of 4KB so that obfuscated payloads
-                    // split across many elements are still caught.
-                    $raw = file_get_contents($value->getRealPath(), false, null, 0, 65536) ?: '';
+                    // Read the entire SVG file without truncation so padded payloads are caught.
+                    $raw = file_get_contents($value->getRealPath()) ?: '';
                     $lower = strtolower($raw);
 
                     // Patterns that must never appear in a signature SVG.

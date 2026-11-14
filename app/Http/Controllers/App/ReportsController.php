@@ -150,14 +150,14 @@ class ReportsController extends Controller
             $grouped = $allPayments->groupBy(function ($payment) use ($groupBy) {
                 return match ($groupBy) {
                     'method' => $payment->payment_method ?: 'other',
-                    'center' => $payment->center?->name ?: 'المركز الرئيسي',
+                    'center' => $payment->center?->name ?: __('reports.runtime.s001'),
                     'customer_type' => $payment->workOrder?->customer->type
                         ?? $payment->invoice?->customer->type
                         ?? 'individual',
                     'customer' => $payment->workOrder?->customer->name
                         ?? $payment->invoice?->customer->name
-                        ?? 'عميل غير محدد',
-                    'supplier' => $payment->purchaseInvoice?->supplier?->name ?: 'مورد غير محدد',
+                        ?? __('reports.runtime.s002'),
+                    'supplier' => $payment->purchaseInvoice?->supplier?->name ?: __('reports.runtime.s003'),
                     default => 'all',
                 };
             });
@@ -339,7 +339,7 @@ class ReportsController extends Controller
             'receivedBy:id,name',
         ])->orderBy('payment_date', 'desc');
 
-        $filename = 'تقرير_المدفوعات_'.now()->format('Y-m-d_His').'.csv';
+        $filename = __('reports.runtime.s004').now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $output = fopen('php://output', 'w');
@@ -353,20 +353,20 @@ class ReportsController extends Controller
 
             // CSV Header
             fputcsv($output, [
-                'رقم المعاملة',
-                'الفرع',
-                'التاريخ',
-                'نوع السند',
-                'الطرف (العميل / المورد)',
-                'رقم الهاتف',
-                'رقم الفاتورة',
-                'رقم أمر العمل',
-                'المركبة',
-                'رقم اللوحة',
-                'طريقة الدفع',
-                "المبلغ ({$currencyLabel})",
-                'المستلم',
-                'الملاحظات',
+                __('reports.runtime.s005'),
+                __('reports.runtime.s006'),
+                __('reports.runtime.s007'),
+                __('reports.runtime.s008'),
+                __('reports.runtime.s009'),
+                __('reports.runtime.s010'),
+                __('reports.runtime.s011'),
+                __('reports.runtime.s012'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s015'),
+                __('reports.runtime.amount_currency', ['currency' => $currencyLabel]),
+                __('reports.runtime.s016'),
+                __('reports.runtime.s017'),
             ]);
 
             $query->chunk(200, function ($payments) use ($output) {
@@ -391,14 +391,14 @@ class ReportsController extends Controller
 
                     $typeVal = $payment->type instanceof PaymentType ? $payment->type->value : (string) $payment->type;
                     $typeLabel = match ($typeVal) {
-                        'refund' => 'استرجاع',
-                        'bad_debt' => 'دين معدوم',
-                        default => 'قبض',
+                        'refund' => __('reports.runtime.s018'),
+                        'bad_debt' => __('reports.runtime.s019'),
+                        default => __('reports.runtime.s020'),
                     };
 
                     fputcsv($output, [
                         $payment->reference ?: ('REC-'.$payment->id),
-                        $payment->center->name ?? 'المركز الرئيسي',
+                        $payment->center->name ?? __('reports.runtime.s001'),
                         $payment->payment_date?->format('Y-m-d H:i') ?? '—',
                         $typeLabel,
                         $partyName,
@@ -630,7 +630,7 @@ class ReportsController extends Controller
                     'type' => $inv->customer->type,
                     'tax_number' => $inv->customer->tax_number,
                 ] : [
-                    'name' => $inv->customer_name_snapshot ?? 'عميل غير مسجل',
+                    'name' => $inv->customer_name_snapshot ?? __('reports.runtime.s021'),
                     'phone' => null,
                     'type' => 'individual',
                     'tax_number' => $inv->customer_vat_snapshot,
@@ -670,19 +670,19 @@ class ReportsController extends Controller
 
             $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
                 return match ($groupBy) {
-                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
-                    'customer' => $inv['customer']['name'] ?? 'عميل غير محدد',
-                    'customer_type' => ($inv['customer']['type'] ?? '') === 'company' ? 'شركة / منشأة' : 'فرد',
+                    'center' => $inv['center']['name'] ?? __('reports.runtime.s001'),
+                    'customer' => $inv['customer']['name'] ?? __('reports.runtime.s002'),
+                    'customer_type' => ($inv['customer']['type'] ?? '') === 'company' ? __('reports.runtime.s022') : __('reports.runtime.s023'),
                     'payment_status' => match ($inv['payment_status']) {
-                        'paid' => 'مدفوع بالكامل',
-                        'partial' => 'مدفوع جزئياً',
-                        'unpaid' => 'غير مدفوع',
-                        default => 'أخرى',
+                        'paid' => __('reports.runtime.s024'),
+                        'partial' => __('reports.runtime.s025'),
+                        'unpaid' => __('reports.runtime.s026'),
+                        default => __('reports.runtime.s027'),
                     },
                     'type' => match ($inv['type']) {
-                        'credit_note' => 'إشعار دائن',
-                        'debit_note' => 'إشعار مدين',
-                        default => 'فاتورة ضريبية',
+                        'credit_note' => __('reports.runtime.s028'),
+                        'debit_note' => __('reports.runtime.s029'),
+                        default => __('reports.runtime.s030'),
                     },
                     default => 'all',
                 };
@@ -832,7 +832,7 @@ class ReportsController extends Controller
             ->withSum('lines as total_discount', 'discount_amount')
             ->orderBy('issue_date', 'desc');
 
-        $filename = 'تقرير_الفواتير_'.now()->format('Y-m-d_His').'.csv';
+        $filename = __('reports.runtime.s031').now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $output = fopen('php://output', 'w');
@@ -841,25 +841,25 @@ class ReportsController extends Controller
             // CSV Header
             fputcsv($output, [
                 '#',
-                'الفرع',
-                'رقم الفاتورة',
-                'نوع الفاتورة',
-                'رقم كرت العمل',
-                'تاريخ الإصدار',
-                'تاريخ الاستحقاق',
-                'العميل',
-                'نوع العميل',
-                'هاتف العميل',
-                'الرقم الضريبي للعميل',
-                'رقم اللوحة',
-                'المجموع قبل الضريبة',
-                'الخصم',
-                'الضريبة',
-                'الإجمالي شامل الضريبة',
-                'المدفوع',
-                'المتبقي',
-                'حالة السداد',
-                'متأخرة عن السداد',
+                __('reports.runtime.s006'),
+                __('reports.runtime.s011'),
+                __('reports.runtime.s032'),
+                __('reports.runtime.s033'),
+                __('reports.runtime.s034'),
+                __('reports.runtime.s035'),
+                __('reports.runtime.s036'),
+                __('reports.runtime.s037'),
+                __('reports.runtime.s038'),
+                __('reports.runtime.s039'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s040'),
+                __('reports.runtime.s041'),
+                __('reports.runtime.s042'),
+                __('reports.runtime.s043'),
+                __('reports.runtime.s044'),
+                __('reports.runtime.s045'),
+                __('reports.runtime.s046'),
+                __('reports.runtime.s047'),
             ]);
 
             $index = 1;
@@ -870,26 +870,26 @@ class ReportsController extends Controller
                     $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
 
                     $customerName = $inv->customer->name ?? $inv->customer_name_snapshot ?? '—';
-                    $customerType = ($inv->customer->type ?? '') === 'company' ? 'شركة / منشأة' : 'فرد';
+                    $customerType = ($inv->customer->type ?? '') === 'company' ? __('reports.runtime.s022') : __('reports.runtime.s023');
                     $customerPhone = $inv->customer->phone ?? '—';
                     $customerVat = $inv->customer->tax_number ?? $inv->customer_vat_snapshot ?? '—';
 
                     $invType = match ($inv->type instanceof InvoiceType ? $inv->type->value : (string) $inv->type) {
-                        'credit_note' => 'إشعار دائن',
-                        'debit_note' => 'إشعار مدين',
-                        default => $inv->subtype === 'standard' ? 'فاتورة ضريبية قياسية' : 'فاتورة ضريبية مبسطة',
+                        'credit_note' => __('reports.runtime.s028'),
+                        'debit_note' => __('reports.runtime.s029'),
+                        default => $inv->subtype === 'standard' ? __('reports.runtime.s048') : __('reports.runtime.s049'),
                     };
 
                     $paymentLabel = match ($inv->payment_status) {
-                        'paid' => 'مدفوع بالكامل',
-                        'partial' => 'مدفوع جزئياً',
-                        'unpaid' => 'غير مدفوع',
+                        'paid' => __('reports.runtime.s024'),
+                        'partial' => __('reports.runtime.s025'),
+                        'unpaid' => __('reports.runtime.s026'),
                         default => (string) $inv->payment_status,
                     };
 
                     fputcsv($output, [
                         $index++,
-                        $inv->center->name ?? 'المركز الرئيسي',
+                        $inv->center->name ?? __('reports.runtime.s001'),
                         $inv->invoice_number,
                         $invType,
                         $inv->workOrder?->code ?: '—',
@@ -907,7 +907,7 @@ class ReportsController extends Controller
                         number_format((float) $inv->total_paid, 2, '.', ''),
                         number_format($remaining, 2, '.', ''),
                         $paymentLabel,
-                        $isOverdue ? 'نعم' : 'لا',
+                        $isOverdue ? __('reports.runtime.s050') : __('reports.runtime.s051'),
                     ]);
                 }
             });
@@ -1153,19 +1153,19 @@ class ReportsController extends Controller
 
             $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
                 return match ($groupBy) {
-                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
-                    'supplier' => $inv['supplier']['name'] ?? 'مورد غير محدد',
+                    'center' => $inv['center']['name'] ?? __('reports.runtime.s001'),
+                    'supplier' => $inv['supplier']['name'] ?? __('reports.runtime.s003'),
                     'payment_status' => match ($inv['payment_status']) {
-                        'paid' => 'مدفوع بالكامل',
-                        'partial' => 'مدفوع جزئياً',
-                        'unpaid' => 'غير مدفوع',
-                        default => 'أخرى',
+                        'paid' => __('reports.runtime.s024'),
+                        'partial' => __('reports.runtime.s025'),
+                        'unpaid' => __('reports.runtime.s026'),
+                        default => __('reports.runtime.s027'),
                     },
                     'status' => match ($inv['status']) {
-                        'paid' => 'مسددة',
-                        'open' => 'مفتوحة / مستحقة',
-                        'draft' => 'مسودة',
-                        'cancelled' => 'ملغاة',
+                        'paid' => __('reports.runtime.s052'),
+                        'open' => __('reports.runtime.s053'),
+                        'draft' => __('reports.runtime.s054'),
+                        'cancelled' => __('reports.runtime.s055'),
                         default => (string) $inv['status'],
                     },
                     default => 'all',
@@ -1309,7 +1309,7 @@ class ReportsController extends Controller
         ])
             ->orderBy('issue_date', 'desc');
 
-        $filename = 'تقرير_فواتير_الشراء_'.now()->format('Y-m-d_His').'.csv';
+        $filename = __('reports.runtime.s056').now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $output = fopen('php://output', 'w');
@@ -1318,23 +1318,23 @@ class ReportsController extends Controller
             // CSV Header
             fputcsv($output, [
                 '#',
-                'الفرع',
-                'رقم الفاتورة الداخلي',
-                'رقم مستند المورد',
-                'أمر الشراء',
-                'المورد',
-                'هاتف المورد',
-                'الرقم الضريبي للمورد',
-                'تاريخ الفاتورة',
-                'تاريخ الاستحقاق',
-                'المجموع قبل الضريبة',
-                'الخصم',
-                'ضريبة القيمة المضافة',
-                'الإجمالي شامل الضريبة',
-                'المبلغ المسدد',
-                'المتبقي للمورد',
-                'حالة السداد',
-                'متأخرة عن السداد',
+                __('reports.runtime.s006'),
+                __('reports.runtime.s057'),
+                __('reports.runtime.s058'),
+                __('reports.runtime.s059'),
+                __('reports.runtime.s060'),
+                __('reports.runtime.s061'),
+                __('reports.runtime.s062'),
+                __('reports.runtime.s063'),
+                __('reports.runtime.s035'),
+                __('reports.runtime.s040'),
+                __('reports.runtime.s041'),
+                __('reports.runtime.s064'),
+                __('reports.runtime.s043'),
+                __('reports.runtime.s065'),
+                __('reports.runtime.s066'),
+                __('reports.runtime.s046'),
+                __('reports.runtime.s047'),
             ]);
 
             $index = 1;
@@ -1346,14 +1346,14 @@ class ReportsController extends Controller
                     $isOverdue = $inv->due_date && $inv->due_date->isPast() && $balance > 0;
 
                     $paymentLabel = match (true) {
-                        $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
-                        $balance < $total - 0.01 => 'مدفوع جزئياً',
-                        default => 'غير مدفوع',
+                        $inv->status === 'paid' || $balance <= 0.01 => __('reports.runtime.s024'),
+                        $balance < $total - 0.01 => __('reports.runtime.s025'),
+                        default => __('reports.runtime.s026'),
                     };
 
                     fputcsv($output, [
                         $index++,
-                        $inv->center->name ?? 'المركز الرئيسي',
+                        $inv->center->name ?? __('reports.runtime.s001'),
                         $inv->code,
                         $inv->invoice_number ?: '—',
                         $inv->purchaseOrder?->code ?: '—',
@@ -1369,7 +1369,7 @@ class ReportsController extends Controller
                         number_format($paid, 2, '.', ''),
                         number_format($balance, 2, '.', ''),
                         $paymentLabel,
-                        $isOverdue ? 'نعم' : 'لا',
+                        $isOverdue ? __('reports.runtime.s050') : __('reports.runtime.s051'),
                     ]);
                 }
             });
@@ -1544,7 +1544,7 @@ class ReportsController extends Controller
                 'raw_id' => $ret->id,
                 'record_type' => $isDebit ? 'debit_note' : 'return_invoice',
                 'code' => $ret->code,
-                'invoice_number' => ($isDebit ? 'إشعار مدين: ' : 'مرتجع: ').($parent?->code ?: '—'),
+                'invoice_number' => ($isDebit ? __('reports.runtime.s067') : __('reports.runtime.s068')).($parent?->code ?: '—'),
                 'issue_date' => $ret->return_date?->format('Y-m-d'),
                 'due_date' => $ret->debit_note_date?->format('Y-m-d') ?? $ret->return_date?->format('Y-m-d'),
                 'status' => $isDebit ? 'debit_note' : 'returned',
@@ -1620,14 +1620,14 @@ class ReportsController extends Controller
         if ($groupBy !== 'none') {
             $grouped = $allTransactions->groupBy(function ($inv) use ($groupBy) {
                 return match ($groupBy) {
-                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
-                    'supplier' => $inv['supplier']['name'] ?? 'مورد غير محدد',
+                    'center' => $inv['center']['name'] ?? __('reports.runtime.s001'),
+                    'supplier' => $inv['supplier']['name'] ?? __('reports.runtime.s003'),
                     'payment_status' => match ($inv['payment_status']) {
-                        'paid' => 'مدفوع بالكامل',
-                        'partial' => 'مدفوع جزئياً',
-                        'debit_note' => 'إشعار مدين للمورد',
-                        'returned' => 'مرتجع مسجل',
-                        default => 'غير مدفوع',
+                        'paid' => __('reports.runtime.s024'),
+                        'partial' => __('reports.runtime.s025'),
+                        'debit_note' => __('reports.runtime.s069'),
+                        'returned' => __('reports.runtime.s070'),
+                        default => __('reports.runtime.s026'),
                     },
                     default => 'all',
                 };
@@ -1789,7 +1789,7 @@ class ReportsController extends Controller
         ])
             ->orderBy('return_date', 'desc');
 
-        $filename = 'تقرير_الموردين_'.now()->format('Y-m-d_His').'.csv';
+        $filename = __('reports.runtime.s071').now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($invoiceQuery, $returnQuery, $documentType, $paymentStatus) {
             $output = fopen('php://output', 'w');
@@ -1797,22 +1797,22 @@ class ReportsController extends Controller
 
             fputcsv($output, [
                 '#',
-                'نوع المعاملة',
-                'الفرع / المركز',
-                'رقم الفاتورة / المستند',
-                'رقم مستند المورد / البيان',
-                'الفاتورة الأصلية المرتبطة',
-                'اسم المورد',
-                'هاتف المورد',
-                'الرقم الضريبي للمورد',
-                'التاريخ',
-                'المجموع قبل الضريبة',
-                'الخصومات والتسويات والمرتجعات',
-                'ضريبة القيمة المضافة',
-                'المستحق / الإجمالي',
-                'المبلغ المسدد',
-                'المتبقي للسداد',
-                'حالة السداد / المعاملة',
+                __('reports.runtime.s072'),
+                __('reports.runtime.s073'),
+                __('reports.runtime.s074'),
+                __('reports.runtime.s075'),
+                __('reports.runtime.s076'),
+                __('reports.runtime.s077'),
+                __('reports.runtime.s061'),
+                __('reports.runtime.s062'),
+                __('reports.runtime.s007'),
+                __('reports.runtime.s040'),
+                __('reports.runtime.s078'),
+                __('reports.runtime.s064'),
+                __('reports.runtime.s079'),
+                __('reports.runtime.s065'),
+                __('reports.runtime.s080'),
+                __('reports.runtime.s081'),
             ]);
 
             $index = 1;
@@ -1827,15 +1827,15 @@ class ReportsController extends Controller
                         $adjusted = (float) $inv->discount_amount + $returnsTotal;
 
                         $paymentLabel = match (true) {
-                            $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
-                            $balance < $total - 0.01 => 'مدفوع جزئياً',
-                            default => 'غير مدفوع',
+                            $inv->status === 'paid' || $balance <= 0.01 => __('reports.runtime.s024'),
+                            $balance < $total - 0.01 => __('reports.runtime.s025'),
+                            default => __('reports.runtime.s026'),
                         };
 
                         fputcsv($output, [
                             $index++,
-                            'فاتورة شراء',
-                            $inv->center->name ?? 'المركز الرئيسي',
+                            __('reports.runtime.s082'),
+                            $inv->center->name ?? __('reports.runtime.s001'),
                             $inv->code,
                             $inv->invoice_number ?: '—',
                             '—',
@@ -1864,10 +1864,10 @@ class ReportsController extends Controller
 
                         fputcsv($output, [
                             $index++,
-                            $isDebit ? 'إشعار مدين للمورد' : 'فاتورة مرتجعة',
-                            $ret->center->name ?? ($parent?->center->name ?? 'المركز الرئيسي'),
+                            $isDebit ? __('reports.runtime.s069') : __('reports.runtime.s083'),
+                            $ret->center->name ?? ($parent?->center->name ?? __('reports.runtime.s001')),
                             $ret->code,
-                            $ret->notes ?: ($isDebit ? 'إشعار مدين للمورد' : 'مرتجع بضاعة'),
+                            $ret->notes ?: ($isDebit ? __('reports.runtime.s069') : __('reports.runtime.s084')),
                             $parent->code ?? '—',
                             $parent?->supplier->name ?? '—',
                             $parent?->supplier->phone ?? '—',
@@ -1879,7 +1879,7 @@ class ReportsController extends Controller
                             number_format(-$tot, 2, '.', ''),
                             '0.00',
                             number_format(-$tot, 2, '.', ''),
-                            $isDebit ? 'إشعار مدين نشط' : 'مرتجع مسجل',
+                            $isDebit ? __('reports.runtime.s085') : __('reports.runtime.s070'),
                         ]);
                     }
                 });
@@ -2136,25 +2136,25 @@ class ReportsController extends Controller
             $ref = $move->resolveReference();
 
             if ($ref instanceof WorkOrderItemPart) {
-                $refLabel = 'أمر عمل';
+                $refLabel = __('reports.runtime.s086');
                 $wo = $move->work_order;
                 $refCode = $wo->code ?? ('#'.($ref->work_order_id ?? $move->reference_id));
                 $refUrl = $wo && Route::has('work-orders.show') ? route('work-orders.show', $wo->id) : null;
             } elseif ($ref instanceof Invoice) {
                 $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
-                $refLabel = $isCreditNote ? 'إشعار دائن' : 'فاتورة مبيعات';
+                $refLabel = $isCreditNote ? __('reports.runtime.s028') : __('reports.runtime.s087');
                 $refCode = $ref->invoice_number ?: ('#'.$ref->id);
                 $refUrl = Route::has('app.invoices.show') ? route('app.invoices.show', $ref->id) : null;
             } elseif ($ref instanceof GrnItem) {
-                $refLabel = 'سند استلام';
+                $refLabel = __('reports.runtime.s088');
                 $grn = $ref->goodsReceivedNote;
                 $refCode = $grn?->code ?: ('#'.($ref->goods_received_note_id ?? $move->reference_id));
                 $refUrl = $grn && Route::has('app.purchasing.grn.show') ? route('app.purchasing.grn.show', $grn->id) : null;
             } elseif ($ref instanceof PurchaseReturnInvoice) {
-                $refLabel = 'مرتجع شراء';
+                $refLabel = __('reports.runtime.s089');
                 $refCode = $ref->code ?: ('#'.$move->reference_id);
             } elseif (! empty($move->notes)) {
-                $refLabel = 'ملاحظة';
+                $refLabel = __('reports.runtime.s090');
                 $refCode = $move->notes;
             }
 
@@ -2201,7 +2201,7 @@ class ReportsController extends Controller
                     'barcode' => $move->part->barcode,
                     'name_ar' => $move->part->name_ar,
                     'name_en' => $move->part->name_en,
-                    'unit_name' => $move->part->unit->name_ar ?? $move->part->unit->name_en ?? 'حبة',
+                    'unit_name' => $move->part->unit->name_ar ?? $move->part->unit->name_en ?? __('reports.runtime.s091'),
                     'category_name' => $move->part->category->name_ar ?? $move->part->category->name_en ?? '—',
                 ] : null,
                 'posted_by' => $move->postedByUser ? [
@@ -2225,10 +2225,10 @@ class ReportsController extends Controller
 
             $grouped = $allMoves->groupBy(function ($m) use ($groupBy) {
                 return match ($groupBy) {
-                    'center' => $m['center']['name'] ?? 'المركز الرئيسي',
-                    'part' => ($m['part']['name_ar'] ?? $m['part']['name_en'] ?? 'قطعة').' ('.($m['part']['sku'] ?? '-').')',
-                    'warehouse' => $m['warehouse']['name'] ?? 'المستودع الرئيسي',
-                    'move_type' => $m['move_type_label'] ?? 'أخرى',
+                    'center' => $m['center']['name'] ?? __('reports.runtime.s001'),
+                    'part' => ($m['part']['name_ar'] ?? $m['part']['name_en'] ?? __('reports.runtime.s092')).' ('.($m['part']['sku'] ?? '-').')',
+                    'warehouse' => $m['warehouse']['name'] ?? __('reports.runtime.s093'),
+                    'move_type' => $m['move_type_label'] ?? __('reports.runtime.s027'),
                     default => 'all',
                 };
             });
@@ -2271,16 +2271,16 @@ class ReportsController extends Controller
         $categories = InventoryCategory::where('tenant_id', $tenantId)->select('id', 'name_ar', 'name_en')->get();
 
         $moveTypes = [
-            ['id' => 'all', 'value' => 'all', 'name' => 'كافة أنواع الحركات', 'label' => 'كافة أنواع الحركات'],
-            ['id' => InventoryMove::TYPE_RECEIPT, 'value' => InventoryMove::TYPE_RECEIPT, 'name' => 'استلام / شراء', 'label' => 'استلام / شراء'],
-            ['id' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'value' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'name' => 'صرف لكرت عمل', 'label' => 'صرف لكرت عمل'],
-            ['id' => InventoryMove::TYPE_SALE, 'value' => InventoryMove::TYPE_SALE, 'name' => 'بيع مباشر', 'label' => 'بيع مباشر'],
-            ['id' => InventoryMove::TYPE_ADJUSTMENT_IN, 'value' => InventoryMove::TYPE_ADJUSTMENT_IN, 'name' => 'تسوية زيادة', 'label' => 'تسوية زيادة'],
-            ['id' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'value' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'name' => 'تسوية عجز', 'label' => 'تسوية عجز'],
-            ['id' => InventoryMove::TYPE_TRANSFER_IN, 'value' => InventoryMove::TYPE_TRANSFER_IN, 'name' => 'تحويل وارد', 'label' => 'تحويل وارد'],
-            ['id' => InventoryMove::TYPE_TRANSFER_OUT, 'value' => InventoryMove::TYPE_TRANSFER_OUT, 'name' => 'تحويل صادر', 'label' => 'تحويل صادر'],
-            ['id' => InventoryMove::TYPE_PURCHASE_RETURN, 'value' => InventoryMove::TYPE_PURCHASE_RETURN, 'name' => 'مرتجع شراء', 'label' => 'مرتجع شراء'],
-            ['id' => InventoryMove::TYPE_REVERSAL, 'value' => InventoryMove::TYPE_REVERSAL, 'name' => 'عكس حركة', 'label' => 'عكس حركة'],
+            ['id' => 'all', 'value' => 'all', 'name' => __('reports.runtime.s094'), 'label' => __('reports.runtime.s094')],
+            ['id' => InventoryMove::TYPE_RECEIPT, 'value' => InventoryMove::TYPE_RECEIPT, 'name' => __('reports.runtime.s095'), 'label' => __('reports.runtime.s095')],
+            ['id' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'value' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'name' => __('reports.runtime.s096'), 'label' => __('reports.runtime.s096')],
+            ['id' => InventoryMove::TYPE_SALE, 'value' => InventoryMove::TYPE_SALE, 'name' => __('reports.runtime.s097'), 'label' => __('reports.runtime.s097')],
+            ['id' => InventoryMove::TYPE_ADJUSTMENT_IN, 'value' => InventoryMove::TYPE_ADJUSTMENT_IN, 'name' => __('reports.runtime.s098'), 'label' => __('reports.runtime.s098')],
+            ['id' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'value' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'name' => __('reports.runtime.s099'), 'label' => __('reports.runtime.s099')],
+            ['id' => InventoryMove::TYPE_TRANSFER_IN, 'value' => InventoryMove::TYPE_TRANSFER_IN, 'name' => __('reports.runtime.s100'), 'label' => __('reports.runtime.s100')],
+            ['id' => InventoryMove::TYPE_TRANSFER_OUT, 'value' => InventoryMove::TYPE_TRANSFER_OUT, 'name' => __('reports.runtime.s101'), 'label' => __('reports.runtime.s101')],
+            ['id' => InventoryMove::TYPE_PURCHASE_RETURN, 'value' => InventoryMove::TYPE_PURCHASE_RETURN, 'name' => __('reports.runtime.s089'), 'label' => __('reports.runtime.s089')],
+            ['id' => InventoryMove::TYPE_REVERSAL, 'value' => InventoryMove::TYPE_REVERSAL, 'name' => __('reports.runtime.s102'), 'label' => __('reports.runtime.s102')],
         ];
 
         $filters = [
@@ -2378,7 +2378,7 @@ class ReportsController extends Controller
         ])
             ->orderBy('posted_at', 'desc');
 
-        $filename = 'تقرير_حركة_المخزون_'.now()->format('Y-m-d_His').'.csv';
+        $filename = __('reports.runtime.s103').now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $output = fopen('php://output', 'w');
@@ -2387,21 +2387,21 @@ class ReportsController extends Controller
             // CSV Header
             fputcsv($output, [
                 '#',
-                'الفرع',
-                'المستودع',
-                'كود القطعة (SKU)',
-                'اسم القطعة',
-                'التصنيف',
-                'نوع الحركة',
-                'التاريخ والوقت',
-                'الرصيد قبل',
-                'الكمية',
-                'الرصيد بعد',
-                'تكلفة الوحدة',
-                'إجمالي التكلفة',
-                'المرجع',
-                'الملاحظات',
-                'بواسطة',
+                __('reports.runtime.s006'),
+                __('reports.runtime.s104'),
+                __('reports.runtime.s105'),
+                __('reports.runtime.s106'),
+                __('reports.runtime.s107'),
+                __('reports.runtime.s108'),
+                __('reports.runtime.s109'),
+                __('reports.runtime.s110'),
+                __('reports.runtime.s111'),
+                __('reports.runtime.s112'),
+                __('reports.runtime.s113'),
+                __('reports.runtime.s114'),
+                __('reports.runtime.s115'),
+                __('reports.runtime.s017'),
+                __('reports.runtime.s116'),
             ]);
 
             $index = 1;
@@ -2416,20 +2416,20 @@ class ReportsController extends Controller
                     $ref = $m->resolveReference();
 
                     if ($ref instanceof WorkOrderItemPart) {
-                        $refText = 'كرت عمل: '.($m->work_order->code ?? ('#'.$ref->work_order_id));
+                        $refText = __('reports.runtime.s117').($m->work_order->code ?? ('#'.$ref->work_order_id));
                     } elseif ($ref instanceof Invoice) {
                         $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
-                        $refText = ($isCreditNote ? 'إشعار دائن: ' : 'فاتورة مبيعات: ').($ref->invoice_number ?: ('#'.$ref->id));
+                        $refText = ($isCreditNote ? __('reports.runtime.s118') : __('reports.runtime.s119')).($ref->invoice_number ?: ('#'.$ref->id));
                     } elseif ($ref instanceof GrnItem) {
-                        $refText = 'سند استلام: '.($ref->goodsReceivedNote?->code ?: ('#'.$ref->goods_received_note_id));
+                        $refText = __('reports.runtime.s120').($ref->goodsReceivedNote?->code ?: ('#'.$ref->goods_received_note_id));
                     } elseif (! empty($m->notes)) {
                         $refText = $m->notes;
                     }
 
                     fputcsv($output, [
                         $index++,
-                        $m->center->name ?? 'المركز الرئيسي',
-                        $m->warehouse->name ?? 'المستودع الرئيسي',
+                        $m->center->name ?? __('reports.runtime.s001'),
+                        $m->warehouse->name ?? __('reports.runtime.s093'),
                         $m->part->sku ?? '—',
                         $m->part->name_ar ?? $m->part->name_en ?? '—',
                         $m->part?->category->name_ar ?? '—',
@@ -2714,10 +2714,10 @@ class ReportsController extends Controller
 
             $grouped = $allTickets->groupBy(function ($ticket) use ($groupBy) {
                 return match ($groupBy) {
-                    'center' => $ticket['center']['name'] ?? 'المركز الرئيسي',
+                    'center' => $ticket['center']['name'] ?? __('reports.runtime.s001'),
                     'status' => $ticket['status'] ?? 'other',
                     'customer_type' => $ticket['customer']['type'] ?? 'individual',
-                    'make' => $ticket['vehicle']['make_name'] ?: 'أخرى',
+                    'make' => $ticket['vehicle']['make_name'] ?: __('reports.runtime.s027'),
                     default => 'all',
                 };
             });
@@ -2829,7 +2829,7 @@ class ReportsController extends Controller
             'tickets' => $tickets,
             'groupedTickets' => $groupedTickets,
             'companyInfo' => [
-                'name' => $tenant->name ?? 'مركز صيانة',
+                'name' => $tenant->name ?? __('reports.runtime.s121'),
                 'commercial_register' => $tenant->cr_number ?? null,
                 'tax_number' => null,
                 'address' => $tenant->address ?? null,
@@ -2898,29 +2898,29 @@ class ReportsController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             fputcsv($handle, [
-                'رقم أمر العمل',
-                'الفرع',
-                'الحالة',
-                'تاريخ الدخول',
-                'موعد التسليم المتوقع',
-                'تاريخ الإغلاق',
-                'اسم العميل',
-                'هاتف العميل',
-                'تصنيف العميل',
-                'المركبة',
-                'رقم اللوحة',
-                'قراءة العداد',
-                'رقم الفاتورة',
-                'الإجمالي قبل الضريبة',
-                'الضريبة',
-                'الإجمالي شامل الضريبة',
-                'تكلفة القطع',
-                'مشتريات الكرت',
-                'ضريبة المشتريات',
-                'صافي المبلغ',
-                'المدفوع',
-                'المتبقي',
-                'الديون المعدومة',
+                __('reports.runtime.s012'),
+                __('reports.runtime.s006'),
+                __('reports.runtime.s122'),
+                __('reports.runtime.s123'),
+                __('reports.runtime.s124'),
+                __('reports.runtime.s125'),
+                __('reports.runtime.s126'),
+                __('reports.runtime.s038'),
+                __('reports.runtime.s127'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s128'),
+                __('reports.runtime.s011'),
+                __('reports.runtime.s129'),
+                __('reports.runtime.s042'),
+                __('reports.runtime.s043'),
+                __('reports.runtime.s130'),
+                __('reports.runtime.s131'),
+                __('reports.runtime.s132'),
+                __('reports.runtime.s133'),
+                __('reports.runtime.s044'),
+                __('reports.runtime.s045'),
+                __('reports.runtime.s134'),
             ]);
 
             (clone $query)
@@ -2941,12 +2941,12 @@ class ReportsController extends Controller
 
                         fputcsv($handle, [
                             $wo->code,
-                            $wo->center->name ?? 'المركز الرئيسي',
+                            $wo->center->name ?? __('reports.runtime.s001'),
                             $wo->status,
                             $wo->entry_date ? Carbon::parse($wo->entry_date)->format('Y-m-d') : '',
                             $wo->expected_end_date ? Carbon::parse($wo->expected_end_date)->format('Y-m-d') : '',
                             $wo->closed_at ? Carbon::parse($wo->closed_at)->format('Y-m-d H:i') : '',
-                            $wo->customer->name ?? 'عميل غير مسجل',
+                            $wo->customer->name ?? __('reports.runtime.s021'),
                             $wo->customer->phone ?? '',
                             $wo->customer->type ?? '',
                             $vehicleName,
@@ -3188,15 +3188,15 @@ class ReportsController extends Controller
                 'ticket_no' => $wo->code ?? ('#'.$item->work_order_id),
                 'ticket_status' => $wo->status ?? 'unknown',
                 'center_id' => $item->center_id,
-                'center_name' => $center->name ?? 'المركز الرئيسي',
+                'center_name' => $center->name ?? __('reports.runtime.s001'),
                 'service_id' => $item->service_id,
-                'service_name' => $item->title ?: ($service?->name_ar ?: $service?->name_en ?: 'خدمة صيانة'),
+                'service_name' => $item->title ?: ($service?->name_ar ?: $service?->name_en ?: __('reports.runtime.s135')),
                 'department_id' => $item->department_id,
-                'department_name' => $department ? ($department->name_ar ?: $department->name_en) : 'عام',
+                'department_name' => $department ? ($department->name_ar ?: $department->name_en) : __('reports.runtime.s136'),
                 'status' => $item->status,
                 'customer' => [
                     'id' => $customer?->id,
-                    'name' => $customer->name ?? 'عميل غير مسجل',
+                    'name' => $customer->name ?? __('reports.runtime.s021'),
                     'phone' => $customer->phone ?? '',
                     'type' => $customer->type ?? 'individual',
                 ],
@@ -3237,13 +3237,13 @@ class ReportsController extends Controller
 
             $grouped = $allServices->groupBy(function ($item) use ($groupBy) {
                 return match ($groupBy) {
-                    'department' => $item['department_name'] ?: 'عام',
-                    'service' => $item['service_name'] ?: 'خدمة أخرى',
-                    'center' => $item['center_name'] ?: 'المركز الرئيسي',
+                    'department' => $item['department_name'] ?: __('reports.runtime.s136'),
+                    'service' => $item['service_name'] ?: __('reports.runtime.s137'),
+                    'center' => $item['center_name'] ?: __('reports.runtime.s001'),
                     'customer_type' => $item['customer']['type'] ?: 'individual',
-                    'customer' => $item['customer']['name'] ?: 'عميل عام',
-                    'make' => $item['vehicle']['make_name'] ?: 'أخرى',
-                    'model' => $item['vehicle']['model_name'] ?: 'أخرى',
+                    'customer' => $item['customer']['name'] ?: __('reports.runtime.s138'),
+                    'make' => $item['vehicle']['make_name'] ?: __('reports.runtime.s027'),
+                    'model' => $item['vehicle']['model_name'] ?: __('reports.runtime.s027'),
                     default => 'all',
                 };
             });
@@ -3371,9 +3371,9 @@ class ReportsController extends Controller
             'models' => $models,
             'centers' => $centers,
             'meta' => [
-                'tenant_name' => $tenant->name ?? 'مركز صيانة السيارات',
+                'tenant_name' => $tenant->name ?? __('reports.runtime.s139'),
                 'tenant_logo' => $tenant?->logo_url,
-                'center_name' => $currentCenter->name ?? 'المركز الرئيسي',
+                'center_name' => $currentCenter->name ?? __('reports.runtime.s001'),
                 'printed_at' => now()->format('Y-m-d H:i'),
                 'prepared_by' => auth()->user()->name,
             ],
@@ -3448,25 +3448,25 @@ class ReportsController extends Controller
 
             fputcsv($handle, [
                 '#',
-                'رقم أمر العمل',
-                'الفرع',
-                'القسم',
-                'الخدمة',
-                'حالة الخدمة',
-                'العميل',
-                'جوال العميل',
-                'المركبة',
-                'اللوحة',
-                'تاريخ البدء',
-                'تاريخ الاستحقاق',
-                'الكمية',
-                'سعر الوحدة',
-                'السعر الإجمالي',
-                'الخصم',
-                'الصافي',
-                'الضريبة',
-                'الإجمالي شامل الضريبة',
-                'تحت الضمان',
+                __('reports.runtime.s012'),
+                __('reports.runtime.s006'),
+                __('reports.runtime.s140'),
+                __('reports.runtime.s141'),
+                __('reports.runtime.s142'),
+                __('reports.runtime.s036'),
+                __('reports.runtime.s143'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s144'),
+                __('reports.runtime.s145'),
+                __('reports.runtime.s035'),
+                __('reports.runtime.s111'),
+                __('reports.runtime.s146'),
+                __('reports.runtime.s147'),
+                __('reports.runtime.s041'),
+                __('reports.runtime.s148'),
+                __('reports.runtime.s042'),
+                __('reports.runtime.s043'),
+                __('reports.runtime.s149'),
             ]);
 
             $rowNumber = 1;
@@ -3495,9 +3495,9 @@ class ReportsController extends Controller
                     fputcsv($handle, [
                         $rowNumber++,
                         $wo->code ?? ('#'.$item->work_order_id),
-                        $center->name ?? 'المركز الرئيسي',
-                        $department ? ($department->name_ar ?: $department->name_en) : 'عام',
-                        $item->title ?: ($service?->name_ar ?: $service?->name_en ?: 'خدمة'),
+                        $center->name ?? __('reports.runtime.s001'),
+                        $department ? ($department->name_ar ?: $department->name_en) : __('reports.runtime.s136'),
+                        $item->title ?: ($service?->name_ar ?: $service?->name_en ?: __('reports.runtime.s150')),
                         $item->status,
                         $customer->name ?? '',
                         $customer->phone ?? '',
@@ -3512,7 +3512,7 @@ class ReportsController extends Controller
                         $serviceCost,
                         $taxAmount,
                         $totalAmount,
-                        $item->is_warranty ? 'نعم' : 'لا',
+                        $item->is_warranty ? __('reports.runtime.s050') : __('reports.runtime.s051'),
                     ]);
                 }
             });
@@ -3766,8 +3766,8 @@ class ReportsController extends Controller
                         'vip' => __('reports.customers_report.type_vip'),
                         default => (string) $key,
                     },
-                    'customer' => $items->first()?->customer->name ?? 'عميل غير مسجل',
-                    'center' => $items->first()?->center->name ?? 'المركز الرئيسي',
+                    'customer' => $items->first()?->customer->name ?? __('reports.runtime.s021'),
+                    'center' => $items->first()?->center->name ?? __('reports.runtime.s001'),
                     default => (string) $key,
                 };
 
@@ -3856,7 +3856,7 @@ class ReportsController extends Controller
             'makes' => $makes,
             'models' => $models,
             'companyInfo' => [
-                'name' => $tenant->name ?? 'مركز صيانة',
+                'name' => $tenant->name ?? __('reports.runtime.s121'),
                 'commercial_register' => $tenant->cr_number ?? null,
                 'tax_number' => null,
                 'address' => $tenant->address ?? null,
@@ -3922,23 +3922,23 @@ class ReportsController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             fputcsv($handle, [
-                'رقم المرجع / التذكرة',
-                'الفرع',
-                'حالة أمر العمل',
-                'تاريخ الدخول',
-                'اسم العميل',
-                'هاتف العميل',
-                'تصنيف العميل',
-                'المركبة',
-                'رقم اللوحة',
-                'قراءة العداد',
-                'رقم الفاتورة',
-                'المستحق (شامل الضريبة)',
-                'المدفوع',
-                'التسويات (الخصومات)',
-                'المتبقي',
-                'ديون معدومة',
-                'حالة السداد',
+                __('reports.runtime.s151'),
+                __('reports.runtime.s006'),
+                __('reports.runtime.s152'),
+                __('reports.runtime.s123'),
+                __('reports.runtime.s126'),
+                __('reports.runtime.s038'),
+                __('reports.runtime.s127'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s128'),
+                __('reports.runtime.s011'),
+                __('reports.runtime.s153'),
+                __('reports.runtime.s044'),
+                __('reports.runtime.s154'),
+                __('reports.runtime.s045'),
+                __('reports.runtime.s155'),
+                __('reports.runtime.s046'),
             ]);
 
             (clone $query)
@@ -3949,9 +3949,9 @@ class ReportsController extends Controller
                         $row = $this->transformCustomerReportRow($wo);
 
                         $statusLabel = match ($row['payment_status']) {
-                            'paid' => 'مسدد بالكامل',
-                            'partial' => 'مسدد جزئياً',
-                            default => 'غير مسدد',
+                            'paid' => __('reports.runtime.s156'),
+                            'partial' => __('reports.runtime.s157'),
+                            default => __('reports.runtime.s158'),
                         };
 
                         fputcsv($handle, [
@@ -4117,14 +4117,14 @@ class ReportsController extends Controller
             'code' => $wo->code,
             'status' => $wo->status,
             'center_id' => $wo->center_id,
-            'center_name' => $wo->center->name ?? 'المركز الرئيسي',
+            'center_name' => $wo->center->name ?? __('reports.runtime.s001'),
             'is_overdue' => $isOverdue,
             'entry_date' => $wo->entry_date ? Carbon::parse($wo->entry_date)->format('Y-m-d') : ($wo->created_at ? $wo->created_at->format('Y-m-d') : ''),
             'expected_end_date' => $wo->expected_end_date ? Carbon::parse($wo->expected_end_date)->format('Y-m-d') : null,
             'closed_at' => $wo->closed_at ? Carbon::parse($wo->closed_at)->format('Y-m-d H:i') : null,
             'customer' => [
                 'id' => $wo->customer?->id,
-                'name' => $wo->customer->name ?? 'عميل غير مسجل',
+                'name' => $wo->customer->name ?? __('reports.runtime.s021'),
                 'phone' => $wo->customer->phone ?? '',
                 'type' => $wo->customer->type ?? 'individual',
                 'tax_number' => $wo->customer->tax_number ?? '',
@@ -4364,7 +4364,7 @@ class ReportsController extends Controller
             'makes' => $makes,
             'models' => $models,
             'companyInfo' => [
-                'name' => $tenant->name ?? config('app.name_ar', 'خدمة برو'),
+                'name' => $tenant->name ?? config('app.name_ar', __('reports.runtime.s159')),
                 'commercial_register' => $tenant->cr_number ?? null,
                 'tax_number' => null,
                 'address' => $tenant->address ?? null,
@@ -4680,12 +4680,12 @@ class ReportsController extends Controller
         if ($groupBy !== 'none') {
             $grouped = $mappedItems->groupBy(function ($item) use ($groupBy) {
                 return match ($groupBy) {
-                    'job_title' => $item['job_title_name'] ?: 'غير محدد',
-                    'employee' => $item['employee_name'] ?: 'غير محدد',
-                    'service_status' => $item['service_status'] ?: 'غير محدد',
-                    'ticket_no' => $item['ticket_no'] ?: 'غير محدد',
-                    'center' => $item['center_name'] ?: 'المركز الرئيسي',
-                    default => 'عام',
+                    'job_title' => $item['job_title_name'] ?: __('reports.runtime.s160'),
+                    'employee' => $item['employee_name'] ?: __('reports.runtime.s160'),
+                    'service_status' => $item['service_status'] ?: __('reports.runtime.s160'),
+                    'ticket_no' => $item['ticket_no'] ?: __('reports.runtime.s160'),
+                    'center' => $item['center_name'] ?: __('reports.runtime.s001'),
+                    default => __('reports.runtime.s136'),
                 };
             });
 
@@ -4845,29 +4845,29 @@ class ReportsController extends Controller
 
             fputcsv($handle, [
                 '#',
-                'الفرع',
-                'الموظف',
-                'المسمى الوظيفي',
-                'الدور في الخدمة',
-                'رقم كارت العمل',
-                'القسم',
-                'الخدمة',
-                'حالة الخدمة',
-                'متأخرة',
-                'المركبة',
-                'رقم اللوحة',
-                'تاريخ الخدمة',
-                'تاريخ الفاتورة',
-                'رقم الفاتورة',
-                'سعر الخدمة',
-                'خصم الخدمة',
-                'تكلفة الخدمة (الصافي)',
-                'مساهمة الخدمة %',
-                'ساعات الخدمة',
-                'الفنيين العاملين',
-                'متوسط المساهمة',
-                'متوسط المساهمة / ساعة',
-                'متوسط المساهمة المرجح',
+                __('reports.runtime.s006'),
+                __('reports.runtime.s161'),
+                __('reports.runtime.s162'),
+                __('reports.runtime.s163'),
+                __('reports.runtime.s164'),
+                __('reports.runtime.s140'),
+                __('reports.runtime.s141'),
+                __('reports.runtime.s142'),
+                __('reports.runtime.s165'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s166'),
+                __('reports.runtime.s063'),
+                __('reports.runtime.s011'),
+                __('reports.runtime.s167'),
+                __('reports.runtime.s168'),
+                __('reports.runtime.s169'),
+                __('reports.runtime.s170'),
+                __('reports.runtime.s171'),
+                __('reports.runtime.s172'),
+                __('reports.runtime.s173'),
+                __('reports.runtime.s174'),
+                __('reports.runtime.s175'),
             ]);
 
             $i = 1;
@@ -4884,7 +4884,7 @@ class ReportsController extends Controller
                     $item['section_name'],
                     $item['service_name'],
                     $item['service_status'],
-                    $item['is_overdue'] ? 'نعم' : 'لا',
+                    $item['is_overdue'] ? __('reports.runtime.s050') : __('reports.runtime.s051'),
                     $item['vehicle']['display_name'],
                     $item['vehicle']['plate_number'],
                     $item['service_date'],
@@ -5187,17 +5187,17 @@ class ReportsController extends Controller
                 'ticket_no' => $row->ticket_no,
                 'ticket_status' => $row->ticket_status,
                 'center_id' => $row->center_id,
-                'center_name' => $row->center_name ?: 'المركز الرئيسي',
+                'center_name' => $row->center_name ?: __('reports.runtime.s001'),
                 'user_id' => $row->user_id,
                 'employee_id' => $row->employee_id ?: $row->user_id,
                 'employee_name' => $row->employee_name_ar ?: $row->user_name,
                 'job_title_id' => $row->job_title_id,
-                'job_title_name' => $row->job_title_name_ar ?: 'فني صيانة',
-                'technician_service_role_name' => $row->pivot_notes ?: ($share >= 100 ? 'فني رئيسي' : 'فني مشارك'),
+                'job_title_name' => $row->job_title_name_ar ?: __('reports.runtime.s176'),
+                'technician_service_role_name' => $row->pivot_notes ?: ($share >= 100 ? __('reports.runtime.s177') : __('reports.runtime.s178')),
                 'service_id' => $row->service_id,
-                'service_name' => $row->item_title ?: ($row->service_name_ar ?: 'خدمة صيانة'),
+                'service_name' => $row->item_title ?: ($row->service_name_ar ?: __('reports.runtime.s135')),
                 'department_id' => $row->department_id,
-                'section_name' => $row->department_name_ar ?: 'عام',
+                'section_name' => $row->department_name_ar ?: __('reports.runtime.s136'),
                 'service_status' => $row->service_status,
                 'is_overdue' => $isOverdue,
                 'vehicle' => [
@@ -5295,7 +5295,7 @@ class ReportsController extends Controller
                 'ticket_status' => $row->ticket_status,
                 'is_ticket_closed' => in_array($row->ticket_status, [WorkOrder::STATUS_DONE, WorkOrder::STATUS_CANCELLED]),
                 'center_id' => $row->center_id,
-                'shop_name' => $row->shop_name ?: 'المركز الرئيسي',
+                'shop_name' => $row->shop_name ?: __('reports.runtime.s001'),
                 'vehicle_id' => $row->vehicle_id,
                 'plate_no' => $row->plate_no ?: '',
                 'make_id' => $row->make_id ?? null,
@@ -5306,8 +5306,8 @@ class ReportsController extends Controller
                 'vehicle_display_name' => $vehicleDisplayName,
                 'odometer_km' => $row->ticket_odometer ?: ($row->vehicle_odometer ?: null),
                 'details' => $row->vehicle_notes ?: ($row->ticket_notes ?: ''),
-                'section_name' => $row->section_name ?: 'عام',
-                'service_name' => $row->item_title ?: ($row->service_name ?: 'خدمة صيانة'),
+                'section_name' => $row->section_name ?: __('reports.runtime.s136'),
+                'service_name' => $row->item_title ?: ($row->service_name ?: __('reports.runtime.s135')),
                 'service_status' => $row->service_status,
                 'due_date' => $dueDate,
                 'service_cost' => $serviceCost,
@@ -5361,7 +5361,7 @@ class ReportsController extends Controller
             $groupedCollection = $mappedItems->groupBy(function ($item) use ($groupBy) {
                 return match ($groupBy) {
                     'shopName' => $item['shop_name'],
-                    'plateNo' => $item['plate_no'] ?: 'بدون لوحة',
+                    'plateNo' => $item['plate_no'] ?: __('reports.runtime.s179'),
                     'serviceStatusName' => $item['service_status'],
                     default => 'all',
                 };
@@ -5372,13 +5372,13 @@ class ReportsController extends Controller
                     'shopName' => $key,
                     'plateNo' => $key,
                     'serviceStatusName' => match ($key) {
-                        'pending' => 'قيد الانتظار',
-                        'in_progress' => 'قيد التنفيذ',
-                        'ready_for_qc' => 'جاهز للفحص',
-                        'completed' => 'مكتمل',
-                        'on_hold' => 'معلق',
-                        'cancelled' => 'ملغي',
-                        'returned' => 'مرتجع',
+                        'pending' => __('reports.runtime.s180'),
+                        'in_progress' => __('reports.runtime.s181'),
+                        'ready_for_qc' => __('reports.runtime.s182'),
+                        'completed' => __('reports.runtime.s183'),
+                        'on_hold' => __('reports.runtime.s184'),
+                        'cancelled' => __('reports.runtime.s185'),
+                        'returned' => __('reports.runtime.s186'),
                         default => $key,
                     },
                     default => $key,
@@ -5454,19 +5454,19 @@ class ReportsController extends Controller
                 'makes' => $makes,
                 'models' => $models,
                 'service_statuses' => [
-                    ['id' => 'pending', 'label' => 'قيد الانتظار'],
-                    ['id' => 'in_progress', 'label' => 'قيد التنفيذ'],
-                    ['id' => 'ready_for_qc', 'label' => 'جاهز للفحص'],
-                    ['id' => 'completed', 'label' => 'مكتمل'],
-                    ['id' => 'on_hold', 'label' => 'معلق'],
-                    ['id' => 'cancelled', 'label' => 'ملغي'],
-                    ['id' => 'returned', 'label' => 'مرتجع'],
+                    ['id' => 'pending', 'label' => __('reports.runtime.s180')],
+                    ['id' => 'in_progress', 'label' => __('reports.runtime.s181')],
+                    ['id' => 'ready_for_qc', 'label' => __('reports.runtime.s182')],
+                    ['id' => 'completed', 'label' => __('reports.runtime.s183')],
+                    ['id' => 'on_hold', 'label' => __('reports.runtime.s184')],
+                    ['id' => 'cancelled', 'label' => __('reports.runtime.s185')],
+                    ['id' => 'returned', 'label' => __('reports.runtime.s186')],
                 ],
                 'groups' => [
-                    ['id' => 'none', 'label' => 'بدون تجميع (قائمة مسطحة)'],
-                    ['id' => 'shopName', 'label' => 'الفرع / المركز'],
-                    ['id' => 'plateNo', 'label' => 'المركبة'],
-                    ['id' => 'serviceStatusName', 'label' => 'حالة الخدمة'],
+                    ['id' => 'none', 'label' => __('reports.runtime.s187')],
+                    ['id' => 'shopName', 'label' => __('reports.runtime.s073')],
+                    ['id' => 'plateNo', 'label' => __('reports.runtime.s013')],
+                    ['id' => 'serviceStatusName', 'label' => __('reports.runtime.s142')],
                 ],
             ],
         ]);
@@ -5547,21 +5547,21 @@ class ReportsController extends Controller
 
             fputcsv($handle, [
                 '#',
-                'الفرع',
-                'المركبة',
-                'رقم اللوحة',
-                'سنة الصنع',
-                'قراءة العداد (كم)',
-                'رقم كرت العمل',
-                'حالة كرت العمل',
-                'القسم',
-                'الخدمة',
-                'حالة الخدمة',
-                'تاريخ الاستحقاق',
-                "تكلفة الخدمة ({$currencyLabel})",
-                "تكلفة قطع الغيار ({$currencyLabel})",
-                "الإجمالي ({$currencyLabel})",
-                'الملاحظات',
+                __('reports.runtime.s006'),
+                __('reports.runtime.s013'),
+                __('reports.runtime.s014'),
+                __('reports.runtime.s188'),
+                __('reports.runtime.s189'),
+                __('reports.runtime.s033'),
+                __('reports.runtime.s190'),
+                __('reports.runtime.s140'),
+                __('reports.runtime.s141'),
+                __('reports.runtime.s142'),
+                __('reports.runtime.s035'),
+                __('reports.runtime.service_cost_currency', ['currency' => $currencyLabel]),
+                __('reports.runtime.parts_cost_currency', ['currency' => $currencyLabel]),
+                __('reports.runtime.total_currency', ['currency' => $currencyLabel]),
+                __('reports.runtime.s017'),
             ]);
 
             $rowNumber = 1;
@@ -5577,38 +5577,38 @@ class ReportsController extends Controller
                     $dueDate = $row->item_due_date ?: ($row->expected_end_date ? Carbon::parse($row->expected_end_date)->format('Y-m-d') : ($row->entry_date ?: ($row->ticket_created_at ? Carbon::parse($row->ticket_created_at)->format('Y-m-d') : '')));
 
                     $serviceStatusLabel = match ($row->service_status) {
-                        'pending' => 'قيد الانتظار',
-                        'in_progress' => 'قيد التنفيذ',
-                        'ready_for_qc' => 'جاهز للفحص',
-                        'completed' => 'مكتمل',
-                        'on_hold' => 'معلق',
-                        'cancelled' => 'ملغي',
-                        'returned' => 'مرتجع',
+                        'pending' => __('reports.runtime.s180'),
+                        'in_progress' => __('reports.runtime.s181'),
+                        'ready_for_qc' => __('reports.runtime.s182'),
+                        'completed' => __('reports.runtime.s183'),
+                        'on_hold' => __('reports.runtime.s184'),
+                        'cancelled' => __('reports.runtime.s185'),
+                        'returned' => __('reports.runtime.s186'),
                         default => $row->service_status,
                     };
 
                     $ticketStatusLabel = match ($row->ticket_status) {
-                        'draft' => 'مسودة',
-                        'open' => 'مفتوح',
-                        'in_progress' => 'قيد العمل',
-                        'on_hold' => 'معلق',
-                        'done' => 'مكتمل',
-                        'ready_for_qc' => 'جاهز للفحص',
-                        'cancelled' => 'ملغي',
+                        'draft' => __('reports.runtime.s054'),
+                        'open' => __('reports.runtime.s191'),
+                        'in_progress' => __('reports.runtime.s192'),
+                        'on_hold' => __('reports.runtime.s184'),
+                        'done' => __('reports.runtime.s183'),
+                        'ready_for_qc' => __('reports.runtime.s182'),
+                        'cancelled' => __('reports.runtime.s185'),
                         default => $row->ticket_status,
                     };
 
                     fputcsv($handle, [
                         $rowNumber++,
-                        $row->shop_name ?: 'المركز الرئيسي',
+                        $row->shop_name ?: __('reports.runtime.s001'),
                         $vehicleDisplayName,
                         $row->plate_no ?: '',
                         $row->vehicle_year ?: '',
                         $row->ticket_odometer ?: ($row->vehicle_odometer ?: ''),
                         $row->ticket_no ?: '',
                         $ticketStatusLabel,
-                        $row->section_name ?: 'عام',
-                        $row->item_title ?: ($row->service_name ?: 'خدمة صيانة'),
+                        $row->section_name ?: __('reports.runtime.s136'),
+                        $row->item_title ?: ($row->service_name ?: __('reports.runtime.s135')),
                         $serviceStatusLabel,
                         $dueDate,
                         number_format($serviceCost, 2, '.', ''),
@@ -5621,13 +5621,13 @@ class ReportsController extends Controller
 
             foreach ($creditNoteItems as $cnItem) {
                 $ticketStatusLabel = match ($cnItem['ticket_status']) {
-                    'draft' => 'مسودة',
-                    'open' => 'مفتوح',
-                    'in_progress' => 'قيد العمل',
-                    'on_hold' => 'معلق',
-                    'done' => 'مكتمل',
-                    'ready_for_qc' => 'جاهز للفحص',
-                    'cancelled' => 'ملغي',
+                    'draft' => __('reports.runtime.s054'),
+                    'open' => __('reports.runtime.s191'),
+                    'in_progress' => __('reports.runtime.s192'),
+                    'on_hold' => __('reports.runtime.s184'),
+                    'done' => __('reports.runtime.s183'),
+                    'ready_for_qc' => __('reports.runtime.s182'),
+                    'cancelled' => __('reports.runtime.s185'),
                     default => $cnItem['ticket_status'],
                 };
 
@@ -5642,7 +5642,7 @@ class ReportsController extends Controller
                     $ticketStatusLabel,
                     $cnItem['section_name'],
                     $cnItem['service_name'],
-                    'مرتجع',
+                    __('reports.runtime.s186'),
                     $cnItem['due_date'],
                     number_format((float) $cnItem['service_cost'], 2, '.', ''),
                     number_format((float) $cnItem['spare_part_cost'], 2, '.', ''),
@@ -6031,8 +6031,8 @@ class ReportsController extends Controller
                 : ($cn->supply_date ?: ($cn->entry_date ?: ($cn->cn_created_at ? Carbon::parse($cn->cn_created_at)->format('Y-m-d') : '')));
 
             $baseDesc = ! empty($descriptions)
-                ? implode('، ', array_unique($descriptions))
-                : 'إشعار دائن / مرتجع';
+                ? implode(__('reports.runtime.s193'), array_unique($descriptions))
+                : __('reports.runtime.s194');
 
             $serviceName = $cn->invoice_number && ! str_contains($baseDesc, (string) $cn->invoice_number)
                 ? "{$baseDesc} ({$cn->invoice_number})"
@@ -6052,7 +6052,7 @@ class ReportsController extends Controller
                 'ticket_status' => $cn->ticket_status,
                 'is_ticket_closed' => in_array($cn->ticket_status, [WorkOrder::STATUS_DONE, WorkOrder::STATUS_CANCELLED]),
                 'center_id' => $cn->center_id,
-                'shop_name' => $cn->shop_name ?: 'المركز الرئيسي',
+                'shop_name' => $cn->shop_name ?: __('reports.runtime.s001'),
                 'vehicle_id' => $cn->vehicle_id,
                 'plate_no' => $cn->plate_no ?: '',
                 'make_id' => $cn->make_id ?? null,
@@ -6063,7 +6063,7 @@ class ReportsController extends Controller
                 'vehicle_display_name' => $vehicleDisplayName,
                 'odometer_km' => $cn->ticket_odometer ?: ($cn->vehicle_odometer ?: null),
                 'details' => $cn->return_reason ?: ($cn->cn_notes ?: ($cn->vehicle_notes ?: ($cn->ticket_notes ?: ''))),
-                'section_name' => $sectionName ?: 'مرتجع مبيعات',
+                'section_name' => $sectionName ?: __('reports.runtime.s195'),
                 'service_name' => $serviceName,
                 'service_status' => 'returned',
                 'due_date' => $dueDate,

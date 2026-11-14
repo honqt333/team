@@ -42,8 +42,6 @@ class Invoice extends Model
         'return_reason',
         'type', // invoice, credit_note, debit_note
         'subtype', // simplified, standard
-        'status', // draft, valid, reported, cancelled
-        'payment_status', // unpaid, partial, paid
 
         // Snapshots
         'customer_name_snapshot',
@@ -90,6 +88,24 @@ class Invoice extends Model
         'total_paid' => 'decimal:2',
         'tax_breakdown' => 'array',
     ];
+
+    /**
+     * Allow setting initial lifecycle statuses only when creating a new record,
+     * while preventing mass-assignment mutation of status / payment_status on existing invoices.
+     */
+    public function fill(array $attributes)
+    {
+        if (! $this->exists) {
+            foreach (['status', 'payment_status'] as $lifecycleKey) {
+                if (array_key_exists($lifecycleKey, $attributes)) {
+                    $this->setAttribute($lifecycleKey, $attributes[$lifecycleKey]);
+                    unset($attributes[$lifecycleKey]);
+                }
+            }
+        }
+
+        return parent::fill($attributes);
+    }
 
     /**
      * Freeze the seller identity when the invoice row is first created.

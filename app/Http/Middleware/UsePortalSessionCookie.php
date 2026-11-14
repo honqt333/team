@@ -159,7 +159,7 @@ class UsePortalSessionCookie
      * Laravel's default naming so an operator
      * grepping the cookie header recognizes it.
      */
-    public const COOKIE_NAME = 'carag_customer_portal_session';
+    public const COOKIE_NAME = 'khidmh_customer_portal_session';
 
     public function handle(Request $request, Closure $next): Response
     {

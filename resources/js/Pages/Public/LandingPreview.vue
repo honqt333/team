@@ -157,7 +157,7 @@ function switchLang() {
 
 // ── CMS live preview sync ──────────────────────────────────────────────────
 function handlePostMessage(event) {
-    if (event.data?.type === 'CARAG_PREVIEW_UPDATE' && event.data?.settings) {
+    if (event.data?.type === 'KHIDMH_PREVIEW_UPDATE' && event.data?.settings) {
         liveSettings.value = { ...liveSettings.value, ...event.data.settings };
     }
 }

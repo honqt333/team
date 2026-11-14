@@ -85,7 +85,7 @@ class AuthenticatedSessionController extends Controller
             $firstCenter = $user->centers()->first();
 
             if ($firstCenter) {
-                $user->update(['current_center_id' => $firstCenter->id]);
+                $user->forceFill(['current_center_id' => $firstCenter->id])->save();
             }
         }
 

@@ -140,7 +140,7 @@ function sendSettingsToIframe() {
         const payload = JSON.parse(JSON.stringify(mapFormSettingsToPreview(props.settings)));
         iframeRef.value.contentWindow.postMessage(
             {
-                type: 'CARAG_PREVIEW_UPDATE',
+                type: 'KHIDMH_PREVIEW_UPDATE',
                 settings: payload,
             },
             '*'

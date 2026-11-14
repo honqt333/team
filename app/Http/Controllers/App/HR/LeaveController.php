@@ -12,22 +12,16 @@ use Illuminate\Validation\Rule;
 
 class LeaveController extends Controller
 {
-    private function authorizeLeaveManage(Request $request, ?Leave $leave = null): void
+    private function ensureSameTenant(Request $request, Leave $leave): void
     {
-        $user = $request->user();
-        abort_unless(
-            $user && ($user->is_system_admin || $user->hasRole('super_admin') || $user->can('hr.employees.manage') || $user->can('hr.leaves.manage') || $user->can('employees.manage')),
-            403
-        );
-
-        if ($leave !== null && (int) $leave->tenant_id !== (int) $user->tenant_id) {
+        if ((int) $leave->tenant_id !== (int) $request->user()?->tenant_id) {
             abort(404);
         }
     }
 
     public function store(Request $request)
     {
-        $this->authorizeLeaveManage($request);
+        $this->authorize('create', Leave::class);
         $tenantId = (int) $request->user()->tenant_id;
 
         $validated = $request->validate([
@@ -61,7 +55,8 @@ class LeaveController extends Controller
 
     public function update(Request $request, Leave $leave)
     {
-        $this->authorizeLeaveManage($request, $leave);
+        $this->ensureSameTenant($request, $leave);
+        $this->authorize('update', $leave);
 
         $validated = $request->validate([
             'type' => 'required|string|in:annual,sick,unpaid,emergency,other',
@@ -87,7 +82,8 @@ class LeaveController extends Controller
 
     public function destroy(Request $request, Leave $leave)
     {
-        $this->authorizeLeaveManage($request, $leave);
+        $this->ensureSameTenant($request, $leave);
+        $this->authorize('delete', $leave);
 
         if ($leave->status !== 'pending') {
             return back()->with('error', __('common.cannot_delete_processed_leave'));
@@ -100,12 +96,20 @@ class LeaveController extends Controller
 
     public function updateStatus(Request $request, Leave $leave)
     {
-        $this->authorizeLeaveManage($request, $leave);
+        $this->ensureSameTenant($request, $leave);
 
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected',
             'notes' => 'nullable|string',
         ]);
+
+        // Enforce self-approval guard even for system admins
+        if ($leave->employee_id !== null && (int) $leave->employee_id === (int) $request->user()?->employee?->id) {
+            abort(403);
+        }
+
+        $ability = $validated['status'] === 'approved' ? 'approve' : 'reject';
+        $this->authorize($ability, $leave);
 
         $leave->update([
             'status' => $validated['status'],

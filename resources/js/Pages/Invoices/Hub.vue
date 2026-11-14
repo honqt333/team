@@ -1,16 +1,16 @@
 <template>
+    <Head :title="$t('invoices.hub.title')" />
     <AppLayout :title="$t('invoices.hub.title')">
         <div class="space-y-8">
             <!-- Header Section -->
-            <PageHeader
-                :title="$t('invoices.hub.title')"
-                :subtitle="$t('invoices.hub.subtitle')"
-                gradientFrom="from-blue-600"
-                gradientTo="to-action-primary"
-                glowFrom="from-blue-600"
-            >
+            <PageHeader :title="$t('invoices.hub.title')" :subtitle="$t('invoices.hub.subtitle')">
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                        class="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -26,13 +26,13 @@
                 <!-- Sales Invoices Card -->
                 <Link
                     :href="route('app.invoices.sales.index')"
-                    class="group relative bg-gradient-to-br from-blue-50 to-action-primary dark:from-blue-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                    class="group relative bg-surface rounded-2xl p-8 border border-border hover:border-action-primary hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
-                        class="w-20 h-20 mx-auto rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 group-hover:scale-110 transition-all duration-300"
+                        class="w-20 h-20 mx-auto rounded-2xl bg-action-primary flex items-center justify-center shadow-lg shadow-action-primary/25 group-hover:scale-110 transition-all duration-300"
                     >
                         <svg
-                            class="w-10 h-10 text-white"
+                            class="w-10 h-10 text-action-on"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -46,17 +46,17 @@
                         </svg>
                     </div>
                     <h3
-                        class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                        class="mt-6 text-xl font-bold text-text-primary group-hover:text-action-primary transition-colors"
                     >
                         {{ $t('invoices.hub.sales_invoices') }}
                     </h3>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <p class="mt-2 text-sm text-text-secondary">
                         {{ $t('invoices.hub.sales_invoices_hint') }}
                     </p>
                     <!-- Count Badge -->
                     <div
                         v-if="salesCount > 0"
-                        class="absolute top-4 end-4 px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded-full shadow-lg"
+                        class="absolute top-4 end-4 px-3 py-1 bg-action-primary text-action-on text-sm font-bold font-mono rounded-full shadow-sm"
                     >
                         {{ toEnglish(salesCount) }}
                     </div>
@@ -65,10 +65,10 @@
                 <!-- Purchase Invoices Card -->
                 <Link
                     :href="route('app.invoices.purchases.index')"
-                    class="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                    class="group relative bg-surface rounded-2xl p-8 border border-border hover:border-warning hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
-                        class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:shadow-xl group-hover:shadow-amber-500/40 group-hover:scale-110 transition-all duration-300"
+                        class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-all duration-300"
                     >
                         <svg
                             class="w-10 h-10 text-white"
@@ -85,17 +85,17 @@
                         </svg>
                     </div>
                     <h3
-                        class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
+                        class="mt-6 text-xl font-bold text-text-primary group-hover:text-warning transition-colors"
                     >
                         {{ $t('invoices.hub.purchase_invoices') }}
                     </h3>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <p class="mt-2 text-sm text-text-secondary">
                         {{ $t('invoices.hub.purchase_invoices_hint') }}
                     </p>
                     <!-- Count Badge -->
                     <div
                         v-if="purchasesCount > 0"
-                        class="absolute top-4 end-4 px-3 py-1 bg-amber-500 text-white text-sm font-bold rounded-full shadow-lg"
+                        class="absolute top-4 end-4 px-3 py-1 bg-warning text-white text-sm font-bold font-mono rounded-full shadow-sm"
                     >
                         {{ toEnglish(purchasesCount) }}
                     </div>
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

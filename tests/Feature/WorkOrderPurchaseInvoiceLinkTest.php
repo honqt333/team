@@ -259,6 +259,7 @@ class WorkOrderPurchaseInvoiceLinkTest extends TestCase
             'center_id' => $this->center->id,
             'supplier_id' => $this->purchaseInvoice->supplier_id,
             'work_order_id' => $this->workOrder->id,
+            'source_type' => 'warehouse',
             'invoice_number' => 'SUP-WH-200',
             'code' => 'PINV-0002',
             'issue_date' => now()->toDateString(),

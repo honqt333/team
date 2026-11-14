@@ -15,31 +15,47 @@ trait CenterScoped
      */
     protected static function bootCenterScoped(): void
     {
-        // Apply global scope only when context is available
-        static::addGlobalScope('center_scoped', function (Builder $builder) {
+        // 1. Independent tenant_scoped global scope:
+        // Enforces tenant_id whenever tenant context exists, even if center_id is null
+        // or if withoutGlobalScope('center_scoped') is called.
+        static::addGlobalScope('tenant_scoped', function (Builder $builder) {
             $tenantId = TenancyContext::tenantId();
-            $centerId = TenancyContext::centerId();
             $model = $builder->getModel();
             $table = $model->getTable();
 
-            // Only apply scope if both tenant and center context are available
-            if ($tenantId !== null && $centerId !== null) {
-                // Check if model has 'source' column (via fillable or explicit property)
+            if ($tenantId !== null) {
                 $hasSourceColumn = in_array('source', $model->getFillable())
                     || (property_exists($model, 'hasSourceColumn') && $model->hasSourceColumn);
 
                 if ($hasSourceColumn) {
-                    // Include center-scoped data OR system-level data (source = 'system')
-                    $builder->where(function ($query) use ($table, $tenantId, $centerId) {
-                        $query->where(function ($q) use ($table, $tenantId, $centerId) {
-                            $q->where($table.'.tenant_id', $tenantId)
-                                ->where($table.'.center_id', $centerId);
-                        })->orWhere($table.'.source', 'system');
+                    $builder->where(function ($query) use ($table, $tenantId) {
+                        $query->where($table.'.tenant_id', $tenantId)
+                            ->orWhere($table.'.source', 'system');
                     });
                 } else {
-                    // Standard center scope without source check
-                    $builder->where($table.'.tenant_id', $tenantId)
-                        ->where($table.'.center_id', $centerId);
+                    $builder->where($table.'.tenant_id', $tenantId);
+                }
+            }
+        });
+
+        // 2. Independent center_scoped global scope:
+        // Enforces center_id when center context is active.
+        static::addGlobalScope('center_scoped', function (Builder $builder) {
+            $centerId = TenancyContext::centerId();
+            $model = $builder->getModel();
+            $table = $model->getTable();
+
+            if ($centerId !== null) {
+                $hasSourceColumn = in_array('source', $model->getFillable())
+                    || (property_exists($model, 'hasSourceColumn') && $model->hasSourceColumn);
+
+                if ($hasSourceColumn) {
+                    $builder->where(function ($query) use ($table, $centerId) {
+                        $query->where($table.'.center_id', $centerId)
+                            ->orWhere($table.'.source', 'system');
+                    });
+                } else {
+                    $builder->where($table.'.center_id', $centerId);
                 }
             }
         });

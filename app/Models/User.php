@@ -45,9 +45,25 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'photo_path',
         'is_active',
-        'tenant_id',
-        'current_center_id',
     ];
+
+    /**
+     * Allow setting scoping attributes only when instantiating a new record,
+     * while blocking mass-assignment of tenant_id / current_center_id on existing records.
+     */
+    public function fill(array $attributes)
+    {
+        if (! $this->exists) {
+            foreach (['tenant_id', 'current_center_id'] as $scopedKey) {
+                if (array_key_exists($scopedKey, $attributes)) {
+                    $this->setAttribute($scopedKey, $attributes[$scopedKey]);
+                    unset($attributes[$scopedKey]);
+                }
+            }
+        }
+
+        return parent::fill($attributes);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

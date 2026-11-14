@@ -172,9 +172,9 @@ class UserController extends Controller
             // Ensure current_center_id is valid after sync
             if ($user->current_center_id && ! array_key_exists($user->current_center_id, $centers)) {
                 $newId = ! empty($centers) ? array_key_first($centers) : null;
-                $user->update(['current_center_id' => $newId]);
+                $user->forceFill(['current_center_id' => $newId])->save();
             } elseif (! $user->current_center_id && ! empty($centers)) {
-                $user->update(['current_center_id' => array_key_first($centers)]);
+                $user->forceFill(['current_center_id' => array_key_first($centers)])->save();
             }
 
             // Sync Role

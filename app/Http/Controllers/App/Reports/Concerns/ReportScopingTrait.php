@@ -69,15 +69,20 @@ trait ReportScopingTrait
         $accessibleCenterIds = $this->accessibleCenterIds();
 
         if ($accessibleCenterIds !== null) {
-            if ($requested !== 'all' && is_numeric($requested) && in_array((int) $requested, $accessibleCenterIds, true)) {
-                return (string) ((int) $requested);
+            if ($requested !== 'all') {
+                if (is_numeric($requested) && in_array((int) $requested, $accessibleCenterIds, true)) {
+                    return (string) ((int) $requested);
+                }
+
+                // Fail-closed: an explicit filter for a centre outside the user's scope returns no records
+                return '-1';
             }
 
             if ($activeCenterId !== null && in_array($activeCenterId, $accessibleCenterIds, true)) {
                 return (string) $activeCenterId;
             }
 
-            return $accessibleCenterIds !== [] ? (string) $accessibleCenterIds[0] : '0';
+            return $accessibleCenterIds !== [] ? (string) $accessibleCenterIds[0] : '-1';
         }
 
         return $requested;
