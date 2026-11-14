@@ -235,6 +235,8 @@ return [
         ],
     ],
     'payroll' => [
+        'accounting_tx_notes' => 'ترحيل آلي لمسير الرواتب — عدد الموظفين: :count | التأمينات (GOSI): :gosi | إجمالي الاستقطاعات: :deductions',
+        'accounting_tx_title' => 'مصروف رواتب وأجور للفترة (:period)',
         'allowances' => 'البدلات',
         'already_exists' => 'مسير الرواتب لهذه الفترة موجود مسبقاً',
         'approve' => 'اعتماد',

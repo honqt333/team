@@ -177,6 +177,7 @@
         "all": "الكل",
         "all_categories": "جميع الفئات",
         "all_centers": "جميع الفروع",
+        "all_statuses": "جميع الحالات",
         "amount": "المبلغ",
         "app_name": "خدمة برو",
         "app_slogan": "نظام ادارة مراكز خدمات السيارات",
@@ -2696,6 +2697,9 @@
             }
         },
         "payroll": {
+            "accounting_posted_badge": "مرحّل محاسبياً",
+            "accounting_reference": "القيد / المصروف المالي المرتبط",
+            "accounting_tx_date": "تاريخ الترحيل",
             "allowances": "البدلات",
             "already_exists": "توجد مسيّرة لهذه الفترة مسبقاً",
             "amount": "المبلغ",
@@ -3606,7 +3610,8 @@
         "website": "الموقع",
         "work_orders": "كروت العمل",
         "year_suffix": "س",
-        "dealers": "الشركاء والجهات"
+        "dealers": "الشركاء والجهات",
+        "partners": "الشركاء والجهات"
     },
     "notifications": {
         "days_ago": "قبل {count} يوم",

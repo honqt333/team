@@ -235,6 +235,8 @@ return [
         ],
     ],
     'payroll' => [
+        'accounting_tx_notes' => 'Automated payroll posting — Employees: :count | GOSI: :gosi | Total Deductions: :deductions',
+        'accounting_tx_title' => 'Payroll & Salaries Expense (:period)',
         'allowances' => 'Allowances',
         'already_exists' => 'Payroll run already exists for this period',
         'approve' => 'Approve',

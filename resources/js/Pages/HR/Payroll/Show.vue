@@ -194,6 +194,35 @@
                 </div>
             </div>
 
+            <!-- Accounting Integration Banner -->
+            <div
+                v-if="payrollRun.company_transaction"
+                class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-900/20 px-4 py-3 text-xs"
+            >
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold">
+                        {{ $t('hr.payroll.accounting_posted_badge') }}
+                    </span>
+                    <div>
+                        <span class="text-gray-500 dark:text-gray-400">
+                            {{ $t('hr.payroll.accounting_reference') }}:
+                        </span>
+                        <span class="ms-1 font-bold text-gray-900 dark:text-white">
+                            {{ payrollRun.company_transaction.title }}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 font-mono">
+                    <span class="text-gray-600 dark:text-gray-300">
+                        {{ $t('hr.payroll.accounting_tx_date') }}:
+                        {{ payrollRun.company_transaction.transaction_date }}
+                    </span>
+                    <span class="font-bold text-emerald-700 dark:text-emerald-300">
+                        {{ formatCurrency(payrollRun.company_transaction.total_amount) }}
+                    </span>
+                </div>
+            </div>
+
             <!-- Items Table -->
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"

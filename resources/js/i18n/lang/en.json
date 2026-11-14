@@ -177,6 +177,7 @@
         "all": "All",
         "all_categories": "All categories",
         "all_centers": "All branches",
+        "all_statuses": "All Statuses",
         "amount": "Amount",
         "app_name": "Khidmh Pro",
         "app_slogan": "Automotive service center management system",
@@ -2696,6 +2697,9 @@
             }
         },
         "payroll": {
+            "accounting_posted_badge": "Posted to Accounting",
+            "accounting_reference": "Linked Accounting Expense",
+            "accounting_tx_date": "Posted Date",
             "allowances": "Suits",
             "already_exists": "There is a plan for this period in advance",
             "amount": "Amount",
@@ -3606,7 +3610,8 @@
         "website": "Website",
         "work_orders": "Business cards",
         "year_suffix": "y",
-        "dealers": "Partners & Fleet"
+        "dealers": "Partners & Fleet",
+        "partners": "Partners & Fleet"
     },
     "notifications": {
         "days_ago": "{count} days ago",

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\CompanyTransaction;
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\TenantScoped;
 use App\Models\User;
@@ -31,12 +32,15 @@ class PayrollRun extends Model
         'status',
         'created_by',
         'approved_by',
+        'company_transaction_id',
+        'accounting_posted_at',
     ];
 
     protected $casts = [
         'period_start' => 'date',
         'period_end' => 'date',
         'payment_date' => 'date',
+        'accounting_posted_at' => 'datetime',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -61,6 +65,11 @@ class PayrollRun extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function companyTransaction(): BelongsTo
+    {
+        return $this->belongsTo(CompanyTransaction::class, 'company_transaction_id');
     }
 
     // ─────────────────────────────────────────────────────────────

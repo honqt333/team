@@ -12,6 +12,7 @@ use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
 use App\Models\HR\PayrollRun;
+use App\Services\HR\PayrollAccountingService;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -96,6 +97,7 @@ class PayrollController extends Controller
             'items.employee.department',
             'createdBy:id,name',
             'approvedBy:id,name',
+            'companyTransaction:id,title,amount,total_amount,status,transaction_date,center_id',
         ]);
 
         return Inertia::render('HR/Payroll/Show', [
@@ -398,7 +400,7 @@ class PayrollController extends Controller
     /**
      * Approve a payroll run.
      */
-    public function approve(PayrollRun $payrollRun)
+    public function approve(PayrollRun $payrollRun, PayrollAccountingService $accountingService)
     {
         $this->authorize('update', $payrollRun);
 
@@ -406,15 +408,19 @@ class PayrollController extends Controller
             return back()->with('error', __('hr.payroll.cannot_approve'));
         }
 
-        $payrollRun->update([
-            'status' => 'approved',
-            'approved_by' => auth()->id(),
-        ]);
+        DB::transaction(function () use ($payrollRun, $accountingService): void {
+            $payrollRun->update([
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+            ]);
 
-        $payrollRun->logActivity('approved', [
-            'status' => 'approved',
-            'approved_by' => auth()->id(),
-        ]);
+            $payrollRun->logActivity('approved', [
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+            ]);
+
+            $accountingService->postPayrollRunExpense($payrollRun);
+        });
 
         return back()->with('success', __('hr.payroll.approved_successfully'));
     }
@@ -422,7 +428,7 @@ class PayrollController extends Controller
     /**
      * Mark payroll as paid.
      */
-    public function markPaid(Request $request, PayrollRun $payrollRun)
+    public function markPaid(Request $request, PayrollRun $payrollRun, PayrollAccountingService $accountingService)
     {
         $this->authorize('update', $payrollRun);
 
@@ -438,28 +444,31 @@ class PayrollController extends Controller
 
         $paymentDate = ! empty($validated['payment_date']) ? Carbon::parse($validated['payment_date']) : now();
 
-        $payrollRun->update([
-            'status' => 'paid',
-            'payment_date' => $paymentDate,
-        ]);
+        DB::transaction(function () use ($payrollRun, $accountingService, $paymentDate, $validated): void {
+            $payrollRun->update([
+                'status' => 'paid',
+                'payment_date' => $paymentDate,
+            ]);
 
-        $payrollRun->logActivity('paid', [
-            'status' => 'paid',
-            'payment_date' => $paymentDate->toDateString(),
-            'payment_method' => $validated['payment_method'] ?? 'bank_transfer',
-            'reference_number' => $validated['reference_number'] ?? null,
-        ]);
+            $payrollRun->logActivity('paid', [
+                'status' => 'paid',
+                'payment_date' => $paymentDate->toDateString(),
+                'payment_method' => $validated['payment_method'] ?? 'bank_transfer',
+                'reference_number' => $validated['reference_number'] ?? null,
+            ]);
 
-        // Mark associated Other Payments as paid
-        // Note: Ideally we would link them to the payroll item, but for now we find them by date/employee
-        $payrollRun->load('items');
+            $accountingService->postPayrollRunExpense($payrollRun, $paymentDate);
 
-        foreach ($payrollRun->items as $item) {
-            $item->employee->otherPayments()
-                ->approved()
-                ->whereBetween('payment_date', [$payrollRun->period_start, $payrollRun->period_end])
-                ->update(['status' => 'paid']);
-        }
+            // Mark associated Other Payments as paid
+            $payrollRun->load('items');
+
+            foreach ($payrollRun->items as $item) {
+                $item->employee->otherPayments()
+                    ->approved()
+                    ->whereBetween('payment_date', [$payrollRun->period_start, $payrollRun->period_end])
+                    ->update(['status' => 'paid']);
+            }
+        });
 
         return back()->with('success', __('hr.payroll.marked_paid'));
     }
