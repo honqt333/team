@@ -402,6 +402,7 @@
         "portrait": "Portrait",
         "landscape": "Landscape",
         "print": "Print",
+        "print_scale": "Print Scale",
         "print_date_label": "Print date:",
         "print_date_time_label": "Print date and time:",
         "print_emoji": "🖨️ Print",
@@ -1680,6 +1681,23 @@
         "new_work_order": "New Work Order",
         "quick_sale": "Quick Sale",
         "sales_return": "Sales Return",
+        "period_today": "Today",
+        "refresh": "Refresh",
+        "auto_refresh": "Auto-refresh",
+        "customize": "Customize",
+        "bays_utilization": "Service Bays Utilization",
+        "bays_booked_today": "{booked} of {total} bays booked today",
+        "on_time_delivery": "On-Time Delivery",
+        "avg_cycle_time": "Avg. Cycle Time",
+        "hours_unit": "{n} hrs",
+        "period_expenses": "Period Purchases",
+        "period_net_flow": "Net Flow",
+        "payment_methods": "Payment Methods",
+        "no_bays_configured": "No active service bays",
+        "widget_kpis": "Key Metrics",
+        "widget_operations": "Daily Operations",
+        "widget_charts": "Analytics Charts",
+        "widget_services": "Top Services",
         "no_alerts_attention": "No alerts need your attention right now.",
         "no_data": "No data available",
         "no_recent_invoices": "No recent invoices",
@@ -2246,6 +2264,26 @@
     },
     "hr": {
         "arabic_suffix": "(Arabic)",
+        "dashboard": {
+            "active_employees": "Active Employees",
+            "compliance_alerts": "Expiring Documents & Contracts",
+            "compliance_alerts_empty": "No documents or contracts expiring within the next 30 days",
+            "contract_badge": "Contract",
+            "current_payroll_net": "Current Month Net Payroll",
+            "departments_distribution": "Employees by Department",
+            "departments_empty": "No active departments found in this center",
+            "document_badge": "Document",
+            "expired_badge": "Expired",
+            "expiring_soon_badge": "Expiring Soon",
+            "late_today_count": "late today",
+            "no_payroll_yet": "No payroll created yet",
+            "of_total": "of total",
+            "pending_leaves": "Pending Leave Requests",
+            "present_today": "Present Today",
+            "recent_employees": "Recently Added Employees",
+            "recent_employees_empty": "No recently added employees",
+            "view_all": "View All"
+        },
         "attendance": {
             "absent": "Absent",
             "check_in": "Login",
@@ -6062,6 +6100,14 @@
             "departments": {
                 "description": "Managing work departments",
                 "title": "Sections"
+            },
+            "hr": {
+                "description": "Allowances, deductions, and job titles",
+                "title": "HR Settings"
+            },
+            "inventory": {
+                "description": "Spare parts categories and inventory units",
+                "title": "Inventory Settings"
             },
             "notifications": {
                 "description": "Control notification channels, event triggers, and message templates",

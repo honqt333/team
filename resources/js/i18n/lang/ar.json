@@ -402,6 +402,7 @@
         "portrait": "طباعة عمودية",
         "landscape": "طباعة أفقية",
         "print": "طباعة",
+        "print_scale": "مقياس الطباعة",
         "print_date_label": "تاريخ الطباعة:",
         "print_date_time_label": "تاريخ ووقت الطباعة:",
         "print_emoji": "🖨️ طباعة",
@@ -1680,6 +1681,23 @@
         "new_work_order": "كرت عمل جديد",
         "quick_sale": "بيع سريع",
         "sales_return": "إرجاع مبيعات",
+        "period_today": "اليوم",
+        "refresh": "تحديث",
+        "auto_refresh": "تحديث تلقائي",
+        "customize": "تخصيص اللوحة",
+        "bays_utilization": "إشغال أحواض الصيانة",
+        "bays_booked_today": "{booked} من {total} حوض محجوز اليوم",
+        "on_time_delivery": "التسليم في الموعد",
+        "avg_cycle_time": "متوسط مدة الإنجاز",
+        "hours_unit": "{n} ساعة",
+        "period_expenses": "مشتريات الفترة",
+        "period_net_flow": "صافي التدفق",
+        "payment_methods": "توزيع طرق الدفع",
+        "no_bays_configured": "لا توجد أحواض صيانة مفعّلة",
+        "widget_kpis": "المؤشرات الرئيسية",
+        "widget_operations": "العمليات اليومية",
+        "widget_charts": "الرسوم التحليلية",
+        "widget_services": "أكثر الخدمات طلباً",
         "no_alerts_attention": "لا توجد تنبيهات تحتاج انتباهك حالياً.",
         "no_data": "لا توجد بيانات",
         "no_recent_invoices": "لا توجد فواتير حديثة",
@@ -2246,6 +2264,26 @@
     },
     "hr": {
         "arabic_suffix": "(العربية)",
+        "dashboard": {
+            "active_employees": "الموظفون النشطون",
+            "compliance_alerts": "تنبيهات الوثائق والعقود",
+            "compliance_alerts_empty": "لا توجد وثائق أو عقود قريبة من الانتهاء خلال ٣٠ يوماً",
+            "contract_badge": "عقد",
+            "current_payroll_net": "صافي مسير الشهر الحالي",
+            "departments_distribution": "توزيع الموظفين حسب الأقسام",
+            "departments_empty": "لا توجد أقسام مسجلة في هذا المركز",
+            "document_badge": "وثيقة",
+            "expired_badge": "منتهي",
+            "expiring_soon_badge": "ينتهي قريباً",
+            "late_today_count": "متأخر اليوم",
+            "no_payroll_yet": "لم يُنشأ مسير بعد",
+            "of_total": "من إجمالي",
+            "pending_leaves": "طلبات إجازة معلقة",
+            "present_today": "الحضور اليوم",
+            "recent_employees": "أحدث الموظفين المضافين",
+            "recent_employees_empty": "لا يوجد موظفون مضافون مؤخراً",
+            "view_all": "عرض الكل"
+        },
         "attendance": {
             "absent": "غائب",
             "check_in": "تسجيل دخول",
@@ -6065,6 +6103,14 @@
             "departments": {
                 "description": "إدارة أقسام العمل",
                 "title": "الأقسام"
+            },
+            "hr": {
+                "description": "العلاوات، الحسومات، والمسميات الوظيفية",
+                "title": "إعدادات الموارد البشرية"
+            },
+            "inventory": {
+                "description": "فئات قطع الغيار ووحدات المخزون",
+                "title": "إعدادات المخزون"
             },
             "notifications": {
                 "description": "التحكم في قنوات الإشعارات، أحداث التنبيهات، وقوالب الرسائل",
