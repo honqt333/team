@@ -1,0 +1,44 @@
+name: Rollback Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_release:
+        description: 'Target release folder name (leave empty for previous release)'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Rollback Code & Assets (No DB Changes)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/rollback-release.sh
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload and execute rollback script
+        run: |
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.SSH_PORT }}" \
+            scripts/rollback-release.sh \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/domains/khidmh.pro/deploy/tmp/"
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "chmod +x ~/domains/khidmh.pro/deploy/tmp/rollback-release.sh && \
+            TARGET_RELEASE='${{ inputs.target_release }}' \
+            bash \$HOME/domains/khidmh.pro/deploy/tmp/rollback-release.sh"

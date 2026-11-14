@@ -1,0 +1,156 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - production
+  workflow_dispatch:
+    inputs:
+      allow_older:
+        description: 'Allow deploying an older commit than currently active'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: Run CI Gate
+    uses: ./.github/workflows/ci.yml
+
+  package:
+    name: Build & Package Release
+    needs: ci
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.meta.outputs.release_id }}
+      commit_sha: ${{ steps.meta.outputs.commit_sha }}
+      commit_epoch: ${{ steps.meta.outputs.commit_epoch }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute release metadata
+        id: meta
+        run: |
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          EPOCH=$(git show -s --format=%ct HEAD)
+          STAMP=$(date -u +%Y%m%d_%H%M%S)
+          echo "release_id=${STAMP}_${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "commit_epoch=${EPOCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+          coverage: none
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies & build frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package release archive (excluding secrets & customer data)
+        run: |
+          tar -czf /tmp/release.tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='storage/*' \
+            --exclude='*.sql' \
+            --exclude='*.sql.gz' \
+            --exclude='*.zip' \
+            --exclude='*.tar.gz' \
+            --exclude='*.log' \
+            --exclude='*.report.html' \
+            --exclude='.DS_Store' \
+            --exclude='audit_reports' \
+            --exclude='.agent' \
+            --exclude='.harness' \
+            --exclude='.mavis' \
+            --exclude='.husky' \
+            .
+
+      - name: Verify archive contains no secrets or customer files
+        run: |
+          LIST=$(tar -tzf /tmp/release.tar.gz)
+          if echo "$LIST" | grep -qE '(^|\./)(\.env(\.|$)|storage/app/|.*\.sql(\.gz)?$|.*\.pem$|.*\.key$|id_ed25519|id_rsa)'; then
+            echo "ERROR: Forbidden sensitive file detected inside release archive!"
+            exit 1
+          fi
+          if ! echo "$LIST" | grep -qE '(^|\./)public/build/manifest\.json$'; then
+            echo "ERROR: public/build/manifest.json missing from release archive!"
+            exit 1
+          fi
+          if ! echo "$LIST" | grep -qE '(^|\./)vendor/autoload\.php$'; then
+            echo "ERROR: vendor/autoload.php missing from release archive!"
+            exit 1
+          fi
+          echo "Archive security and completeness verification passed."
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: /tmp/release.tar.gz
+          retention-days: 1
+
+  deploy:
+    name: Deploy to Hostinger
+    needs: package
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/deploy-release.sh
+
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-package
+          path: /tmp
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload archive and deploy script
+        run: |
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.SSH_PORT }}" \
+            /tmp/release.tar.gz \
+            scripts/deploy-release.sh \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/domains/khidmh.pro/deploy/tmp/"
+
+      - name: Execute remote atomic release deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "chmod +x ~/domains/khidmh.pro/deploy/tmp/deploy-release.sh && \
+            RELEASE_ID='${{ needs.package.outputs.release_id }}' \
+            COMMIT_SHA='${{ needs.package.outputs.commit_sha }}' \
+            COMMIT_EPOCH='${{ needs.package.outputs.commit_epoch }}' \
+            ALLOW_OLDER='${{ inputs.allow_older || 'false' }}' \
+            ARCHIVE_PATH=\$HOME/domains/khidmh.pro/deploy/tmp/release.tar.gz \
+            bash \$HOME/domains/khidmh.pro/deploy/tmp/deploy-release.sh"
