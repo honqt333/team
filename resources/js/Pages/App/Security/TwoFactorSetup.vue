@@ -1,6 +1,8 @@
 <script setup>
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -386,33 +388,24 @@ const regenerate = () =>
             >
                 <form @submit.prevent="disable">
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('security.enter_password_to_confirm') }}
-                        </label>
-                        <input
-                            type="password"
+                        <AppInput
                             v-model="disableForm.password"
+                            type="password"
+                            :label="$t('security.enter_password_to_confirm')"
                             required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
-                    <div class="flex gap-3">
-                        <button
-                            type="submit"
-                            :disabled="disableForm.processing"
-                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50"
-                        >
-                            {{ $t('security.deactivate') }}
-                        </button>
-                        <button
+                    <div class="flex justify-end gap-3">
+                        <AppButton
                             type="button"
+                            variant="secondary"
                             @click="showDisableModal = false"
-                            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                         >
                             {{ $t('system.company_subscription.history.confirm_modal.go_back') }}
-                        </button>
+                        </AppButton>
+                        <AppButton type="submit" variant="danger" :loading="disableForm.processing">
+                            {{ $t('security.deactivate') }}
+                        </AppButton>
                     </div>
                 </form>
             </BaseModal>
@@ -429,33 +422,24 @@ const regenerate = () =>
                 </p>
                 <form @submit.prevent="regenerate">
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('security.enter_password') }}
-                        </label>
-                        <input
-                            type="password"
+                        <AppInput
                             v-model="regenForm.password"
+                            type="password"
+                            :label="$t('security.enter_password')"
                             required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
-                    <div class="flex gap-3">
-                        <button
-                            type="submit"
-                            :disabled="regenForm.processing"
-                            class="btn-primary flex-1"
-                        >
-                            {{ $t('security.new_codes') }}
-                        </button>
-                        <button
+                    <div class="flex justify-end gap-3">
+                        <AppButton
                             type="button"
+                            variant="secondary"
                             @click="showRegenModal = false"
-                            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                         >
                             {{ $t('common.cancel') }}
-                        </button>
+                        </AppButton>
+                        <AppButton type="submit" variant="primary" :loading="regenForm.processing">
+                            {{ $t('security.new_codes') }}
+                        </AppButton>
                     </div>
                 </form>
             </BaseModal>

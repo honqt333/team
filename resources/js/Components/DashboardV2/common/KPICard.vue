@@ -15,6 +15,7 @@ const props = defineProps({
     href: { type: [String, null], default: null },
     subtitle: { type: String, default: null },
     isLoading: { type: Boolean, default: false },
+    sparkline: { type: Array, default: () => [] },
 });
 
 const iconColorClasses = {
@@ -60,6 +61,33 @@ const formattedPrevious = computed(() => {
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num);
     }
     return new Intl.NumberFormat('en-US').format(num);
+});
+
+const sparklineColorClasses = {
+    slate: 'text-slate-400',
+    indigo: 'text-indigo-500',
+    emerald: 'text-emerald-500',
+    amber: 'text-amber-500',
+    rose: 'text-rose-500',
+    sky: 'text-sky-500',
+    violet: 'text-violet-500',
+};
+
+const sparklinePoints = computed(() => {
+    const values = (props.sparkline || []).map((v) => Number(v) || 0);
+    if (values.length < 2) return '';
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || 1;
+    const width = 120;
+    const height = 24;
+    return values
+        .map((val, idx) => {
+            const x = (idx / (values.length - 1)) * width;
+            const y = height - ((val - min) / span) * (height - 4) - 2;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+        })
+        .join(' ');
 });
 </script>
 
@@ -167,6 +195,28 @@ const formattedPrevious = computed(() => {
                 ]"
                 v-html="icon"
             />
+        </div>
+        <div
+            v-if="sparklinePoints && !isLoading"
+            class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700/60"
+        >
+            <svg
+                viewBox="0 0 120 24"
+                preserveAspectRatio="none"
+                :class="[
+                    'h-5 w-full',
+                    sparklineColorClasses[iconColor] || sparklineColorClasses.slate,
+                ]"
+            >
+                <polyline
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    :points="sparklinePoints"
+                />
+            </svg>
         </div>
     </component>
 </template>

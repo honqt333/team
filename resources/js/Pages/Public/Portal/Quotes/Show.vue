@@ -421,21 +421,17 @@
             </p>
             <template #footer>
                 <div class="flex items-center justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="showApproveModal = false"
-                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showApproveModal = false">
                         {{ t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
-                        :disabled="submitting"
+                        variant="primary"
+                        :loading="submitting"
                         @click="submitApprove"
-                        class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold disabled:opacity-50 transition"
                     >
                         {{ t('customer_portal.portal_quotes.approve_confirm_btn') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -447,41 +443,30 @@
             size="sm"
             @close="showRejectModal = false"
         >
-            <label
-                for="rejection_reason"
-                class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5"
-            >
-                {{ t('customer_portal.portal_quotes.reject_reason_label') }}
-                <span class="text-rose-500">*</span>
-            </label>
-            <textarea
+            <AppTextarea
                 id="rejection_reason"
                 v-model="rejectionReason"
-                rows="4"
+                :label="t('customer_portal.portal_quotes.reject_reason_label')"
+                :rows="4"
                 maxlength="1000"
                 :placeholder="t('customer_portal.portal_quotes.reject_reason_placeholder')"
-                class="w-full rounded-xl border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-            ></textarea>
-            <p v-if="rejectError" class="mt-1.5 text-xs font-semibold text-rose-600">
-                {{ rejectError }}
-            </p>
+                required
+                :error="rejectError"
+            />
             <template #footer>
                 <div class="flex items-center justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="showRejectModal = false"
-                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showRejectModal = false">
                         {{ t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
-                        :disabled="submitting || !rejectionReason.trim()"
+                        variant="danger"
+                        :loading="submitting"
+                        :disabled="!rejectionReason.trim()"
                         @click="submitReject"
-                        class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold disabled:opacity-50 transition"
                     >
                         {{ t('customer_portal.portal_quotes.reject_confirm_btn') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -493,6 +478,8 @@ import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { printDocument } from '@/Composables/usePrint';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import BaseModal from '@/Components/BaseModal.vue';

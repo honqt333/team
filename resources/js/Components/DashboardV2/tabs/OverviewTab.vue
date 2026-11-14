@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import KPICard from '@/Components/DashboardV2/common/KPICard.vue';
 import ChartCard from '@/Components/DashboardV2/common/ChartCard.vue';
@@ -10,8 +11,9 @@ import RecentInvoices from '@/Components/DashboardV2/widgets/RecentInvoices.vue'
 import TodaySchedule from '@/Components/DashboardV2/widgets/TodaySchedule.vue';
 import QuickActions from '@/Components/DashboardV2/widgets/QuickActions.vue';
 import TopServices from '@/Components/DashboardV2/widgets/TopServices.vue';
+import CustomerContactActions from '@/Components/DashboardV2/common/CustomerContactActions.vue';
 
-defineProps({
+const props = defineProps({
     userContext: { type: Object, default: () => ({}) },
     stats: { type: Object, required: true },
     charts: { type: Object, required: true },
@@ -23,7 +25,22 @@ defineProps({
     myAssignedWorkOrders: { type: Array, default: () => [] },
     topServices: { type: Array, default: () => [] },
     currency: { type: String, default: 'SAR' },
+    isLoading: { type: Boolean, default: false },
+    visibleWidgets: {
+        type: Object,
+        default: () => ({ kpis: true, charts: true, operations: true, services: true }),
+    },
 });
+
+const workOrdersSparkline = computed(() =>
+    (props.charts?.weeklyWorkOrders ?? []).map((d) => Number(d.count ?? d.value ?? 0))
+);
+
+const revenueSparkline = computed(() =>
+    (props.charts?.revenueDaily ?? [])
+        .slice(-10)
+        .map((d) => Number(d.total ?? d.amount ?? d.value ?? 0))
+);
 
 function navigate(url) {
     router.get(url);
@@ -47,14 +64,21 @@ const ICONS = {
 <template>
     <div class="space-y-5">
         <!-- KPI Row -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+            v-if="visibleWidgets.kpis !== false"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        >
             <KPICard
                 :label="$t('dashboard.work_orders_this_month')"
-                :value="stats.workOrders?.thisMonth ?? 0"
-                :previousValue="stats.workOrders?.lastMonth ?? null"
+                :value="stats.workOrders?.periodCount ?? stats.workOrders?.thisMonth ?? 0"
+                :previousValue="
+                    stats.workOrders?.prevPeriodCount ?? stats.workOrders?.lastMonth ?? null
+                "
                 :icon="ICONS.workOrders"
                 icon-color="indigo"
                 :subtitle="$t('dashboard.active_count', { n: stats.workOrders?.active ?? 0 })"
+                :sparkline="workOrdersSparkline"
+                :is-loading="isLoading"
                 href="/app/work-orders"
             />
 
@@ -62,12 +86,16 @@ const ICONS = {
             <template v-if="userContext?.canViewFinancials">
                 <KPICard
                     :label="$t('dashboard.revenue_this_month')"
-                    :value="stats.revenue?.thisMonth ?? 0"
-                    :previousValue="stats.revenue?.lastMonth ?? null"
+                    :value="stats.revenue?.periodTotal ?? stats.revenue?.thisMonth ?? 0"
+                    :previousValue="
+                        stats.revenue?.prevPeriodTotal ?? stats.revenue?.lastMonth ?? null
+                    "
                     :icon="ICONS.revenue"
                     icon-color="emerald"
                     format="currency"
                     :suffix="currency"
+                    :sparkline="revenueSparkline"
+                    :is-loading="isLoading"
                     href="/app/invoices"
                 />
                 <KPICard
@@ -84,6 +112,7 @@ const ICONS = {
                             ),
                         })
                     "
+                    :is-loading="isLoading"
                     href="/app/invoices"
                 />
             </template>
@@ -96,6 +125,7 @@ const ICONS = {
                     :icon="ICONS.active"
                     icon-color="sky"
                     :subtitle="$t('dashboard.open_or_in_progress')"
+                    :is-loading="isLoading"
                     href="/app/workshop"
                 />
                 <KPICard
@@ -104,6 +134,7 @@ const ICONS = {
                     :icon="ICONS.workOrders"
                     icon-color="emerald"
                     :subtitle="$t('dashboard.closed_today')"
+                    :is-loading="isLoading"
                     href="/app/work-orders"
                 />
             </template>
@@ -129,12 +160,13 @@ const ICONS = {
                         ? $t('dashboard.new_this_month', { n: stats.customers?.thisMonth ?? 0 })
                         : null
                 "
+                :is-loading="isLoading"
                 :href="userContext?.canViewFinancials ? '/app/customers' : '/app/vehicles'"
             />
         </div>
 
         <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div v-if="visibleWidgets.charts !== false" class="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <ChartCard
                     v-if="userContext?.canViewFinancials"
@@ -160,15 +192,25 @@ const ICONS = {
         </div>
 
         <!-- Charts Row 2 -->
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div
+            v-if="visibleWidgets.charts !== false || visibleWidgets.services !== false"
+            class="grid grid-cols-1 gap-4 lg:grid-cols-3"
+        >
             <ChartCard
-                v-if="userContext?.canViewFinancials"
+                v-if="userContext?.canViewFinancials && visibleWidgets.charts !== false"
                 :title="$t('dashboard.weekly_work_orders')"
                 :subtitle="$t('dashboard.last_7_days')"
             >
                 <WeeklyBarChart :data="charts.weeklyWorkOrders ?? []" />
             </ChartCard>
-            <div :class="userContext?.canViewFinancials ? 'lg:col-span-2' : 'lg:col-span-3'">
+            <div
+                v-if="visibleWidgets.services !== false"
+                :class="
+                    userContext?.canViewFinancials && visibleWidgets.charts !== false
+                        ? 'lg:col-span-2'
+                        : 'lg:col-span-3'
+                "
+            >
                 <ChartCard
                     :title="$t('dashboard.top_services')"
                     :subtitle="$t('dashboard.last_30_days')"
@@ -179,7 +221,10 @@ const ICONS = {
         </div>
 
         <!-- Recent activity + Today schedule + Quick actions -->
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div
+            v-if="visibleWidgets.operations !== false"
+            class="grid grid-cols-1 gap-4 lg:grid-cols-3"
+        >
             <ChartCard :title="$t('dashboard.today_schedule')" :subtitle="$t('dashboard.today')">
                 <TodaySchedule :items="todaySchedule" />
             </ChartCard>
@@ -272,14 +317,22 @@ const ICONS = {
                                 {{ wo.vehicle?.plate_number || '—' }}
                             </p>
                         </div>
-                        <span
-                            class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                        >
-                            {{
-                                $t('work_orders.work_order_statuses.ready_for_qc') ||
-                                'جاهزة للتسليم'
-                            }}
-                        </span>
+                        <div class="flex shrink-0 items-center gap-2">
+                            <CustomerContactActions
+                                :phone="wo.customer?.phone"
+                                :whatsapp="wo.customer?.whatsapp"
+                                :work-order-code="wo.code"
+                                :plate-number="wo.vehicle?.plate_number"
+                            />
+                            <span
+                                class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                            >
+                                {{
+                                    $t('work_orders.work_order_statuses.ready_for_qc') ||
+                                    'جاهزة للتسليم'
+                                }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

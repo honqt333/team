@@ -1,40 +1,25 @@
 <template>
-    <Modal :show="show" @close="close">
-        <div
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden max-w-5xl w-full mx-auto"
-        >
-            <!-- Header -->
-            <div
-                class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center"
-            >
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg
-                        class="w-6 h-6 text-gray-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                        />
-                    </svg>
-                    {{ $t('payments.title') }}
-                </h3>
-                <button @click="close" class="text-gray-400 hover:text-gray-500 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
+    <BaseModal :show="show" @close="close" size="5xl">
+        <template #title>
+            <div class="flex items-center gap-2">
+                <svg
+                    class="w-6 h-6 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                </svg>
+                <span>{{ $t('payments.title') }}</span>
             </div>
+        </template>
 
+        <div>
             <!-- Summary Strip -->
             <div
                 class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex flex-wrap justify-between items-center gap-4"
@@ -104,18 +89,21 @@
                                 ></path>
                             </svg>
                         </span>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="searchQuery"
+                            size="sm"
                             :placeholder="$t('common.search') + '...'"
-                            class="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary transition-shadow"
+                            class="pl-10 pr-4"
                         />
                     </div>
 
                     <!-- Add Payment Button -->
-                    <button
+                    <AppButton
+                        type="button"
+                        variant="success"
+                        size="sm"
                         @click="openAddModal"
-                        class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg shadow-md flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="loading"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +115,7 @@
                             />
                         </svg>
                         {{ $t('payments.add_payment') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
 
@@ -258,6 +246,14 @@
             </div>
         </div>
 
+        <template #footer>
+            <div class="flex justify-end w-full">
+                <AppButton type="button" variant="secondary" @click="close">
+                    {{ $t('common.close') }}
+                </AppButton>
+            </div>
+        </template>
+
         <!-- Add Payment Modal (Nested) -->
         <PaymentFormModal
             :show="showAddModal"
@@ -270,13 +266,15 @@
             @close="showAddModal = false"
             @saved="onPaymentSaved"
         />
-    </Modal>
+    </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PaymentFormModal from './PaymentFormModal.vue';
 
 const props = defineProps({

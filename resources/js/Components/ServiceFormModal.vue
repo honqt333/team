@@ -210,17 +210,13 @@
                             {{ $t('services_management.form.name_ar') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.name_ar"
                             dir="rtl"
                             :placeholder="$t('services_management.form.name_ar_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.name_ar }"
+                            :error="form.errors.name_ar"
                         />
-                        <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-600">
-                            {{ form.errors.name_ar }}
-                        </p>
                     </div>
                     <div>
                         <label
@@ -229,17 +225,13 @@
                             {{ $t('services_management.form.name_en') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.name_en"
                             dir="ltr"
                             :placeholder="$t('services_management.form.name_en_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.name_en }"
+                            :error="form.errors.name_en"
                         />
-                        <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-600">
-                            {{ form.errors.name_en }}
-                        </p>
                     </div>
                 </div>
 
@@ -251,12 +243,12 @@
                         >
                             {{ $t('services_management.form.description_ar') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.description_ar"
                             rows="2"
                             dir="rtl"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
-                        ></textarea>
+                            class="w-full resize-none"
+                        />
                     </div>
                     <div>
                         <label
@@ -264,12 +256,12 @@
                         >
                             {{ $t('services_management.form.description_en') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.description_en"
                             rows="2"
                             dir="ltr"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
-                        ></textarea>
+                            class="w-full resize-none"
+                        />
                     </div>
                 </div>
 
@@ -282,13 +274,13 @@
                             {{ $t('services_management.form.estimated_duration') }}
                         </label>
                         <div class="flex gap-2">
-                            <input
+                            <AppInput
                                 type="number"
                                 v-model.number="form.duration_value"
                                 inputmode="numeric"
                                 lang="en"
                                 min="1"
-                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                                class="flex-1"
                             />
                             <div class="w-32">
                                 <SearchableSelect
@@ -326,13 +318,13 @@
                             {{ $t('services_management.form.warranty') }}
                         </label>
                         <div class="flex gap-2">
-                            <input
+                            <AppInput
                                 type="number"
                                 v-model.number="form.warranty_value"
                                 inputmode="numeric"
                                 lang="en"
                                 min="1"
-                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                                class="flex-1"
                             />
                             <div class="w-32">
                                 <SearchableSelect
@@ -371,20 +363,16 @@
                         {{ $t('services_management.form.type') }}
                     </label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label
+                        <button
+                            type="button"
+                            @click="form.type = 'internal'"
                             :class="[
-                                'flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all',
+                                'flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all text-start',
                                 form.type === 'internal'
                                     ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                             ]"
                         >
-                            <input
-                                type="radio"
-                                v-model="form.type"
-                                value="internal"
-                                class="sr-only"
-                            />
                             <div
                                 class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center flex-shrink-0"
                             >
@@ -405,7 +393,7 @@
                             <span class="font-medium text-sm text-gray-900 dark:text-white">
                                 {{ $t('services_management.types.internal') }}
                             </span>
-                        </label>
+                        </button>
                         <label
                             class="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
                         >
@@ -482,7 +470,7 @@
                         <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="number"
                             name="base_price"
                             v-model.number="form.base_price"
@@ -490,8 +478,8 @@
                             lang="en"
                             step="0.01"
                             min="0"
-                            class="w-full px-4 py-2.5 pe-14 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.base_price }"
+                            class="pe-14"
+                            :error="form.errors.base_price"
                         />
                         <span
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium"
@@ -499,9 +487,6 @@
                             {{ activeCurrencySymbol }}
                         </span>
                     </div>
-                    <p v-if="form.errors.base_price" class="mt-1 text-xs text-red-600">
-                        {{ form.errors.base_price }}
-                    </p>
                 </div>
 
                 <!-- Discount -->
@@ -556,7 +541,7 @@
                             {{ $t('pricing.discount_value') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="number"
                                 name="default_discount_value"
                                 v-model.number="form.default_discount_value"
@@ -564,7 +549,7 @@
                                 lang="en"
                                 step="0.01"
                                 min="0"
-                                class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                                class="pe-10"
                             />
                             <span
                                 class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
@@ -581,7 +566,7 @@
                         {{ $t('pricing.min_price') }}
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="number"
                             name="min_price"
                             v-model.number="form.min_price"
@@ -590,10 +575,8 @@
                             step="0.01"
                             min="0"
                             :max="form.base_price"
-                            class="w-full px-4 py-2.5 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{
-                                'border-red-500': form.errors.min_price || minPriceValidationError,
-                            }"
+                            class="pe-12"
+                            :error="form.errors.min_price || minPriceValidationError ? ' ' : ''"
                         />
                         <span class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
                             {{ activeCurrencySymbol }}
@@ -645,45 +628,22 @@
                     </span>
                 </div>
                 <div class="flex items-center justify-end gap-3 w-full sm:w-auto">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
                         @click="submitForm"
+                        :loading="form.processing"
                         :disabled="
                             form.processing ||
                             (!selectedCatalogService && !service?.id) ||
                             !!minPriceValidationError
                         "
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
                         {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -698,6 +658,9 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({

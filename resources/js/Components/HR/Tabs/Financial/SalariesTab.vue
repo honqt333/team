@@ -229,57 +229,41 @@
             size="sm"
             @close="showEditSalary = false"
         >
-            <form @submit.prevent="submitSalary">
+            <form id="salary-edit-form" @submit.prevent="submitSalary">
                 <div class="space-y-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.financial.payroll.base_salary') }} ({{
-                                activeCurrencySymbol
-                            }})
-                        </label>
-                        <input
-                            v-model="salaryForm.base_salary"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.financial.payroll.gosi_rate') }} (%)
-                        </label>
-                        <input
-                            v-model="salaryForm.gosi_rate"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button
-                        type="button"
-                        @click="showEditSalary = false"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
-                    >
-                        {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="salaryForm.processing"
-                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
-                    >
-                        {{ $t('common.save') }}
-                    </button>
+                    <AppInput
+                        v-model="salaryForm.base_salary"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :label="`${$t('hr.financial.payroll.base_salary')} (${activeCurrencySymbol})`"
+                    />
+                    <AppInput
+                        v-model="salaryForm.gosi_rate"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        :label="`${$t('hr.financial.payroll.gosi_rate')} (%)`"
+                    />
                 </div>
             </form>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="showEditSalary = false">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="submit"
+                        form="salary-edit-form"
+                        variant="primary"
+                        :loading="salaryForm.processing"
+                    >
+                        {{ $t('common.save') }}
+                    </AppButton>
+                </div>
+            </template>
         </BaseModal>
     </div>
 </template>
@@ -288,6 +272,8 @@
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 
 const { activeCurrencySymbol } = useNumberFormat();

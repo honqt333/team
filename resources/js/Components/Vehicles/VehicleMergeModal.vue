@@ -128,11 +128,11 @@
                             />
                         </svg>
                     </div>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="searchQuery"
                         :placeholder="$t('vehicles.merge.search_target_placeholder')"
-                        class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                        class="ps-10 text-sm"
                     />
                 </div>
 
@@ -423,6 +423,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import axios from 'axios';
 

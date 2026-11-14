@@ -5,180 +5,214 @@
             <!-- Breadcrumbs -->
             <Breadcrumb :items="breadcrumbItems" class="px-1" />
 
-            <!-- Profile Hero Card with Glow Effect -->
-            <div class="relative group">
+            <!-- Profile Header Card (Compact & Clean) -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+                <!-- Top Action Bar -->
                 <div
-                    class="absolute -inset-1 bg-action-primary hover:bg-action-primary-hover rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
-                ></div>
-
-                <div
-                    class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-focus-ring-soft border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex flex-wrap items-center justify-between gap-2"
+                    :dir="isRtl ? 'rtl' : 'ltr'"
                 >
-                    <!-- Top Action Bar -->
-                    <div
-                        class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20"
-                        :dir="isRtl ? 'rtl' : 'ltr'"
-                    >
-                        <BackButton :href="route('app.dealers.index')" />
+                    <BackButton :href="route('app.dealers.index')" />
 
-                        <div
-                            class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Statement Modal Button -->
+                        <button
+                            type="button"
+                            @click="showStatementModal = true"
+                            :title="$t('dealers.show.statement_title')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-purple-200/80 dark:border-purple-800/40 bg-purple-50/70 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 hover:bg-purple-100/70 dark:hover:bg-purple-900/40 transition-colors cursor-pointer"
                         >
-                            <!-- Statement Modal Button -->
-                            <button
-                                type="button"
-                                @click="showStatementModal = true"
-                                :title="$t('dealers.show.statement_title')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-purple-100/70 dark:border-purple-800/30 bg-purple-50/70 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 hover:bg-white dark:hover:bg-purple-900/40 hover:shadow-md transition-all cursor-pointer"
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
-                                <span class="hidden sm:inline">
-                                    {{ $t('dealers.show.statement_title') }}
-                                </span>
-                            </button>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <span class="hidden sm:inline">
+                                {{ $t('dealers.show.statement_title') }}
+                            </span>
+                        </button>
 
-                            <!-- Toggle Status Button -->
-                            <button
-                                v-if="can('crm.customers.update') || isAnyAdmin()"
-                                type="button"
-                                @click="toggleActiveStatus"
-                                :title="
-                                    dealer.is_active
-                                        ? $t('dealers.show.status_toggle_inactive')
-                                        : $t('dealers.show.status_toggle_active')
-                                "
-                                :class="[
-                                    'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all cursor-pointer',
-                                    dealer.is_active
-                                        ? 'border-emerald-200/70 dark:border-emerald-800/30 bg-emerald-50/70 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-white dark:hover:bg-emerald-900/40 hover:shadow-md'
-                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:bg-white hover:shadow-md',
-                                ]"
-                            >
-                                <span
-                                    class="w-2 h-2 rounded-full"
-                                    :class="
-                                        dealer.is_active
-                                            ? 'bg-emerald-500 animate-pulse'
-                                            : 'bg-gray-400'
-                                    "
-                                ></span>
-                                <span class="hidden sm:inline">
-                                    {{
-                                        dealer.is_active
-                                            ? $t('dealers.status_active')
-                                            : $t('dealers.status_inactive')
-                                    }}
-                                </span>
-                            </button>
-
-                            <!-- Edit Button -->
-                            <button
-                                v-if="can('crm.customers.update') || isAnyAdmin()"
-                                type="button"
-                                @click="showEditModal = true"
-                                :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all cursor-pointer"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
-                            </button>
-
-                            <!-- Delete Button -->
-                            <button
-                                v-if="can('crm.customers.delete') || isAnyAdmin()"
-                                type="button"
-                                @click="confirmDelete"
-                                :disabled="!canDelete"
-                                :title="
-                                    canDelete
-                                        ? $t('common.delete')
-                                        : $t('dealers.show.cannot_delete_has_data')
-                                "
-                                :class="[
-                                    'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                    canDelete
-                                        ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md cursor-pointer'
-                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
-                                ]"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Watermark Background Graphic -->
-                    <div
-                        class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none"
-                    >
-                        <svg
-                            class="w-80 h-80 text-selection-text dark:text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
+                        <!-- Toggle Status Button -->
+                        <button
+                            v-if="can('crm.customers.update') || isAnyAdmin()"
+                            type="button"
+                            @click="toggleActiveStatus"
+                            :title="
+                                dealer.is_active
+                                    ? $t('dealers.show.status_toggle_inactive')
+                                    : $t('dealers.show.status_toggle_active')
+                            "
+                            :class="[
+                                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border transition-colors cursor-pointer',
+                                dealer.is_active
+                                    ? 'border-emerald-200/80 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/40'
+                                    : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:bg-gray-200/70',
+                            ]"
                         >
-                            <path
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                            />
-                        </svg>
-                    </div>
+                            <span
+                                class="w-2 h-2 rounded-full"
+                                :class="
+                                    dealer.is_active
+                                        ? 'bg-emerald-500 animate-pulse'
+                                        : 'bg-gray-400'
+                                "
+                            ></span>
+                            <span class="hidden sm:inline">
+                                {{
+                                    dealer.is_active
+                                        ? $t('dealers.status_active')
+                                        : $t('dealers.status_inactive')
+                                }}
+                            </span>
+                        </button>
 
-                    <!-- Hero Body -->
-                    <div class="relative z-10 p-6 pt-16">
-                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <!-- Left: Profile Info -->
-                            <div
-                                class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-6 flex-1"
+                        <!-- Edit Button -->
+                        <button
+                            v-if="can('crm.customers.update') || isAnyAdmin()"
+                            type="button"
+                            @click="showEditModal = true"
+                            :title="$t('common.edit')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <!-- Avatar Box -->
-                                <div class="relative">
-                                    <div
-                                        class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.25rem] bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft flex items-center justify-center text-white ring-4 ring-action-primary/20 transition-transform group-hover:scale-[1.03] duration-500"
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                            <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+                        </button>
+
+                        <!-- Delete Button -->
+                        <button
+                            v-if="can('crm.customers.delete') || isAnyAdmin()"
+                            type="button"
+                            @click="confirmDelete"
+                            :disabled="!canDelete"
+                            :title="
+                                canDelete
+                                    ? $t('common.delete')
+                                    : $t('dealers.show.cannot_delete_has_data')
+                            "
+                            :class="[
+                                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border transition-colors',
+                                canDelete
+                                    ? 'border-red-200/80 dark:border-red-800/40 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100/70 dark:hover:bg-red-900/40 cursor-pointer'
+                                    : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                            </svg>
+                            <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Header Body -->
+                <div class="p-4 sm:p-5">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                        <!-- Right: Avatar + Identity + Compact Contact Line -->
+                        <div class="flex items-start gap-4 min-w-0 flex-1">
+                            <div class="relative shrink-0">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-action-primary flex items-center justify-center text-white shadow-sm"
+                                >
+                                    <span class="text-2xl font-black">
+                                        {{ dealer.name?.charAt(0)?.toUpperCase() || '?' }}
+                                    </span>
+                                </div>
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600 flex items-center justify-center"
+                                >
+                                    <svg
+                                        class="w-3.5 h-3.5 text-indigo-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <span class="text-3xl lg:text-5xl font-black">
-                                            {{ dealer.name?.charAt(0)?.toUpperCase() || '?' }}
-                                        </span>
-                                    </div>
-                                    <div
-                                        class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border-4 border-action-primary/25 flex items-center justify-center"
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h1
+                                        class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight truncate"
+                                    >
+                                        {{ dealer.name }}
+                                    </h1>
+                                    <span
+                                        class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold border bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-200/70 dark:border-indigo-800/40"
+                                    >
+                                        {{ $t(`dealers.types.${dealer.type}`) || dealer.type }}
+                                    </span>
+                                    <span
+                                        class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold border"
+                                        :class="
+                                            dealer.is_active
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200/70 dark:border-emerald-800/40'
+                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'
+                                        "
+                                    >
+                                        {{
+                                            dealer.is_active
+                                                ? $t('dealers.status_active')
+                                                : $t('dealers.status_inactive')
+                                        }}
+                                    </span>
+                                </div>
+
+                                <p
+                                    v-if="dealer.name_en"
+                                    class="text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    dir="ltr"
+                                >
+                                    {{ dealer.name_en }}
+                                </p>
+
+                                <div
+                                    class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300"
+                                >
+                                    <span
+                                        v-if="dealer.contact_name"
+                                        class="inline-flex items-center gap-1.5"
                                     >
                                         <svg
-                                            class="w-5 h-5 text-indigo-500"
+                                            class="w-4 h-4 text-gray-400 shrink-0"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -187,407 +221,278 @@
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="2"
-                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                             />
                                         </svg>
-                                    </div>
-                                </div>
+                                        {{ dealer.contact_name }}
+                                    </span>
 
-                                <!-- Text Details -->
-                                <div class="flex-1">
-                                    <div
-                                        class="flex flex-wrap items-center justify-center sm:justify-start gap-2 lg:gap-3 mb-1"
-                                    >
-                                        <h1
-                                            class="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight"
-                                        >
-                                            {{ dealer.name }}
-                                        </h1>
-                                        <div
-                                            class="px-3 py-1.5 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase border shadow-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800/30"
-                                        >
-                                            {{ $t(`dealers.types.${dealer.type}`) || dealer.type }}
-                                        </div>
-                                        <div
-                                            class="px-3 py-1.5 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase border shadow-sm"
-                                            :class="
-                                                dealer.is_active
-                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/30'
-                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'
-                                            "
-                                        >
-                                            {{
-                                                dealer.is_active
-                                                    ? $t('dealers.status_active')
-                                                    : $t('dealers.status_inactive')
-                                            }}
-                                        </div>
-                                    </div>
-
-                                    <p
-                                        v-if="dealer.name_en"
-                                        class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3"
+                                    <a
+                                        v-if="dealer.phone"
+                                        :href="`tel:${dealer.phone}`"
+                                        class="inline-flex items-center gap-1.5 hover:text-action-primary transition-colors font-mono"
                                         dir="ltr"
                                     >
-                                        {{ dealer.name_en }}
-                                    </p>
-
-                                    <!-- Information Badges & Contact Pills -->
-                                    <div
-                                        class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm font-bold text-gray-500 dark:text-gray-400 mt-2"
-                                    >
-                                        <!-- Contact Person -->
-                                        <span
-                                            v-if="dealer.contact_name"
-                                            class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-selection-bg text-selection-text border border-action-primary/25"
+                                        <svg
+                                            class="w-4 h-4 text-action-primary shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            <svg
-                                                class="w-5 h-5 text-action-primary"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                />
-                                            </svg>
-                                            {{ dealer.contact_name }}
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                            />
+                                        </svg>
+                                        {{ dealer.phone }}
+                                    </a>
+
+                                    <a
+                                        v-if="dealer.whatsapp || dealer.phone"
+                                        :href="`https://wa.me/${getWhatsAppNumber(dealer)}`"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 hover:underline font-mono"
+                                        dir="ltr"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 shrink-0"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                                            />
+                                        </svg>
+                                        {{ dealer.whatsapp || dealer.phone }}
+                                    </a>
+
+                                    <a
+                                        v-if="dealer.email"
+                                        :href="`mailto:${dealer.email}`"
+                                        :title="$t('common.email')"
+                                        class="inline-flex items-center gap-1.5 hover:text-purple-600 dark:hover:text-purple-400 transition-colors max-w-[240px]"
+                                        dir="ltr"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-purple-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                            />
+                                        </svg>
+                                        <span class="truncate">{{ dealer.email }}</span>
+                                    </a>
+
+                                    <span
+                                        v-if="dealer.tax_number"
+                                        :title="$t('dealers.fields.tax_number')"
+                                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-mono text-xs"
+                                        dir="ltr"
+                                    >
+                                        <span class="font-bold">VAT</span>
+                                        {{ dealer.tax_number }}
+                                    </span>
+
+                                    <span
+                                        v-if="headerAddress"
+                                        :title="
+                                            $t('dealers.fields.address_line') + ': ' + headerAddress
+                                        "
+                                        class="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 max-w-[320px]"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-amber-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                        </svg>
+                                        <span class="truncate">{{ headerAddress }}</span>
+                                    </span>
+
+                                    <span
+                                        v-if="dealer.credit_limit || dealer.payment_terms_days"
+                                        class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-xs text-gray-700 dark:text-gray-200"
+                                    >
+                                        <span v-if="dealer.credit_limit">
+                                            {{ $t('dealers.fields.credit_limit') }}:
+                                            <strong class="font-mono">
+                                                {{ formatPrice(dealer.credit_limit) }}
+                                            </strong>
                                         </span>
-
-                                        <!-- Phone -->
-                                        <a
-                                            v-if="dealer.phone"
-                                            :href="`tel:${dealer.phone}`"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 hover:bg-white dark:hover:bg-gray-700 hover:text-action-primary hover:shadow-xl hover:shadow-focus-ring-soft transition-all border border-transparent hover:border-action-primary/25"
-                                            dir="ltr"
+                                        <span
+                                            v-if="dealer.credit_limit && dealer.payment_terms_days"
+                                            class="text-gray-400"
                                         >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-action-primary"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ dealer.phone }}
-                                        </a>
-
-                                        <!-- WhatsApp -->
-                                        <a
-                                            v-if="dealer.whatsapp || dealer.phone"
-                                            :href="`https://wa.me/${getWhatsAppNumber(dealer)}`"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-white dark:hover:bg-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5 transition-all border border-transparent hover:border-emerald-100"
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-emerald-500"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ dealer.whatsapp || dealer.phone }}
-                                        </a>
-
-                                        <!-- Email -->
-                                        <a
-                                            v-if="dealer.email"
-                                            :href="`mailto:${dealer.email}`"
-                                            :title="$t('common.email')"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 hover:bg-white dark:hover:bg-gray-800 hover:text-purple-700 dark:hover:text-purple-300 hover:shadow-xl hover:shadow-focus-ring-soft transition-all border border-transparent hover:border-purple-100 dark:hover:border-purple-800/50"
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-purple-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <span class="max-w-[220px] truncate">
-                                                {{ dealer.email }}
-                                            </span>
-                                        </a>
-
-                                        <!-- VAT Number -->
-                                        <div
-                                            v-if="dealer.tax_number"
-                                            :title="$t('dealers.fields.tax_number')"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-100/60 dark:border-blue-800/40"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center font-black text-xs text-blue-600"
-                                            >
-                                                VAT
-                                            </div>
-                                            <span class="font-mono text-xs font-bold" dir="ltr">
-                                                {{ dealer.tax_number }}
-                                            </span>
-                                        </div>
-
-                                        <!-- National Address -->
-                                        <div
-                                            v-if="headerAddress"
-                                            :title="
-                                                $t('dealers.fields.address_line') +
-                                                ': ' +
-                                                headerAddress
-                                            "
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-amber-50/50 dark:bg-amber-900/20 hover:bg-white dark:hover:bg-amber-900/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all border border-transparent hover:border-amber-100"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-amber-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                    />
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <span class="max-w-[320px] truncate">
-                                                {{ headerAddress }}
-                                            </span>
-                                        </div>
-
-                                        <!-- Credit Limit & Payment Terms -->
-                                        <div
-                                            v-if="dealer.credit_limit || dealer.payment_terms_days"
-                                            class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-selection-bg text-selection-text border border-action-primary/25 text-xs font-bold"
-                                        >
-                                            <svg
-                                                class="w-4 h-4 text-action-primary"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                                                />
-                                            </svg>
-                                            <span v-if="dealer.credit_limit">
-                                                {{ $t('dealers.fields.credit_limit') }}:
-                                                <strong
-                                                    class="font-mono text-gray-900 dark:text-white"
-                                                >
-                                                    {{ formatPrice(dealer.credit_limit) }}
-                                                </strong>
-                                            </span>
-                                            <span
-                                                v-if="
-                                                    dealer.credit_limit && dealer.payment_terms_days
-                                                "
-                                                class="text-border-strong"
-                                            >
-                                                |
-                                            </span>
-                                            <span v-if="dealer.payment_terms_days">
-                                                {{ $t('dealers.fields.payment_terms_days') }}:
-                                                <strong
-                                                    class="font-mono text-gray-900 dark:text-white"
-                                                >
-                                                    {{ dealer.payment_terms_days }}
-                                                </strong>
-                                                {{ $t('dealers.show.days_unit') }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right: Stat KPI Cards -->
-                            <div
-                                class="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-wrap items-center gap-2 lg:gap-3 w-full lg:w-auto"
-                            >
-                                <!-- Vehicles Count -->
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-teal-50/50 dark:bg-teal-900/20 rounded-3xl border border-teal-100/50 dark:border-teal-800/30 hover:bg-white dark:hover:bg-teal-900/40 transition-all hover:shadow-lg hover:shadow-teal-500/10"
-                                >
-                                    <span
-                                        class="text-2xl font-black text-teal-600 dark:text-teal-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ formatNumber(counts.vehicles, 0) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 text-center"
-                                    >
-                                        {{ $t('dealers.columns.vehicles_count') }}
+                                            |
+                                        </span>
+                                        <span v-if="dealer.payment_terms_days">
+                                            {{ $t('dealers.fields.payment_terms_days') }}:
+                                            <strong class="font-mono">
+                                                {{ dealer.payment_terms_days }}
+                                            </strong>
+                                            {{ $t('dealers.show.days_unit') }}
+                                        </span>
                                     </span>
                                 </div>
-
-                                <!-- Work Orders Count -->
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-selection-bg rounded-3xl border border-action-primary/25 hover:bg-white transition-all hover:shadow-lg hover:shadow-focus-ring-soft"
-                                >
-                                    <span
-                                        class="text-2xl font-black text-action-primary group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ formatNumber(counts.workOrders, 0) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 text-center"
-                                    >
-                                        {{ $t('dealers.columns.work_orders_count') }}
-                                    </span>
-                                </div>
-
-                                <!-- Invoices Count -->
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-rose-50/50 dark:bg-rose-900/20 rounded-3xl border border-rose-100/50 dark:border-rose-800/30 hover:bg-white dark:hover:bg-rose-900/40 transition-all hover:shadow-lg hover:shadow-rose-500/10"
-                                >
-                                    <span
-                                        class="text-2xl font-black text-rose-600 dark:text-rose-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ formatNumber(counts.invoices || 0, 0) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 text-center"
-                                    >
-                                        {{ $t('dealers.show.invoices_tab') }}
-                                    </span>
-                                </div>
-
-                                <!-- Balance Due (Clickable to open Statement Modal) -->
-                                <button
-                                    type="button"
-                                    @click="showStatementModal = true"
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-28 lg:h-24 px-2 rounded-3xl border transition-all hover:shadow-lg cursor-pointer text-center"
-                                    :class="
-                                        (financialSummary?.total_due || 0) > 0
-                                            ? 'bg-rose-50/70 dark:bg-rose-900/30 border-rose-200 dark:border-rose-800/50 hover:bg-white dark:hover:bg-rose-900/50 hover:shadow-rose-500/15'
-                                            : 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 hover:shadow-emerald-500/10'
-                                    "
-                                >
-                                    <span
-                                        class="text-sm font-black font-mono transition-transform group-hover/stat:scale-105"
-                                        :class="
-                                            (financialSummary?.total_due || 0) > 0
-                                                ? 'text-rose-600 dark:text-rose-400'
-                                                : 'text-emerald-600 dark:text-emerald-400'
-                                        "
-                                    >
-                                        {{ formatPrice(financialSummary?.total_due || 0) }}
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black uppercase tracking-wider mt-1"
-                                        :class="
-                                            (financialSummary?.total_due || 0) > 0
-                                                ? 'text-rose-500'
-                                                : 'text-emerald-500'
-                                        "
-                                    >
-                                        {{ $t('dealers.show.balance_due') }}
-                                    </span>
-                                </button>
                             </div>
                         </div>
 
-                        <!-- Credit Limit Utilization Bar (Shown when limit is configured) -->
+                        <!-- Left: Compact Stats Bar -->
                         <div
-                            v-if="dealer.credit_limit > 0"
-                            class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-700/70"
+                            class="grid grid-cols-2 sm:grid-cols-4 xl:flex items-center gap-2 shrink-0"
                         >
                             <div
-                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2"
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
                             >
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="text-xs font-black text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ $t('dealers.show.credit_utilization') }}
-                                    </span>
-                                    <span
-                                        v-if="dealer.is_credit_exceeded"
-                                        class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 animate-pulse"
-                                    >
-                                        {{ $t('dealers.show.credit_exceeded_warning') }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-4 text-xs font-mono">
-                                    <span class="text-gray-500">
-                                        {{ $t('dealers.show.credit_used') }}:
-                                        <strong class="text-gray-900 dark:text-white font-bold">
-                                            {{ formatPrice(financialSummary?.total_due || 0) }}
-                                        </strong>
-                                        / {{ formatPrice(dealer.credit_limit) }}
-                                    </span>
-                                    <span
-                                        class="font-black px-2 py-0.5 rounded-lg"
-                                        :class="
-                                            creditUsagePercent >= 100
-                                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
-                                                : creditUsagePercent >= 80
-                                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                                                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                        "
-                                    >
-                                        {{ creditUsagePercent }}%
-                                    </span>
-                                </div>
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
+                                >
+                                    {{ formatNumber(counts.vehicles, 0) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('dealers.columns.vehicles_count') }}
+                                </span>
                             </div>
 
-                            <!-- Progress Track -->
                             <div
-                                class="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner"
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
                             >
-                                <div
-                                    class="h-full rounded-full transition-all duration-700"
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
+                                >
+                                    {{ formatNumber(counts.workOrders, 0) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('dealers.columns.work_orders_count') }}
+                                </span>
+                            </div>
+
+                            <div
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
+                            >
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
+                                >
+                                    {{ formatNumber(counts.invoices || 0, 0) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('dealers.show.invoices_tab') }}
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                @click="showStatementModal = true"
+                                class="flex flex-col items-center justify-center px-3.5 py-2 rounded-xl border transition-colors cursor-pointer min-w-[96px]"
+                                :class="
+                                    (financialSummary?.total_due || 0) > 0
+                                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50 hover:bg-rose-100/70'
+                                        : 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100/70'
+                                "
+                            >
+                                <span
+                                    class="text-sm font-bold font-mono"
+                                    :class="
+                                        (financialSummary?.total_due || 0) > 0
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-emerald-600 dark:text-emerald-400'
+                                    "
+                                >
+                                    {{ formatPrice(financialSummary?.total_due || 0) }}
+                                </span>
+                                <span
+                                    class="text-[11px] font-semibold mt-0.5"
+                                    :class="
+                                        (financialSummary?.total_due || 0) > 0
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-emerald-600 dark:text-emerald-400'
+                                    "
+                                >
+                                    {{ $t('dealers.show.balance_due') }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Credit Limit Utilization Bar (Shown when limit is configured) -->
+                    <div
+                        v-if="dealer.credit_limit > 0"
+                        class="mt-4 pt-3.5 border-t border-gray-100 dark:border-gray-700/70"
+                    >
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-black text-gray-700 dark:text-gray-300">
+                                    {{ $t('dealers.show.credit_utilization') }}
+                                </span>
+                                <span
+                                    v-if="dealer.is_credit_exceeded"
+                                    class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 animate-pulse"
+                                >
+                                    {{ $t('dealers.show.credit_exceeded_warning') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs font-mono">
+                                <span class="text-gray-500">
+                                    {{ $t('dealers.show.credit_used') }}:
+                                    <strong class="text-gray-900 dark:text-white font-bold">
+                                        {{ formatPrice(financialSummary?.total_due || 0) }}
+                                    </strong>
+                                    / {{ formatPrice(dealer.credit_limit) }}
+                                </span>
+                                <span
+                                    class="font-black px-2 py-0.5 rounded-lg"
                                     :class="
                                         creditUsagePercent >= 100
-                                            ? 'bg-gradient-to-r from-rose-500 to-red-600'
+                                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
                                             : creditUsagePercent >= 80
-                                              ? 'bg-gradient-to-r from-amber-500 to-orange-500'
-                                              : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                                     "
-                                    :style="{ width: `${Math.min(100, creditUsagePercent)}%` }"
-                                ></div>
+                                >
+                                    {{ creditUsagePercent }}%
+                                </span>
                             </div>
+                        </div>
+
+                        <!-- Progress Track -->
+                        <div
+                            class="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner"
+                        >
+                            <div
+                                class="h-full rounded-full transition-all duration-700"
+                                :class="
+                                    creditUsagePercent >= 100
+                                        ? 'bg-gradient-to-r from-rose-500 to-red-600'
+                                        : creditUsagePercent >= 80
+                                          ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                                          : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                                "
+                                :style="{ width: `${Math.min(100, creditUsagePercent)}%` }"
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -2021,44 +1926,34 @@
                     required
                     :error="paymentTermForm.errors.term_text"
                 >
-                    <textarea
+                    <AppTextarea
                         v-model="paymentTermForm.term_text"
-                        rows="3"
+                        :rows="3"
                         :placeholder="$t('dealers.show.payment_term_text_placeholder')"
-                        class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
-                    ></textarea>
+                    />
                 </FormField>
 
                 <FormField
                     :label="$t('dealers.show.payment_term_sort_order')"
                     :error="paymentTermForm.errors.sort_order"
                 >
-                    <input
-                        type="number"
-                        min="0"
-                        v-model.number="paymentTermForm.sort_order"
-                        class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring font-mono"
-                    />
+                    <AppInput type="number" min="0" v-model.number="paymentTermForm.sort_order" />
                 </FormField>
             </form>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-3">
-                    <button
-                        type="button"
-                        @click="closePaymentTermModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="closePaymentTermModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="paymentTermForm.processing"
                         @click="submitPaymentTerm"
-                        :disabled="paymentTermForm.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -2162,11 +2057,10 @@
                             :error="vehicleForm.errors.vehicle_make_id"
                         />
                         <div v-if="vehicleForm.vehicle_make_id === 'other'" class="mt-2">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="vehicleForm.make_other"
                                 :placeholder="$t('vehicles.form.enter_make')"
-                                class="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                             />
                         </div>
                     </div>
@@ -2204,11 +2098,10 @@
                             "
                             :class="{ 'mt-2': vehicleForm.vehicle_make_id !== 'other' }"
                         >
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="vehicleForm.model_other"
                                 :placeholder="$t('vehicles.form.enter_model')"
-                                class="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                             />
                         </div>
                     </div>
@@ -2247,52 +2140,42 @@
                         />
                     </div>
                     <div>
-                        <label
-                            class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5"
-                        >
-                            {{ $t('vehicles.form.odometer') }}
-                        </label>
-                        <input
+                        <AppInput
                             type="number"
                             min="0"
                             v-model="vehicleForm.odometer"
+                            :label="$t('vehicles.form.odometer')"
                             placeholder="0"
                             dir="ltr"
-                            class="w-full px-3.5 py-2 text-sm font-mono rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                         />
                     </div>
                 </div>
 
                 <!-- VIN -->
                 <FormField :label="$t('vehicles.form.vin')" :error="vehicleForm.errors.vin">
-                    <input
+                    <AppInput
                         type="text"
                         v-model="vehicleForm.vin"
                         maxlength="17"
                         dir="ltr"
                         :placeholder="$t('vehicles.form.vin_placeholder')"
-                        class="w-full px-3.5 py-2 text-sm font-mono uppercase rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                     />
                 </FormField>
             </form>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-3">
-                    <button
-                        type="button"
-                        @click="closeAddVehicleModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="closeAddVehicleModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="vehicleForm.processing"
                         @click="submitAddVehicle"
-                        :disabled="vehicleForm.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -2315,6 +2198,9 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import BackButton from '@/Components/BackButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';

@@ -126,32 +126,30 @@
             size="sm"
             @close="showHoldModal = false"
         >
-            <p class="text-xs text-gray-500 dark:text-gray-400">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                 {{ labels.hold_hint }}
             </p>
-            <textarea
-                v-model="holdReason"
-                rows="3"
-                class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
-                :placeholder="labels.hold_placeholder"
-            ></textarea>
+            <AppTextarea v-model="holdReason" :rows="3" :placeholder="labels.hold_placeholder" />
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         @click="showHoldModal = false"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                         {{ labels.cancel }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        size="sm"
+                        :loading="busy"
+                        :disabled="!holdReason.trim()"
                         @click="confirmHold"
-                        :disabled="!holdReason.trim() || busy"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50"
                     >
                         {{ labels.hold }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -163,32 +161,30 @@
             size="sm"
             @close="showRejectModal = false"
         >
-            <p class="text-xs text-gray-500 dark:text-gray-400">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                 {{ labels.reject_hint }}
             </p>
-            <textarea
-                v-model="rejectNotes"
-                rows="3"
-                class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
-                :placeholder="labels.reject_placeholder"
-            ></textarea>
+            <AppTextarea v-model="rejectNotes" :rows="3" :placeholder="labels.reject_placeholder" />
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         @click="showRejectModal = false"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                         {{ labels.cancel }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="danger"
+                        size="sm"
+                        :loading="busy"
+                        :disabled="!rejectNotes.trim()"
                         @click="confirmReject"
-                        :disabled="!rejectNotes.trim() || busy"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50"
                     >
                         {{ labels.reject_quality }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -201,6 +197,8 @@ import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     workOrder: { type: Object, required: true },

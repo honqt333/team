@@ -205,33 +205,20 @@
                 {{ t('customer_portal.actions.cancel_body') }}
             </p>
             <form @submit.prevent="submitCancel" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1.5">
-                        {{ t('customer_portal.actions.cancel_reason_label') }}
-                    </label>
-                    <textarea
-                        v-model="cancelReason"
-                        :placeholder="t('customer_portal.actions.cancel_reason_placeholder')"
-                        rows="3"
-                        maxlength="255"
-                        class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-                    ></textarea>
-                </div>
-                <div class="flex gap-3">
-                    <button
-                        type="button"
-                        @click="showCancelModal = false"
-                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
+                <AppTextarea
+                    v-model="cancelReason"
+                    :label="t('customer_portal.actions.cancel_reason_label')"
+                    :placeholder="t('customer_portal.actions.cancel_reason_placeholder')"
+                    :rows="3"
+                    maxlength="255"
+                />
+                <div class="flex justify-end gap-3">
+                    <AppButton type="button" variant="secondary" @click="showCancelModal = false">
                         {{ t('customer_portal.actions.cancel_keep') }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="cancelSubmitting"
-                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="danger" :loading="cancelSubmitting">
                         {{ t('customer_portal.actions.cancel_confirm') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -245,6 +232,8 @@ import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

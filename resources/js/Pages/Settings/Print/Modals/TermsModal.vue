@@ -52,18 +52,19 @@
                     {{ index + 1 }}
                 </span>
 
-                <input
+                <AppInput
                     v-model="sig.name_ar"
                     type="text"
+                    size="sm"
                     placeholder="الاسم بالعربي"
-                    class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-end w-full"
+                    class="text-end"
                 />
 
-                <input
+                <AppInput
                     v-model="sig.name_en"
                     type="text"
+                    size="sm"
                     placeholder="English name"
-                    class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none w-full"
                     dir="ltr"
                 />
 
@@ -125,18 +126,12 @@
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    @click="handleSave"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
+                </AppButton>
+                <AppButton type="button" variant="primary" @click="handleSave">
                     {{ $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -146,6 +141,8 @@
 import BaseModal from '@/Components/BaseModal.vue';
 import { ref, watch } from 'vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const DEFAULT_SIGNATURES = [
     { name_ar: 'توقيع المدير', name_en: 'Manager Signature', order: 1, show: true },

@@ -6,6 +6,8 @@ import axios from 'axios';
 import BaseModal from '@/Components/BaseModal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -228,50 +230,50 @@ const viewInspection = async (inspection) => {
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label
+                                    <button
                                         v-for="status in ['good', 'warning', 'danger', 'na']"
                                         :key="status"
-                                        class="flex-1 md:flex-none"
+                                        type="button"
+                                        @click="
+                                            inspectionForm.results.find(
+                                                (r) => r.item_id === item.id
+                                            ).status = status
+                                        "
+                                        class="flex-1 md:flex-none cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-center transition-all border-2"
+                                        :class="[
+                                            status === 'good'
+                                                ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                                                : status === 'warning'
+                                                  ? 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                  : status === 'danger'
+                                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                                            inspectionForm.results.find(
+                                                (r) => r.item_id === item.id
+                                            )?.status === status
+                                                ? status === 'good'
+                                                    ? 'border-green-500'
+                                                    : status === 'warning'
+                                                      ? 'border-yellow-500'
+                                                      : status === 'danger'
+                                                        ? 'border-red-500'
+                                                        : 'border-gray-400'
+                                                : 'border-transparent',
+                                        ]"
                                     >
-                                        <input
-                                            type="radio"
-                                            :name="'status-' + item.id"
-                                            v-model="
-                                                inspectionForm.results.find(
-                                                    (r) => r.item_id === item.id
-                                                ).status
-                                            "
-                                            :value="status"
-                                            class="hidden peer"
-                                        />
-                                        <div
-                                            class="cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-center transition-all border-2 border-transparent"
-                                            :class="{
-                                                'bg-green-50 text-green-600 peer-checked:border-green-500 dark:bg-green-900/20 dark:text-green-400':
-                                                    status === 'good',
-                                                'bg-yellow-50 text-yellow-600 peer-checked:border-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400':
-                                                    status === 'warning',
-                                                'bg-red-50 text-red-600 peer-checked:border-red-500 dark:bg-red-900/20 dark:text-red-400':
-                                                    status === 'danger',
-                                                'bg-gray-100 text-gray-600 peer-checked:border-gray-400 dark:bg-gray-800 dark:text-gray-400':
-                                                    status === 'na',
-                                            }"
-                                        >
-                                            {{ getStatusLabel(status) }}
-                                        </div>
-                                    </label>
+                                        {{ getStatusLabel(status) }}
+                                    </button>
                                 </div>
                             </div>
                             <div class="mt-4">
-                                <textarea
+                                <AppTextarea
                                     v-model="
                                         inspectionForm.results.find((r) => r.item_id === item.id)
                                             .notes
                                     "
-                                    class="w-full text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-focus-ring"
-                                    rows="1"
+                                    :rows="1"
                                     :placeholder="$t('common.notes')"
-                                ></textarea>
+                                />
                             </div>
                         </div>
                     </div>
@@ -280,12 +282,21 @@ const viewInspection = async (inspection) => {
 
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <SecondaryButton @click="showNewInspectionModal = false">
+                    <AppButton
+                        type="button"
+                        variant="secondary"
+                        @click="showNewInspectionModal = false"
+                    >
                         {{ $t('common.cancel') }}
-                    </SecondaryButton>
-                    <PrimaryButton @click="saveInspection" :loading="loading">
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="loading"
+                        @click="saveInspection"
+                    >
                         {{ $t('work_orders.systematic.save_inspection') }}
-                    </PrimaryButton>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>

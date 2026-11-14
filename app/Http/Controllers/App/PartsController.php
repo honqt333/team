@@ -162,7 +162,7 @@ class PartsController extends Controller
             'purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|extensions:jpeg,png,jpg,webp|max:2048',
             'default_sale_price' => 'nullable|numeric|min:0',
             'min_sale_price' => 'nullable|numeric|min:0',
             'min_qty' => 'nullable|numeric|min:0',

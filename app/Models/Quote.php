@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use App\Models\Concerns\TenantScoped;
 use App\Traits\HasQuoteRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
  */
 class Quote extends Model
 {
-    use CenterScoped, HasQuoteRelations, HasTaxSnapshot, SoftDeletes;
+    use CenterScoped, HasQuoteRelations, HasTaxSnapshot, SoftDeletes, TenantScoped;
 
     public const STATUS_DRAFT = 'draft';
 

@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import KPICard from '@/Components/DashboardV2/common/KPICard.vue';
 import ChartCard from '@/Components/DashboardV2/common/ChartCard.vue';
@@ -6,13 +7,31 @@ import RevenueBarChart from '@/Components/DashboardV2/widgets/RevenueBarChart.vu
 import RecentInvoices from '@/Components/DashboardV2/widgets/RecentInvoices.vue';
 import TopCustomers from '@/Components/DashboardV2/widgets/TopCustomers.vue';
 
-defineProps({
+const props = defineProps({
     stats: { type: Object, required: true },
     charts: { type: Object, required: true },
     recentInvoices: { type: Array, default: () => [] },
     topCustomers: { type: Array, default: () => [] },
     currency: { type: String, default: 'SAR' },
+    isLoading: { type: Boolean, default: false },
 });
+
+const revenueSparkline = computed(() =>
+    (props.charts?.revenueDaily ?? [])
+        .slice(-10)
+        .map((d) => Number(d.total ?? d.amount ?? d.value ?? 0))
+);
+
+const paymentMethodsTotal = computed(() =>
+    (props.charts?.paymentMethods ?? []).reduce((sum, item) => sum + Number(item.total ?? 0), 0)
+);
+
+function formatAmount(value) {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(Number(value ?? 0));
+}
 
 function navigate(url) {
     router.get(url);
@@ -35,12 +54,14 @@ const ICONS = {
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KPICard
                 :label="$t('dashboard.revenue_this_month')"
-                :value="stats.revenue?.thisMonth ?? 0"
-                :previousValue="stats.revenue?.lastMonth ?? null"
+                :value="stats.revenue?.periodTotal ?? stats.revenue?.thisMonth ?? 0"
+                :previousValue="stats.revenue?.prevPeriodTotal ?? stats.revenue?.lastMonth ?? null"
                 :icon="ICONS.revenue"
                 icon-color="emerald"
                 format="currency"
                 :suffix="currency"
+                :sparkline="revenueSparkline"
+                :is-loading="isLoading"
                 href="/app/invoices"
             />
             <KPICard
@@ -73,10 +94,82 @@ const ICONS = {
             />
         </div>
 
-        <!-- Revenue trend (large chart) -->
-        <ChartCard :title="$t('dashboard.revenue_trend')" :subtitle="$t('dashboard.last_30_days')">
-            <RevenueBarChart :data="charts.revenueDaily ?? []" :currency="currency" />
-        </ChartCard>
+        <!-- Cash Flow Summary (Expenses & Net Flow) -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <KPICard
+                :label="$t('dashboard.period_expenses')"
+                :value="stats.revenue?.periodExpenses ?? 0"
+                :icon="ICONS.outstanding"
+                icon-color="amber"
+                format="currency"
+                :suffix="currency"
+                :is-loading="isLoading"
+                href="/app/purchase-invoices"
+            />
+            <KPICard
+                :label="$t('dashboard.period_net_flow')"
+                :value="stats.revenue?.periodNetFlow ?? 0"
+                :icon="ICONS.paid"
+                :icon-color="(stats.revenue?.periodNetFlow ?? 0) >= 0 ? 'emerald' : 'rose'"
+                format="currency"
+                :suffix="currency"
+                :is-loading="isLoading"
+            />
+        </div>
+
+        <!-- Revenue trend + Payment methods -->
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="lg:col-span-2">
+                <ChartCard
+                    :title="$t('dashboard.revenue_trend')"
+                    :subtitle="$t('dashboard.last_30_days')"
+                >
+                    <RevenueBarChart :data="charts.revenueDaily ?? []" :currency="currency" />
+                </ChartCard>
+            </div>
+            <ChartCard :title="$t('dashboard.payment_methods')">
+                <div v-if="charts.paymentMethods?.length" class="space-y-3">
+                    <div
+                        v-for="item in charts.paymentMethods"
+                        :key="item.method"
+                        class="space-y-1.5"
+                    >
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-700 dark:text-slate-200">
+                                {{ $t(`payments.methods.${item.method}`) || item.method }}
+                            </span>
+                            <span class="font-semibold tabular-nums text-slate-900 dark:text-white">
+                                {{ formatAmount(item.total) }} {{ currency }}
+                            </span>
+                        </div>
+                        <div
+                            class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                        >
+                            <div
+                                class="h-full rounded-full bg-emerald-500 transition-all"
+                                :style="{
+                                    width: `${
+                                        paymentMethodsTotal > 0
+                                            ? Math.max(
+                                                  4,
+                                                  Math.round(
+                                                      (Number(item.total ?? 0) /
+                                                          paymentMethodsTotal) *
+                                                          100
+                                                  )
+                                              )
+                                            : 0
+                                    }%`,
+                                }"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="py-8 text-center text-xs text-slate-400">
+                    {{ $t('dashboard.all_clear') }}
+                </div>
+            </ChartCard>
+        </div>
 
         <!-- Top customers + Recent invoices -->
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">

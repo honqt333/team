@@ -144,13 +144,23 @@ class CompanyProfileController extends Controller
                 ]),
             'company_invoices' => fn () => [
                 'sales' => Invoice::withoutGlobalScope('center_scoped')
+                    ->where('invoices.tenant_id', $tenant->id)
                     ->whereNull('center_id')
-                    ->whereIn('id', function ($query) {
-                        $query->select('invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('invoice_id');
+                    ->whereIn('id', function ($query) use ($tenant) {
+                        $query->select('invoice_id')
+                            ->from('company_transactions')
+                            ->where('tenant_id', $tenant->id)
+                            ->whereNull('center_id')
+                            ->whereNotNull('invoice_id');
                     })->with(['customer', 'center'])->latest()->get(),
-                'purchases' => PurchaseInvoice::whereNull('center_id')
-                    ->whereIn('id', function ($query) {
-                        $query->select('purchase_invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('purchase_invoice_id');
+                'purchases' => PurchaseInvoice::where('purchase_invoices.tenant_id', $tenant->id)
+                    ->whereNull('center_id')
+                    ->whereIn('id', function ($query) use ($tenant) {
+                        $query->select('purchase_invoice_id')
+                            ->from('company_transactions')
+                            ->where('tenant_id', $tenant->id)
+                            ->whereNull('center_id')
+                            ->whereNotNull('purchase_invoice_id');
                     })->with(['supplier', 'center'])->latest()->get(),
             ],
             'subscriptions' => rescue(function () use ($tenant) {

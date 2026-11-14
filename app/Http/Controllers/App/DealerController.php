@@ -15,22 +15,24 @@ use App\Models\Payment;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Models\WorkOrder;
+use App\Support\TenancyContext;
+use BackedEnum;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DealerController extends Controller
 {
-    public function index(Request $request): Response
+    private function buildDealerQuery(Request $request): Builder
     {
-        $this->authorize('viewAny', Dealer::class);
-
-        $user = $request->user();
-        $tenantId = $user->tenant_id;
+        $tenantId = $request->user()->tenant_id;
 
         $query = Dealer::query()
             ->where('tenant_id', $tenantId)
@@ -45,8 +47,11 @@ class DealerController extends Controller
                     ->withoutGlobalScope('center_scoped')
                     ->whereColumn('invoices.dealer_id', 'dealers.id')
                     ->whereNotIn('status', ['cancelled'])
-                    ->where('type', 'invoice')
-                    ->selectRaw('COALESCE(SUM(CASE WHEN (total_incl_tax - total_paid) > 0 THEN (total_incl_tax - total_paid) ELSE 0 END), 0)'),
+                    ->selectRaw("COALESCE(SUM(CASE
+                        WHEN type = 'credit_note' THEN -(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END)
+                        WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0))
+                        ELSE 0
+                    END), 0)"),
                 'outstanding_balance'
             );
 
@@ -59,10 +64,46 @@ class DealerController extends Controller
             $query->latest('dealers.id');
         }
 
-        $dealers = $query->paginate(20)->withQueryString();
-        $dealers->getCollection()->each(function (Dealer $dealer) {
-            $dealer->outstanding_balance = $dealer->getOutstandingBalance();
+        return $query;
+    }
+
+    private function attachOutstandingBalances(Collection $dealers, int $tenantId): void
+    {
+        $dealerIds = $dealers->pluck('id')->all();
+
+        $uninvoicedByDealer = $dealerIds !== []
+            ? WorkOrder::query()
+                ->withoutGlobalScope('center_scoped')
+                ->where('tenant_id', $tenantId)
+                ->whereIn('dealer_id', $dealerIds)
+                ->whereNotIn('status', ['cancelled'])
+                ->whereDoesntHave('invoice', function ($q) {
+                    $q->withoutGlobalScope('center_scoped')
+                        ->whereNotIn('status', ['cancelled']);
+                })
+                ->with(['payments', 'creditNotes'])
+                ->get()
+                ->groupBy('dealer_id')
+            : collect();
+
+        $dealers->each(function (Dealer $dealer) use ($uninvoicedByDealer) {
+            $invoicedDue = (float) ($dealer->outstanding_balance ?? 0);
+            $uninvoicedDue = (float) ($uninvoicedByDealer->get($dealer->id, collect())
+                ->sum(fn (WorkOrder $wo) => (float) $wo->balance));
+            $dealer->outstanding_balance = max(0.0, round($invoicedDue + $uninvoicedDue, 2));
         });
+    }
+
+    public function index(Request $request): Response
+    {
+        $this->authorize('viewAny', Dealer::class);
+
+        $tenantId = $request->user()->tenant_id;
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $dealers = $this->buildDealerQuery($request)->paginate(20)->withQueryString();
+        $this->attachOutstandingBalances($dealers->getCollection(), $tenantId);
 
         return Inertia::render('Dealers/Index', [
             'dealers' => $dealers,
@@ -71,6 +112,76 @@ class DealerController extends Controller
                 $request->only(['search', 'type', 'status']),
                 ['sort' => $sort ?: null, 'direction' => $sort ? $direction : null]
             ),
+        ]);
+    }
+
+    public function print(Request $request): Response
+    {
+        $this->authorize('viewAny', Dealer::class);
+
+        $user = $request->user();
+        $dealers = $this->buildDealerQuery($request)->get();
+        $this->attachOutstandingBalances($dealers, $user->tenant_id);
+
+        $tenant = $user->tenant;
+        $centerId = TenancyContext::centerId();
+        $center = $centerId ? Center::find($centerId) : null;
+
+        return Inertia::render('Dealers/Print', [
+            'dealers' => $dealers,
+            'filters' => $request->only(['search', 'type', 'status']),
+            'companyInfo' => [
+                'name' => $center?->name_ar ?? $center?->name ?? $tenant?->trade_name ?? $tenant?->name ?? config('app.name_ar', 'خدمة برو'),
+                'vat_number' => $tenant?->vat_number ?? '',
+                'cr_number' => $tenant?->cr_number ?? '',
+                'logo_path' => $tenant?->logo_path ?? '',
+                'center_name' => $center?->name ?? '',
+                'phone' => $center?->phone ?? $tenant?->phone ?? '',
+            ],
+        ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Dealer::class);
+
+        $user = $request->user();
+        $dealers = $this->buildDealerQuery($request)->get();
+        $this->attachOutstandingBalances($dealers, $user->tenant_id);
+
+        $filename = 'dealers_'.Carbon::now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($dealers) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                __('dealers.columns.name'),
+                __('dealers.columns.contact'),
+                __('common.phone'),
+                __('dealers.columns.tax_number'),
+                __('dealers.columns.vehicles_count'),
+                __('dealers.columns.work_orders_count'),
+                __('dealers.columns.outstanding_balance'),
+                __('dealers.columns.status'),
+            ]);
+
+            foreach ($dealers as $dealer) {
+                fputcsv($handle, [
+                    $dealer->name,
+                    $dealer->contact_name ?? '',
+                    $dealer->phone ?? '',
+                    $dealer->tax_number ?? '',
+                    $dealer->vehicles_count ?? 0,
+                    $dealer->work_orders_count ?? 0,
+                    number_format((float) ($dealer->outstanding_balance ?? 0), 2, '.', ''),
+                    $dealer->is_active ? __('dealers.status_active') : __('dealers.status_inactive'),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 
@@ -258,8 +369,13 @@ class DealerController extends Controller
 
             return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
         }, 0.0);
-        $invoicedDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(fn ($inv) => max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid));
-        $totalDue = round($invoicedDue + $openUninvoicedDue, 2);
+        $invoicedDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(function ($inv) {
+            $rem = max(0.0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
+            $typeVal = $inv->type instanceof BackedEnum ? $inv->type->value : (string) $inv->type;
+
+            return $typeVal === 'credit_note' ? -$rem : $rem;
+        });
+        $totalDue = max(0.0, round($invoicedDue + $openUninvoicedDue, 2));
 
         $financialSummary = [
             'total_invoiced' => $totalInvoiced,
@@ -356,11 +472,13 @@ class DealerController extends Controller
             ? (int) $validated['sort_order']
             : ((int) $dealer->paymentTerms()->max('sort_order') + 1);
 
-        $dealer->paymentTerms()->create([
+        $term = $dealer->paymentTerms()->create([
             'tenant_id' => $dealer->tenant_id,
             'term_text' => $validated['term_text'],
             'sort_order' => $nextOrder,
         ]);
+
+        $dealer->logActivity('payment_term_created', ['payment_term_id' => $term->id]);
 
         return redirect()->back()->with('success', __('messages.saved_successfully'));
     }
@@ -380,6 +498,8 @@ class DealerController extends Controller
             'sort_order' => isset($validated['sort_order']) ? (int) $validated['sort_order'] : $paymentTerm->sort_order,
         ]);
 
+        $dealer->logActivity('payment_term_updated', ['payment_term_id' => $paymentTerm->id]);
+
         return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 
@@ -388,7 +508,9 @@ class DealerController extends Controller
         $this->authorize('update', $dealer);
         abort_unless((int) $paymentTerm->dealer_id === (int) $dealer->id, 404);
 
+        $termId = $paymentTerm->id;
         $paymentTerm->delete();
+        $dealer->logActivity('payment_term_deleted', ['payment_term_id' => $termId]);
 
         return redirect()->back()->with('success', __('messages.deleted_successfully'));
     }

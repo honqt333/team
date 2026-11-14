@@ -165,16 +165,13 @@
                         {{ $t('feedback.modal.chars_count') }}
                     </span>
                 </div>
-                <textarea
+                <AppTextarea
                     v-model="form.comments"
                     rows="3"
                     maxlength="1000"
                     :placeholder="$t('feedback.modal.comments_placeholder')"
-                    class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-gray-900 dark:text-gray-100 focus:border-action-primary focus:ring-focus-ring p-3"
-                ></textarea>
-                <p v-if="form.errors.comments" class="text-xs text-rose-500 mt-1">
-                    {{ form.errors.comments }}
-                </p>
+                    :error="form.errors.comments"
+                />
             </div>
 
             <!-- 5. Screen Recording Section -->
@@ -337,58 +334,35 @@
                     ></div>
                 </div>
             </div>
-
-            <!-- Modal Actions -->
-            <div
-                class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700"
-            >
-                <button
-                    type="button"
-                    @click="handleClose"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
-                    {{ $t('feedback.modal.cancel') }}
-                </button>
-                <button
-                    type="submit"
-                    :disabled="form.processing || recorder.isRecording.value"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
-                    <svg
-                        v-if="form.processing"
-                        class="animate-spin w-4 h-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span>
-                        {{
-                            form.processing
-                                ? $t('feedback.modal.submitting')
-                                : $t('feedback.modal.submit')
-                        }}
-                    </span>
-                </button>
-            </div>
         </form>
+
+        <template #footer>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" @click="handleClose">
+                    {{ $t('feedback.modal.cancel') }}
+                </AppButton>
+                <AppButton
+                    type="button"
+                    variant="primary"
+                    @click="submit"
+                    :loading="form.processing"
+                    :disabled="form.processing || recorder.isRecording.value"
+                >
+                    {{
+                        form.processing
+                            ? $t('feedback.modal.submitting')
+                            : $t('feedback.modal.submit')
+                    }}
+                </AppButton>
+            </div>
+        </template>
     </BaseModal>
 </template>
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

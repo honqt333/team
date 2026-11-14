@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -44,6 +44,8 @@ const props = defineProps({
     activeWorkshopVehicles: { type: Array, default: () => [] },
     workingTechniciansNow: { type: Array, default: () => [] },
     currency: { type: String, default: '' },
+    period: { type: String, default: 'month' },
+    lastUpdatedAt: { type: String, default: '' },
 });
 
 const page = usePage();
@@ -123,35 +125,160 @@ watch(activeTab, (newTab) => {
 });
 
 const isRefreshing = ref(false);
+const selectedPeriod = ref(props.period || 'month');
+const autoRefresh = ref(
+    typeof window !== 'undefined' &&
+        window.localStorage?.getItem('khidmh_dashboard_autorefresh') === '1'
+);
+const showCustomizeMenu = ref(false);
 
-function refresh() {
-    if (isRefreshing.value) return;
+const defaultWidgetPrefs = {
+    kpis: true,
+    operations: true,
+    charts: true,
+    services: true,
+};
+
+const loadWidgetPrefs = () => {
+    if (typeof window === 'undefined') return { ...defaultWidgetPrefs };
+    try {
+        const raw = window.localStorage?.getItem('khidmh_dashboard_widgets');
+        return raw ? { ...defaultWidgetPrefs, ...JSON.parse(raw) } : { ...defaultWidgetPrefs };
+    } catch {
+        return { ...defaultWidgetPrefs };
+    }
+};
+
+const widgetPrefs = ref(loadWidgetPrefs());
+
+watch(
+    widgetPrefs,
+    (val) => {
+        if (typeof window !== 'undefined') {
+            try {
+                window.localStorage?.setItem('khidmh_dashboard_widgets', JSON.stringify(val));
+            } catch {
+                // ignore storage errors
+            }
+        }
+    },
+    { deep: true }
+);
+
+watch(
+    () => props.period,
+    (val) => {
+        if (val) selectedPeriod.value = val;
+    }
+);
+
+const periodOptions = computed(() => [
+    { id: 'today', label: t('dashboard.period_today') },
+    { id: '7d', label: t('dashboard.last_7_days') },
+    { id: 'month', label: t('dashboard.this_month') },
+    { id: '30d', label: t('dashboard.last_30_days') },
+]);
+
+const RELOAD_ONLY = [
+    'period',
+    'lastUpdatedAt',
+    'userContext',
+    'stats',
+    'charts',
+    'alerts',
+    'recentWorkOrders',
+    'recentInvoices',
+    'todaySchedule',
+    'todayNewWorkOrders',
+    'todayAppointments',
+    'readyForDelivery',
+    'myAssignedWorkOrders',
+    'topServices',
+    'technicianPerformance',
+    'topCustomers',
+    'checkedOutPaymentDue',
+    'activeWorkshopVehicles',
+    'workingTechniciansNow',
+];
+
+function selectPeriod(periodId) {
+    if (selectedPeriod.value === periodId && !isRefreshing.value) return;
+    selectedPeriod.value = periodId;
     isRefreshing.value = true;
     router.reload({
-        only: [
-            'userContext',
-            'stats',
-            'charts',
-            'alerts',
-            'recentWorkOrders',
-            'recentInvoices',
-            'todaySchedule',
-            'todayNewWorkOrders',
-            'todayAppointments',
-            'readyForDelivery',
-            'myAssignedWorkOrders',
-            'topServices',
-            'technicianPerformance',
-            'topCustomers',
-            'checkedOutPaymentDue',
-            'activeWorkshopVehicles',
-            'workingTechniciansNow',
-        ],
+        data: { period: periodId },
+        only: RELOAD_ONLY,
+        preserveState: true,
+        preserveScroll: true,
         onFinish: () => {
             isRefreshing.value = false;
         },
     });
 }
+
+function refresh(force = true) {
+    if (isRefreshing.value) return;
+    isRefreshing.value = true;
+    router.reload({
+        data: {
+            period: selectedPeriod.value,
+            ...(force ? { refresh: 1 } : {}),
+        },
+        only: RELOAD_ONLY,
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => {
+            isRefreshing.value = false;
+        },
+    });
+}
+
+let autoRefreshTimer = null;
+
+function setupAutoRefresh() {
+    if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
+    if (autoRefresh.value && typeof window !== 'undefined') {
+        autoRefreshTimer = setInterval(() => {
+            if (!document.hidden) {
+                refresh(true);
+            }
+        }, 60000);
+    }
+}
+
+watch(autoRefresh, (val) => {
+    if (typeof window !== 'undefined') {
+        try {
+            window.localStorage?.setItem('khidmh_dashboard_autorefresh', val ? '1' : '0');
+        } catch {
+            // ignore
+        }
+    }
+    setupAutoRefresh();
+});
+
+const closeCustomizeOnOutsideClick = (event) => {
+    if (showCustomizeMenu.value && !event.target.closest('.dashboard-customize-root')) {
+        showCustomizeMenu.value = false;
+    }
+};
+
+onMounted(() => {
+    setupAutoRefresh();
+    if (typeof document !== 'undefined') {
+        document.addEventListener('click', closeCustomizeOnOutsideClick);
+    }
+});
+
+onBeforeUnmount(() => {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    if (typeof document !== 'undefined') {
+        document.removeEventListener('click', closeCustomizeOnOutsideClick);
+    }
+});
 </script>
 
 <template>
@@ -214,12 +341,86 @@ function refresh() {
                         <span>{{ today }}</span>
                     </div>
 
+                    <!-- Period Switcher -->
+                    <div
+                        class="hidden lg:inline-flex items-center gap-0.5 rounded-xl border border-slate-200/80 bg-slate-100/80 p-1 dark:border-slate-700 dark:bg-slate-800/80"
+                    >
+                        <button
+                            v-for="opt in periodOptions"
+                            :key="opt.id"
+                            type="button"
+                            @click="selectPeriod(opt.id)"
+                            :class="[
+                                'rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer',
+                                selectedPeriod === opt.id
+                                    ? 'bg-white text-action-primary shadow-2xs dark:bg-slate-700 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            {{ opt.label }}
+                        </button>
+                    </div>
+
+                    <!-- Customize Widgets -->
+                    <div class="relative dashboard-customize-root">
+                        <button
+                            type="button"
+                            @click="showCustomizeMenu = !showCustomizeMenu"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                            :title="$t('dashboard.customize')"
+                        >
+                            <svg
+                                class="h-3.5 w-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                                />
+                            </svg>
+                            <span class="hidden xl:inline">{{ $t('dashboard.customize') }}</span>
+                        </button>
+                        <div
+                            v-if="showCustomizeMenu"
+                            class="absolute end-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl z-40 dark:border-slate-700 dark:bg-slate-800 space-y-2"
+                        >
+                            <label
+                                v-for="(val, key) in widgetPrefs"
+                                :key="key"
+                                class="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
+                            >
+                                <span>{{ $t(`dashboard.widget_${key}`) }}</span>
+                                <input
+                                    type="checkbox"
+                                    v-model="widgetPrefs[key]"
+                                    class="rounded border-slate-300 text-action-primary focus:ring-action-primary"
+                                />
+                            </label>
+                            <div class="border-t border-slate-100 dark:border-slate-700 pt-2">
+                                <label
+                                    class="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
+                                >
+                                    <span>{{ $t('dashboard.auto_refresh') }} (60s)</span>
+                                    <input
+                                        type="checkbox"
+                                        v-model="autoRefresh"
+                                        class="rounded border-slate-300 text-action-primary focus:ring-action-primary"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Refresh button -->
                     <button
                         type="button"
-                        @click="refresh"
+                        @click="refresh(true)"
                         :disabled="isRefreshing"
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
                         :title="$t('dashboard.refresh')"
                     >
                         <svg
@@ -241,7 +442,7 @@ function refresh() {
 
                 <template #primary-action v-if="userContext?.canCreateWorkOrder">
                     <Link
-                        href="/app/work-orders/create"
+                        href="/app/work-orders?create=1"
                         class="inline-flex items-center justify-center gap-2 rounded-xl bg-action-primary hover:bg-action-primary-hover px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-focus-ring-soft transition-all active:scale-95"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,6 +563,8 @@ function refresh() {
                         :my-assigned-work-orders="myAssignedWorkOrders"
                         :top-services="topServices"
                         :currency="dashboardCurrency"
+                        :is-loading="isRefreshing"
+                        :visible-widgets="widgetPrefs"
                     />
 
                     <FinancialTab

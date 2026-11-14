@@ -5,6 +5,7 @@ import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -144,41 +145,18 @@ const submit = () => {
 
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
-                <button
-                    type="button"
-                    @click="close"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="close">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
                     form="condition-category-form"
+                    variant="primary"
+                    :loading="form.processing"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    <svg
-                        v-if="form.processing"
-                        class="animate-spin h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span>{{ isEdit ? $t('common.save') : $t('common.add') }}</span>
-                </button>
+                    {{ isEdit ? $t('common.save') : $t('common.add') }}
+                </AppButton>
             </div>
         </template>
     </BaseModal>

@@ -277,6 +277,8 @@ class TwoFactorController extends Controller
             Auth::guard('web')->login($user);
         }
 
+        $request->session()->regenerate();
+
         $user->updateLoginInfo();
 
         return redirect()->intended('/system');

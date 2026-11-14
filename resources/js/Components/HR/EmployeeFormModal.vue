@@ -16,19 +16,13 @@
                             {{ $t('common.name') }} (AR)
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.name_ar"
                             type="text"
-                            :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
-                                form.errors.name_ar || (form.hasErrors && !form.name_ar)
-                                    ? 'border-red-500 focus:border-danger'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                            ]"
+                            :error="
+                                form.errors.name_ar || (form.hasErrors && !form.name_ar ? ' ' : '')
+                            "
                         />
-                        <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.name_ar }}
-                        </p>
                     </div>
 
                     <!-- Name EN -->
@@ -39,20 +33,14 @@
                             {{ $t('common.name') }} (EN)
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.name_en"
                             type="text"
                             required
-                            :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
-                                form.errors.name_en || (form.hasErrors && !form.name_en)
-                                    ? 'border-red-500 focus:border-danger'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                            ]"
+                            :error="
+                                form.errors.name_en || (form.hasErrors && !form.name_en ? ' ' : '')
+                            "
                         />
-                        <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.name_en }}
-                        </p>
                     </div>
 
                     <!-- Phone -->
@@ -63,20 +51,12 @@
                             {{ $t('common.phone') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.phone"
                             type="tel"
                             dir="ltr"
-                            :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
-                                form.errors.phone || (form.hasErrors && !form.phone)
-                                    ? 'border-red-500 focus:border-danger'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                            ]"
+                            :error="form.errors.phone || (form.hasErrors && !form.phone ? ' ' : '')"
                         />
-                        <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.phone }}
-                        </p>
                     </div>
 
                     <!-- Gender -->
@@ -153,20 +133,12 @@
                             {{ $t('common.email') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             v-model="form.email"
                             type="email"
-                            :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
-                                form.errors.email
-                                    ? 'border-red-500 focus:border-danger'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                            ]"
+                            :error="form.errors.email"
                             required
                         />
-                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.email }}
-                        </p>
                     </div>
 
                     <!-- Branch -->
@@ -181,7 +153,6 @@
                             required
                         />
                     </div>
-                    <input v-else type="hidden" :value="form.center_id" />
 
                     <!-- Default Shift -->
                     <div v-if="shifts?.length">
@@ -230,21 +201,18 @@
 
         <template #footer>
             <div class="flex justify-end gap-3">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="button"
+                    variant="primary"
                     @click="submit"
+                    :loading="form.processing"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -256,6 +224,8 @@ import { useI18n } from 'vue-i18n';
 import { computed, watch } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t, locale } = useI18n();

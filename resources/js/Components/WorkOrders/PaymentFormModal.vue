@@ -1,280 +1,194 @@
 <template>
-    <Modal :show="show" @close="emit('close')" maxWidth="md">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full mx-auto">
-            <!-- Header -->
-            <div
-                class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700"
-            >
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">💰</span>
-                    <span class="text-lg font-bold text-gray-900 dark:text-white">
-                        {{ isEditing ? $t('payments.edit_payment') : $t('payments.add_payment') }}
+    <BaseModal :show="show" @close="emit('close')" size="md">
+        <template #title>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">💰</span>
+                <span class="text-lg font-bold text-gray-900 dark:text-white">
+                    {{ isEditing ? $t('payments.edit_payment') : $t('payments.add_payment') }}
+                </span>
+            </div>
+        </template>
+
+        <form id="payment-form-modal" @submit.prevent="submitForm" class="space-y-4">
+            <!-- Operation Type -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ $t('payments.form.type') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        @click="form.type = 'payment'"
+                        :class="[
+                            'px-3 py-1.5 rounded-xl border text-sm font-medium transition-all cursor-pointer',
+                            form.type === 'payment'
+                                ? 'border-action-primary bg-selection-bg text-selection-text'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ]"
+                    >
+                        {{ $t('payments.types.payment') }}
+                    </button>
+                    <button
+                        v-if="allowRefund"
+                        type="button"
+                        @click="form.type = 'refund'"
+                        :class="[
+                            'px-3 py-1.5 rounded-xl border text-sm font-medium transition-all cursor-pointer',
+                            form.type === 'refund'
+                                ? 'border-danger bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ]"
+                    >
+                        {{ $t('payments.types.refund') }}
+                    </button>
+                    <button
+                        v-if="allowBadDebt"
+                        type="button"
+                        @click="form.type = 'bad_debt'"
+                        :class="[
+                            'px-3 py-1.5 rounded-xl border text-sm font-medium transition-all cursor-pointer',
+                            form.type === 'bad_debt'
+                                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ]"
+                    >
+                        {{ $t('payments.types.bad_debt') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div v-if="form.type !== 'bad_debt'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('payments.form.method') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <SearchableSelect
+                    v-model="form.payment_method"
+                    :options="paymentMethods"
+                    option-label="label"
+                    option-value="value"
+                    :placeholder="$t('common.select')"
+                    :class="{ 'border-red-500 rounded-xl': errors.payment_method }"
+                />
+                <p v-if="errors.payment_method" class="mt-1 text-sm text-red-500">
+                    {{ errors.payment_method }}
+                </p>
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('payments.form.amount') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <AppInput
+                        type="text"
+                        inputmode="decimal"
+                        v-model="form.amount"
+                        @input="forceEnglishNumbers"
+                        dir="ltr"
+                        class="pr-4 pl-14 text-left font-mono"
+                        :error="errors.amount"
+                        :placeholder="$t('payments.form.amount_placeholder')"
+                    />
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                        {{ activeCurrencySymbol }}
                     </span>
                 </div>
-                <button
-                    @click="emit('close')"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
-            </div>
 
-            <!-- Body -->
-            <div class="p-6 max-h-[80vh] overflow-y-auto">
-                <form @submit.prevent="submitForm" class="space-y-4">
-                    <!-- Operation Type -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                        >
-                            {{ $t('payments.form.type') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    v-model="form.type"
-                                    value="payment"
-                                    class="text-action-primary focus:ring-focus-ring rounded-full"
-                                />
-                                <span
-                                    class="text-sm font-medium"
-                                    :class="
-                                        form.type === 'payment'
-                                            ? 'text-selection-text'
-                                            : 'text-gray-600 dark:text-gray-400'
-                                    "
-                                >
-                                    {{ $t('payments.types.payment') }}
-                                </span>
-                            </label>
-                            <label
-                                v-if="allowRefund"
-                                class="flex items-center gap-2 cursor-pointer"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.type"
-                                    value="refund"
-                                    class="text-red-600 focus:ring-danger rounded-full"
-                                />
-                                <span
-                                    class="text-sm font-medium"
-                                    :class="
-                                        form.type === 'refund'
-                                            ? 'text-red-700 dark:text-red-400'
-                                            : 'text-gray-600 dark:text-gray-400'
-                                    "
-                                >
-                                    {{ $t('payments.types.refund') }}
-                                </span>
-                            </label>
-                            <label
-                                v-if="allowBadDebt"
-                                class="flex items-center gap-2 cursor-pointer"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.type"
-                                    value="bad_debt"
-                                    class="text-amber-600 focus:ring-focus-ring rounded-full"
-                                />
-                                <span
-                                    class="text-sm font-medium"
-                                    :class="
-                                        form.type === 'bad_debt'
-                                            ? 'text-amber-700 dark:text-amber-400'
-                                            : 'text-gray-600 dark:text-gray-400'
-                                    "
-                                >
-                                    {{ $t('payments.types.bad_debt') }}
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div v-if="form.type !== 'bad_debt'">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.method') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <SearchableSelect
-                            v-model="form.payment_method"
-                            :options="paymentMethods"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('common.select')"
-                            :class="{ 'border-red-500 rounded-xl': errors.payment_method }"
-                        />
-                        <p v-if="errors.payment_method" class="mt-1 text-sm text-red-500">
-                            {{ errors.payment_method }}
-                        </p>
-                    </div>
-
-                    <!-- Amount -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.amount') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <input
-                                type="text"
-                                inputmode="decimal"
-                                v-model="form.amount"
-                                @input="forceEnglishNumbers"
-                                dir="ltr"
-                                class="w-full pr-4 pl-14 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
-                                :class="{ 'border-red-500': errors.amount }"
-                                :placeholder="$t('payments.form.amount_placeholder')"
-                            />
-                            <span
-                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
-                            >
-                                {{ activeCurrencySymbol }}
-                            </span>
-                        </div>
-                        <p v-if="errors.amount" class="mt-1 text-sm text-red-500">
-                            {{ errors.amount }}
-                        </p>
-
-                        <!-- Quick fill buttons -->
-                        <div v-if="balance > 0 && form.type === 'payment'" class="flex gap-2 mt-2">
-                            <button
-                                type="button"
-                                @click="form.amount = balance"
-                                class="px-3 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full hover:bg-green-200 dark:hover:bg-green-900/50"
-                            >
-                                {{ $t('payments.pay_full') }} ({{ formatPrice(balance) }})
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Payment Date -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.date') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <CustomDatePicker
-                            v-model="form.payment_date"
-                            name="payment_date"
-                            :class="{ 'border-red-500': errors.payment_date }"
-                        />
-                        <p v-if="errors.payment_date" class="mt-1 text-sm text-red-500">
-                            {{ errors.payment_date }}
-                        </p>
-                    </div>
-
-                    <!-- Reference -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.reference') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.reference"
-                            dir="ltr"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
-                            :placeholder="$t('payments.form.reference_placeholder')"
-                        />
-                    </div>
-
-                    <!-- Notes -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.notes') }}
-                        </label>
-                        <textarea
-                            v-model="form.notes"
-                            rows="2"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
-                            :placeholder="$t('payments.form.notes_placeholder')"
-                        ></textarea>
-                    </div>
-
-                    <!-- Actions -->
-                    <div
-                        class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6"
+                <!-- Quick fill buttons -->
+                <div v-if="balance > 0 && form.type === 'payment'" class="flex gap-2 mt-2">
+                    <button
+                        type="button"
+                        @click="form.amount = balance"
+                        class="px-3 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full hover:bg-green-200 dark:hover:bg-green-900/50"
                     >
-                        <button
-                            type="button"
-                            @click="emit('close')"
-                            class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="submit"
-                            :disabled="loading"
-                            :class="[
-                                'inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer',
-                                form.type === 'refund'
-                                    ? 'bg-danger hover:bg-danger-hover'
-                                    : 'bg-action-primary hover:bg-action-primary-hover',
-                            ]"
-                        >
-                            <svg
-                                v-if="loading"
-                                class="inline-block w-4 h-4 mr-2 animate-spin"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                ></path>
-                            </svg>
-                            {{
-                                loading
-                                    ? $t('common.loading')
-                                    : isEditing
-                                      ? $t('common.save')
-                                      : $t('payments.add_payment')
-                            }}
-                        </button>
-                    </div>
-                </form>
+                        {{ $t('payments.pay_full') }} ({{ formatPrice(balance) }})
+                    </button>
+                </div>
             </div>
-        </div>
-    </Modal>
+
+            <!-- Payment Date -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('payments.form.date') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <CustomDatePicker
+                    v-model="form.payment_date"
+                    name="payment_date"
+                    :class="{ 'border-red-500': errors.payment_date }"
+                />
+                <p v-if="errors.payment_date" class="mt-1 text-sm text-red-500">
+                    {{ errors.payment_date }}
+                </p>
+            </div>
+
+            <!-- Reference -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('payments.form.reference') }}
+                </label>
+                <AppInput
+                    type="text"
+                    v-model="form.reference"
+                    dir="ltr"
+                    class="text-left font-mono"
+                    :placeholder="$t('payments.form.reference_placeholder')"
+                />
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('payments.form.notes') }}
+                </label>
+                <AppTextarea
+                    v-model="form.notes"
+                    rows="2"
+                    :placeholder="$t('payments.form.notes_placeholder')"
+                />
+            </div>
+        </form>
+
+        <template #footer>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" @click="emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    type="submit"
+                    form="payment-form-modal"
+                    :variant="form.type === 'refund' ? 'danger' : 'primary'"
+                    :loading="loading"
+                    :disabled="loading"
+                >
+                    {{
+                        loading
+                            ? $t('common.loading')
+                            : isEditing
+                              ? $t('common.save')
+                              : $t('payments.add_payment')
+                    }}
+                </AppButton>
+            </div>
+        </template>
+    </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

@@ -10,6 +10,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Part;
 use App\Models\Payment;
+use App\Models\PurchaseInvoice;
+use App\Models\ServiceBay;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
@@ -17,6 +19,7 @@ use App\Support\CountryCurrencyRegistry;
 use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -54,13 +57,43 @@ class DashboardController extends Controller
             || $isReceptionist
             || (bool) $user?->hasPermissionTo(Permissions::WORK_ORDERS_CREATE);
 
-        // Date ranges
+        // Date ranges & interactive period filter
+        $period = in_array($request->string('period')->toString(), ['today', '7d', 'month', '30d'], true)
+            ? $request->string('period')->toString()
+            : 'month';
+
         $today = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
         $last30Days = Carbon::now()->subDays(30);
         $last7Days = Carbon::now()->subDays(7);
+
+        [$periodStart, $prevPeriodStart, $prevPeriodEnd] = match ($period) {
+            'today' => [Carbon::today(), Carbon::yesterday()->startOfDay(), Carbon::yesterday()->endOfDay()],
+            '7d' => [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->subDays(13)->startOfDay(), Carbon::now()->subDays(7)->endOfDay()],
+            '30d' => [Carbon::now()->subDays(29)->startOfDay(), Carbon::now()->subDays(59)->startOfDay(), Carbon::now()->subDays(30)->endOfDay()],
+            default => [$thisMonth, $lastMonth, $lastMonthEnd],
+        };
+
+        $cacheKey = sprintf(
+            'dashboard_v2:%s:%s:%s:%s:%d:%d:%d',
+            (string) $tenantId,
+            (string) ($centerId ?? 'all'),
+            $period,
+            $isTechnician ? (string) $user?->id : 'team',
+            $canViewFinancials ? 1 : 0,
+            $canViewInventory ? 1 : 0,
+            $canCreateWorkOrder ? 1 : 0
+        );
+
+        if (! app()->runningUnitTests() && ! $request->boolean('refresh')) {
+            $cached = Cache::get($cacheKey);
+
+            if (is_array($cached)) {
+                return Inertia::render('Dashboard', $cached);
+            }
+        }
 
         // ─── Base query builders (re-used everywhere) ─────────────────────
         $workOrdersBase = WorkOrder::where('tenant_id', $tenantId)
@@ -89,6 +122,41 @@ class DashboardController extends Controller
             ->where('status', 'done')
             ->whereDate('closed_at', $today)->count();
 
+        $periodWorkOrders = (clone $workOrdersBase)
+            ->where('created_at', '>=', $periodStart)->count();
+
+        $prevPeriodWorkOrders = (clone $workOrdersBase)
+            ->whereBetween('created_at', [$prevPeriodStart, $prevPeriodEnd])->count();
+
+        // ─── Workshop Intelligence (Service Bays, Cycle Time, On-Time Rate) ─
+        $baysTotal = ServiceBay::where('tenant_id', $tenantId)
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
+            ->where('is_active', true)
+            ->count();
+
+        $baysBookedToday = Appointment::where('tenant_id', $tenantId)
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
+            ->whereDate('scheduled_at', $today)
+            ->whereNotNull('service_bay_id')
+            ->whereNotIn('status', ['cancelled', 'converted'])
+            ->distinct('service_bay_id')
+            ->count('service_bay_id');
+
+        $doneInPeriod = (clone $workOrdersBase)
+            ->where('status', 'done')
+            ->whereNotNull('closed_at')
+            ->where('closed_at', '>=', $periodStart)
+            ->get(['created_at', 'closed_at', 'expected_end_date']);
+
+        $avgCycleHours = $doneInPeriod->isNotEmpty()
+            ? round((float) $doneInPeriod->avg(fn ($wo) => max(0, $wo->created_at->diffInMinutes($wo->closed_at) / 60)), 1)
+            : 0.0;
+
+        $withExpected = $doneInPeriod->filter(fn ($wo) => $wo->expected_end_date !== null);
+        $onTimeRate = $withExpected->isNotEmpty()
+            ? (int) round(($withExpected->filter(fn ($wo) => $wo->closed_at->lte(Carbon::parse($wo->expected_end_date)->endOfDay()))->count() / $withExpected->count()) * 100)
+            : null;
+
         // Work Orders by Status (for donut chart)
         $workOrdersByStatus = (clone $workOrdersBase)
             ->select('status', DB::raw('count(*) as count'))
@@ -107,6 +175,11 @@ class DashboardController extends Controller
         // ─── Revenue Stats (Protected by $canViewFinancials) ───────────────
         $revenueThisMonth = null;
         $revenueLastMonth = null;
+        $periodRevenue = null;
+        $prevPeriodRevenue = null;
+        $periodExpenses = null;
+        $periodNetFlow = null;
+        $paymentMethodsChart = [];
         $outstandingBalance = null;
         $avgInvoiceValue = null;
         $paymentsToday = null;
@@ -143,6 +216,37 @@ class DashboardController extends Controller
                 ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
                 ->whereDate('payment_date', $today)
                 ->sum('amount');
+
+            $periodRevenue = (clone $invoiceBase)
+                ->where('issue_date', '>=', $periodStart->toDateString())
+                ->sum('total_incl_tax');
+
+            $prevPeriodRevenue = (clone $invoiceBase)
+                ->whereBetween('issue_date', [$prevPeriodStart->toDateString(), $prevPeriodEnd->toDateString()])
+                ->sum('total_incl_tax');
+
+            $periodExpenses = PurchaseInvoice::where('tenant_id', $tenantId)
+                ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
+                ->whereNotIn('status', ['draft', 'cancelled'])
+                ->where('issue_date', '>=', $periodStart->toDateString())
+                ->sum('total');
+
+            $periodNetFlow = round((float) $periodRevenue - (float) $periodExpenses, 2);
+
+            $paymentMethodsChart = Payment::where('tenant_id', $tenantId)
+                ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
+                ->where('type', 'payment')
+                ->where('payment_date', '>=', $periodStart->toDateString())
+                ->select('payment_method', DB::raw('SUM(amount) as total'))
+                ->groupBy('payment_method')
+                ->orderByDesc('total')
+                ->get()
+                ->map(fn ($row) => [
+                    'method' => $row->payment_method ?: 'cash',
+                    'total' => round((float) $row->total, 2),
+                ])
+                ->values()
+                ->toArray();
 
             // Revenue last 30 days (daily)
             $dailyRevenue = (clone $invoiceBase)
@@ -274,7 +378,7 @@ class DashboardController extends Controller
 
         // ─── Recent Work Orders (Sanitized: hide price if no financial access)
         $recentWorkOrders = (clone $workOrdersBase)
-            ->with(['customer:id,name', 'vehicle:id,plate_number'])
+            ->with(['customer:id,name,phone,whatsapp', 'vehicle:id,plate_number'])
             ->latest()
             ->take(8)
             ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'total_incl_tax', 'created_at', 'expected_end_date'])
@@ -305,7 +409,7 @@ class DashboardController extends Controller
 
         // ─── Ready for QC / Delivery (Cars finished or waiting customer) ──
         $readyForDelivery = (clone $workOrdersBase)
-            ->with(['customer:id,name,phone', 'vehicle:id,plate_number'])
+            ->with(['customer:id,name,phone,whatsapp', 'vehicle:id,plate_number'])
             ->whereIn('status', ['ready_for_qc', 'done'])
             ->latest()
             ->take(6)
@@ -517,7 +621,9 @@ class DashboardController extends Controller
         $primaryRole = $user?->roles->first();
         $roleLabel = $primaryRole->label_ar ?? ($isTechnician ? 'فني صيانة' : ($isReceptionist ? 'موظف استقبال' : 'عضو فريق'));
 
-        return Inertia::render('Dashboard', [
+        $payload = [
+            'period' => $period,
+            'lastUpdatedAt' => Carbon::now()->toIso8601String(),
             'userContext' => [
                 'canViewFinancials' => $canViewFinancials,
                 'canViewInventory' => $canViewInventory,
@@ -531,12 +637,24 @@ class DashboardController extends Controller
                 'workOrders' => [
                     'thisMonth' => $workOrdersThisMonth,
                     'lastMonth' => $workOrdersLastMonth,
+                    'periodCount' => $periodWorkOrders,
+                    'prevPeriodCount' => $prevPeriodWorkOrders,
                     'active' => $activeWorkOrders,
                     'completedToday' => $completedToday,
+                ],
+                'workshop' => [
+                    'baysTotal' => $baysTotal,
+                    'baysBookedToday' => $baysBookedToday,
+                    'avgCycleHours' => $avgCycleHours,
+                    'onTimeRate' => $onTimeRate,
                 ],
                 'revenue' => $canViewFinancials ? [
                     'thisMonth' => round((float) $revenueThisMonth, 2),
                     'lastMonth' => round((float) $revenueLastMonth, 2),
+                    'periodTotal' => round((float) $periodRevenue, 2),
+                    'prevPeriodTotal' => round((float) $prevPeriodRevenue, 2),
+                    'periodExpenses' => round((float) $periodExpenses, 2),
+                    'periodNetFlow' => $periodNetFlow,
                     'outstanding' => round((float) max((float) $outstandingBalance, 0), 2),
                     'paymentsToday' => round((float) $paymentsToday, 2),
                     'avgInvoiceValue' => round((float) $avgInvoiceValue, 2),
@@ -560,6 +678,7 @@ class DashboardController extends Controller
                 'workOrdersByStatus' => $workOrdersByStatus,
                 'workOrdersByStatusAll' => $workOrdersByStatusAll,
                 'weeklyWorkOrders' => $weeklyChart,
+                'paymentMethods' => $paymentMethodsChart,
             ],
             'alerts' => [
                 'overdueWorkOrders' => $overdueWorkOrders,
@@ -580,6 +699,12 @@ class DashboardController extends Controller
             'activeWorkshopVehicles' => $activeWorkshopVehicles,
             'workingTechniciansNow' => $workingTechniciansNow,
             'currency' => CountryCurrencyRegistry::tenantCurrency($user?->tenant),
-        ]);
+        ];
+
+        if (! app()->runningUnitTests()) {
+            Cache::put($cacheKey, $payload, now()->addSeconds(60));
+        }
+
+        return Inertia::render('Dashboard', $payload);
     }
 }

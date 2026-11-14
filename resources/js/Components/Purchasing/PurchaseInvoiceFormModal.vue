@@ -103,31 +103,33 @@
             >
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <!-- Supplier (Span 4) -->
-                    <FormField class="md:col-span-4" :error="form.errors.supplier_id" required>
-                        <template #label>
-                            <div class="flex items-center justify-between w-full">
-                                <span>{{ $t('purchasing.orders.supplier') }}</span>
-                                <button
-                                    type="button"
-                                    @click="showSupplierModal = true"
-                                    class="text-xs text-action-primary hover:underline font-bold flex items-center gap-1 transition-colors"
+                    <FormField
+                        class="md:col-span-4"
+                        :label="$t('purchasing.orders.supplier')"
+                        :error="form.errors.supplier_id"
+                        required
+                    >
+                        <template #label-action>
+                            <button
+                                type="button"
+                                @click="showSupplierModal = true"
+                                class="text-xs text-action-primary hover:underline font-bold flex items-center gap-1 transition-colors shrink-0"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 4v16m8-8H4"
-                                        />
-                                    </svg>
-                                    {{ $t('purchasing.suppliers.add') }}
-                                </button>
-                            </div>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                {{ $t('purchasing.suppliers.add') }}
+                            </button>
                         </template>
                         <SearchableSelect
                             v-model="form.supplier_id"
@@ -736,11 +738,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('common.notes') }}
                 </label>
-                <textarea
-                    v-model="form.notes"
-                    rows="3"
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
-                ></textarea>
+                <AppTextarea v-model="form.notes" rows="3" :error="form.errors.notes" />
             </div>
         </form>
 
@@ -755,44 +753,20 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="form.processing || submitting"
+                        :disabled="!isFormValid"
                         @click="submit"
-                        :disabled="!isFormValid || form.processing || submitting"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <svg
-                            v-if="form.processing || submitting"
-                            class="animate-spin h-4 w-4 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
                         {{
                             form.processing || submitting ? $t('common.loading') : $t('common.save')
                         }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -849,17 +823,20 @@ import { ref, computed, watch } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import PurchaseOrderItemModal from './PurchaseOrderItemModal.vue';
 import SupplierServiceItemModal from './SupplierServiceItemModal.vue';
 import SupplierCreateModal from '@/Pages/Purchasing/Suppliers/CreateModal.vue';
 import PurchaseOrderPaymentModal from './PurchaseOrderPaymentModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -883,6 +860,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { sanitizeInput, formatCurrency: formatCurrencyEn, toEnglish } = useNumberFormat();
+const { scrollToError } = useFormScrollToError();
 
 const selectedPurchaseType = ref(props.purpose || 'inventory');
 
@@ -1151,6 +1129,7 @@ const submit = () => {
         },
         onError: (errors) => {
             console.error('Validation Errors:', errors);
+            scrollToError(errors);
             submitting.value = false;
         },
         onFinish: () => {

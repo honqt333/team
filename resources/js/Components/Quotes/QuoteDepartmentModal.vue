@@ -76,21 +76,19 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
-                @click="submitForm"
-                :disabled="form.processing || form.departments.length === 0"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :loading="form.processing"
+                    :disabled="form.departments.length === 0"
+                    @click="submitForm"
+                >
+                    {{ $t('common.save') }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 </template>
@@ -100,6 +98,7 @@ import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useLocalized } from '@/Composables/useLocalized';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,

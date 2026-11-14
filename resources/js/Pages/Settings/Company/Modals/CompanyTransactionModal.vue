@@ -37,16 +37,13 @@
                     {{ $t('company_profile.transactions.form.title') }}
                     <span class="text-red-500">*</span>
                 </label>
-                <input
+                <AppInput
                     v-model="form.title"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition-all"
+                    :error="form.errors.title"
                     :placeholder="$t('company_profile.transactions.form.title_placeholder')"
                 />
-                <p v-if="form.errors.title" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.title }}
-                </p>
             </div>
 
             <!-- Date & Type -->
@@ -153,19 +150,17 @@
                     </span>
                 </div>
                 <div class="relative">
-                    <input
+                    <AppInput
                         v-model="enteredAmount"
                         type="number"
                         step="0.01"
                         min="0"
                         required
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono text-sm"
+                        class="font-mono"
+                        :error="form.errors.amount"
                         placeholder="0.00"
                     />
                 </div>
-                <p v-if="form.errors.amount" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.amount }}
-                </p>
             </div>
 
             <!-- Tax Configuration Section (If VAT Enabled) -->
@@ -377,54 +372,24 @@
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('company_profile.transactions.form.notes') }}
                 </label>
-                <textarea
-                    v-model="form.notes"
-                    rows="2"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition-all"
-                ></textarea>
-                <p v-if="form.errors.notes" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.notes }}
-                </p>
+                <AppTextarea v-model="form.notes" rows="2" :error="form.errors.notes" />
             </div>
         </form>
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
                     form="company-transaction-form"
+                    variant="primary"
+                    :loading="form.processing"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    <svg
-                        v-if="form.processing"
-                        class="w-4 h-4 animate-spin"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                        ></path>
-                    </svg>
-                    <span>{{ $t('common.save') }}</span>
-                </button>
+                    {{ $t('common.save') }}
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -440,6 +405,9 @@ import axios from 'axios';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const { t } = useI18n();
 

@@ -11,6 +11,9 @@ import { useConfirm } from '@/Composables/useConfirm';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const { t } = useI18n();
 
@@ -1343,12 +1346,11 @@ const saveChecklist = async () => {
                     </span>
                 </div>
 
-                <textarea
+                <AppTextarea
                     v-model="notesInput"
-                    rows="6"
+                    :rows="6"
                     placeholder="اكتب ملاحظاتك التقنية حول تنفيذ الخدمة..."
-                    class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white shadow-sm focus:border-action-primary focus:ring-focus-ring text-sm p-3.5"
-                ></textarea>
+                />
 
                 <div class="flex justify-between items-center text-xs text-gray-400">
                     <span>الحد الأقصى: 2000 حرف</span>
@@ -1357,23 +1359,18 @@ const saveChecklist = async () => {
             </div>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-2">
-                    <button
-                        type="button"
-                        @click="closeNotesModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton type="button" variant="secondary" @click="closeNotesModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="isSavingNotes"
                         @click="saveNotes"
-                        :disabled="isSavingNotes"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <span v-if="isSavingNotes">{{ $t('common.saving') }}</span>
-                        <span v-else>{{ $t('common.save') }}</span>
-                    </button>
+                        {{ isSavingNotes ? $t('common.saving') : $t('common.save') }}
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1494,14 +1491,10 @@ const saveChecklist = async () => {
             </div>
 
             <template #footer>
-                <div class="flex justify-end">
-                    <button
-                        type="button"
-                        @click="closePhotosModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex justify-end w-full">
+                    <AppButton type="button" variant="secondary" @click="closePhotosModal">
                         {{ $t('common.close') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1550,20 +1543,23 @@ const saveChecklist = async () => {
 
                 <!-- Add Item Input -->
                 <div class="flex items-center gap-2">
-                    <input
+                    <AppInput
                         v-model="newChecklistText"
                         @keyup.enter="addChecklistItem"
                         type="text"
+                        size="sm"
+                        class="flex-1"
                         placeholder="أدخل عنصر فحص جديد واضغط Enter..."
-                        class="flex-1 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-xs px-3 py-2.5 focus:border-action-primary focus:ring-focus-ring"
                     />
-                    <button
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        size="sm"
+                        class="shrink-0"
                         @click="addChecklistItem"
-                        class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors shrink-0"
                     >
                         إضافة +
-                    </button>
+                    </AppButton>
                 </div>
 
                 <!-- Checklist Items -->
@@ -1610,23 +1606,18 @@ const saveChecklist = async () => {
             </div>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-3">
-                    <button
-                        type="button"
-                        @click="closeChecklistModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="closeChecklistModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="isSavingChecklist"
                         @click="saveChecklist"
-                        :disabled="isSavingChecklist"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <span v-if="isSavingChecklist">{{ $t('common.saving') }}</span>
-                        <span v-else>{{ $t('common.save') }}</span>
-                    </button>
+                        {{ isSavingChecklist ? $t('common.saving') : $t('common.save') }}
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1648,14 +1639,10 @@ const saveChecklist = async () => {
             </div>
 
             <template #footer>
-                <div class="flex justify-end">
-                    <button
-                        type="button"
-                        @click="showLightboxModal = false"
-                        class="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    >
+                <div class="flex justify-end w-full">
+                    <AppButton type="button" variant="secondary" @click="showLightboxModal = false">
                         إلغاء
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>

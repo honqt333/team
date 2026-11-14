@@ -24,43 +24,31 @@
                     {{ $t('payments.form.type') }}
                     <span class="text-red-500">*</span>
                 </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="radio"
-                            v-model="localPayment.type"
-                            value="payment"
-                            class="text-blue-600 focus:ring-focus-ring rounded-full"
-                        />
-                        <span
-                            class="text-sm font-semibold"
-                            :class="
-                                localPayment.type === 'payment'
-                                    ? 'text-blue-700 dark:text-blue-400'
-                                    : 'text-gray-600 dark:text-gray-400'
-                            "
-                        >
-                            {{ $t('payments.types.payment') }}
-                        </span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="radio"
-                            v-model="localPayment.type"
-                            value="bad_debt"
-                            class="text-amber-600 focus:ring-focus-ring rounded-full"
-                        />
-                        <span
-                            class="text-sm font-semibold"
-                            :class="
-                                localPayment.type === 'bad_debt'
-                                    ? 'text-amber-700 dark:text-amber-400'
-                                    : 'text-gray-600 dark:text-gray-400'
-                            "
-                        >
-                            {{ $t('payments.types.bad_debt') }}
-                        </span>
-                    </label>
+                <div class="flex gap-3">
+                    <button
+                        type="button"
+                        @click="localPayment.type = 'payment'"
+                        :class="[
+                            'px-3 py-1.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer',
+                            localPayment.type === 'payment'
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ]"
+                    >
+                        {{ $t('payments.types.payment') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="localPayment.type = 'bad_debt'"
+                        :class="[
+                            'px-3 py-1.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer',
+                            localPayment.type === 'bad_debt'
+                                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ]"
+                    >
+                        {{ $t('payments.types.bad_debt') }}
+                    </button>
                 </div>
             </div>
 
@@ -106,17 +94,17 @@
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         type="text"
                         inputmode="decimal"
                         dir="ltr"
                         v-model="localPayment.amount"
                         @input="handleAmountInput"
-                        class="w-full pr-20 pl-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all"
-                        :class="
+                        class="pr-20"
+                        :error="
                             parseFloat(localPayment.amount) > maxAmount
-                                ? 'border-red-500 focus:border-danger'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary'
+                                ? $t('payments.amount_exceeds_balance')
+                                : ''
                         "
                         :placeholder="$t('payments.form.amount_placeholder')"
                     />
@@ -126,12 +114,6 @@
                         {{ activeCurrencySymbol }}
                     </div>
                 </div>
-                <p
-                    v-if="parseFloat(localPayment.amount) > maxAmount"
-                    class="mt-1.5 text-sm text-red-500"
-                >
-                    {{ $t('payments.amount_exceeds_balance') }}
-                </p>
             </div>
 
             <!-- Payment Date -->
@@ -152,11 +134,11 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('payments.form.reference') }}
                 </label>
-                <input
+                <AppInput
                     type="text"
                     v-model="localPayment.reference"
                     dir="ltr"
-                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
+                    class="text-left font-mono"
                     :placeholder="$t('payments.form.reference_placeholder')"
                 />
             </div>
@@ -166,32 +148,27 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('payments.form.notes') }}
                 </label>
-                <textarea
+                <AppTextarea
                     v-model="localPayment.notes"
                     rows="2"
-                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                    class="resize-none"
                     :placeholder="$t('payments.form.notes_placeholder')"
-                ></textarea>
+                />
             </div>
         </div>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
+            <AppButton variant="secondary" @click="$emit('close')">
                 {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
+            </AppButton>
+            <AppButton
+                variant="action"
                 @click="submit"
                 :disabled="
                     parseFloat(localPayment.amount) > maxAmount ||
                     !localPayment.amount ||
                     parseFloat(localPayment.amount) <= 0
                 "
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 {{
                     isEditing
@@ -200,7 +177,7 @@
                           ? $t('payments.types.bad_debt')
                           : $t('payments.add_payment')
                 }}
-            </button>
+            </AppButton>
         </template>
     </BaseModal>
 </template>
@@ -209,6 +186,9 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

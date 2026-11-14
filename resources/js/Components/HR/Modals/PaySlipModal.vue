@@ -151,20 +151,12 @@
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full print:hidden">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.close') }}
-                </button>
-                <button
-                    type="button"
-                    @click="printSlip"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all cursor-pointer"
-                >
+                </AppButton>
+                <AppButton type="button" variant="primary" @click="printSlip">
                     🖨️ {{ $t('common.print') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -172,6 +164,7 @@
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useI18n } from 'vue-i18n';
 import { printDocument } from '@/Composables/usePrint';
 const { t } = useI18n();

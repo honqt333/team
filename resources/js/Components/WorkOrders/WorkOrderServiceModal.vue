@@ -341,18 +341,16 @@
                             >
                                 {{ $t('quotes.service_modal.description') }}
                             </label>
-                            <textarea
+                            <AppTextarea
                                 v-model="form.title"
                                 name="title"
                                 data-field="title"
                                 rows="2"
                                 :disabled="isDescriptionDisabled || isReadOnly"
-                                class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                :error="form.errors.title"
+                                class="resize-none"
                                 :placeholder="$t('quotes.service_modal.description_placeholder')"
-                            ></textarea>
-                            <p v-if="form.errors.title" class="mt-1 text-xs text-red-500">
-                                {{ form.errors.title }}
-                            </p>
+                            />
                         </div>
                     </div>
 
@@ -366,20 +364,14 @@
                                 >
                                     {{ $t('work_orders.service_modal.duration_value') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="number"
                                     v-model="form.duration_value"
                                     name="duration_value"
                                     data-field="duration_value"
                                     :disabled="isDurationDisabled || isReadOnly"
-                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                    :error="form.errors.duration_value"
                                 />
-                                <p
-                                    v-if="form.errors.duration_value"
-                                    class="mt-1 text-xs text-red-500"
-                                >
-                                    {{ form.errors.duration_value }}
-                                </p>
                             </div>
                             <div data-field="duration_unit">
                                 <label
@@ -408,20 +400,14 @@
                                 >
                                     {{ $t('work_orders.service_modal.warranty_value') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="number"
                                     v-model="form.warranty_value_snapshot"
                                     name="warranty_value_snapshot"
                                     data-field="warranty_value_snapshot"
                                     :disabled="isWarrantyDisabled || isReadOnly"
-                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                    :error="form.errors.warranty_value_snapshot"
                                 />
-                                <p
-                                    v-if="form.errors.warranty_value_snapshot"
-                                    class="mt-1 text-xs text-red-500"
-                                >
-                                    {{ form.errors.warranty_value_snapshot }}
-                                </p>
                             </div>
                             <div data-field="warranty_unit_snapshot">
                                 <label
@@ -552,7 +538,7 @@
                                     {{ $t('work_orders.item.price') }}
                                 </label>
                                 <div class="relative">
-                                    <input
+                                    <AppInput
                                         type="text"
                                         inputmode="decimal"
                                         v-model="form.unit_price"
@@ -565,14 +551,8 @@
                                                 .replace(/(\..*?)\..*/g, '$1')
                                         "
                                         :disabled="isPriceLocked || isReadOnly || form.is_warranty"
-                                        :class="[
-                                            'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right text-sm focus:ring-2 focus:border-action-primary',
-                                            isPriceLocked || isReadOnly || form.is_warranty
-                                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                                                : isPriceBelowMinimum
-                                                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-danger'
-                                                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-focus-ring',
-                                        ]"
+                                        :error="isPriceBelowMinimum ? ' ' : ''"
+                                        class="pl-4 pr-16 font-mono text-right"
                                         required
                                     />
                                     <div
@@ -656,20 +636,21 @@
                                     v-if="form.discount_type !== 'none'"
                                     data-field="discount_value"
                                 >
-                                    <input
+                                    <AppInput
                                         type="text"
                                         inputmode="decimal"
                                         v-model="form.discount_value"
                                         name="discount_value"
                                         data-field="discount_value"
                                         dir="ltr"
+                                        size="sm"
                                         :disabled="isReadOnly"
                                         @input="
                                             form.discount_value = toEnglish($event.target.value)
                                                 .replace(/[^0-9.]/g, '')
                                                 .replace(/(\..*?)\..*/g, '$1')
                                         "
-                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl font-mono text-end text-sm focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                        class="font-mono text-end"
                                     />
                                 </div>
                             </div>
@@ -821,14 +802,15 @@
                                     {{ $t('work_orders.item.technician_share') }}:
                                 </span>
                                 <div class="relative w-24">
-                                    <input
+                                    <AppInput
                                         type="number"
                                         v-model.number="tech.share"
+                                        size="sm"
                                         :disabled="isReadOnly"
                                         min="0"
                                         max="100"
                                         step="0.01"
-                                        class="w-full py-1.5 pl-3 pr-8 border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-right text-xs focus:ring-1 focus:ring-focus-ring focus:border-action-primary bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                                        class="pl-3 pr-8 font-mono text-right"
                                     />
                                     <div
                                         class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none"
@@ -937,14 +919,7 @@
 
         <template #footer>
             <div class="flex items-center justify-between w-full">
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
-                        {{ $t('common.close') }}
-                    </button>
+                <div>
                     <span
                         v-if="Object.keys(form.errors).length > 0"
                         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900"
@@ -967,7 +942,14 @@
                         }}
                     </span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
+                    >
+                        {{ $t('common.close') }}
+                    </button>
                     <button
                         v-if="!isReadOnly"
                         type="button"
@@ -1020,52 +1002,29 @@
                     >
                         {{ $t('work_orders.item.tab_notes') }}
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="noteForm.content"
                         required
                         rows="5"
                         :placeholder="$t('work_orders.item.note_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                    ></textarea>
+                        class="resize-none"
+                    />
                 </div>
             </form>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="showAddNoteModal = false"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="showAddNoteModal = false">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
+                    variant="primary"
                     @click="addNote"
+                    :loading="notesLoading"
                     :disabled="notesLoading || !noteForm.content.trim()"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    <svg
-                        v-if="notesLoading"
-                        class="animate-spin h-4 w-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span>{{ $t('common.save') }}</span>
-                </button>
+                    {{ $t('common.save') }}
+                </AppButton>
             </template>
         </BaseModal>
     </BaseModal>
@@ -1078,6 +1037,9 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
 import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';

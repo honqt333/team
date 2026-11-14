@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class Dealer extends Model
 {
@@ -143,9 +144,12 @@ class Dealer extends Model
         $invoicedDue = (float) $this->invoices()
             ->withoutGlobalScope('center_scoped')
             ->whereNotIn('status', ['cancelled'])
-            ->where(fn ($q) => $q->whereNull('type')->orWhere('type', '!=', 'credit_note'))
             ->toBase()
-            ->selectRaw('COALESCE(SUM(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END), 0) as total_balance')
+            ->selectRaw("COALESCE(SUM(CASE
+                WHEN type = 'credit_note' THEN -(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END)
+                WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0))
+                ELSE 0
+            END), 0) as total_balance")
             ->value('total_balance');
 
         $uninvoicedWorkOrders = $this->workOrders()
@@ -161,5 +165,15 @@ class Dealer extends Model
         $uninvoicedDue = (float) $uninvoicedWorkOrders->sum(fn (WorkOrder $wo) => (float) $wo->balance);
 
         return max(0.0, round($invoicedDue + $uninvoicedDue, 2));
+    }
+
+    public function logActivity(string $action, array $context = []): void
+    {
+        Log::info("dealer.{$action}", array_merge([
+            'tenant_id' => $this->tenant_id,
+            'dealer_id' => $this->id,
+            'user_id' => auth()->id(),
+            'action' => $action,
+        ], $context));
     }
 }

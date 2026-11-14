@@ -835,14 +835,11 @@
 
                 <div class="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                        <label class="block font-bold text-gray-600 dark:text-gray-400 mb-1">
-                            {{ $t('company_profile.transactions.table.date') }}
-                        </label>
-                        <input
-                            type="text"
-                            :value="approvingTransaction.transaction_date"
+                        <AppInput
+                            :model-value="approvingTransaction.transaction_date"
+                            :label="$t('company_profile.transactions.table.date')"
                             disabled
-                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 font-mono"
+                            size="sm"
                         />
                     </div>
                     <div>
@@ -859,21 +856,23 @@
 
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         @click="approvingTransaction = null"
-                        class="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl"
                     >
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
-                        :disabled="submittingApprove"
+                        variant="primary"
+                        size="sm"
+                        :loading="submittingApprove"
                         @click="confirmApproveTransaction"
-                        class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md disabled:opacity-50"
                     >
                         {{ $t('hr.payroll.approve') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -890,6 +889,8 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

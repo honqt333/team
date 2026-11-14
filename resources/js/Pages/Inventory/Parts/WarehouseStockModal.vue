@@ -1,5 +1,5 @@
 <template>
-    <DialogModal :show="show" @close="handleClose" max-width="md">
+    <BaseModal :show="show" @close="handleClose" size="md">
         <template #title>
             <div class="flex flex-col gap-0.5">
                 <span class="text-xl font-bold">
@@ -15,181 +15,157 @@
             </div>
         </template>
 
-        <template #content>
-            <form @submit.prevent="submit" class="space-y-4">
-                <!-- Warehouse -->
+        <form @submit.prevent="submit" class="space-y-4">
+            <!-- Warehouse -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('inventory.parts.warehouse') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <SearchableSelect
+                    v-model="form.warehouse_id"
+                    :options="warehouseOptions"
+                    option-label="label"
+                    option-value="value"
+                    :label="''"
+                    :placeholder="$t('inventory.parts.select_warehouse')"
+                    :error="form.errors.warehouse_id"
+                    :disabled="!!editRowData"
+                />
+                <p v-if="form.errors.warehouse_id" class="mt-1 text-xs text-red-500">
+                    {{ form.errors.warehouse_id }}
+                </p>
+            </div>
+
+            <!-- Cost & Sale Price -->
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('inventory.parts.warehouse') }}
-                        <span class="text-red-500">*</span>
+                        {{ $t('inventory.parts.wac_cost') }}
                     </label>
-                    <SearchableSelect
-                        v-model="form.warehouse_id"
-                        :options="warehouseOptions"
-                        option-label="label"
-                        option-value="value"
-                        :label="''"
-                        :placeholder="$t('inventory.parts.select_warehouse')"
-                        :error="form.errors.warehouse_id"
-                        :disabled="!!editRowData"
+                    <AppInput
+                        v-model="form.cost_price"
+                        type="text"
+                        inputmode="decimal"
+                        dir="ltr"
+                        @input="sanitizeNumber($event, 'cost_price')"
+                        placeholder="0.00"
                     />
-                    <p v-if="form.errors.warehouse_id" class="mt-1 text-xs text-red-500">
-                        {{ form.errors.warehouse_id }}
-                    </p>
                 </div>
-
-                <!-- Cost & Sale Price -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.wac_cost') }}
-                        </label>
-                        <input
-                            v-model="form.cost_price"
-                            type="text"
-                            inputmode="decimal"
-                            dir="ltr"
-                            @input="sanitizeNumber($event, 'cost_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            placeholder="0.00"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.sale_price') }}
-                        </label>
-                        <input
-                            v-model="form.sale_price"
-                            type="text"
-                            inputmode="decimal"
-                            dir="ltr"
-                            @input="sanitizeNumber($event, 'sale_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            placeholder="0.00"
-                        />
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('inventory.parts.sale_price') }}
+                    </label>
+                    <AppInput
+                        v-model="form.sale_price"
+                        type="text"
+                        inputmode="decimal"
+                        dir="ltr"
+                        @input="sanitizeNumber($event, 'sale_price')"
+                        placeholder="0.00"
+                    />
                 </div>
+            </div>
 
-                <!-- Min Sale Price & Initial Stock -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.min_sale_price') }}
-                        </label>
-                        <input
-                            v-model="form.min_sale_price"
-                            type="text"
-                            inputmode="decimal"
-                            dir="ltr"
-                            @input="sanitizeNumber($event, 'min_sale_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            placeholder="0.00"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.initial_stock') }}
-                            <span v-if="editRowData" class="text-xs text-gray-400 font-normal">
-                                ({{ $t('common.read_only') }})
-                            </span>
-                        </label>
-                        <input
-                            v-model="form.initial_stock"
-                            type="text"
-                            inputmode="decimal"
-                            dir="ltr"
-                            @input="sanitizeNumber($event, 'initial_stock')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                            :placeholder="editRowData ? form.initial_stock : '0'"
-                            :disabled="!!editRowData"
-                            :readonly="!!editRowData"
-                        />
-                    </div>
+            <!-- Min Sale Price & Initial Stock -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('inventory.parts.min_sale_price') }}
+                    </label>
+                    <AppInput
+                        v-model="form.min_sale_price"
+                        type="text"
+                        inputmode="decimal"
+                        dir="ltr"
+                        @input="sanitizeNumber($event, 'min_sale_price')"
+                        placeholder="0.00"
+                    />
                 </div>
-
-                <!-- Min Stock & Storage Location -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.min_stock') }}
-                        </label>
-                        <input
-                            v-model="form.min_stock"
-                            type="text"
-                            inputmode="decimal"
-                            dir="ltr"
-                            @input="sanitizeNumber($event, 'min_stock')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            placeholder="0"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('inventory.parts.storage_location') }}
-                        </label>
-                        <input
-                            v-model="form.storage_location"
-                            type="text"
-                            dir="ltr"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            placeholder="A1"
-                        />
-                    </div>
-                </div>
-
-                <!-- Checkboxes -->
-                <div class="flex items-center gap-6">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <AppToggle v-model="form.is_active" />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ $t('common.active') }}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('inventory.parts.initial_stock') }}
+                        <span v-if="editRowData" class="text-xs text-gray-400 font-normal">
+                            ({{ $t('common.read_only') }})
                         </span>
                     </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <AppToggle v-model="form.allow_price_change" />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ $t('inventory.parts.allow_price_change') }}
-                        </span>
-                    </label>
+                    <AppInput
+                        v-model="form.initial_stock"
+                        type="text"
+                        inputmode="decimal"
+                        dir="ltr"
+                        @input="sanitizeNumber($event, 'initial_stock')"
+                        :placeholder="editRowData ? form.initial_stock : '0'"
+                        :disabled="!!editRowData"
+                        :readonly="!!editRowData"
+                    />
                 </div>
-            </form>
-        </template>
+            </div>
+
+            <!-- Min Stock & Storage Location -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('inventory.parts.min_stock') }}
+                    </label>
+                    <AppInput
+                        v-model="form.min_stock"
+                        type="text"
+                        inputmode="decimal"
+                        dir="ltr"
+                        @input="sanitizeNumber($event, 'min_stock')"
+                        placeholder="0"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('inventory.parts.storage_location') }}
+                    </label>
+                    <AppInput
+                        v-model="form.storage_location"
+                        type="text"
+                        dir="ltr"
+                        placeholder="A1"
+                    />
+                </div>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="flex items-center gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <AppToggle v-model="form.is_active" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('common.active') }}
+                    </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <AppToggle v-model="form.allow_price_change" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('inventory.parts.allow_price_change') }}
+                    </span>
+                </label>
+            </div>
+        </form>
 
         <template #footer>
-            <div class="flex justify-end gap-3">
-                <button
-                    @click="handleClose"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="handleClose">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    @click="submit"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
+                </AppButton>
+                <AppButton variant="action" @click="submit">
                     {{ editRowData ? $t('common.update') : $t('common.add') }}
-                </button>
+                </AppButton>
             </div>
         </template>
-    </DialogModal>
+    </BaseModal>
 </template>
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import DialogModal from '@/Components/DialogModal.vue';
 import { ref, computed, watch } from 'vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

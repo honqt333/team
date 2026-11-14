@@ -381,51 +381,30 @@
             </template>
             <form @submit.prevent="submitEditItem" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.payroll.base_salary') }}
-                        </label>
-                        <input
-                            v-model.number="itemForm.base_salary"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-gray-900 dark:text-white"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.payroll.allowances') }}
-                        </label>
-                        <input
-                            v-model.number="itemForm.total_allowances"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-emerald-600 font-bold"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.payroll.deductions') }}
-                        </label>
-                        <input
-                            v-model.number="itemForm.total_deductions"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-red-600 font-bold"
-                            required
-                        />
-                    </div>
+                    <AppInput
+                        v-model.number="itemForm.base_salary"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :label="$t('hr.payroll.base_salary')"
+                        required
+                    />
+                    <AppInput
+                        v-model.number="itemForm.total_allowances"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :label="$t('hr.payroll.allowances')"
+                        required
+                    />
+                    <AppInput
+                        v-model.number="itemForm.total_deductions"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :label="$t('hr.payroll.deductions')"
+                        required
+                    />
                 </div>
 
                 <div
@@ -441,34 +420,15 @@
                     </span>
                 </div>
 
-                <div>
-                    <label
-                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        {{ $t('common.notes') }}
-                    </label>
-                    <textarea
-                        v-model="itemForm.notes"
-                        rows="2"
-                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-gray-900 dark:text-white"
-                    ></textarea>
-                </div>
+                <AppTextarea v-model="itemForm.notes" :label="$t('common.notes')" :rows="2" />
 
                 <div class="flex justify-end gap-3 pt-2">
-                    <button
-                        type="button"
-                        @click="showEditModal = false"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showEditModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="itemForm.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="primary" :loading="itemForm.processing">
                         {{ itemForm.processing ? $t('common.saving') : $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -497,33 +457,18 @@
                         required
                     />
                 </div>
-                <div>
-                    <label
-                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        {{ $t('common.reference_number') || 'رقم الحوالة / المرجع' }}
-                    </label>
-                    <input
-                        v-model="paidForm.reference_number"
-                        type="text"
-                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-gray-900 dark:text-white"
-                    />
-                </div>
+                <AppInput
+                    v-model="paidForm.reference_number"
+                    type="text"
+                    :label="$t('common.reference_number') || 'رقم الحوالة / المرجع'"
+                />
                 <div class="flex justify-end gap-3 pt-2">
-                    <button
-                        type="button"
-                        @click="showPaidModal = false"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showPaidModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="paidForm.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="primary" :loading="paidForm.processing">
                         {{ paidForm.processing ? $t('common.saving') : $t('hr.payroll.mark_paid') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -545,6 +490,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 

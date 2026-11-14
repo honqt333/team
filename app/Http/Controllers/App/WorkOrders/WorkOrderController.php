@@ -634,7 +634,9 @@ class WorkOrderController
                 'nullable',
                 'integer',
                 Rule::exists('purchase_invoice_lines', 'id')
-                    ->where('tenant_id', $workOrder->tenant_id),
+                    ->where('tenant_id', $workOrder->tenant_id)
+                    ->where('center_id', $workOrder->center_id)
+                    ->where('purchase_invoice_id', $request->input('purchase_invoice_id')),
             ],
             'type' => ['nullable', 'string', Rule::in(WorkOrderPurchaseAllocation::TYPES)],
             'item_description' => ['nullable', 'string', 'max:255'],
@@ -666,6 +668,26 @@ class WorkOrderController
         $purchaseInvoice->update(['work_order_id' => $workOrder->id]);
 
         $qty = (float) ($validated['allocated_qty'] ?? 1);
+
+        if (! empty($validated['purchase_invoice_line_id'])) {
+            $invoiceLine = $purchaseInvoice->lines()->whereKey($validated['purchase_invoice_line_id'])->first();
+
+            if ($invoiceLine) {
+                $alreadyAllocatedQty = (float) WorkOrderPurchaseAllocation::query()
+                    ->where('purchase_invoice_line_id', $invoiceLine->id)
+                    ->sum('allocated_qty');
+
+                if ($alreadyAllocatedQty + $qty > (float) $invoiceLine->qty + 0.001) {
+                    throw ValidationException::withMessages([
+                        'allocated_qty' => [__('validation.max.numeric', [
+                            'attribute' => 'allocated_qty',
+                            'max' => max(0, round((float) $invoiceLine->qty - $alreadyAllocatedQty, 2)),
+                        ])],
+                    ]);
+                }
+            }
+        }
+
         $unitCost = isset($validated['unit_cost'])
             ? (float) $validated['unit_cost']
             : (isset($validated['allocated_amount']) ? (float) $validated['allocated_amount'] / max(1, $qty) : (float) $purchaseInvoice->total);
@@ -935,10 +957,8 @@ class WorkOrderController
                 $qty = (float) ($line['allocated_qty'] ?? 1);
                 $cost = (float) ($line['unit_cost'] ?? 0);
                 $lineSubtotal = round($qty * $cost, 2);
-                $lineTax = isset($line['tax_amount']) ? (float) $line['tax_amount'] : 0.0;
-                $lineTotal = isset($line['total_cost']) && (float) $line['total_cost'] > 0
-                    ? (float) $line['total_cost']
-                    : round($lineSubtotal + $lineTax, 2);
+                $lineTax = isset($line['tax_amount']) ? round(max(0.0, (float) $line['tax_amount']), 2) : 0.0;
+                $lineTotal = round($lineSubtotal + $lineTax, 2);
 
                 $createdAllocations[] = $workOrder->purchaseAllocations()->create([
                     'tenant_id' => $workOrder->tenant_id,

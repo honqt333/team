@@ -418,10 +418,11 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
                                 {{ $t('company_profile.map.click_hint') }}
                             </p>
-                            <div
-                                ref="mapContainer"
-                                class="w-full h-64 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden"
-                            ></div>
+                            <NationalAddressMapCanvas
+                                :map-ready="mapReady"
+                                height-class="h-64"
+                                @container="(el) => (mapContainer = el)"
+                            />
                         </div>
 
                         <div class="flex justify-end pt-4">
@@ -927,25 +928,13 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import CompanyTransactionModal from '../Company/Modals/CompanyTransactionModal.vue';
 import CompanyTransactionsTab from '@/Components/Settings/Company/CompanyTransactionsTab.vue';
-
-// Fix Leaflet marker icon issue
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
-});
 
 const { t, locale } = useI18n();
 const { success, error } = useToast();
@@ -987,11 +976,6 @@ const props = defineProps({
 const activeTab = ref('profile');
 const saving = ref(false);
 
-// Map state
-const mapContainer = ref(null);
-const mapReady = ref(false);
-let map = null;
-let marker = null;
 const defaultLat = 21.4858; // Jeddah
 const defaultLng = 39.1925;
 
@@ -1035,6 +1019,16 @@ const form = ref({
             close_time: wh.close_time?.slice(0, 5) ?? '17:00',
         })) ?? [],
 });
+
+const { mapContainer, mapReady, isLocating, mountWithRetry, fetchLocation, destroyMap } =
+    useNationalAddressMap({
+        form,
+        target: () => form.value.address,
+        fieldMap: { lat: 'latitude', lng: 'longitude' },
+        defaultLat,
+        defaultLng,
+        locale,
+    });
 
 const centerTypeOptions = computed(() => [
     { value: 'main', label: t('company_profile.branches.center_type_main') },
@@ -1207,201 +1201,19 @@ function handleStampDelete() {
     });
 }
 
-// Map functions
-function initMap() {
-    if (!mapContainer.value || map) return;
-
-    const lat = form.value.address.latitude || defaultLat;
-    const lng = form.value.address.longitude || defaultLng;
-
-    map = L.map(mapContainer.value).setView([lat, lng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-    }).addTo(map);
-
-    // Add marker if we have coordinates
-    if (form.value.address.latitude && form.value.address.longitude) {
-        marker = L.marker([form.value.address.latitude, form.value.address.longitude]).addTo(map);
-    }
-
-    // Handle map click
-    map.on('click', handleMapClick);
-    mapReady.value = true;
-}
-
-function handleMapClick(e) {
-    const { lat, lng } = e.latlng;
-
-    form.value.address.latitude = lat;
-    form.value.address.longitude = lng;
-
-    // Update or create marker
-    if (marker) {
-        marker.setLatLng([lat, lng]);
-    } else {
-        marker = L.marker([lat, lng]).addTo(map);
-    }
-
-    // Reverse geocode to get address
-    reverseGeocode(lat, lng);
-}
-
-async function reverseGeocode(lat, lng) {
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`,
-            {
-                headers: {
-                    'User-Agent': 'KhidmhPro-App/1.0',
-                },
-            }
-        );
-        const data = await response.json();
-
-        if (data && data.address) {
-            const addr = data.address;
-            form.value.address.city =
-                addr.city || addr.town || addr.village || form.value.address.city || '';
-            form.value.address.district =
-                addr.suburb || addr.neighbourhood || form.value.address.district || '';
-
-            // Extraction helpers for numeric fields
-            const toEnglishDigits = (str) => {
-                if (!str) return '';
-                return str
-                    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-            };
-
-            const cleanDisplayName = toEnglishDigits(data.display_name || '');
-            const numbers = cleanDisplayName.match(/\d+/g) || [];
-
-            // 1. Building number
-            let bldNum = addr.house_number || '';
-            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
-            if (bldNum.length !== 4) {
-                bldNum = '';
-            }
-            if (!bldNum) {
-                // Find first 4-digit sequence
-                const fourDigit = numbers.find((n) => n.length === 4);
-                if (fourDigit) {
-                    bldNum = fourDigit;
-                }
-            }
-            form.value.address.building_number = bldNum || form.value.address.building_number || '';
-
-            // 2. Postal code
-            let postCode = addr.postcode || '';
-            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
-            if (postCode.length !== 5) {
-                postCode = '';
-            }
-            if (!postCode) {
-                // Find first 5-digit sequence
-                const fiveDigit = numbers.find((n) => n.length === 5);
-                if (fiveDigit) {
-                    postCode = fiveDigit;
-                }
-            }
-            form.value.address.postal_code = postCode || form.value.address.postal_code || '';
-
-            // Map street name to street field
-            form.value.address.street =
-                addr.road || addr.pedestrian || addr.street || form.value.address.street || '';
-        }
-    } catch (err) {
-        console.error('Geocoding error:', err);
-    }
-}
-
-function destroyMap() {
-    if (map) {
-        map.remove();
-        map = null;
-        marker = null;
-        mapReady.value = false;
-    }
-}
-
-const isLocating = ref(false);
-
-async function fetchLocation() {
-    isLocating.value = true;
-
-    const useIpFallback = async () => {
-        try {
-            const response = await fetch('https://ipapi.co/json/');
-            if (!response.ok) throw new Error('IP geolocation failed');
-            const data = await response.json();
-            if (data && data.latitude && data.longitude) {
-                const lat = parseFloat(data.latitude);
-                const lng = parseFloat(data.longitude);
-
-                form.value.address.latitude = parseFloat(lat.toFixed(7));
-                form.value.address.longitude = parseFloat(lng.toFixed(7));
-
-                if (map) {
-                    if (marker) {
-                        marker.setLatLng([lat, lng]);
-                    } else {
-                        marker = L.marker([lat, lng]).addTo(map);
-                    }
-                    map.setView([lat, lng], 13);
-                }
-                reverseGeocode(lat, lng);
-                isLocating.value = false;
-                return;
-            }
-        } catch (err) {
-            console.warn('[Centers/Show] IP Geolocation failed:', err.message);
-        }
-
-        isLocating.value = false;
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                form.value.address.latitude = parseFloat(latitude.toFixed(7));
-                form.value.address.longitude = parseFloat(longitude.toFixed(7));
-
-                if (map) {
-                    if (marker) {
-                        marker.setLatLng([latitude, longitude]);
-                    } else {
-                        marker = L.marker([latitude, longitude]).addTo(map);
-                    }
-                    map.setView([latitude, longitude], 13);
-                }
-                reverseGeocode(latitude, longitude);
-                isLocating.value = false;
-            },
-            (error) => {
-                console.warn('[Centers/Show] Browser Geolocation error:', error.message);
-                useIpFallback();
-            },
-            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-        );
-    } else {
-        useIpFallback();
-    }
-}
-
 // Watch for tab change to init map when contact tab is active
 watch(activeTab, async (newTab) => {
     if (newTab === 'contact') {
         await nextTick();
+        destroyMap();
         setTimeout(() => {
-            initMap();
-            if (map) map.invalidateSize();
+            mountWithRetry();
             if (!form.value.address.latitude && !form.value.address.longitude) {
                 fetchLocation();
             }
         }, 100);
+    } else {
+        destroyMap();
     }
 });
 
@@ -1415,16 +1227,12 @@ onMounted(() => {
 
     if (activeTab.value === 'contact') {
         setTimeout(() => {
-            initMap();
+            mountWithRetry();
             if (!form.value.address.latitude && !form.value.address.longitude) {
                 fetchLocation();
             }
         }, 100);
     }
-});
-
-onUnmounted(() => {
-    destroyMap();
 });
 
 // Center Transactions & Invoices Logic

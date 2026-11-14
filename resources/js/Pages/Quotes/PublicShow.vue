@@ -362,29 +362,27 @@
             </template>
 
             <div>
-                <textarea
+                <AppTextarea
                     v-model="rejectionReason"
-                    rows="4"
+                    :rows="4"
                     :placeholder="t('quotes.public.rejection_reason_placeholder')"
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger resize-none"
-                ></textarea>
+                />
             </div>
 
             <template #footer>
-                <div class="flex gap-3 w-full">
-                    <button
-                        @click="showRejectModal = false"
-                        class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-black text-sm rounded-xl transition-all"
-                    >
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="showRejectModal = false">
                         {{ t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="danger"
+                        :loading="submitting"
+                        :disabled="!rejectionReason.trim()"
                         @click="handleReject"
-                        :disabled="!rejectionReason.trim() || submitting"
-                        class="flex-1 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-black text-sm rounded-xl transition-all"
                     >
                         {{ t('quotes.public.confirm_reject') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -439,43 +437,17 @@
 
             <template #footer>
                 <div class="flex items-center justify-end gap-3 w-full">
-                    <button
-                        @click="showApproveModal = false"
-                        class="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showApproveModal = false">
                         {{ t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="submitting"
                         @click="confirmApprove"
-                        :disabled="submitting"
-                        class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2"
                     >
-                        <svg
-                            v-if="submitting"
-                            class="w-4 h-4 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <span>
-                            {{
-                                submitting ? t('common.saving') : t('quotes.public.confirm_approve')
-                            }}
-                        </span>
-                    </button>
+                        {{ submitting ? t('common.saving') : t('quotes.public.confirm_approve') }}
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -485,6 +457,8 @@
 <script setup>
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import {
     printDocument,
     resolveDocumentSettings,

@@ -201,13 +201,9 @@
 
         <template #footer>
             <div class="flex justify-end">
-                <button
-                    type="button"
-                    @click="emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="emit('close')">
                     {{ $t('common.close') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -216,6 +212,7 @@
 <script setup>
 import { computed } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: false },

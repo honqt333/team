@@ -274,12 +274,7 @@
                     :label="$t('customers.form.notes')"
                     :error="form.errors.notes"
                 >
-                    <textarea
-                        name="notes"
-                        v-model="form.notes"
-                        rows="2"
-                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
-                    ></textarea>
+                    <AppTextarea name="notes" v-model="form.notes" rows="2" class="resize-none" />
                 </FormField>
             </div>
 
@@ -367,35 +362,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <!-- Map Container -->
                     <div class="order-1 lg:order-2">
-                        <div
-                            ref="mapContainer"
-                            class="w-full h-[260px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
-                        >
-                            <div
-                                v-if="!mapReady"
-                                class="h-full flex flex-col items-center justify-center text-center p-4"
-                            >
-                                <svg
-                                    class="w-8 h-8 text-gray-400 mb-2 animate-pulse"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                    />
-                                </svg>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $t('common.loading') }}
-                                </p>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                            {{ $t('customers.map.click_hint') }}
-                        </p>
+                        <NationalAddressMapCanvas
+                            :map-ready="mapReady"
+                            height-class="h-[260px]"
+                            :hint="$t('customers.map.click_hint')"
+                            @container="(el) => (mapContainer = el)"
+                        />
                     </div>
 
                     <!-- Address Fields -->
@@ -407,13 +379,13 @@
                             >
                                 {{ $t('customers.form.address_line') }}
                             </label>
-                            <textarea
+                            <AppTextarea
                                 name="address_line"
                                 v-model="form.address_line"
                                 rows="2"
                                 :placeholder="$t('customers.form.address_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
-                            ></textarea>
+                                class="resize-none"
+                            />
                         </div>
 
                         <!-- Building + Postal + Zip -->
@@ -422,34 +394,27 @@
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.building_number') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="text"
                                     name="building_number"
                                     v-model="form.building_number"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.postal_code') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="text"
                                     name="postal_code"
                                     v-model="form.postal_code"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.district') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="district"
-                                    v-model="form.district"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="district" v-model="form.district" />
                             </div>
                         </div>
 
@@ -459,23 +424,13 @@
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.city') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="city"
-                                    v-model="form.city"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="city" v-model="form.city" />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.region') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="region"
-                                    v-model="form.region"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="region" v-model="form.region" />
                             </div>
                         </div>
 
@@ -484,12 +439,11 @@
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 {{ $t('customers.form.country') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 name="country"
                                 v-model="form.country"
                                 :placeholder="$t('customers.form.country_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                         </div>
                     </div>
@@ -517,41 +471,17 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="form.processing"
                         @click="submitForm"
-                        :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
                         {{ form.processing ? $t('common.loading') : $t('customers.form.submit') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -635,14 +565,10 @@
         </div>
 
         <template #footer>
-            <div class="flex justify-end">
-                <button
-                    type="button"
-                    @click="showDuplicateModal = false"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex justify-end w-full">
+                <AppButton type="button" variant="secondary" @click="showDuplicateModal = false">
                     {{ $t('common.cancel') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -657,19 +583,13 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Fix Leaflet default marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 
 const props = defineProps({
     show: {
@@ -691,14 +611,6 @@ const page = usePage();
 const duplicateCustomer = ref(null);
 const showDuplicateModal = ref(false);
 const checkingPhone = ref(false);
-
-const mapContainer = ref(null);
-const mapReady = ref(false);
-const geocodingLoading = ref(false);
-const isLocating = ref(false);
-
-let map = null;
-let marker = null;
 
 // Default location: use tenant/center location or fallback to Riyadh
 const defaultLat = computed(() => {
@@ -733,6 +645,25 @@ const form = useForm({
     country: '',
     lat: null,
     lng: null,
+});
+
+const {
+    mapContainer,
+    mapReady,
+    isLocating,
+    mountWithRetry,
+    fetchLocation,
+    clearAddressFields,
+    destroyMap,
+} = useNationalAddressMap({
+    form,
+    defaultLat,
+    defaultLng,
+    locale,
+    onReady: () => {
+        initialFormData.value = JSON.stringify(form.data());
+        isDirty.value = false;
+    },
 });
 
 const typeOptions = computed(() => [
@@ -777,65 +708,6 @@ watch(
     { immediate: true }
 );
 
-async function fetchLocation() {
-    isLocating.value = true;
-
-    const useIpFallback = async () => {
-        try {
-            const response = await fetch('https://ipapi.co/json/');
-            if (!response.ok) throw new Error('IP geolocation failed');
-            const data = await response.json();
-            if (data && data.latitude && data.longitude) {
-                const lat = parseFloat(data.latitude);
-                const lng = parseFloat(data.longitude);
-
-                form.lat = parseFloat(lat.toFixed(7));
-                form.lng = parseFloat(lng.toFixed(7));
-
-                if (map) {
-                    setMarker(lat, lng, true);
-                } else {
-                    reverseGeocode(form.lat, form.lng, true);
-                }
-                return;
-            }
-        } catch (err) {
-            console.warn('[CustomerFormModal] IP Geolocation failed:', err.message);
-        }
-
-        // Final fallback: just use default lat/lng
-        isLocating.value = false;
-        nextTick(() => {
-            initialFormData.value = JSON.stringify(form.data());
-            isDirty.value = false;
-        });
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                form.lat = parseFloat(latitude.toFixed(7));
-                form.lng = parseFloat(longitude.toFixed(7));
-
-                if (map) {
-                    setMarker(latitude, longitude, true);
-                } else {
-                    reverseGeocode(form.lat, form.lng, true);
-                }
-            },
-            (error) => {
-                console.warn('[CustomerFormModal] Browser Geolocation error:', error.message);
-                useIpFallback();
-            },
-            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-        );
-    } else {
-        useIpFallback();
-    }
-}
-
 // Handle modal open/close
 watch(
     () => props.show,
@@ -852,28 +724,8 @@ watch(
             // Ensure previous map is destroyed before creating new one
             destroyMap();
 
-            // Wait for modal transition and DOM to be ready, then initialize map with retries
-            const tryInitMap = (attempts = 0) => {
-                if (mapContainer.value) {
-                    initMap();
-                    setTimeout(() => {
-                        if (map) map.invalidateSize();
-                        // Only set initialFormData here if we are not still locating
-                        if (!isLocating.value) {
-                            initialFormData.value = JSON.stringify(form.data());
-                            isDirty.value = false;
-                        }
-                    }, 100);
-                } else if (attempts < 10) {
-                    // Retry after 100ms, up to 10 times (1 second total)
-                    setTimeout(() => tryInitMap(attempts + 1), 100);
-                } else {
-                    console.warn('[CustomerFormModal] Map container not found after retries');
-                }
-            };
-
             // Start trying after modal animation (300ms)
-            setTimeout(() => tryInitMap(), 300);
+            setTimeout(() => mountWithRetry(), 300);
         } else {
             destroyMap();
         }
@@ -957,30 +809,6 @@ watch(
     }
 );
 
-function initMap() {
-    if (!mapContainer.value || map) return;
-
-    const startLat = form.lat || defaultLat.value;
-    const startLng = form.lng || defaultLng.value;
-
-    map = L.map(mapContainer.value).setView([startLat, startLng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-
-    // Add initial marker if we have coordinates
-    if (form.lat && form.lng) {
-        marker = L.marker([form.lat, form.lng], { draggable: true }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    // Handle map clicks
-    map.on('click', onMapClick);
-
-    mapReady.value = true;
-}
-
 function resetForm() {
     form.reset();
     isDirty.value = false;
@@ -1011,183 +839,6 @@ async function handleClose() {
 
     resetForm();
     emit('close');
-}
-
-function destroyMap() {
-    if (map) {
-        map.off(); // Remove all event listeners
-        map.remove();
-        map = null;
-        marker = null;
-        mapReady.value = false;
-    }
-}
-
-function onMapClick(e) {
-    const { lat, lng } = e.latlng;
-    setMarker(lat, lng);
-}
-
-function onMarkerDrag(e) {
-    const { lat, lng } = e.target.getLatLng();
-    form.lat = parseFloat(lat.toFixed(7));
-    form.lng = parseFloat(lng.toFixed(7));
-    reverseGeocode(form.lat, form.lng);
-}
-
-function setMarker(lat, lng, isInit = false) {
-    form.lat = parseFloat(lat.toFixed(7));
-    form.lng = parseFloat(lng.toFixed(7));
-
-    if (marker) {
-        marker.setLatLng([lat, lng]);
-    } else {
-        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    map.panTo([lat, lng]);
-
-    // Reverse geocode to fill address fields
-    reverseGeocode(form.lat, form.lng, isInit);
-}
-
-// Reverse geocoding using OpenStreetMap Nominatim
-async function reverseGeocode(lat, lng, isInit = false) {
-    if (geocodingLoading.value) return;
-
-    geocodingLoading.value = true;
-
-    try {
-        const lang = locale.value === 'ar' ? 'ar' : 'en';
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
-            {
-                headers: {
-                    'User-Agent': 'KhidmhPro-App/1.0',
-                },
-            }
-        );
-
-        if (!response.ok) throw new Error('Geocoding failed');
-
-        const data = await response.json();
-
-        if (data && data.address) {
-            const addr = data.address;
-
-            // Fill form fields from geocoding response
-            form.country = addr.country || form.country || '';
-            form.region = addr.state || addr.region || form.region || '';
-            form.city =
-                addr.city || addr.town || addr.village || addr.municipality || form.city || '';
-            form.district =
-                addr.suburb ||
-                addr.neighbourhood ||
-                addr.quarter ||
-                addr.district ||
-                form.district ||
-                '';
-
-            // Extraction helpers for numeric fields (e.g. building_number and postal_code)
-            const toEnglishDigits = (str) => {
-                if (!str) return '';
-                return str
-                    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-            };
-
-            const cleanDisplayName = toEnglishDigits(data.display_name || '');
-            const numbers = cleanDisplayName.match(/\d+/g) || [];
-
-            // 1. Building number
-            let bldNum = addr.house_number || '';
-            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
-            if (bldNum.length !== 4) {
-                bldNum = '';
-            }
-            if (!bldNum) {
-                // Find first 4-digit sequence
-                const fourDigit = numbers.find((n) => n.length === 4);
-                if (fourDigit) {
-                    bldNum = fourDigit;
-                }
-            }
-            form.building_number = bldNum || form.building_number || '';
-
-            // 2. Postal code
-            let postCode = addr.postcode || '';
-            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
-            if (postCode.length !== 5) {
-                postCode = '';
-            }
-            if (!postCode) {
-                // Find first 5-digit sequence
-                const fiveDigit = numbers.find((n) => n.length === 5);
-                if (fiveDigit) {
-                    postCode = fiveDigit;
-                }
-            }
-            form.postal_code = postCode || form.postal_code || '';
-
-            // Build address line from available info
-            const addressParts = [];
-            if (addr.road) addressParts.push(addr.road);
-            if (addr.neighbourhood && addr.neighbourhood !== form.district)
-                addressParts.push(addr.neighbourhood);
-
-            // Always update address_line with formatted address
-            form.address_line =
-                addressParts.length > 0
-                    ? addressParts.join('، ')
-                    : data.display_name?.split(',').slice(0, 2).join('،') || '';
-        }
-    } catch (error) {
-        console.warn('Reverse geocoding failed:', error);
-    } finally {
-        geocodingLoading.value = false;
-        if (isInit) {
-            isLocating.value = false;
-            nextTick(() => {
-                initialFormData.value = JSON.stringify(form.data());
-                isDirty.value = false;
-            });
-        }
-    }
-}
-
-function updateMarkerFromInputs() {
-    const lat = parseFloat(form.lat);
-    const lng = parseFloat(form.lng);
-
-    if (!isNaN(lat) && !isNaN(lng) && map) {
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-            marker.on('dragend', onMarkerDrag);
-        }
-        map.setView([lat, lng], 15);
-    }
-}
-
-// Clear all address fields
-function clearAddressFields() {
-    form.address_line = '';
-    form.building_number = '';
-    form.postal_code = '';
-    form.district = '';
-    form.city = '';
-    form.region = '';
-    form.country = '';
-    form.lat = null;
-    form.lng = null;
-
-    // Remove marker from map
-    if (marker && map) {
-        map.removeLayer(marker);
-        marker = null;
-    }
 }
 
 const checkPhoneExistence = async () => {
@@ -1299,18 +950,9 @@ function quickEmail() {
     if (!form.email) return;
     window.open(`mailto:${form.email}`, '_self');
 }
-
-onUnmounted(() => {
-    destroyMap();
-});
 </script>
 
 <style>
-/* Leaflet RTL fixes */
-.leaflet-container {
-    z-index: 0;
-}
-
 /* Vue Tel Input Customization */
 .vue-tel-input {
     border-radius: 0.75rem !important;

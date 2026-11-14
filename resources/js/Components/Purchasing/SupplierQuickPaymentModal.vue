@@ -48,20 +48,29 @@
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label
-                        class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all"
+                    <button
+                        type="button"
+                        @click="allocationType = 'fifo'"
+                        class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all text-start"
                         :class="
                             allocationType === 'fifo'
                                 ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-900 dark:text-emerald-200'
                                 : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800'
                         "
                     >
-                        <input
-                            type="radio"
-                            v-model="allocationType"
-                            value="fifo"
-                            class="text-emerald-600 focus:ring-focus-ring"
-                        />
+                        <span
+                            class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
+                            :class="
+                                allocationType === 'fifo'
+                                    ? 'border-emerald-600 bg-emerald-600'
+                                    : 'border-gray-300 dark:border-gray-600'
+                            "
+                        >
+                            <span
+                                v-if="allocationType === 'fifo'"
+                                class="w-1.5 h-1.5 rounded-full bg-white"
+                            ></span>
+                        </span>
                         <div>
                             <p class="text-xs font-bold">
                                 {{ $t('purchasing.suppliers.auto_allocate') }}
@@ -70,22 +79,31 @@
                                 {{ $t('purchasing.suppliers.auto_allocate_hint') }}
                             </p>
                         </div>
-                    </label>
+                    </button>
 
-                    <label
-                        class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all"
+                    <button
+                        type="button"
+                        @click="allocationType = 'specific'"
+                        class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all text-start"
                         :class="
                             allocationType === 'specific'
                                 ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-900 dark:text-emerald-200'
                                 : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800'
                         "
                     >
-                        <input
-                            type="radio"
-                            v-model="allocationType"
-                            value="specific"
-                            class="text-emerald-600 focus:ring-focus-ring"
-                        />
+                        <span
+                            class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
+                            :class="
+                                allocationType === 'specific'
+                                    ? 'border-emerald-600 bg-emerald-600'
+                                    : 'border-gray-300 dark:border-gray-600'
+                            "
+                        >
+                            <span
+                                v-if="allocationType === 'specific'"
+                                class="w-1.5 h-1.5 rounded-full bg-white"
+                            ></span>
+                        </span>
                         <div>
                             <p class="text-xs font-bold">
                                 {{ $t('purchasing.suppliers.specific_invoice') }}
@@ -94,7 +112,7 @@
                                 {{ $t('purchasing.suppliers.specific_invoice_hint') }}
                             </p>
                         </div>
-                    </label>
+                    </button>
                 </div>
             </div>
 
@@ -174,47 +192,24 @@
                             </strong>
                         </span>
                     </div>
-                    <input
+                    <AppInput
                         v-model="form.amount"
                         type="number"
                         step="0.01"
                         min="0.01"
                         :max="maxAllowedAmount"
                         required
-                        class="w-full px-4 py-2.5 text-sm font-mono font-black rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 transition-all"
-                        :class="
+                        class="font-mono font-black"
+                        :error="
                             isOverAmount
-                                ? 'border-red-500 focus:border-danger focus:ring-danger/20 text-red-600 dark:text-red-400'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary focus:ring-focus-ring/20'
+                                ? $t('purchasing.payment_exceeds_max', {
+                                      formatCurrency_maxAllowedAmount_:
+                                          formatCurrency(maxAllowedAmount),
+                                  })
+                                : ''
                         "
                         placeholder="0.00"
                     />
-                    <p
-                        v-if="isOverAmount"
-                        class="mt-1 text-xs text-red-600 dark:text-red-400 font-bold flex items-center gap-1"
-                    >
-                        <svg
-                            class="w-3.5 h-3.5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <span>
-                            {{
-                                $t('purchasing.payment_exceeds_max', {
-                                    formatCurrency_maxAllowedAmount_:
-                                        formatCurrency(maxAllowedAmount),
-                                })
-                            }}
-                        </span>
-                    </p>
                 </div>
 
                 <!-- Payment Method -->
@@ -250,10 +245,10 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('payments.form.reference') }}
                     </label>
-                    <input
+                    <AppInput
                         v-model="form.reference"
                         type="text"
-                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all font-mono"
+                        class="font-mono"
                         placeholder="REF-1234..."
                     />
                 </div>
@@ -264,27 +259,25 @@
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('payments.form.notes') }}
                 </label>
-                <textarea
+                <AppTextarea
                     v-model="form.notes"
                     rows="2"
-                    class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all resize-none"
+                    class="resize-none"
                     :placeholder="$t('payments.form.notes_placeholder')"
-                ></textarea>
+                />
             </div>
 
             <!-- Modal Footer -->
             <div
                 class="pt-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-3"
             >
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
+                    variant="action"
+                    :loading="submitting"
                     :disabled="
                         submitting ||
                         !form.amount ||
@@ -293,36 +286,11 @@
                         maxAllowedAmount <= 0 ||
                         (allocationType === 'specific' && !form.purchase_invoice_id)
                     "
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    <svg
-                        v-if="submitting"
-                        class="w-4 h-4 animate-spin"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span>
-                        {{
-                            submitting
-                                ? $t('common.saving')
-                                : $t('purchasing.suppliers.record_payment')
-                        }}
-                    </span>
-                </button>
+                    {{
+                        submitting ? $t('common.saving') : $t('purchasing.suppliers.record_payment')
+                    }}
+                </AppButton>
             </div>
         </form>
     </BaseModal>
@@ -334,6 +302,9 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 

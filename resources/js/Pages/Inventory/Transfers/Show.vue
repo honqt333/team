@@ -230,36 +230,24 @@
                             />
                         </div>
                         <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('inventory.transfers.qty_requested') }}
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="newItem.qty_requested"
                                 type="number"
                                 step="0.001"
                                 min="0.001"
                                 dir="ltr"
-                                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                :label="$t('inventory.transfers.qty_requested')"
                                 required
                             />
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
-                        <button
-                            type="button"
-                            @click="showAddModal = false"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300"
-                        >
+                        <AppButton type="button" variant="secondary" @click="showAddModal = false">
                             {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover"
-                        >
+                        </AppButton>
+                        <AppButton type="submit" variant="primary">
                             {{ $t('common.add') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </form>
             </BaseModal>
@@ -270,6 +258,8 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

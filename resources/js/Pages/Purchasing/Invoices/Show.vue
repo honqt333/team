@@ -1334,19 +1334,12 @@
                                 />
                             </div>
                             <!-- Notes -->
-                            <div>
-                                <label
-                                    class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
-                                >
-                                    {{ $t('payments.form.notes') }}
-                                </label>
-                                <textarea
-                                    v-model="returnForm.notes"
-                                    rows="3"
-                                    :placeholder="$t('invoices.return_notes_placeholder')"
-                                    class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-sm"
-                                ></textarea>
-                            </div>
+                            <AppTextarea
+                                v-model="returnForm.notes"
+                                :label="$t('payments.form.notes')"
+                                :rows="3"
+                                :placeholder="$t('invoices.return_notes_placeholder')"
+                            />
                         </div>
 
                         <!-- Right: Summary Card -->
@@ -1736,47 +1729,26 @@
 
                 <template #footer>
                     <div class="flex items-center justify-end gap-3 w-full">
-                        <button
+                        <AppButton
                             type="button"
+                            variant="secondary"
                             @click="showReturnModal = false"
-                            class="px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
                         >
                             {{ $t('common.cancel') }}
-                        </button>
-                        <button
+                        </AppButton>
+                        <AppButton
                             type="button"
-                            @click="submitReturn"
+                            variant="danger"
+                            :loading="returnForm.processing"
                             :disabled="!isReturnFormValid"
-                            class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
+                            @click="submitReturn"
                         >
-                            <svg
-                                v-if="returnForm.processing"
-                                class="animate-spin w-4 h-4 text-white inline-block mr-1.5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                            </svg>
-                            <span>
-                                {{
-                                    returnForm.processing
-                                        ? $t('common.saving')
-                                        : $t('invoices.confirm_return')
-                                }}
-                            </span>
-                        </button>
+                            {{
+                                returnForm.processing
+                                    ? $t('common.saving')
+                                    : $t('invoices.confirm_return')
+                            }}
+                        </AppButton>
                     </div>
                 </template>
             </BaseModal>
@@ -1837,21 +1809,19 @@
                             </span>
                         </div>
                         <div class="relative flex flex-col items-center">
-                            <input
+                            <AppInput
                                 type="number"
                                 v-model="itemReturnQty"
                                 :max="getAvailableQty(selectedReturnLine)"
                                 min="0.01"
                                 step="0.01"
-                                class="w-full text-center font-bold py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 dir="ltr"
+                                :error="
+                                    itemReturnQty > getAvailableQty(selectedReturnLine)
+                                        ? $t('invoices.errors.qty_exceeds_available')
+                                        : ''
+                                "
                             />
-                            <span
-                                v-if="itemReturnQty > getAvailableQty(selectedReturnLine)"
-                                class="text-[10px] font-bold text-red-500 mt-1.5"
-                            >
-                                {{ $t('invoices.errors.qty_exceeds_available') }}
-                            </span>
                         </div>
                     </div>
 
@@ -1869,12 +1839,11 @@
                                 {{ $t('invoices.editable_price') }}
                             </span>
                         </div>
-                        <input
+                        <AppInput
                             type="number"
                             v-model="itemReturnPrice"
                             min="0"
                             step="0.01"
-                            class="w-full text-center font-bold py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             dir="ltr"
                         />
                     </div>
@@ -1956,24 +1925,26 @@
 
                 <template #footer>
                     <div class="flex items-center justify-end gap-2.5 w-full">
-                        <button
+                        <AppButton
                             type="button"
+                            variant="secondary"
+                            size="sm"
                             @click="showItemReturnModal = false"
-                            class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
                         >
                             {{ $t('common.cancel') }}
-                        </button>
-                        <button
+                        </AppButton>
+                        <AppButton
                             type="button"
-                            @click="addItemToReturn"
+                            variant="danger"
+                            size="sm"
                             :disabled="
                                 itemReturnQty <= 0 ||
                                 itemReturnQty > getAvailableQty(selectedReturnLine)
                             "
-                            class="px-5 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            @click="addItemToReturn"
                         >
                             {{ $t('common.add') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </template>
             </BaseModal>
@@ -2003,6 +1974,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';

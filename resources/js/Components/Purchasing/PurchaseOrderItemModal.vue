@@ -120,13 +120,11 @@
                         >
                             {{ $t('inventory.parts.part_number') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.part_number"
-                            :placeholder="
-                                $t('inventory.parts.part_number_placeholder') || 'رقم القطعة...'
-                            "
-                            class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                            :placeholder="$t('inventory.parts.part_number_placeholder')"
+                            class="text-xs font-mono"
                             dir="ltr"
                         />
                     </div>
@@ -151,23 +149,23 @@
                         {{ $t('inventory.parts.name') }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.custom_name"
                         required
-                        :placeholder="$t('inventory.parts.name_placeholder') || 'اسم القطعة...'"
-                        class="w-full px-3.5 py-2.5 text-xs font-bold rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                        :placeholder="$t('inventory.parts.name_placeholder')"
+                        class="text-xs font-bold"
                     />
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('inventory.parts.description') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.notes"
                         :placeholder="$t('inventory.parts.description_placeholder')"
-                        class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                        class="text-xs"
                     />
                 </div>
             </div>
@@ -240,14 +238,14 @@
                         {{ $t('inventory.parts.cost_price') }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.unit_cost"
                         inputmode="decimal"
                         dir="ltr"
                         lang="en"
                         @input="(e) => (form.unit_cost = toEnglish(e.target.value))"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
+                        class="text-center font-bold text-lg shadow-sm font-mono"
                     />
                 </div>
 
@@ -258,14 +256,14 @@
                     >
                         {{ $t('common.discount') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.discount"
                         inputmode="decimal"
                         dir="ltr"
                         lang="en"
                         @input="(e) => (form.discount = toEnglish(e.target.value))"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center text-lg shadow-sm font-mono"
+                        class="text-center text-lg shadow-sm font-mono"
                     />
                 </div>
 
@@ -278,14 +276,14 @@
                         <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="number"
                             v-model.number="form.qty"
                             min="1"
                             step="1"
                             dir="ltr"
                             lang="en"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
+                            class="text-center font-bold text-lg shadow-sm font-mono"
                         />
                     </div>
                 </div>
@@ -382,14 +380,14 @@
                         </span>
                     </label>
                     <div class="relative flex items-center">
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.conversion_factor"
                             inputmode="decimal"
                             dir="ltr"
                             lang="en"
                             @input="(e) => (form.conversion_factor = toEnglish(e.target.value))"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
+                            class="text-center font-bold text-lg shadow-sm font-mono"
                         />
                         <span
                             class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400 text-xs font-bold"
@@ -488,58 +486,45 @@
         </form>
 
         <template #footer>
-            <div class="flex items-center justify-between w-full">
-                <div v-if="item" class="text-sm text-gray-500">
-                    <!-- Optional: Delete button or other secondary actions -->
-                </div>
-                <div v-else></div>
-                <!-- Spacer -->
-
-                <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :disabled="!selectedPart || form.qty <= 0"
+                    @click="submit"
+                >
+                    <svg
+                        v-if="!item"
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
-                        {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="submit"
-                        :disabled="!selectedPart || form.qty <= 0"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+                    <svg
+                        v-else
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
-                        <svg
-                            v-if="!item"
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                        {{ item ? $t('common.save') : $t('common.add') }}
-                    </button>
-                </div>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+                    {{ item ? $t('common.save') : $t('common.add') }}
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -548,7 +533,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AppInput from '@/Components/App/AppInput.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import axios from 'axios';

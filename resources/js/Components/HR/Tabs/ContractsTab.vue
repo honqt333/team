@@ -130,26 +130,20 @@
             size="xl"
             @close="showModal = false"
         >
-            <form @submit.prevent="submit" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <form
+                id="contract-form"
+                @submit.prevent="submit"
+                class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+            >
                 <!-- Sidebar -->
                 <div class="lg:col-span-1 space-y-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.contracts.number') }}
-                        </label>
-                        <input
-                            v-model="form.contract_number"
-                            type="text"
-                            placeholder="CONT-2024-XXXX"
-                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            required
-                        />
-                        <p v-if="form.errors.contract_number" class="text-xs text-red-500 mt-1">
-                            {{ form.errors.contract_number }}
-                        </p>
-                    </div>
+                    <AppInput
+                        v-model="form.contract_number"
+                        :label="$t('hr.contracts.number')"
+                        placeholder="CONT-2024-XXXX"
+                        :error="form.errors.contract_number"
+                        required
+                    />
 
                     <div class="grid grid-cols-1 gap-4">
                         <div>
@@ -204,44 +198,42 @@
                         </div>
                     </div>
 
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
+                        class="w-full justify-center"
                         @click="generateDraft"
-                        class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 transition-colors"
                     >
                         {{ $t('hr.contracts.draft_contract') }}
-                    </button>
+                    </AppButton>
                 </div>
 
                 <!-- Content -->
                 <div class="lg:col-span-2 flex flex-col h-full">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('hr.contracts.content') }}
-                    </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.content"
-                        class="flex-1 w-full rounded-2xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono text-sm p-4 min-h-[400px]"
+                        :label="$t('hr.contracts.content')"
+                        :rows="15"
                         placeholder="اكتب بنود العقد هنا..."
-                    ></textarea>
-
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button
-                            type="button"
-                            @click="showModal = false"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="submit"
-                            :disabled="form.processing"
-                            class="px-8 py-2 bg-emerald-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-sm shadow-emerald-200 dark:shadow-none"
-                        >
-                            {{ $t('common.save') }}
-                        </button>
-                    </div>
+                    />
                 </div>
             </form>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="showModal = false">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="submit"
+                        form="contract-form"
+                        variant="primary"
+                        :loading="form.processing"
+                    >
+                        {{ $t('common.save') }}
+                    </AppButton>
+                </div>
+            </template>
         </BaseModal>
     </div>
 </template>
@@ -256,6 +248,9 @@ import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     employee: Object,

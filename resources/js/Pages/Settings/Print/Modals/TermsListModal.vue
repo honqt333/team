@@ -45,11 +45,11 @@
                             />
                         </svg>
                     </span>
-                    <input
+                    <AppInput
                         v-model="search"
                         type="text"
                         :placeholder="$t('common.search')"
-                        class="w-full ps-10 pe-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all text-sm"
+                        class="ps-10"
                     />
                 </div>
                 <button
@@ -231,18 +231,12 @@
                     </svg>
                 </button>
                 <div class="flex gap-3">
-                    <button
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        @click="handleSave"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="button" variant="primary" @click="handleSave">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -261,6 +255,8 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';

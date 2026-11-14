@@ -239,41 +239,18 @@
                 <div
                     class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
                 >
-                    <button
-                        type="button"
-                        @click="closeModal"
-                        class="px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors text-center"
-                    >
+                    <AppButton type="button" variant="secondary" @click="closeModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="isUploading"
+                        :disabled="selectedFiles.length === 0"
                         @click="handleUploadSubmit"
-                        :disabled="isUploading || selectedFiles.length === 0"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-md shadow-blue-500/20 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
                     >
-                        <svg
-                            v-if="isUploading"
-                            class="w-4 h-4 animate-spin -ms-1 me-2 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
                         {{ isUploading ? $t('common.loading') : $t('common.upload_files') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -286,6 +263,7 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 

@@ -455,54 +455,31 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-content-secondary mb-1">
-                            {{ $t('hr.attendance.check_in') }}
-                        </label>
-                        <input
-                            v-model="editForm.check_in"
-                            type="time"
-                            class="w-full px-3 py-2 text-sm border border-border-subtle rounded-xl bg-surface-primary text-content-primary focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-content-secondary mb-1">
-                            {{ $t('hr.attendance.check_out') }}
-                        </label>
-                        <input
-                            v-model="editForm.check_out"
-                            type="time"
-                            class="w-full px-3 py-2 text-sm border border-border-subtle rounded-xl bg-surface-primary text-content-primary focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="editForm.check_in"
+                        type="time"
+                        :label="$t('hr.attendance.check_in')"
+                    />
+                    <AppInput
+                        v-model="editForm.check_out"
+                        type="time"
+                        :label="$t('hr.attendance.check_out')"
+                    />
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-content-secondary mb-1">
-                        {{ $t('hr.attendance.notes') }}
-                    </label>
-                    <textarea
-                        v-model="editForm.notes"
-                        rows="3"
-                        class="w-full px-3 py-2 text-sm border border-border-subtle rounded-xl bg-surface-primary text-content-primary focus:ring-2 focus:ring-focus-ring"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="editForm.notes"
+                    :label="$t('hr.attendance.notes')"
+                    :rows="3"
+                />
 
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-                    <button
-                        @click="editingAttendance = null"
-                        type="button"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="editingAttendance = null">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        @click="updateAttendance"
-                        type="button"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="button" variant="primary" @click="updateAttendance">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </BaseModal>
@@ -523,6 +500,9 @@ import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';

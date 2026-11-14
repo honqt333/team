@@ -14,7 +14,7 @@
                 badgeDot="bg-slate-500"
             >
                 <template #back>
-                    <BackButton :href="route('app.hr.index')" />
+                    <BackButton :href="route('settings.index')" />
                 </template>
 
                 <template #icon>
@@ -801,17 +801,12 @@
             </template>
 
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }} *
-                    </label>
-                    <input
-                        v-model="deviceForm.name"
-                        type="text"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                        required
-                    />
-                </div>
+                <AppInput
+                    v-model="deviceForm.name"
+                    type="text"
+                    :label="$t('common.name')"
+                    required
+                />
 
                 <div>
                     <SearchableSelect
@@ -825,63 +820,34 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.settings.biometric_devices.device_id') }}
-                        </label>
-                        <input
-                            v-model="deviceForm.device_id"
-                            type="text"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.settings.biometric_devices.device_type') }}
-                        </label>
-                        <input
-                            v-model="deviceForm.device_type"
-                            type="text"
-                            placeholder="ZKTeco, Hikvision..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="deviceForm.device_id"
+                        type="text"
+                        :label="$t('hr.settings.biometric_devices.device_id')"
+                    />
+                    <AppInput
+                        v-model="deviceForm.device_type"
+                        type="text"
+                        :label="$t('hr.settings.biometric_devices.device_type')"
+                        placeholder="ZKTeco, Hikvision..."
+                    />
                 </div>
 
                 <div v-if="editingDevice" class="flex items-center gap-2">
                     <AppToggle v-model="deviceForm.is_active" :label="$t('common.active')" />
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.notes') }}
-                    </label>
-                    <textarea
-                        v-model="deviceForm.notes"
-                        rows="2"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                    ></textarea>
-                </div>
+                <AppTextarea v-model="deviceForm.notes" :label="$t('common.notes')" :rows="2" />
 
                 <div
                     class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700"
                 >
-                    <button
-                        @click="closeDeviceModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="closeDeviceModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        @click="saveDevice"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="button" variant="primary" @click="saveDevice">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </BaseModal>
@@ -895,81 +861,45 @@
 
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('common.name') }} {{ $t('hr.settings.arabic_required') }}
-                        </label>
-                        <input
-                            v-model="shiftForm.name_ar"
-                            type="text"
-                            placeholder="صباحي، مسائي..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('common.name') }} (English)
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="shiftForm.name_en"
-                            type="text"
-                            required
-                            placeholder="Morning, Evening..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="shiftForm.name_ar"
+                        type="text"
+                        :label="`${$t('common.name')} ${$t('hr.settings.arabic_required')}`"
+                        placeholder="صباحي، مسائي..."
+                        required
+                    />
+                    <AppInput
+                        v-model="shiftForm.name_en"
+                        type="text"
+                        :label="`${$t('common.name')} (English)`"
+                        placeholder="Morning, Evening..."
+                        required
+                    />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.settings.shifts.start_time') }} *
-                        </label>
-                        <input
-                            v-model="shiftForm.start_time"
-                            type="time"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.settings.shifts.end_time') }} *
-                        </label>
-                        <input
-                            v-model="shiftForm.end_time"
-                            type="time"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            required
-                        />
-                    </div>
+                    <AppInput
+                        v-model="shiftForm.start_time"
+                        type="time"
+                        :label="$t('hr.settings.shifts.start_time')"
+                        required
+                    />
+                    <AppInput
+                        v-model="shiftForm.end_time"
+                        type="time"
+                        :label="$t('hr.settings.shifts.end_time')"
+                        required
+                    />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('hr.settings.shifts.break') }}
-                        </label>
-                        <input
-                            v-model.number="shiftForm.break_minutes"
-                            type="number"
-                            min="0"
-                            max="180"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                        />
-                    </div>
+                    <AppInput
+                        v-model.number="shiftForm.break_minutes"
+                        type="number"
+                        min="0"
+                        max="180"
+                        :label="$t('hr.settings.shifts.break')"
+                    />
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -999,18 +929,12 @@
                 <div
                     class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700"
                 >
-                    <button
-                        @click="closeShiftModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="closeShiftModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        @click="saveShift"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="button" variant="primary" @click="saveShift">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </BaseModal>
@@ -1033,6 +957,9 @@ import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';

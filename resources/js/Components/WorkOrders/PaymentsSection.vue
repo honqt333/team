@@ -313,59 +313,32 @@
                     </div>
 
                     <!-- Notes -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('payments.form.notes') }}
-                        </label>
-                        <textarea
-                            v-model="creditInvoiceForm.notes"
-                            rows="3"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
-                            :placeholder="$t('payments.form.notes_placeholder')"
-                        ></textarea>
-                    </div>
+                    <AppTextarea
+                        v-model="creditInvoiceForm.notes"
+                        :label="$t('payments.form.notes')"
+                        :rows="3"
+                        :placeholder="$t('payments.form.notes_placeholder')"
+                    />
                 </div>
             </form>
 
             <template #footer>
                 <div class="flex items-center justify-end gap-3 w-full">
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
                         @click="showCreditInvoiceModal = false"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
                     >
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="submit"
                         form="credit-invoice-form"
-                        :disabled="submittingCreditInvoice"
-                        class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="primary"
+                        :loading="submittingCreditInvoice"
                     >
-                        <svg
-                            v-if="submittingCreditInvoice"
-                            class="inline-block w-4 h-4 mr-2 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                        </svg>
                         {{ submittingCreditInvoice ? $t('common.loading') : $t('common.create') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -381,6 +354,8 @@ import { router } from '@inertiajs/vue3';
 import PaymentFormModal from './PaymentFormModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

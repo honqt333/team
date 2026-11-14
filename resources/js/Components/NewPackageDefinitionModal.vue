@@ -68,23 +68,23 @@
                     :label="$t('services_management.form.description_ar')"
                     :error="form.errors.description_ar"
                 >
-                    <textarea
+                    <AppTextarea
                         v-model="form.description_ar"
                         rows="2"
                         dir="rtl"
-                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
-                    ></textarea>
+                        class="w-full resize-none"
+                    />
                 </FormField>
                 <FormField
                     :label="$t('services_management.form.description_en')"
                     :error="form.errors.description_en"
                 >
-                    <textarea
+                    <AppTextarea
                         v-model="form.description_en"
                         rows="2"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
-                    ></textarea>
+                        class="w-full resize-none"
+                    />
                 </FormField>
             </div>
 
@@ -131,21 +131,24 @@
                             <label class="block text-xs font-medium text-gray-500 mb-1">
                                 {{ $t('packages.quantity') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="number"
                                 v-model.number="newItem.quantity"
                                 min="1"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent"
+                                size="sm"
+                                class="w-full"
                             />
                         </div>
-                        <button
+                        <AppButton
                             type="button"
+                            variant="primary"
+                            size="sm"
                             @click="addItem"
                             :disabled="!newItem.id"
-                            class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
+                            class="h-[38px]"
                         >
                             {{ $t('packages.add_item') }}
-                        </button>
+                        </AppButton>
                     </div>
 
                     <!-- Items List -->
@@ -240,21 +243,18 @@
             <div
                 class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
             >
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="button"
+                    variant="primary"
                     @click="submitForm"
+                    :loading="form.processing"
                     :disabled="form.processing || form.items.length === 0"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -269,6 +269,8 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useLocalized } from '@/Composables/useLocalized';
 
 const props = defineProps({

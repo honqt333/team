@@ -8,14 +8,33 @@ use App\Http\Controllers\Controller;
 use App\Models\HR\Leave;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class LeaveController extends Controller
 {
+    private function authorizeLeaveManage(Request $request, ?Leave $leave = null): void
+    {
+        $user = $request->user();
+        abort_unless(
+            $user && ($user->is_system_admin || $user->hasRole('super_admin') || $user->can('hr.employees.manage') || $user->can('hr.leaves.manage') || $user->can('employees.manage')),
+            403
+        );
+
+        if ($leave !== null && (int) $leave->tenant_id !== (int) $user->tenant_id) {
+            abort(404);
+        }
+    }
+
     public function store(Request $request)
     {
+        $this->authorizeLeaveManage($request);
+        $tenantId = (int) $request->user()->tenant_id;
+
         $validated = $request->validate([
-            'employee_id' => 'required|exists:hr_employees,id',
+            'employee_id' => [
+                'required',
+                Rule::exists('hr_employees', 'id')->where('tenant_id', $tenantId),
+            ],
             'type' => 'required|string|in:annual,sick,unpaid,emergency,other',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -42,6 +61,8 @@ class LeaveController extends Controller
 
     public function update(Request $request, Leave $leave)
     {
+        $this->authorizeLeaveManage($request, $leave);
+
         $validated = $request->validate([
             'type' => 'required|string|in:annual,sick,unpaid,emergency,other',
             'start_date' => 'required|date',
@@ -64,8 +85,10 @@ class LeaveController extends Controller
         return back()->with('success', __('common.saved_success'));
     }
 
-    public function destroy(Leave $leave)
+    public function destroy(Request $request, Leave $leave)
     {
+        $this->authorizeLeaveManage($request, $leave);
+
         if ($leave->status !== 'pending') {
             return back()->with('error', __('common.cannot_delete_processed_leave'));
         }
@@ -77,6 +100,8 @@ class LeaveController extends Controller
 
     public function updateStatus(Request $request, Leave $leave)
     {
+        $this->authorizeLeaveManage($request, $leave);
+
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected',
             'notes' => 'nullable|string',

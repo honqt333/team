@@ -253,12 +253,7 @@
                     :label="$t('customers.form.notes')"
                     :error="form.errors.notes"
                 >
-                    <textarea
-                        name="notes"
-                        v-model="form.notes"
-                        rows="2"
-                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
-                    ></textarea>
+                    <AppTextarea name="notes" v-model="form.notes" rows="2" class="resize-none" />
                 </FormField>
             </div>
 
@@ -346,35 +341,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <!-- Map Container -->
                     <div class="order-1 lg:order-2">
-                        <div
-                            ref="mapContainer"
-                            class="w-full h-[260px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
-                        >
-                            <div
-                                v-if="!mapReady"
-                                class="h-full flex flex-col items-center justify-center text-center p-4"
-                            >
-                                <svg
-                                    class="w-8 h-8 text-gray-400 mb-2 animate-pulse"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                    />
-                                </svg>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $t('common.loading') }}
-                                </p>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                            {{ $t('customers.map.click_hint') }}
-                        </p>
+                        <NationalAddressMapCanvas
+                            :map-ready="mapReady"
+                            height-class="h-[260px]"
+                            :hint="$t('customers.map.click_hint')"
+                            @container="(el) => (mapContainer = el)"
+                        />
                     </div>
 
                     <!-- Address Fields -->
@@ -385,13 +357,13 @@
                             >
                                 {{ $t('customers.form.address_line') }}
                             </label>
-                            <textarea
+                            <AppTextarea
                                 name="address_line"
                                 v-model="form.address_line"
                                 rows="2"
                                 :placeholder="$t('customers.form.address_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
-                            ></textarea>
+                                class="resize-none"
+                            />
                         </div>
 
                         <div class="grid grid-cols-3 gap-2">
@@ -399,34 +371,27 @@
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.building_number') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="text"
                                     name="building_number"
                                     v-model="form.building_number"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.postal_code') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="text"
                                     name="postal_code"
                                     v-model="form.postal_code"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.district') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="district"
-                                    v-model="form.district"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="district" v-model="form.district" />
                             </div>
                         </div>
 
@@ -435,23 +400,13 @@
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.city') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="city"
-                                    v-model="form.city"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="city" v-model="form.city" />
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                     {{ $t('customers.form.region') }}
                                 </label>
-                                <input
-                                    type="text"
-                                    name="region"
-                                    v-model="form.region"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                />
+                                <AppInput type="text" name="region" v-model="form.region" />
                             </div>
                         </div>
 
@@ -459,12 +414,11 @@
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 {{ $t('customers.form.country') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 name="country"
                                 v-model="form.country"
                                 :placeholder="$t('customers.form.country_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                         </div>
                     </div>
@@ -492,41 +446,17 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="handleClose"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="handleClose">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="primary"
+                        :loading="form.processing"
                         @click="submitForm"
-                        :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
                         {{ form.processing ? $t('common.loading') : $t('customers.form.submit') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -540,9 +470,12 @@ import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 
 const props = defineProps({
     show: {
@@ -788,10 +721,6 @@ onUnmounted(() => destroyMap());
 </script>
 
 <style>
-.leaflet-container {
-    z-index: 0;
-}
-
 .vue-tel-input {
     border-radius: 0.75rem !important;
     border-color: #d1d5db !important;

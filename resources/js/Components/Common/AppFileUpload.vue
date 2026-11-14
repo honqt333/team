@@ -175,7 +175,8 @@ function openPicker() {
         <div
             v-if="variant === 'image'"
             :class="[
-                'flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl transition-colors',
+                'flex flex-col justify-between gap-3 rounded-2xl transition-colors',
+                compactPreview ? 'items-start' : 'sm:flex-row sm:items-center gap-4',
                 dragging ? 'ring-2 ring-action-primary bg-selection-bg/40 p-2 -m-2' : '',
             ]"
             @dragover.prevent="dragging = !isBusy"
@@ -231,7 +232,7 @@ function openPicker() {
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex flex-wrap items-center gap-2">
                 <input
                     ref="inputRef"
                     type="file"

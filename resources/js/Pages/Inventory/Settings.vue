@@ -10,7 +10,7 @@
                 glowFrom="from-slate-500"
             >
                 <template #back>
-                    <BackButton :href="route('app.inventory.hub')" />
+                    <BackButton :href="route('settings.index')" />
                 </template>
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,31 +274,18 @@
             @close="showUnitModal = false"
         >
             <form @submit.prevent="saveUnit" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }}
-                        {{ $t('inventory.settings.arabic_suffix') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="unitForm.name_ar"
-                        type="text"
-                        required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }} (English)
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="unitForm.name_en"
-                        type="text"
-                        required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                </div>
+                <AppInput
+                    v-model="unitForm.name_ar"
+                    type="text"
+                    :label="`${$t('common.name')} ${$t('inventory.settings.arabic_suffix')}`"
+                    required
+                />
+                <AppInput
+                    v-model="unitForm.name_en"
+                    type="text"
+                    :label="`${$t('common.name')} (English)`"
+                    required
+                />
                 <div>
                     <AppToggle
                         v-model="unitForm.is_active"
@@ -307,19 +294,12 @@
                     />
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button
-                        type="button"
-                        @click="showUnitModal = false"
-                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showUnitModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="primary">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -332,31 +312,18 @@
             @close="showCategoryModal = false"
         >
             <form @submit.prevent="saveCategory" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }}
-                        {{ $t('inventory.settings.arabic_suffix') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="categoryForm.name_ar"
-                        type="text"
-                        required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }} (English)
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="categoryForm.name_en"
-                        type="text"
-                        required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                </div>
+                <AppInput
+                    v-model="categoryForm.name_ar"
+                    type="text"
+                    :label="`${$t('common.name')} ${$t('inventory.settings.arabic_suffix')}`"
+                    required
+                />
+                <AppInput
+                    v-model="categoryForm.name_en"
+                    type="text"
+                    :label="`${$t('common.name')} (English)`"
+                    required
+                />
                 <div>
                     <AppToggle
                         v-model="categoryForm.is_active"
@@ -365,19 +332,12 @@
                     />
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button
-                        type="button"
-                        @click="showCategoryModal = false"
-                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showCategoryModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="primary">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -387,6 +347,8 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

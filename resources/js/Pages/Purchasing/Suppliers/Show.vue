@@ -1,107 +1,136 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-8">
-            <!-- Main Header Card -->
-            <div class="relative group">
+        <PrintEngine document-type="report" class="space-y-6">
+            <!-- Main Header Card (Compact & Clean) -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+                <!-- Top Action Bar -->
                 <div
-                    class="absolute -inset-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
-                ></div>
-
-                <div
-                    class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-orange-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex flex-wrap items-center justify-between gap-2"
                 >
-                    <!-- Absolute Top Bar (Nav & Actions) -->
-                    <div
-                        class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20"
-                    >
-                        <BackButton :href="route('app.purchasing.suppliers.index')" />
+                    <BackButton :href="route('app.purchasing.suppliers.index')" />
 
-                        <!-- Actions Group -->
-                        <div
-                            class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    <!-- Actions Group -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Tooltip
+                            v-if="balance > 0.01"
+                            :text="$t('purchasing.suppliers.record_payment')"
                         >
-                            <Tooltip
-                                v-if="balance > 0.01"
-                                :text="$t('purchasing.suppliers.record_payment')"
+                            <button
+                                v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
+                                @click="showPaymentModal = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                             >
-                                <button
-                                    v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
-                                    @click="showPaymentModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 hover:shadow-md transition-all"
+                                <svg
+                                    class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <svg
-                                        class="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                        />
-                                    </svg>
-                                    <span class="hidden sm:inline">
-                                        {{ $t('purchasing.suppliers.record_payment') }}
-                                    </span>
-                                </button>
-                            </Tooltip>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
+                                <span class="hidden sm:inline">
+                                    {{ $t('purchasing.suppliers.record_payment') }}
+                                </span>
+                            </button>
+                        </Tooltip>
 
-                            <Tooltip :text="$t('common.edit')">
-                                <button
-                                    v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
-                                    @click="showEditModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-orange-100/70 dark:border-orange-800/30 bg-orange-50/70 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-white dark:hover:bg-orange-900/30 hover:shadow-md transition-all"
+                        <Tooltip :text="$t('common.edit')">
+                            <button
+                                v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
+                                @click="showEditModal = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-orange-200/80 dark:border-orange-800/40 bg-orange-50/70 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-100/70 dark:hover:bg-orange-900/40 transition-colors cursor-pointer"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <svg
-                                        class="w-4.5 h-4.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                        />
-                                    </svg>
-                                    <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
-                                </button>
-                            </Tooltip>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                                <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+                            </button>
+                        </Tooltip>
 
-                            <Tooltip
-                                :text="
+                        <Tooltip
+                            :text="
+                                counts.orders > 0 ||
+                                counts.invoices > 0 ||
+                                counts.returns > 0 ||
+                                counts.payments > 0
+                                    ? $t('common.cannot_delete_has_data')
+                                    : $t('common.delete')
+                            "
+                        >
+                            <button
+                                v-if="can('purchasing.suppliers.destroy') || isAnyAdmin()"
+                                @click="confirmDelete"
+                                :disabled="
                                     counts.orders > 0 ||
                                     counts.invoices > 0 ||
                                     counts.returns > 0 ||
                                     counts.payments > 0
-                                        ? $t('common.cannot_delete_has_data')
-                                        : $t('common.delete')
                                 "
+                                :class="[
+                                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border transition-colors',
+                                    counts.orders === 0 &&
+                                    counts.invoices === 0 &&
+                                    counts.returns === 0 &&
+                                    counts.payments === 0
+                                        ? 'border-red-200/80 dark:border-red-800/40 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100/70 dark:hover:bg-red-900/40 cursor-pointer'
+                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
+                                ]"
                             >
-                                <button
-                                    v-if="can('purchasing.suppliers.destroy') || isAnyAdmin()"
-                                    @click="confirmDelete"
-                                    :disabled="
-                                        counts.orders > 0 ||
-                                        counts.invoices > 0 ||
-                                        counts.returns > 0 ||
-                                        counts.payments > 0
-                                    "
-                                    :class="[
-                                        'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                        counts.orders === 0 &&
-                                        counts.invoices === 0 &&
-                                        counts.returns === 0 &&
-                                        counts.payments === 0
-                                            ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
-                                            : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
-                                    ]"
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                                <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                            </button>
+                        </Tooltip>
+                    </div>
+                </div>
+
+                <!-- Main Info Area -->
+                <div class="p-4 sm:p-5">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                        <!-- Supplier Identity -->
+                        <div class="flex items-start gap-4 min-w-0 flex-1">
+                            <div class="relative shrink-0">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center text-white shadow-sm"
+                                >
+                                    <span class="text-2xl font-black">
+                                        {{ supplier.name?.charAt(0)?.toUpperCase() || '?' }}
+                                    </span>
+                                </div>
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600 flex items-center justify-center"
                                 >
                                     <svg
-                                        class="w-5 h-5"
+                                        v-if="supplier.type === 'parts'"
+                                        class="w-3.5 h-3.5 text-orange-500"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -109,241 +138,180 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                         />
                                     </svg>
-                                    <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
-                                </button>
-                            </Tooltip>
-                        </div>
-                    </div>
-
-                    <!-- Watermark Decoration -->
-                    <div
-                        class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none"
-                    >
-                        <svg
-                            class="w-80 h-80 text-orange-900 dark:text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            />
-                        </svg>
-                    </div>
-
-                    <!-- Main Info Area -->
-                    <div class="relative z-10 p-6 pt-16">
-                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <!-- Supplier Identity -->
-                            <div class="flex items-center gap-6 flex-1">
-                                <div class="relative">
-                                    <div
-                                        class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.25rem] bg-gradient-to-br from-orange-600 to-red-600 shadow-xl shadow-orange-500/35 flex items-center justify-center text-white ring-4 ring-orange-50 dark:ring-orange-900/20 transition-transform group-hover:scale-[1.03] duration-500"
+                                    <svg
+                                        v-else
+                                        class="w-3.5 h-3.5 text-blue-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <span class="text-3xl lg:text-5xl font-black">
-                                            {{ supplier.name?.charAt(0)?.toUpperCase() || '?' }}
-                                        </span>
-                                    </div>
-                                    <div
-                                        class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border-4 border-orange-50 dark:border-orange-900/20 flex items-center justify-center"
-                                    >
-                                        <svg
-                                            v-if="supplier.type === 'parts'"
-                                            class="w-6 h-6 text-orange-500"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                            />
-                                        </svg>
-                                        <svg
-                                            v-else
-                                            class="w-6 h-6 text-blue-500"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                                            />
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-1">
-                                        <h1
-                                            class="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight"
-                                        >
-                                            {{ supplier.name }}
-                                        </h1>
-                                        <div
-                                            v-if="supplier.code"
-                                            class="px-3 py-1.5 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase border shadow-sm bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-800/30"
-                                        >
-                                            {{ supplier.code }}
-                                        </div>
-                                    </div>
-                                    <p
-                                        class="text-sm font-bold text-orange-500/80 dark:text-orange-400/80 mb-4"
-                                    >
-                                        {{ $t('purchasing.suppliers.details') }}
-                                    </p>
-
-                                    <div
-                                        class="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-500 dark:text-gray-400"
-                                    >
-                                        <span
-                                            v-if="supplier.contact_person"
-                                            class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-orange-50/50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-100/50"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                />
-                                            </svg>
-                                            {{ supplier.contact_person }}
-                                        </span>
-                                        <a
-                                            v-if="supplier.phone"
-                                            :href="`tel:${supplier.phone}`"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 hover:bg-white dark:hover:bg-gray-700 hover:text-orange-600 hover:shadow-xl hover:shadow-orange-500/5 transition-all border border-transparent hover:border-orange-100"
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-orange-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ supplier.phone }}
-                                        </a>
-                                        <a
-                                            v-if="supplier.email"
-                                            :href="`mailto:${supplier.email}`"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-white dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 hover:shadow-xl hover:shadow-blue-500/5 transition-all border border-transparent hover:border-blue-100"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-blue-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <span class="max-w-[220px] truncate">
-                                                {{ supplier.email }}
-                                            </span>
-                                        </a>
-                                    </div>
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                                        />
+                                    </svg>
                                 </div>
                             </div>
 
-                            <!-- Stats Grid -->
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h1
+                                        class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight truncate"
+                                    >
+                                        {{ supplier.name }}
+                                    </h1>
+                                    <span
+                                        v-if="supplier.code"
+                                        class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold border bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border-orange-200/70 dark:border-orange-800/40 font-mono"
+                                    >
+                                        {{ supplier.code }}
+                                    </span>
+                                </div>
+
+                                <div
+                                    class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300"
+                                >
+                                    <span
+                                        v-if="supplier.contact_person"
+                                        class="inline-flex items-center gap-1.5"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-gray-400 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                            />
+                                        </svg>
+                                        {{ supplier.contact_person }}
+                                    </span>
+
+                                    <a
+                                        v-if="supplier.phone"
+                                        :href="`tel:${supplier.phone}`"
+                                        class="inline-flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors font-mono"
+                                        dir="ltr"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-orange-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                            />
+                                        </svg>
+                                        {{ supplier.phone }}
+                                    </a>
+
+                                    <a
+                                        v-if="supplier.email"
+                                        :href="`mailto:${supplier.email}`"
+                                        class="inline-flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors max-w-[240px]"
+                                        dir="ltr"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-blue-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                            />
+                                        </svg>
+                                        <span class="truncate">{{ supplier.email }}</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compact Stats Grid -->
+                        <div
+                            class="grid grid-cols-2 sm:grid-cols-3 xl:flex items-center gap-2 shrink-0"
+                        >
                             <div
-                                class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-2 lg:gap-3 w-full lg:w-auto"
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
                             >
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-orange-50/50 dark:bg-orange-900/20 rounded-3xl border border-orange-100/50 dark:border-orange-800/30 hover:bg-white dark:hover:bg-orange-900/40 transition-all hover:shadow-lg hover:shadow-orange-500/10"
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
                                 >
-                                    <span
-                                        class="text-xl lg:text-2xl font-black text-orange-600 dark:text-orange-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ counts.orders }}
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.orders') }}
-                                    </span>
-                                </div>
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-blue-50/50 dark:bg-blue-900/20 rounded-3xl border border-blue-100/50 dark:border-blue-800/30 hover:bg-white dark:hover:bg-blue-900/40 transition-all hover:shadow-lg hover:shadow-blue-500/10"
+                                    {{ counts.orders }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('purchasing.suppliers.orders') }}
+                                </span>
+                            </div>
+
+                            <div
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
+                            >
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
                                 >
-                                    <span
-                                        class="text-xl lg:text-2xl font-black text-blue-600 dark:text-blue-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ counts.invoices }}
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.invoices') }}
-                                    </span>
-                                </div>
-                                <div
+                                    {{ counts.invoices }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('purchasing.suppliers.invoices') }}
+                                </span>
+                            </div>
+
+                            <div
+                                :class="[
+                                    'flex flex-col items-center justify-center px-3.5 py-2 rounded-xl border col-span-2 sm:col-span-1 min-w-[110px]',
+                                    balance < -0.01
+                                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50'
+                                        : 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50',
+                                ]"
+                            >
+                                <span
                                     :class="[
-                                        'group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 rounded-3xl border transition-all hover:bg-white col-span-2 sm:col-span-1 px-2 text-center',
+                                        'text-sm font-bold font-mono',
                                         balance < -0.01
-                                            ? 'bg-red-50/50 dark:bg-red-900/20 border-red-100/50 dark:border-red-800/30 hover:shadow-red-500/10 dark:hover:bg-red-900/40 hover:shadow-lg'
-                                            : 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100/50 dark:border-emerald-800/30 hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/40 hover:shadow-lg',
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-emerald-600 dark:text-emerald-400',
                                     ]"
                                 >
-                                    <span
-                                        :class="[
-                                            'text-xl lg:text-2xl font-black group-hover/stat:scale-110 transition-transform',
+                                    {{
+                                        formatCurrency(
                                             balance < -0.01
-                                                ? 'text-red-650 dark:text-red-400'
-                                                : 'text-emerald-600 dark:text-emerald-400',
-                                        ]"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                balance < -0.01
-                                                    ? amountDueFromSupplier || Math.abs(balance)
-                                                    : balance
-                                            )
-                                        }}
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{
-                                            balance < -0.01
-                                                ? $t('suppliers.amount_due_from_supplier')
-                                                : $t('purchasing.suppliers.balance')
-                                        }}
-                                    </span>
-                                </div>
+                                                ? amountDueFromSupplier || Math.abs(balance)
+                                                : balance
+                                        )
+                                    }}
+                                </span>
+                                <span
+                                    :class="[
+                                        'text-[11px] font-semibold mt-0.5',
+                                        balance < -0.01
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-emerald-600 dark:text-emerald-400',
+                                    ]"
+                                >
+                                    {{
+                                        balance < -0.01
+                                            ? $t('suppliers.amount_due_from_supplier')
+                                            : $t('purchasing.suppliers.balance')
+                                    }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -352,7 +320,7 @@
 
             <!-- Tabbed Content Card -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-orange-500/5 border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[500px]"
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[500px]"
             >
                 <!-- Tabs Navigation -->
                 <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">

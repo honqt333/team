@@ -57,55 +57,30 @@
                     <label class="text-sm font-bold text-gray-700 dark:text-gray-300 px-1">
                         {{ $t('common.notes') }}
                     </label>
-                    <textarea
+                    <AppTextarea
                         v-model="form.notes"
                         rows="3"
                         :placeholder="$t('common.notes_placeholder')"
-                        class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl focus:ring-2 focus:ring-focus-ring transition-all text-gray-900 dark:text-white"
-                    ></textarea>
-                    <p v-if="form.errors.notes" class="text-xs text-red-500 px-1">
-                        {{ form.errors.notes }}
-                    </p>
+                        :error="form.errors.notes"
+                    />
                 </div>
             </div>
         </form>
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    type="button"
-                    @click="close"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="close">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
                     form="create-transfer-form"
+                    variant="action"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                    :loading="form.processing"
                 >
-                    <span v-if="form.processing" class="flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                                fill="none"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        {{ $t('common.saving') }}
-                    </span>
-                    <span v-else>{{ $t('common.save') }}</span>
-                </button>
+                    {{ form.processing ? $t('common.saving') : $t('common.save') }}
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -113,9 +88,12 @@
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -142,11 +120,14 @@ const close = () => {
     emit('close');
 };
 
+const { scrollToError } = useFormScrollToError();
+
 const submit = () => {
     form.post(route('app.inventory.transfers.store'), {
         onSuccess: () => {
             close();
         },
+        onError: (errors) => scrollToError(errors),
     });
 };
 </script>

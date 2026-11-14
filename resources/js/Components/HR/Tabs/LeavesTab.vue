@@ -164,38 +164,27 @@
                 </div>
 
                 <!-- Reason -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('hr.leaves.reason') }}
-                    </label>
-                    <textarea
-                        v-model="leaveForm.reason"
-                        rows="3"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-focus-ring"
-                    ></textarea>
-                    <p v-if="leaveForm.errors.reason" class="text-xs text-red-500 mt-1">
-                        {{ leaveForm.errors.reason }}
-                    </p>
-                </div>
+                <AppTextarea
+                    v-model="leaveForm.reason"
+                    :label="$t('hr.leaves.reason')"
+                    :rows="3"
+                    :error="leaveForm.errors.reason"
+                />
             </form>
 
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <button
-                        type="button"
-                        @click="closeLeaveModal"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton type="button" variant="secondary" @click="closeLeaveModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="submit"
                         form="leave-form"
-                        :disabled="leaveForm.processing"
-                        class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
+                        variant="primary"
+                        :loading="leaveForm.processing"
                     >
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -208,6 +197,8 @@ import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';

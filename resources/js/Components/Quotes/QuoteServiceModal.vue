@@ -111,13 +111,13 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('quotes.service_modal.description') }}
                 </label>
-                <textarea
+                <AppTextarea
                     v-model="form.description"
                     rows="2"
                     :disabled="isReadOnly"
-                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500 text-sm"
+                    class="resize-none text-sm"
                     :placeholder="$t('quotes.service_modal.description_placeholder')"
-                ></textarea>
+                />
             </div>
 
             <!-- Price & Discount in a 2-column grid -->
@@ -130,7 +130,7 @@
                         </label>
                     </div>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="text"
                             inputmode="decimal"
                             v-model="form.unit_price"
@@ -141,14 +141,8 @@
                                     .replace(/(\..*?)\..*/g, '$1')
                             "
                             :disabled="isPriceLocked || isReadOnly"
-                            :class="[
-                                'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-action-primary text-sm',
-                                isPriceLocked || isReadOnly
-                                    ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                                    : isPriceBelowMinimum
-                                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-danger'
-                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-focus-ring',
-                            ]"
+                            :error="isPriceBelowMinimum ? ' ' : ''"
+                            class="pl-4 pr-16 font-mono text-right"
                             required
                         />
                         <div
@@ -238,7 +232,7 @@
 
                     <!-- Discount Value -->
                     <div v-if="form.discount_type !== 'none'">
-                        <input
+                        <AppInput
                             type="text"
                             inputmode="decimal"
                             v-model="form.discount_value"
@@ -250,14 +244,8 @@
                                     .replace(/[^0-9.]/g, '')
                                     .replace(/(\..*?)\..*/g, '$1')
                             "
-                            :class="[
-                                'w-full px-3 py-2 border rounded-xl font-mono text-end text-sm focus:ring-2',
-                                isReadOnly
-                                    ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                                    : isPriceBelowMinimum
-                                      ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-danger focus:border-danger'
-                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-focus-ring focus:border-action-primary',
-                            ]"
+                            :error="isPriceBelowMinimum ? ' ' : ''"
+                            class="font-mono text-end"
                         />
 
                         <!-- Max allowed discount hint -->
@@ -390,22 +378,18 @@
         />
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
+            <AppButton variant="secondary" @click="$emit('close')">
                 {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
-            </button>
-            <button
+            </AppButton>
+            <AppButton
                 v-if="!isReadOnly"
-                type="button"
+                variant="action"
                 @click="submitForm"
+                :loading="form.processing"
                 :disabled="form.processing || isPriceBelowMinimum"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            </AppButton>
         </template>
     </BaseModal>
 </template>
@@ -417,6 +401,9 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

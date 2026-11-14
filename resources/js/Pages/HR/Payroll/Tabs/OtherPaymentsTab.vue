@@ -268,29 +268,17 @@
 
                 <div>
                     <InputLabel :value="$t('common.notes')" />
-                    <textarea
-                        v-model="form.notes"
-                        class="w-full border-border-subtle dark:bg-surface-secondary/50 dark:text-content-primary focus:border-action-primary focus:ring-action-primary rounded-xl shadow-2xs text-sm"
-                        rows="3"
-                    ></textarea>
+                    <AppTextarea v-model="form.notes" :rows="3" />
                     <InputError :message="errors.notes?.[0]" />
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-border-subtle">
-                    <button
-                        type="button"
-                        @click="closeModal"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="closeModal">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton type="submit" variant="primary" :loading="processing">
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -312,6 +300,8 @@ import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import InputError from '@/Components/InputError.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

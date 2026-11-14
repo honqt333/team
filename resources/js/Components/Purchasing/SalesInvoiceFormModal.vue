@@ -294,11 +294,12 @@
                             >
                                 {{ $t('common.notes') }}
                             </label>
-                            <textarea
+                            <AppTextarea
                                 v-model="form.notes"
                                 rows="4"
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring resize-none"
-                            ></textarea>
+                                class="resize-none"
+                                :error="form.errors.notes"
+                            />
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-3">
                             <div class="flex justify-between text-sm">
@@ -362,21 +363,19 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
-                @click="submitForm"
-                :disabled="form.processing || !form.customer_id || form.items.length === 0"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :loading="form.processing"
+                    :disabled="!form.customer_id || form.items.length === 0"
+                    @click="submitForm"
+                >
+                    {{ $t('common.save') }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 
@@ -420,6 +419,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
@@ -427,6 +427,8 @@ import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
 import PaymentFormModal from '@/Components/WorkOrders/PaymentFormModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -440,6 +442,7 @@ const { t } = useI18n();
 const { formatCurrency } = useNumberFormat();
 const page = usePage();
 const toast = useToast();
+const { scrollToError } = useFormScrollToError();
 
 // State
 const showCustomerModal = ref(false);
@@ -566,6 +569,7 @@ function submitForm() {
             emit('saved');
             emit('close');
         },
+        onError: (errors) => scrollToError(errors),
     });
 }
 </script>

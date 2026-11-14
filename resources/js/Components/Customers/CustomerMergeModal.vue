@@ -89,11 +89,11 @@
                                 />
                             </svg>
                         </div>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="searchQuery"
                             :placeholder="$t('customers.search')"
-                            class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                            class="ps-10 text-sm"
                         />
                     </div>
                 </div>
@@ -342,31 +342,28 @@
         </div>
 
         <template #footer>
-            <div class="flex items-center gap-3">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     v-if="selectedTarget"
                     type="button"
+                    variant="secondary"
                     @click="selectedTarget = null"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('customers.merge.change_target') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     v-if="selectedTarget"
                     type="button"
+                    variant="primary"
+                    :loading="processing"
+                    :disabled="!canMerge"
                     @click="executeMerge"
-                    :disabled="!canMerge || processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ processing ? $t('common.loading') : $t('customers.merge.execute') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -378,6 +375,8 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const props = defineProps({
     show: Boolean,

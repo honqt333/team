@@ -148,18 +148,13 @@
             size="md"
             @close="showUploadModal = false"
         >
-            <form @submit.prevent="submit" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('hr.documents.title_label') }}
-                    </label>
-                    <input
-                        v-model="form.title"
-                        type="text"
-                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        required
-                    />
-                </div>
+            <form id="document-upload-form" @submit.prevent="submit" class="space-y-4">
+                <AppInput
+                    v-model="form.title"
+                    :label="$t('hr.documents.title_label')"
+                    :error="form.errors.title"
+                    required
+                />
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -192,24 +187,23 @@
                     :max-size-mb="10"
                     :error="form.errors.file"
                 />
+            </form>
 
-                <div class="flex justify-end gap-3 mt-6">
-                    <button
-                        type="button"
-                        @click="showUploadModal = false"
-                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
-                    >
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton type="button" variant="secondary" @click="showUploadModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="submit"
-                        :disabled="form.processing"
-                        class="px-6 py-2 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
+                        form="document-upload-form"
+                        variant="primary"
+                        :loading="form.processing"
                     >
                         {{ $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
-            </form>
+            </template>
         </BaseModal>
     </div>
 </template>
@@ -224,6 +218,8 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     employee: Object,

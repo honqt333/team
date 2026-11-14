@@ -11,12 +11,7 @@
                     {{ $t('common.name') }} (AR)
                     <span class="text-red-500">*</span>
                 </label>
-                <input
-                    v-model="form.name_ar"
-                    type="text"
-                    required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
-                />
+                <AppInput v-model="form.name_ar" type="text" required />
             </div>
 
             <!-- Name EN -->
@@ -25,16 +20,12 @@
                     {{ $t('common.name') }} (EN)
                     <span class="text-red-500">*</span>
                 </label>
-                <input
+                <AppInput
                     v-model="form.name_en"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
-                    :class="{ 'border-red-500': form.errors.name_en }"
+                    :error="form.errors.name_en"
                 />
-                <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.name_en }}
-                </p>
             </div>
 
             <!-- Department (for job_title only) -->
@@ -78,13 +69,7 @@
                         <label class="block text-sm font-medium text-text-primary mb-1">
                             {{ $t('common.amount') }} {{ form.type === 'percentage' ? '(%)' : '' }}
                         </label>
-                        <input
-                            v-model.number="form.amount"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="w-full px-4 py-2.5 text-sm border border-border-strong rounded-xl bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
-                        />
+                        <AppInput v-model.number="form.amount" type="number" step="0.01" min="0" />
                     </div>
                 </div>
 
@@ -108,21 +93,18 @@
 
         <template #footer>
             <div class="flex justify-end gap-3">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="button"
+                    variant="primary"
                     @click="submit"
+                    :loading="form.processing"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -135,6 +117,8 @@ import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();

@@ -1087,59 +1087,30 @@
             </template>
 
             <form @submit.prevent="handleAddNote" class="space-y-4 text-right">
-                <div class="space-y-1">
-                    <!-- Note Content -->
-                    <label
-                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-                    >
-                        {{ $t('work_orders.item.tab_notes') }}
-                    </label>
-                    <textarea
-                        v-model="newNoteContent"
-                        required
-                        rows="5"
-                        :placeholder="$t('work_orders.item.note_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="newNoteContent"
+                    :label="$t('work_orders.item.tab_notes')"
+                    required
+                    :rows="5"
+                    :placeholder="$t('work_orders.item.note_placeholder')"
+                />
             </form>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="showAddNoteModal = false"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="submit"
-                    @click="handleAddNote"
-                    :disabled="isSubmittingNote || !newNoteContent.trim()"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
-                >
-                    <svg
-                        v-if="isSubmittingNote"
-                        class="animate-spin h-4 w-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton type="button" variant="secondary" @click="showAddNoteModal = false">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="isSubmittingNote"
+                        :disabled="!newNoteContent.trim()"
+                        @click="handleAddNote"
                     >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span>{{ $t('common.save') }}</span>
-                </button>
+                        {{ $t('common.save') }}
+                    </AppButton>
+                </div>
             </template>
         </BaseModal>
 
@@ -1153,38 +1124,29 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $t('work_orders.messages.hold_reason_prompt') }}
                 </p>
-                <div class="space-y-1">
-                    <label
-                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-                    >
-                        {{ $t('work_orders.hold_reason_label') }}
-                    </label>
-                    <textarea
-                        v-model="holdReason"
-                        required
-                        rows="3"
-                        :placeholder="$t('work_orders.hold_reason_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="holdReason"
+                    :label="$t('work_orders.hold_reason_label')"
+                    required
+                    :rows="3"
+                    :placeholder="$t('work_orders.hold_reason_placeholder')"
+                />
             </div>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="cancelHold"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="confirmHold"
-                    :disabled="!holdReason.trim()"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
-                >
-                    {{ $t('work_orders.actions.put_on_hold') }}
-                </button>
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton type="button" variant="secondary" @click="cancelHold">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :disabled="!holdReason.trim()"
+                        @click="confirmHold"
+                    >
+                        {{ $t('work_orders.actions.put_on_hold') }}
+                    </AppButton>
+                </div>
             </template>
         </BaseModal>
 
@@ -1252,37 +1214,28 @@
                 </div>
 
                 <!-- Exit Notes -->
-                <div class="space-y-1">
-                    <label
-                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-                    >
-                        {{ $t('work_orders.exit_notes_label') }}
-                    </label>
-                    <textarea
-                        v-model="exitNotes"
-                        rows="3"
-                        :placeholder="$t('work_orders.exit_notes_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="exitNotes"
+                    :label="$t('work_orders.exit_notes_label')"
+                    :rows="3"
+                    :placeholder="$t('work_orders.exit_notes_placeholder')"
+                />
             </div>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="cancelExit"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="confirmExit"
-                    :disabled="!exitDate || (isDeferred && !dueDate)"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
-                >
-                    {{ $t('work_orders.actions.complete') }}
-                </button>
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton type="button" variant="secondary" @click="cancelExit">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :disabled="!exitDate || (isDeferred && !dueDate)"
+                        @click="confirmExit"
+                    >
+                        {{ $t('work_orders.actions.complete') }}
+                    </AppButton>
+                </div>
             </template>
         </BaseModal>
 
@@ -1334,57 +1287,29 @@
                 </div>
 
                 <!-- Notes -->
-                <div class="space-y-1">
-                    <label
-                        class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                        {{ $t('common.notes') }}
-                    </label>
-                    <textarea
-                        v-model="deferredNotes"
-                        rows="3"
-                        :placeholder="$t('invoices.deferred_notes_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-colors"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="deferredNotes"
+                    :label="$t('common.notes')"
+                    :rows="3"
+                    :placeholder="$t('invoices.deferred_notes_placeholder')"
+                />
             </form>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="closeDeferredInvoiceModal"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="confirmDeferredInvoice"
-                    :disabled="!deferredDueDate || isDeferredSubmitting"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
-                >
-                    <svg
-                        v-if="isDeferredSubmitting"
-                        class="w-4 h-4 animate-spin"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton type="button" variant="secondary" @click="closeDeferredInvoiceModal">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="isDeferredSubmitting"
+                        :disabled="!deferredDueDate"
+                        @click="confirmDeferredInvoice"
                     >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        />
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"
-                        />
-                    </svg>
-                    {{ $t('invoices.create_deferred') }}
-                </button>
+                        {{ $t('invoices.create_deferred') }}
+                    </AppButton>
+                </div>
             </template>
         </BaseModal>
 
@@ -1436,11 +1361,11 @@
                 <!-- Search & Filters -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="relative flex-1">
-                        <input
+                        <AppInput
                             v-model="allocationSearchQuery"
                             type="text"
+                            size="sm"
                             :placeholder="$t('work_orders.purchases.search_invoices_placeholder')"
-                            class="w-full px-3 py-2 text-xs rounded-xl border border-border-subtle bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/30"
                         />
                     </div>
                     <!-- Category Filter Tabs -->
@@ -1595,12 +1520,13 @@
                                     {{ $t('work_orders.purchases.allocated_qty') }}:
                                 </label>
                                 <div class="inline-flex items-center gap-1">
-                                    <input
+                                    <AppInput
                                         v-model.number="allocationForms[inv.id].qty"
                                         type="number"
                                         min="1"
                                         step="1"
-                                        class="w-20 px-2.5 py-1 text-xs font-mono font-bold text-center rounded-lg border border-border-subtle bg-surface text-text-primary"
+                                        size="sm"
+                                        class="w-20"
                                     />
                                     <span class="text-[10px] text-text-muted font-bold">
                                         {{ $t('common.piece') }}
@@ -1611,12 +1537,13 @@
                                 <label class="text-xs font-semibold text-text-secondary">
                                     {{ $t('work_orders.purchases.allocated_amount') }}:
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="allocationForms[inv.id].amount"
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    class="w-28 px-2.5 py-1 text-xs font-mono rounded-lg border border-border-subtle bg-surface text-text-primary"
+                                    size="sm"
+                                    class="w-28"
                                 />
                             </div>
 
@@ -1683,27 +1610,28 @@
             </div>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-2">
-                    <button
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         @click="showAllocationModal = false"
-                        class="px-4 py-2 text-xs font-bold text-text-secondary hover:bg-surface-secondary rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
-                        :disabled="
-                            selectedAllocationInvoiceIds.length === 0 || isSubmittingAllocation
-                        "
+                        variant="primary"
+                        size="sm"
+                        :loading="isSubmittingAllocation"
+                        :disabled="selectedAllocationInvoiceIds.length === 0"
                         @click="submitAllocationsToOrder"
-                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                     >
-                        <span>{{ $t('work_orders.purchases.add_to_order') }}</span>
+                        {{ $t('work_orders.purchases.add_to_order') }}
                         <span v-if="selectedAllocationInvoiceIds.length > 0">
                             ({{ selectedAllocationInvoiceIds.length }})
                         </span>
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1763,6 +1691,9 @@ import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
 import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
 import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNoteModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import WorkOrderSuggestionsPanel from '@/Components/WorkOrders/WorkOrderSuggestionsPanel.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';

@@ -332,35 +332,12 @@
                             </div>
 
                             <!-- Map Container -->
-                            <div
-                                ref="mapContainer"
-                                class="w-full h-[280px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
-                            >
-                                <div
-                                    v-if="!mapReady"
-                                    class="h-full flex flex-col items-center justify-center text-center p-4"
-                                >
-                                    <svg
-                                        class="w-8 h-8 text-gray-400 mb-2 animate-pulse"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                        />
-                                    </svg>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $t('common.loading') }}
-                                    </p>
-                                </div>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                                {{ $t('company_profile.map.click_hint') }}
-                            </p>
+                            <NationalAddressMapCanvas
+                                :map-ready="mapReady"
+                                height-class="h-[280px]"
+                                :hint="$t('company_profile.map.click_hint')"
+                                @container="(el) => (mapContainer = el)"
+                            />
                         </div>
 
                         <!-- Sticky Action Bar for Contact & Address Section -->
@@ -2141,59 +2118,26 @@
                             : 'Please enter your current password to proceed:'
                     }}
                 </p>
-                <div>
-                    <input
-                        v-model="checkPasswordInput"
-                        type="password"
-                        autofocus
-                        :placeholder="locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
-                        :class="[checkPasswordError ? 'border-red-500 font-medium' : '']"
-                    />
-                    <p
-                        v-if="checkPasswordError"
-                        class="mt-1.5 text-xs text-red-650 dark:text-red-400 font-medium"
-                    >
-                        {{ checkPasswordError }}
-                    </p>
-                </div>
+                <AppInput
+                    v-model="checkPasswordInput"
+                    type="password"
+                    autofocus
+                    :placeholder="locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'"
+                    :error="checkPasswordError"
+                />
 
                 <!-- Modal Action Buttons -->
                 <div class="flex justify-end gap-3 pt-2">
-                    <button
+                    <AppButton
                         type="button"
+                        variant="secondary"
                         @click="showPasswordCheckModal = false"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
                     >
                         {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
-                    </button>
-                    <button
-                        type="submit"
-                        :disabled="checkingPassword"
-                        class="px-5 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                        <svg
-                            v-if="checkingPassword"
-                            class="w-4 h-4 animate-spin text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
+                    </AppButton>
+                    <AppButton type="submit" variant="primary" :loading="checkingPassword">
                         {{ locale === 'ar' ? 'تأكيد' : 'Confirm' }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -2205,6 +2149,8 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -2218,8 +2164,8 @@ import { useToast } from '@/Composables/useToast';
 import CompanyTransactionModal from './Modals/CompanyTransactionModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 import CompanyProfileTab from '@/Components/Settings/Company/CompanyProfileTab.vue';
 import CompanyAdminUserTab from '@/Components/Settings/Company/CompanyAdminUserTab.vue';
 import CompanyBranchesTab from '@/Components/Settings/Company/CompanyBranchesTab.vue';
@@ -2228,14 +2174,6 @@ import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { getCountryMeta } from '@/Utils/currency';
 import axios from 'axios';
-
-// Fix Leaflet default marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
 const { t, locale } = useI18n();
 const { success, error } = useToast();
@@ -2318,12 +2256,6 @@ const logoPreview = ref(null);
 const showVatExplanationModal = ref(false);
 const vatExplanationToggle = ref(true);
 
-// Map state
-const mapContainer = ref(null);
-const mapReady = ref(false);
-const geocodingLoading = ref(false);
-let map = null;
-let marker = null;
 const defaultLat = 21.4858; // Jeddah
 const defaultLng = 39.1925;
 
@@ -2403,6 +2335,16 @@ const form = ref({
         new_password_confirmation: '',
     },
 });
+
+const { mapContainer, mapReady, isLocating, mountWithRetry, fetchLocation, destroyMap } =
+    useNationalAddressMap({
+        form,
+        target: () => form.value.address,
+        fieldMap: { lat: 'latitude', lng: 'longitude' },
+        defaultLat,
+        defaultLng,
+        locale,
+    });
 
 const activeCountryCode = computed(
     () => form.value?.profile?.country || props.profile?.country || 'SA'
@@ -2734,235 +2676,13 @@ async function handleLogoDelete() {
     }
 }
 
-// ===== Map Functions =====
-function initMap() {
-    if (!mapContainer.value || map) return;
-
-    const startLat = form.value.address.latitude || defaultLat;
-    const startLng = form.value.address.longitude || defaultLng;
-
-    map = L.map(mapContainer.value).setView([startLat, startLng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-
-    // Add initial marker if we have coordinates
-    if (form.value.address.latitude && form.value.address.longitude) {
-        marker = L.marker([form.value.address.latitude, form.value.address.longitude], {
-            draggable: true,
-        }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    // Handle map clicks
-    map.on('click', onMapClick);
-    mapReady.value = true;
-}
-
-function destroyMap() {
-    if (map) {
-        map.off();
-        map.remove();
-        map = null;
-        marker = null;
-        mapReady.value = false;
-    }
-}
-
-function onMapClick(e) {
-    const { lat, lng } = e.latlng;
-    setMarker(lat, lng);
-}
-
-function onMarkerDrag(e) {
-    const { lat, lng } = e.target.getLatLng();
-    form.value.address.latitude = parseFloat(lat.toFixed(7));
-    form.value.address.longitude = parseFloat(lng.toFixed(7));
-    reverseGeocode(form.value.address.latitude, form.value.address.longitude);
-}
-
-function setMarker(lat, lng) {
-    form.value.address.latitude = parseFloat(lat.toFixed(7));
-    form.value.address.longitude = parseFloat(lng.toFixed(7));
-
-    if (marker) {
-        marker.setLatLng([lat, lng]);
-    } else {
-        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    map.panTo([lat, lng]);
-    reverseGeocode(form.value.address.latitude, form.value.address.longitude);
-}
-
-// Reverse geocoding using OpenStreetMap Nominatim
-async function reverseGeocode(lat, lng) {
-    if (geocodingLoading.value) return;
-
-    geocodingLoading.value = true;
-
-    try {
-        const lang = locale.value === 'ar' ? 'ar' : 'en';
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`
-        );
-
-        if (!response.ok) throw new Error('Geocoding failed');
-
-        const data = await response.json();
-
-        if (data && data.address) {
-            const addr = data.address;
-            form.value.address.country = addr.country || form.value.address.country || '';
-            form.value.address.city =
-                addr.city ||
-                addr.town ||
-                addr.village ||
-                addr.municipality ||
-                form.value.address.city ||
-                '';
-            form.value.address.district =
-                addr.suburb ||
-                addr.neighbourhood ||
-                addr.quarter ||
-                addr.district ||
-                form.value.address.district ||
-                '';
-
-            // Extraction helpers for numeric fields
-            const toEnglishDigits = (str) => {
-                if (!str) return '';
-                return str
-                    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-            };
-
-            const cleanDisplayName = toEnglishDigits(data.display_name || '');
-            const numbers = cleanDisplayName.match(/\d+/g) || [];
-
-            // 1. Building number
-            let bldNum = addr.house_number || '';
-            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
-            if (bldNum.length !== 4) {
-                bldNum = '';
-            }
-            if (!bldNum) {
-                // Find first 4-digit sequence
-                const fourDigit = numbers.find((n) => n.length === 4);
-                if (fourDigit) {
-                    bldNum = fourDigit;
-                }
-            }
-            form.value.address.building_number = bldNum || form.value.address.building_number || '';
-
-            // 2. Postal code
-            let postCode = addr.postcode || '';
-            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
-            if (postCode.length !== 5) {
-                postCode = '';
-            }
-            if (!postCode) {
-                // Find first 5-digit sequence
-                const fiveDigit = numbers.find((n) => n.length === 5);
-                if (fiveDigit) {
-                    postCode = fiveDigit;
-                }
-            }
-            form.value.address.postal_code = postCode || form.value.address.postal_code || '';
-
-            // Map street name to street field
-            form.value.address.street =
-                addr.road ||
-                addr.pedestrian ||
-                addr.street ||
-                addr.footway ||
-                form.value.address.street ||
-                '';
-        }
-    } catch (err) {
-        console.warn('Reverse geocoding failed:', err);
-    } finally {
-        geocodingLoading.value = false;
-    }
-}
-
-const isLocating = ref(false);
-
-async function fetchLocation() {
-    isLocating.value = true;
-
-    const useIpFallback = async () => {
-        try {
-            const response = await fetch('https://ipapi.co/json/');
-            if (!response.ok) throw new Error('IP geolocation failed');
-            const data = await response.json();
-            if (data && data.latitude && data.longitude) {
-                const lat = parseFloat(data.latitude);
-                const lng = parseFloat(data.longitude);
-
-                form.value.address.latitude = parseFloat(lat.toFixed(7));
-                form.value.address.longitude = parseFloat(lng.toFixed(7));
-
-                if (map) {
-                    if (marker) {
-                        marker.setLatLng([lat, lng]);
-                    } else {
-                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                        marker.on('dragend', onMarkerDrag);
-                    }
-                    map.setView([lat, lng], 13);
-                }
-                reverseGeocode(lat, lng);
-                isLocating.value = false;
-                return;
-            }
-        } catch (err) {
-            console.warn('[Company/Index] IP Geolocation failed:', err.message);
-        }
-
-        isLocating.value = false;
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                form.value.address.latitude = parseFloat(latitude.toFixed(7));
-                form.value.address.longitude = parseFloat(longitude.toFixed(7));
-
-                if (map) {
-                    if (marker) {
-                        marker.setLatLng([latitude, longitude]);
-                    } else {
-                        marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
-                        marker.on('dragend', onMarkerDrag);
-                    }
-                    map.setView([latitude, longitude], 13);
-                }
-                reverseGeocode(latitude, longitude);
-                isLocating.value = false;
-            },
-            (error) => {
-                console.warn('[Company/Index] Browser Geolocation error:', error.message);
-                useIpFallback();
-            },
-            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-        );
-    } else {
-        useIpFallback();
-    }
-}
-
 // Watch for tab changes to init/destroy map
 watch(activeTab, async (newTab) => {
     if (newTab === 'contact') {
         await nextTick();
-        initMap();
+        destroyMap();
         setTimeout(() => {
-            if (map) map.invalidateSize();
+            mountWithRetry();
             if (!form.value.address.latitude && !form.value.address.longitude) {
                 fetchLocation();
             }
@@ -2993,9 +2713,8 @@ onMounted(() => {
 
     if (activeTab.value === 'contact') {
         nextTick(() => {
-            initMap();
             setTimeout(() => {
-                if (map) map.invalidateSize();
+                mountWithRetry();
                 if (!form.value.address.latitude && !form.value.address.longitude) {
                     fetchLocation();
                 }
@@ -3123,15 +2842,4 @@ const filteredTransactions = computed(() => {
     }
     return props.company_transactions.filter((t) => t.transaction_type === transactionFilter.value);
 });
-
-onUnmounted(() => {
-    destroyMap();
-});
 </script>
-
-<style>
-/* Leaflet RTL fixes */
-.leaflet-container {
-    z-index: 0;
-}
-</style>

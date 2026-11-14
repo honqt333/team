@@ -89,14 +89,14 @@
 
                         <!-- Search Input -->
                         <div class="relative">
-                            <input
+                            <AppInput
                                 v-model="searchQuery"
                                 name="vehicle_id"
                                 type="text"
                                 @input="debouncedSearch"
                                 @focus="showResults = true"
                                 :placeholder="$t('quotes.form_tabs.search_placeholder')"
-                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                                class="py-3 ps-10"
                             />
                             <svg
                                 class="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -584,13 +584,13 @@
                         >
                             {{ $t('quotes.form_tabs.customer_complaint') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.customer_complaint"
                             name="customer_complaint"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.customer_complaint_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                        ></textarea>
+                            class="resize-none"
+                        />
                     </div>
                 </div>
 
@@ -605,13 +605,13 @@
                         >
                             {{ $t('quotes.form_tabs.initial_assessment') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.initial_assessment"
                             name="initial_assessment"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.initial_assessment_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                        ></textarea>
+                            class="resize-none"
+                        />
                     </div>
                 </div>
 
@@ -759,6 +759,8 @@ import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';

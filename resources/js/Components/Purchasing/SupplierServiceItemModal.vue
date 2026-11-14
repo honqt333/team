@@ -140,33 +140,23 @@
 
             <!-- Notes -->
             <FormField :label="$t('purchasing.supplier_services.notes')">
-                <textarea
+                <AppTextarea
                     v-model="form.notes"
                     rows="2"
                     :placeholder="$t('purchasing.supplier_services.notes_placeholder')"
-                    class="w-full px-3.5 py-2 text-xs rounded-xl border border-border-subtle bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
-                ></textarea>
+                />
             </FormField>
         </form>
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-4 py-2 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="submit"
-                    :disabled="!isValid"
-                    class="inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl shadow-xs transition-all cursor-pointer"
-                >
+                </AppButton>
+                <AppButton variant="action" @click="submit" :disabled="!isValid">
                     <span>✓</span>
                     <span>{{ $t('purchasing.supplier_services.save_btn') }}</span>
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -178,6 +168,8 @@ import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

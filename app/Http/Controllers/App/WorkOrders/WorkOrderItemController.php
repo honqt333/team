@@ -10,9 +10,11 @@ use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Inventory\WorkOrderPartsService;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class WorkOrderItemController
 {
@@ -30,14 +32,40 @@ class WorkOrderItemController
             $request->merge(['department_id' => null]);
         }
 
+        $tenantId = $work_order->tenant_id;
+
         $validated = $request->validate([
-            'service_id' => 'nullable|exists:services,id',
-            'department_id' => 'nullable|exists:departments,id',
+            'service_id' => [
+                'nullable',
+                Rule::exists('services', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
+            'department_id' => [
+                'nullable',
+                Rule::exists('departments', 'id')->where('tenant_id', $tenantId),
+            ],
             'title' => 'required_without:service_id|nullable|string|max:255',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
-            'discount_value' => 'nullable|numeric|min:0',
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function (string $attribute, mixed $value, Closure $fail) use ($request): void {
+                    $type = (string) $request->input('discount_type', 'none');
+                    $val = (float) $value;
+
+                    if ($type === 'percentage' && $val > 100) {
+                        $fail(__('validation.max.numeric', ['attribute' => $attribute, 'max' => 100]));
+                    } elseif ($type === 'fixed') {
+                        $max = round((float) $request->input('qty', 1) * (float) $request->input('unit_price', 0), 2);
+
+                        if ($val > $max + 0.01) {
+                            $fail(__('validation.max.numeric', ['attribute' => $attribute, 'max' => $max]));
+                        }
+                    }
+                },
+            ],
             'duration_value' => 'nullable|integer|min:0',
             'duration_unit' => 'nullable|string|max:50',
             'warranty_value_snapshot' => 'nullable|integer|min:0',
@@ -49,13 +77,38 @@ class WorkOrderItemController
             'pending_parts' => ['nullable', 'array'],
             'pending_parts.*.source' => ['required_with:pending_parts', 'in:warehouse,external,customer'],
             'pending_parts.*.name' => ['required_with:pending_parts', 'string', 'max:255'],
-            'pending_parts.*.part_id' => ['nullable', 'exists:parts,id'],
-            'pending_parts.*.warehouse_id' => ['nullable', 'exists:warehouses,id'],
+            'pending_parts.*.part_id' => [
+                'nullable',
+                Rule::exists('parts', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
+            'pending_parts.*.warehouse_id' => [
+                'nullable',
+                Rule::exists('warehouses', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
             'pending_parts.*.qty' => ['required_with:pending_parts', 'numeric', 'min:0.01'],
             'pending_parts.*.unit_price' => ['required_with:pending_parts', 'numeric', 'min:0'],
-            'pending_parts.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'pending_parts.*.discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function (string $attribute, mixed $value, Closure $fail) use ($request): void {
+                    if (preg_match('/pending_parts\.(\d+)\.discount/', $attribute, $m)) {
+                        $idx = (int) $m[1];
+                        $qty = (float) data_get($request->input('pending_parts'), "{$idx}.qty", 1);
+                        $price = (float) data_get($request->input('pending_parts'), "{$idx}.unit_price", 0);
+                        $max = round($qty * $price, 2);
+
+                        if ((float) $value > $max + 0.01) {
+                            $fail(__('validation.max.numeric', ['attribute' => $attribute, 'max' => $max]));
+                        }
+                    }
+                },
+            ],
             'pending_technicians' => ['nullable', 'array'],
-            'pending_technicians.*.user_id' => ['required_with:pending_technicians', 'exists:users,id'],
+            'pending_technicians.*.user_id' => [
+                'required_with:pending_technicians',
+                Rule::exists('users', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
             'pending_technicians.*.share' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'pending_notes' => ['nullable', 'array'],
             'pending_notes.*.content' => ['required_with:pending_notes', 'string'],

@@ -1,0 +1,1 @@
+import{E as s,M as t,f as a,g as r,k as o,t as c}from"./vendor-vue-husyvYtj.js";const n={class:"text-sm text-red-600"},l={__name:"InputError",props:{message:{type:String}},setup(e){return(i,m)=>s((a(),r("div",null,[o("p",n,c(e.message),1)],512)),[[t,e.message]])}};export{l as _};

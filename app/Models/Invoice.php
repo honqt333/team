@@ -8,6 +8,7 @@ use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use App\Models\Concerns\TenantScoped;
 use App\Support\TenancyContext;
 use App\Traits\HasInvoiceRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Log;
  */
 class Invoice extends Model
 {
-    use CenterScoped, HasFactory, HasInvoiceRelations, HasTaxSnapshot, SoftDeletes;
+    use CenterScoped, HasFactory, HasInvoiceRelations, HasTaxSnapshot, SoftDeletes, TenantScoped;
 
     protected $appends = ['balance', 'is_paid', 'payment_status_label', 'bad_debt'];
 

@@ -199,11 +199,11 @@
         </div>
 
         <template #footer>
-            <div class="flex w-full gap-3">
-                <button
-                    @click="$emit('print')"
-                    class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.close') }}
+                </AppButton>
+                <AppButton variant="primary" @click="$emit('print')">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -213,13 +213,7 @@
                         />
                     </svg>
                     {{ $t('common.print') }}
-                </button>
-                <button
-                    @click="$emit('close')"
-                    class="flex-1 px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
-                    {{ $t('common.close') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -232,6 +226,7 @@ import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,

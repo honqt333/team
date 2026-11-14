@@ -302,26 +302,16 @@
                             :label="$t('system.promo_codes.form.max_uses_per_tenant')"
                             required
                         />
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.promo_codes.form.starts_at') }}
-                            </label>
-                            <input
-                                v-model="form.starts_at"
-                                type="datetime-local"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.promo_codes.form.expires_at') }}
-                            </label>
-                            <input
-                                v-model="form.expires_at"
-                                type="datetime-local"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="form.starts_at"
+                            type="datetime-local"
+                            :label="$t('system.promo_codes.form.starts_at')"
+                        />
+                        <AppInput
+                            v-model="form.expires_at"
+                            type="datetime-local"
+                            :label="$t('system.promo_codes.form.expires_at')"
+                        />
                     </div>
                 </div>
 

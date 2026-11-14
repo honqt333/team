@@ -6,6 +6,7 @@
     >
         <!-- Floating Controls Bar (Hidden during print) -->
         <StandardPrintControls
+            v-model:scale="printScale"
             layout="floating"
             :print-label="printLabel"
             :close-label="backLabel"
@@ -17,16 +18,18 @@
         </StandardPrintControls>
 
         <!-- Document Content: Slot or Standard PrintEngine -->
-        <slot>
-            <PrintEngine
-                :documentType="documentType"
-                :data="data"
-                :centerData="resolvedCenterData"
-                :documentSettings="resolvedDocumentSettings"
-                :visualSettings="resolvedVisualSettings"
-                :previewMode="previewMode"
-            />
-        </slot>
+        <div class="w-full flex flex-col items-center print:block" :style="printScaleStyle">
+            <slot>
+                <PrintEngine
+                    :documentType="documentType"
+                    :data="data"
+                    :centerData="resolvedCenterData"
+                    :documentSettings="resolvedDocumentSettings"
+                    :visualSettings="resolvedVisualSettings"
+                    :previewMode="previewMode"
+                />
+            </slot>
+        </div>
     </div>
 </template>
 
@@ -35,6 +38,7 @@ import {
     printDocument,
     resolveDocumentSettings,
     resolveVisualSettings,
+    usePrintScale,
 } from '@/Composables/usePrint';
 
 import { computed, onMounted, onBeforeUnmount, watch } from 'vue';
@@ -106,6 +110,7 @@ const emit = defineEmits(['print', 'back']);
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const page = usePage();
+const { printScale, printScaleStyle } = usePrintScale();
 
 // Resolve Center & Company Data with safe defaults
 const resolvedCenterData = computed(() => {

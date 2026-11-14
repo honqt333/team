@@ -36,15 +36,14 @@
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         type="number"
                         v-model.number="form.base_price"
                         inputmode="decimal"
                         lang="en"
                         step="0.01"
                         min="0"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                        :class="{ 'border-red-500': form.errors.base_price }"
+                        :error="form.errors.base_price"
                     />
                     <span
                         class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
@@ -52,12 +51,6 @@
                         {{ activeCurrencySymbol }}
                     </span>
                 </div>
-                <p
-                    v-if="form.errors.base_price"
-                    class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                >
-                    {{ form.errors.base_price }}
-                </p>
             </div>
 
             <!-- Discount -->
@@ -112,14 +105,13 @@
                         {{ $t('pricing.discount_value') }}
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="number"
                             v-model.number="form.default_discount_value"
                             inputmode="decimal"
                             lang="en"
                             step="0.01"
                             min="0"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                         <span class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
                             {{
@@ -138,7 +130,7 @@
                     {{ $t('pricing.min_price') }}
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         type="number"
                         v-model.number="form.min_price"
                         inputmode="decimal"
@@ -146,10 +138,7 @@
                         step="0.01"
                         min="0"
                         :max="form.base_price"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                        :class="{
-                            'border-red-500': form.errors.min_price || minPriceValidationError,
-                        }"
+                        :error="minPriceValidationError || form.errors.min_price"
                     />
                     <span
                         class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
@@ -157,12 +146,6 @@
                         {{ activeCurrencySymbol }}
                     </span>
                 </div>
-                <p v-if="minPriceValidationError" class="text-sm text-red-600 dark:text-red-400">
-                    {{ minPriceValidationError }}
-                </p>
-                <p v-else-if="form.errors.min_price" class="text-sm text-red-600 dark:text-red-400">
-                    {{ form.errors.min_price }}
-                </p>
             </div>
         </form>
 
@@ -170,21 +153,17 @@
             <div
                 class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
             >
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :loading="form.processing"
+                    :disabled="minPriceValidationError"
                     @click="submitForm"
-                    :disabled="form.processing || minPriceValidationError"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                </button>
+                    {{ $t('common.save') }}
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -195,10 +174,14 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
 const { activeCurrencySymbol } = useNumberFormat();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     show: {
@@ -339,6 +322,7 @@ function submitForm() {
             emit('saved');
             emit('close');
         },
+        onError: (errors) => scrollToError(errors),
     });
 }
 </script>

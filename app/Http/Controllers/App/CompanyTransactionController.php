@@ -83,7 +83,7 @@ class CompanyTransactionController extends Controller
             'contact_id' => ['nullable', 'integer', Rule::exists($request->input('contact_type') === 'supplier' ? 'suppliers' : 'customers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'notes' => 'nullable|string',
             'center_id' => ['nullable', Rule::exists('centers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|extensions:jpg,jpeg,png,webp,pdf|max:5120',
             'remove_attachment' => 'nullable|boolean',
         ]);
 
@@ -165,7 +165,7 @@ class CompanyTransactionController extends Controller
             'contact_id' => ['nullable', 'integer', Rule::exists($request->input('contact_type') === 'supplier' ? 'suppliers' : 'customers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'notes' => 'nullable|string',
             'center_id' => ['nullable', Rule::exists('centers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|extensions:jpg,jpeg,png,webp,pdf|max:5120',
             'remove_attachment' => 'nullable|boolean',
         ]);
 
@@ -460,7 +460,7 @@ class CompanyTransactionController extends Controller
         }
 
         $request->validate([
-            'attachment' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'attachment' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|extensions:jpg,jpeg,png,webp,pdf|max:5120',
         ]);
 
         if ($transaction->attachment_path && Storage::disk('public')->exists($transaction->attachment_path)) {

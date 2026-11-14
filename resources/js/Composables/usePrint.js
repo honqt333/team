@@ -1,10 +1,52 @@
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
 import { buildPrintSignatures as buildPrintSignaturesUtil } from '@/Utils/printSignatures';
 import { getCurrencyDecimals, getCurrencyLabel, resolveTenantCurrency } from '@/Utils/currency';
+
+/**
+ * Manage persistent print zoom/scale percentage (70% - 100%) for print preview & output.
+ */
+export function usePrintScale(storageKey = 'khidmh_print_scale') {
+    const clampScale = (val) => {
+        const num = Number(val);
+        if (Number.isNaN(num)) return 100;
+        return Math.min(100, Math.max(70, Math.round(num)));
+    };
+
+    const initial =
+        typeof window !== 'undefined'
+            ? clampScale(window.localStorage?.getItem(storageKey) ?? 100)
+            : 100;
+
+    const printScale = ref(initial);
+
+    watch(printScale, (val) => {
+        const clamped = clampScale(val);
+        if (clamped !== val) {
+            printScale.value = clamped;
+            return;
+        }
+        if (typeof window !== 'undefined') {
+            try {
+                window.localStorage?.setItem(storageKey, String(clamped));
+            } catch {
+                // Ignore storage quota or private mode errors
+            }
+        }
+    });
+
+    const printScaleStyle = computed(() =>
+        printScale.value !== 100 ? { zoom: String(printScale.value / 100) } : {}
+    );
+
+    return {
+        printScale,
+        printScaleStyle,
+    };
+}
 
 /**
  * Trigger browser print safely with optional document title.

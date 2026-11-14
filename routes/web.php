@@ -451,6 +451,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
     // Dealers (Fleet, Insurance & Corporate Partners)
     Route::get('/dealers', [DealerController::class, 'index'])->name('app.dealers.index');
+    Route::get('/dealers/export', [DealerController::class, 'export'])->name('app.dealers.export');
+    Route::get('/dealers/print', [DealerController::class, 'print'])->name('app.dealers.print');
     Route::post('/dealers', [DealerController::class, 'store'])->name('app.dealers.store');
     Route::get('/dealers/{dealer}', [DealerController::class, 'show'])->name('app.dealers.show');
     Route::put('/dealers/{dealer}', [DealerController::class, 'update'])->name('app.dealers.update');

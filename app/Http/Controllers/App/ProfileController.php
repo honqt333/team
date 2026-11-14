@@ -198,7 +198,7 @@ class ProfileController extends Controller
         }
 
         $request->validate([
-            'photo' => ['required', 'image', 'max:2048'],
+            'photo' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'extensions:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         if ($request->hasFile('photo')) {

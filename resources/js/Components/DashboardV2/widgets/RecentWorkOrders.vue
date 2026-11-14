@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import StatusBadge from '@/Components/DashboardV2/common/StatusBadge.vue';
+import CustomerContactActions from '@/Components/DashboardV2/common/CustomerContactActions.vue';
 
 defineProps({
     items: { type: Array, default: () => [] },
@@ -62,6 +63,12 @@ function relativeTime(dateStr) {
                             </span>
                         </p>
                     </div>
+                    <CustomerContactActions
+                        :phone="item.customer?.phone"
+                        :whatsapp="item.customer?.whatsapp"
+                        :work-order-code="item.code"
+                        :plate-number="item.vehicle?.plate_number"
+                    />
                     <div class="flex-shrink-0 text-end">
                         <p
                             v-if="

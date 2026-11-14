@@ -96,11 +96,7 @@
 
             <!-- Description -->
             <FormField :label="$t('departments.form.description')" :error="form.errors.description">
-                <textarea
-                    v-model="form.description"
-                    rows="3"
-                    class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
-                ></textarea>
+                <AppTextarea v-model="form.description" rows="3" class="resize-none" />
             </FormField>
 
             <!-- Sort Order -->
@@ -108,12 +104,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('departments.form.sort_order') }}
                 </label>
-                <input
-                    type="number"
-                    v-model.number="form.sort_order"
-                    min="0"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                />
+                <AppInput type="number" v-model.number="form.sort_order" min="0" />
             </div>
 
             <!-- Active Toggle -->
@@ -127,21 +118,17 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
+            <AppButton variant="secondary" @click="$emit('close')">
                 {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
+            </AppButton>
+            <AppButton
+                variant="action"
                 @click="submitForm"
                 :disabled="form.processing"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                :loading="form.processing"
             >
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            </AppButton>
         </template>
     </BaseModal>
 </template>
@@ -154,6 +141,8 @@ import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 
 const { locale } = useI18n();
 

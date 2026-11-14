@@ -48,7 +48,7 @@ class VehicleMakeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'is_active' => 'boolean',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|extensions:jpeg,png,jpg,webp|max:2048',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -78,7 +78,7 @@ class VehicleMakeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|extensions:jpeg,png,jpg,webp|max:2048',
         ]);
 
         if ($request->hasFile('logo')) {

@@ -52,11 +52,11 @@
                     >
                         {{ $t('inventory.parts.name') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
-                        :value="part?.name || ''"
+                        :model-value="part?.name || ''"
                         disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                        class="font-bold cursor-not-allowed"
                     />
                 </div>
 
@@ -67,11 +67,11 @@
                     >
                         {{ $t('inventory.parts.part_number') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
-                        :value="part?.part_number || ''"
+                        :model-value="part?.part_number || ''"
                         disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                        class="font-bold cursor-not-allowed"
                     />
                 </div>
 
@@ -82,11 +82,11 @@
                     >
                         {{ $t('inventory.parts.description') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
-                        :value="part?.notes || ''"
+                        :model-value="part?.notes || ''"
                         disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                        class="font-bold cursor-not-allowed"
                     />
                 </div>
             </div>
@@ -162,13 +162,13 @@
                         ⚠️ {{ $t('inventory.parts.cannot_return_more_than_current') }}
                     </span>
                 </div>
-                <input
+                <AppInput
                     type="text"
                     inputmode="decimal"
                     v-model="returnedQty"
                     dir="ltr"
                     @input="returnedQty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
-                    class="w-full px-5 py-4 border-2 border-red-300 focus:border-danger dark:border-red-700 focus:ring-4 focus:ring-danger/10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-mono text-center text-xl font-extrabold transition-all"
+                    class="py-4 font-mono text-center text-xl font-extrabold"
                     placeholder="0"
                 />
             </div>
@@ -180,12 +180,12 @@
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {{ $t('inventory.parts.unit_price') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         readonly
-                        :value="formatCurrency(part?.unit_price || 0)"
+                        :model-value="formatCurrency(part?.unit_price || 0)"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                        class="text-center font-mono font-bold cursor-not-allowed"
                     />
                 </div>
 
@@ -194,12 +194,12 @@
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {{ $t('inventory.parts.discount') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         readonly
-                        :value="formatCurrency(part?.discount || 0)"
+                        :model-value="formatCurrency(part?.discount || 0)"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                        class="text-center font-mono font-bold cursor-not-allowed"
                     />
                 </div>
 
@@ -208,12 +208,12 @@
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {{ $t('common.qty') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         readonly
-                        :value="formatQuantity(calculatedQty)"
+                        :model-value="formatQuantity(calculatedQty)"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-red-650 dark:text-red-400 text-center font-mono text-sm font-black cursor-not-allowed rounded-xl"
+                        class="text-red-650 dark:text-red-400 text-center font-mono font-black cursor-not-allowed"
                     />
                 </div>
 
@@ -222,12 +222,12 @@
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {{ $t('common.amount') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         readonly
-                        :value="formatCurrency(calculatedAmount)"
+                        :model-value="formatCurrency(calculatedAmount)"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                        class="text-center font-mono font-bold cursor-not-allowed"
                     />
                 </div>
             </div>
@@ -258,17 +258,15 @@
         </form>
 
         <template #footer>
-            <div class="flex items-center justify-between w-full">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="button"
+                    variant="primary"
                     @click="submitForm"
+                    :loading="form.processing"
                     :disabled="
                         form.processing ||
                         !returnedQty ||
@@ -276,10 +274,9 @@
                         parseFloat(returnedQty) <= 0 ||
                         parseFloat(returnedQty) > parseFloat(part?.qty)
                     "
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -291,6 +288,8 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import axios from 'axios';
 
 const props = defineProps({

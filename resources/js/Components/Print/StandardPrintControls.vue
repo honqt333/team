@@ -32,18 +32,72 @@
             :label="printLabel || $t('common.print')"
         />
 
+        <!-- Print Scale Slider (70% - 100%) -->
+        <div
+            v-if="showScale"
+            class="flex items-center gap-2 px-3 py-2 bg-white/95 text-gray-700 rounded-xl border border-gray-200 shadow-lg text-xs font-semibold"
+        >
+            <span class="hidden sm:inline text-gray-500 whitespace-nowrap">
+                {{ $t('common.print_scale') }}
+            </span>
+            <input
+                type="range"
+                min="70"
+                max="100"
+                step="5"
+                :value="scale"
+                :aria-label="$t('common.print_scale')"
+                @input="handleScaleInput"
+                class="w-20 sm:w-24 accent-blue-600 cursor-pointer"
+            />
+            <button
+                type="button"
+                @click="resetScale"
+                :title="$t('common.print_scale')"
+                class="min-w-[38px] text-center font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
+            >
+                {{ scale }}%
+            </button>
+        </div>
+
         <slot name="extra-actions" />
     </div>
     <div
         v-else
-        class="print:hidden mb-6 flex justify-between items-center bg-gray-50 dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
+        class="print:hidden mb-6 flex flex-wrap justify-between items-center gap-3 bg-gray-50 dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
     >
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <AppPrintButton
                 variant="primary"
                 @click="handlePrint"
                 :label="printLabel || $t('common.print')"
             />
+            <div
+                v-if="showScale"
+                class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold"
+            >
+                <span class="hidden sm:inline text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    {{ $t('common.print_scale') }}
+                </span>
+                <input
+                    type="range"
+                    min="70"
+                    max="100"
+                    step="5"
+                    :value="scale"
+                    :aria-label="$t('common.print_scale')"
+                    @input="handleScaleInput"
+                    class="w-20 sm:w-24 accent-blue-600 cursor-pointer"
+                />
+                <button
+                    type="button"
+                    @click="resetScale"
+                    :title="$t('common.print_scale')"
+                    class="min-w-[38px] text-center font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-100 transition-colors cursor-pointer"
+                >
+                    {{ scale }}%
+                </button>
+            </div>
             <slot name="extra-actions" />
         </div>
 
@@ -80,9 +134,27 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    scale: {
+        type: Number,
+        default: 100,
+    },
+    showScale: {
+        type: Boolean,
+        default: true,
+    },
 });
 
-const emit = defineEmits(['print', 'close']);
+const emit = defineEmits(['print', 'close', 'update:scale']);
+
+function handleScaleInput(event) {
+    const raw = Number(event?.target?.value ?? 100);
+    const clamped = Math.min(100, Math.max(70, Number.isNaN(raw) ? 100 : Math.round(raw)));
+    emit('update:scale', clamped);
+}
+
+function resetScale() {
+    emit('update:scale', 100);
+}
 
 function handlePrint() {
     if (props.onPrint) {

@@ -438,26 +438,13 @@
                 <!-- Quick Vehicle/Customer Search -->
                 <div class="relative">
                     <div class="relative">
-                        <input
+                        <AppInput
                             v-model="quickSearchQuery"
                             type="text"
+                            size="sm"
                             @input="onQuickSearchInput"
                             :placeholder="$t('appointments.search_vehicle_or_customer')"
-                            class="w-full px-3 py-2 ps-9 text-xs rounded-xl border border-border-subtle bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition"
                         />
-                        <svg
-                            class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-content-muted"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
                         <span
                             v-if="searchingQuick"
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-content-muted animate-pulse"
@@ -594,23 +581,17 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.scheduled_at') }}
-                        </label>
-                        <input
+                        <AppInput
                             v-model="form.scheduled_at"
                             type="datetime-local"
-                            class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
+                            :label="$t('appointments.scheduled_at')"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.estimated_end_at') }}
-                        </label>
-                        <input
+                        <AppInput
                             v-model="form.estimated_end_at"
                             type="datetime-local"
-                            class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
+                            :label="$t('appointments.estimated_end_at')"
                         />
                     </div>
                 </div>
@@ -633,41 +614,28 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.notes') }}
-                    </label>
-                    <textarea
-                        v-model="form.notes"
-                        rows="2"
-                        class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
-                    ></textarea>
-                </div>
+                <AppTextarea v-model="form.notes" :label="$t('appointments.notes')" :rows="2" />
             </div>
 
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
-                    <button
-                        type="button"
-                        @click="showForm = false"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showForm = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
-                        @click="create"
+                        variant="primary"
+                        :loading="busy"
                         :disabled="
-                            busy ||
                             !form.customer_id ||
                             !form.vehicle_id ||
                             !form.scheduled_at ||
                             !form.estimated_end_at
                         "
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                        @click="create"
                     >
                         {{ $t('common.create') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -679,30 +647,25 @@
             :title="$t('appointments.cancel_title')"
             @close="showCancel = false"
         >
-            <textarea
+            <AppTextarea
                 v-model="cancelReason"
-                rows="3"
+                :rows="3"
                 :placeholder="$t('appointments.cancel_reason_placeholder')"
-                class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
-            ></textarea>
+            />
 
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
-                    <button
-                        type="button"
-                        @click="showCancel = false"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                    <AppButton type="button" variant="secondary" @click="showCancel = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         type="button"
+                        variant="danger"
+                        :loading="busy"
                         @click="confirmCancel"
-                        :disabled="busy"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-danger hover:bg-danger/90 rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('appointments.cancel') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -722,6 +685,9 @@ import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';

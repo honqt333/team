@@ -84,13 +84,13 @@
 
                         <!-- Search Input -->
                         <div class="relative">
-                            <input
+                            <AppInput
                                 v-model="searchQuery"
                                 type="text"
                                 @input="debouncedSearch"
                                 @focus="showResults = true"
                                 :placeholder="$t('quotes.form_tabs.search_placeholder')"
-                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                                class="ps-10"
                             />
                             <svg
                                 class="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -447,12 +447,12 @@
                         >
                             {{ $t('quotes.form_tabs.customer_complaint') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.customer_complaint"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.customer_complaint_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                        ></textarea>
+                            class="resize-none"
+                        />
                     </div>
                 </div>
 
@@ -466,12 +466,12 @@
                         >
                             {{ $t('quotes.form_tabs.initial_assessment') }}
                         </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.initial_assessment"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.initial_assessment_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
-                        ></textarea>
+                            class="resize-none"
+                        />
                     </div>
                 </div>
 
@@ -500,25 +500,21 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
-                @click="submitForm"
-                :disabled="
-                    form.processing ||
-                    !selectedVehicle ||
-                    (showOdometerWarning && !form.allow_lower_odometer)
-                "
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :loading="form.processing"
+                    :disabled="
+                        !selectedVehicle || (showOdometerWarning && !form.allow_lower_odometer)
+                    "
+                    @click="submitForm"
+                >
+                    {{ $t('common.save') }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 
@@ -554,6 +550,10 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
@@ -573,6 +573,7 @@ const props = defineProps({
     services: Array,
 });
 const emit = defineEmits(['close', 'saved']);
+const { scrollToError } = useFormScrollToError();
 const { t } = useI18n();
 const { getName } = useLocalized();
 const { toEnglish } = useNumberFormat();
@@ -816,6 +817,7 @@ function handleCustomerCreated(savedCustomer) {
         },
         onError: (errors) => {
             console.error('[QuoteFormModal] Reload error:', errors);
+            scrollToError(errors);
         },
     });
 }

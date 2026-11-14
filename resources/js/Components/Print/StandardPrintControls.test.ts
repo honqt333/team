@@ -8,7 +8,16 @@ const global = {
         createI18n({
             legacy: false,
             locale: 'en',
-            messages: { en: { common: { print: 'print', close: 'close', back: 'back' } } },
+            messages: {
+                en: {
+                    common: {
+                        print: 'print',
+                        close: 'close',
+                        back: 'back',
+                        print_scale: 'Print Scale',
+                    },
+                },
+            },
         }),
     ],
 };
@@ -38,4 +47,23 @@ describe('shared print controls', () => {
         print.mockRestore();
         wrapper.unmount();
     });
+    it.each(['inline', 'floating'])(
+        'emits clamped update:scale (70-100) and resets to 100 in %s layout',
+        async (layout) => {
+            const wrapper = mount(StandardPrintControls, {
+                global,
+                props: { layout, scale: 85 },
+            });
+            const range = wrapper.get('input[type="range"]');
+            await range.setValue('75');
+            expect(wrapper.emitted('update:scale')?.[0]).toEqual([75]);
+
+            const resetBtn = wrapper
+                .findAll('button')
+                .find((button) => button.text().includes('85%'))!;
+            await resetBtn.trigger('click');
+            expect(wrapper.emitted('update:scale')?.[1]).toEqual([100]);
+            wrapper.unmount();
+        }
+    );
 });

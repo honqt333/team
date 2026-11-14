@@ -1,202 +1,181 @@
 <template>
-    <DialogModal :show="show" @close="handleClose" max-width="2xl">
+    <BaseModal :show="show" @close="handleClose" size="max-w-2xl">
         <template #title>
             {{ form.id ? $t('purchasing.suppliers.edit') : $t('purchasing.suppliers.add') }}
         </template>
 
-        <template #content>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Type -->
-                <div class="md:col-span-2" data-field="type">
-                    <SearchableSelect
-                        v-model="form.type"
-                        :options="supplierTypeOptions"
-                        :label="$t('purchasing.suppliers.type')"
-                        required
-                        :error="form.errors.type"
-                    />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Type -->
+            <div class="md:col-span-2" data-field="type">
+                <SearchableSelect
+                    v-model="form.type"
+                    :options="supplierTypeOptions"
+                    :label="$t('purchasing.suppliers.type')"
+                    required
+                    :error="form.errors.type"
+                />
+            </div>
 
-                <!-- Name -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.name') }}
-                        <span class="text-red-500">*</span>
+            <!-- Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.name') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <AppInput name="name" v-model="form.name" type="text" :error="form.errors.name" />
+            </div>
+
+            <!-- Contact Person -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.contact') }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <AppInput
+                    name="contact_person"
+                    v-model="form.contact_person"
+                    type="text"
+                    :error="form.errors.contact_person"
+                />
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.phone') }}
+                </label>
+                <div data-field="phone">
+                    <vue-tel-input
+                        v-model="form.phone"
+                        @on-input="(value) => onPhoneInput('phone', value)"
+                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                        mode="international"
+                        :validCharactersOnly="false"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
+                    ></vue-tel-input>
+                </div>
+                <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                    {{ form.errors.phone }}
+                </p>
+            </div>
+
+            <!-- WhatsApp -->
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $t('customers.form.whatsapp') }}
                     </label>
-                    <input
-                        name="name"
-                        v-model="form.name"
-                        type="text"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all',
-                            form.errors.name
-                                ? 'border-red-500 focus:ring-danger'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                        ]"
-                    />
-                    <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-500">
-                        {{ form.errors.name }}
-                    </p>
-                </div>
-
-                <!-- Contact Person -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    <button
+                        v-if="
+                            form.phone &&
+                            normalizePhone(form.phone) !== normalizePhone(form.whatsapp)
+                        "
+                        type="button"
+                        @click="form.whatsapp = form.phone"
+                        class="text-xs text-action-primary hover:text-selection-text transition-colors"
                     >
-                        {{ $t('purchasing.suppliers.contact') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        name="contact_person"
-                        v-model="form.contact_person"
-                        type="text"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all',
-                            form.errors.contact_person
-                                ? 'border-red-500 focus:ring-danger'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                        ]"
-                    />
-                    <p v-if="form.errors.contact_person" class="mt-1.5 text-sm text-red-500">
-                        {{ form.errors.contact_person }}
-                    </p>
+                        {{ $t('customers.form.copy_from_phone') }}
+                    </button>
                 </div>
-
-                <!-- Phone -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.phone') }}
-                    </label>
-                    <div data-field="phone">
-                        <vue-tel-input
-                            v-model="form.phone"
-                            @on-input="(value) => onPhoneInput('phone', value)"
-                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                            mode="international"
-                            :validCharactersOnly="false"
-                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
-                        ></vue-tel-input>
-                    </div>
-                    <p
-                        v-if="form.errors.phone"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.phone }}
-                    </p>
+                <div data-field="whatsapp">
+                    <vue-tel-input
+                        v-model="form.whatsapp"
+                        @on-input="(value) => onPhoneInput('whatsapp', value)"
+                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                        mode="international"
+                        :validCharactersOnly="false"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
+                    ></vue-tel-input>
                 </div>
+                <p
+                    v-if="form.errors.whatsapp"
+                    class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                >
+                    {{ form.errors.whatsapp }}
+                </p>
+            </div>
 
-                <!-- WhatsApp -->
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ $t('customers.form.whatsapp') }}
-                        </label>
-                        <button
-                            v-if="
-                                form.phone &&
-                                normalizePhone(form.phone) !== normalizePhone(form.whatsapp)
-                            "
-                            type="button"
-                            @click="form.whatsapp = form.phone"
-                            class="text-xs text-action-primary hover:text-selection-text transition-colors"
+            <!-- Tax Number -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.tax_number') }}
+                </label>
+                <AppInput
+                    name="tax_number"
+                    v-model="form.tax_number"
+                    type="text"
+                    dir="ltr"
+                    maxlength="15"
+                    :error="form.errors.tax_number"
+                />
+            </div>
+
+            <!-- CR Number -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.cr_number') }}
+                </label>
+                <AppInput
+                    name="cr_number"
+                    v-model="form.cr_number"
+                    type="text"
+                    dir="ltr"
+                    :error="form.errors.cr_number"
+                />
+            </div>
+
+            <!-- Email -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.email') }}
+                </label>
+                <AppInput
+                    name="email"
+                    v-model="form.email"
+                    type="email"
+                    dir="ltr"
+                    :error="form.errors.email"
+                />
+            </div>
+
+            <!-- Address Details (md:col-span-2) -->
+            <div class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-5 mt-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h3
+                        class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4 text-gray-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                         >
-                            {{ $t('customers.form.copy_from_phone') }}
-                        </button>
-                    </div>
-                    <div data-field="whatsapp">
-                        <vue-tel-input
-                            v-model="form.whatsapp"
-                            @on-input="(value) => onPhoneInput('whatsapp', value)"
-                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                            mode="international"
-                            :validCharactersOnly="false"
-                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
-                        ></vue-tel-input>
-                    </div>
-                    <p
-                        v-if="form.errors.whatsapp"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.whatsapp }}
-                    </p>
-                </div>
-
-                <!-- Tax Number -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.tax_number') }}
-                    </label>
-                    <input
-                        name="tax_number"
-                        v-model="form.tax_number"
-                        type="text"
-                        dir="ltr"
-                        maxlength="15"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600',
-                            form.errors.tax_number
-                                ? 'border-red-500 focus:border-danger focus:ring-danger/20'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
-                        ]"
-                    />
-                    <p v-if="form.errors.tax_number" class="mt-1.5 text-sm text-red-500">
-                        {{ form.errors.tax_number }}
-                    </p>
-                </div>
-
-                <!-- CR Number -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.cr_number') }}
-                    </label>
-                    <input
-                        name="cr_number"
-                        v-model="form.cr_number"
-                        type="text"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                    />
-                    <p v-if="form.errors.cr_number" class="mt-1.5 text-sm text-red-500">
-                        {{ form.errors.cr_number }}
-                    </p>
-                </div>
-
-                <!-- Email -->
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.email') }}
-                    </label>
-                    <input
-                        name="email"
-                        v-model="form.email"
-                        type="email"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                    />
-                    <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-500">
-                        {{ form.errors.email }}
-                    </p>
-                </div>
-
-                <!-- Address Details (md:col-span-2) -->
-                <div class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-5 mt-2">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3
-                            class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2"
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                        {{ $t('purchasing.suppliers.address_details') }}
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            @click="fetchLocation"
+                            :disabled="isLocating"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-action-primary hover:bg-selection-bg rounded-lg transition-colors disabled:opacity-50"
+                            :title="$t('customers.form.locate_me')"
                         >
                             <svg
-                                class="w-4 h-4 text-gray-500"
+                                class="w-3.5 h-3.5"
+                                :class="{ 'animate-spin': isLocating }"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -205,272 +184,194 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                                 />
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                                 />
                             </svg>
-                            {{ $t('purchasing.suppliers.address_details') }}
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <button
-                                type="button"
-                                @click="fetchLocation"
-                                :disabled="isLocating"
-                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-action-primary hover:bg-selection-bg rounded-lg transition-colors disabled:opacity-50"
-                                :title="$t('customers.form.locate_me')"
-                            >
-                                <svg
-                                    class="w-3.5 h-3.5"
-                                    :class="{ 'animate-spin': isLocating }"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                </svg>
-                                {{
-                                    isLocating
-                                        ? $t('common.loading')
-                                        : $t('customers.form.locate_me')
-                                }}
-                            </button>
-                            <button
-                                type="button"
-                                @click="clearAddressFields"
-                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            >
-                                {{ $t('purchasing.suppliers.clear_address') }}
-                            </button>
-                        </div>
+                            {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="clearAddressFields"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        >
+                            {{ $t('purchasing.suppliers.clear_address') }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Map Container -->
+                    <div class="order-1 lg:order-2">
+                        <NationalAddressMapCanvas
+                            :map-ready="mapReady"
+                            height-class="h-[220px]"
+                            :loading-text="$t('common.loading_map')"
+                            :hint="$t('purchasing.suppliers.map.click_hint')"
+                            @container="(el) => (mapContainer = el)"
+                        />
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <!-- Map Container -->
-                        <div class="order-1 lg:order-2">
-                            <div
-                                ref="mapContainer"
-                                class="w-full h-[220px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
+                    <!-- Address Fields -->
+                    <div class="order-2 lg:order-1 space-y-3">
+                        <!-- Address Line -->
+                        <div>
+                            <label
+                                class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                             >
-                                <div
-                                    v-if="!mapReady"
-                                    class="h-full flex flex-col items-center justify-center text-center p-4"
-                                >
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $t('common.loading_map') }}
-                                    </p>
-                                </div>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                                {{ $t('purchasing.suppliers.map.click_hint') }}
-                            </p>
+                                {{ $t('purchasing.suppliers.address_line') }}
+                            </label>
+                            <AppTextarea
+                                name="address"
+                                v-model="form.address"
+                                rows="2"
+                                class="resize-none"
+                            />
                         </div>
 
-                        <!-- Address Fields -->
-                        <div class="order-2 lg:order-1 space-y-3">
-                            <!-- Address Line -->
+                        <!-- Building + Postal + District -->
+                        <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label
                                     class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                                 >
-                                    {{ $t('purchasing.suppliers.address_line') }}
+                                    {{ $t('purchasing.suppliers.building_number') }}
                                 </label>
-                                <textarea
-                                    name="address"
-                                    v-model="form.address"
-                                    rows="2"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
-                                ></textarea>
+                                <AppInput
+                                    name="building_number"
+                                    v-model="form.building_number"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
                             </div>
-
-                            <!-- Building + Postal + District -->
-                            <div class="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.building_number') }}
-                                    </label>
-                                    <input
-                                        name="building_number"
-                                        v-model="form.building_number"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.postal_code') }}
-                                    </label>
-                                    <input
-                                        name="postal_code"
-                                        v-model="form.postal_code"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.district') }}
-                                    </label>
-                                    <input
-                                        name="district"
-                                        v-model="form.district"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('purchasing.suppliers.postal_code') }}
+                                </label>
+                                <AppInput
+                                    name="postal_code"
+                                    v-model="form.postal_code"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
                             </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('purchasing.suppliers.district') }}
+                                </label>
+                                <AppInput
+                                    name="district"
+                                    v-model="form.district"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
+                            </div>
+                        </div>
 
-                            <!-- City + Region + Country -->
-                            <div class="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.city') }}
-                                    </label>
-                                    <input
-                                        name="city"
-                                        v-model="form.city"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.region') }}
-                                    </label>
-                                    <input
-                                        name="region"
-                                        v-model="form.region"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('purchasing.suppliers.country') }}
-                                    </label>
-                                    <input
-                                        name="country"
-                                        v-model="form.country"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
-                                    />
-                                </div>
+                        <!-- City + Region + Country -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('purchasing.suppliers.city') }}
+                                </label>
+                                <AppInput
+                                    name="city"
+                                    v-model="form.city"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('purchasing.suppliers.region') }}
+                                </label>
+                                <AppInput
+                                    name="region"
+                                    v-model="form.region"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('purchasing.suppliers.country') }}
+                                </label>
+                                <AppInput
+                                    name="country"
+                                    v-model="form.country"
+                                    type="text"
+                                    class="px-3 py-2 text-sm"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Bank Section (md:col-span-2) -->
-                <div class="md:col-span-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                        {{ $t('purchasing.suppliers.bank_info') }}
-                    </h3>
-                </div>
+            <!-- Bank Section (md:col-span-2) -->
+            <div class="md:col-span-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    {{ $t('purchasing.suppliers.bank_info') }}
+                </h3>
+            </div>
 
-                <!-- Bank Name -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.bank_name') }}
-                    </label>
-                    <input
-                        name="bank_name"
-                        v-model="form.bank_name"
-                        type="text"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+            <!-- Bank Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.bank_name') }}
+                </label>
+                <AppInput name="bank_name" v-model="form.bank_name" type="text" />
+            </div>
+
+            <!-- IBAN -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('purchasing.suppliers.iban') }}
+                </label>
+                <AppInput
+                    name="iban"
+                    v-model="form.iban"
+                    type="text"
+                    dir="ltr"
+                    placeholder="SA..."
+                />
+            </div>
+
+            <!-- Notes (md:col-span-2) -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('common.notes') }}
+                </label>
+                <AppTextarea name="notes" v-model="form.notes" rows="2" class="resize-none" />
+            </div>
+
+            <!-- Active Status (md:col-span-2) -->
+            <div class="md:col-span-2">
+                <div
+                    class="flex items-center p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30"
+                >
+                    <AppToggle
+                        v-model="form.is_active"
+                        :label="form.is_active ? $t('common.active') : $t('common.inactive')"
                     />
-                </div>
-
-                <!-- IBAN -->
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('purchasing.suppliers.iban') }}
-                    </label>
-                    <input
-                        name="iban"
-                        v-model="form.iban"
-                        type="text"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                        placeholder="SA..."
-                    />
-                </div>
-
-                <!-- Notes (md:col-span-2) -->
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('common.notes') }}
-                    </label>
-                    <textarea
-                        name="notes"
-                        v-model="form.notes"
-                        rows="2"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
-                    ></textarea>
-                </div>
-
-                <!-- Active Status (md:col-span-2) -->
-                <div class="md:col-span-2">
-                    <label
-                        class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30"
-                    >
-                        <div
-                            class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-focus-ring"
-                            :class="
-                                form.is_active
-                                    ? 'bg-action-primary'
-                                    : 'bg-gray-200 dark:bg-gray-600'
-                            "
-                            @click="form.is_active = !form.is_active"
-                        >
-                            <span
-                                class="inline-block w-5 h-5 transform transition duration-200 ease-in-out bg-white rounded-full shadow ring-0"
-                                :class="
-                                    form.is_active
-                                        ? 'translate-x-5 rtl:-translate-x-5'
-                                        : 'translate-x-0'
-                                "
-                            ></span>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ form.is_active ? $t('common.active') : $t('common.inactive') }}
-                        </span>
-                    </label>
                 </div>
             </div>
-        </template>
+        </div>
 
         <template #footer>
             <div class="flex items-center justify-between w-full">
@@ -492,9 +393,9 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <SecondaryButton @click="handleClose">
+                    <AppButton variant="secondary" @click="handleClose">
                         {{ $t('common.cancel') }}
-                    </SecondaryButton>
+                    </AppButton>
                     <AppButton
                         variant="action-xl"
                         @click="submit"
@@ -506,29 +407,23 @@
                 </div>
             </div>
         </template>
-    </DialogModal>
+    </BaseModal>
 </template>
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import DialogModal from '@/Components/DialogModal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { ref, watch, nextTick, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import AppButton from '@/Components/App/AppButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-
-// Fix Leaflet default marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -553,12 +448,6 @@ const isDirty = ref(false);
 const initialFormData = ref(null);
 const isConfirming = ref(false);
 
-const mapContainer = ref(null);
-const mapReady = ref(false);
-const geocodingLoading = ref(false);
-
-let map = null;
-let marker = null;
 const defaultLat = 24.7136;
 const defaultLng = 46.6753;
 
@@ -587,6 +476,26 @@ const form = useForm({
     iban: '',
     notes: '',
     is_active: true,
+});
+
+const {
+    mapContainer,
+    mapReady,
+    isLocating,
+    mountWithRetry,
+    fetchLocation,
+    clearAddressFields,
+    destroyMap,
+} = useNationalAddressMap({
+    form,
+    fieldMap: { addressLine: 'address' },
+    defaultLat,
+    defaultLng,
+    locale,
+    onReady: () => {
+        initialFormData.value = JSON.stringify(form.data());
+        isDirty.value = false;
+    },
 });
 
 watch(
@@ -652,67 +561,6 @@ watch(
     }
 );
 
-const isLocating = ref(false);
-
-async function fetchLocation() {
-    isLocating.value = true;
-
-    const useIpFallback = async () => {
-        try {
-            const response = await fetch('https://ipapi.co/json/');
-            if (!response.ok) throw new Error('IP geolocation failed');
-            const data = await response.json();
-            if (data && data.latitude && data.longitude) {
-                const lat = parseFloat(data.latitude);
-                const lng = parseFloat(data.longitude);
-
-                form.lat = parseFloat(lat.toFixed(7));
-                form.lng = parseFloat(lng.toFixed(7));
-
-                if (map) {
-                    setMarker(lat, lng);
-                } else {
-                    reverseGeocode(form.lat, form.lng);
-                }
-                return;
-            }
-        } catch (err) {
-            console.warn('[CreateModal] IP Geolocation failed:', err.message);
-        }
-
-        isLocating.value = false;
-        nextTick(() => {
-            initialFormData.value = JSON.stringify(form.data());
-            isDirty.value = false;
-        });
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                form.lat = parseFloat(latitude.toFixed(7));
-                form.lng = parseFloat(longitude.toFixed(7));
-
-                if (map) {
-                    setMarker(latitude, longitude);
-                } else {
-                    reverseGeocode(form.lat, form.lng);
-                }
-            },
-            (error) => {
-                console.warn('[CreateModal] Browser Geolocation error:', error.message);
-                useIpFallback();
-            },
-            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-        );
-    } else {
-        useIpFallback();
-    }
-}
-
-// Map Methods
 watch(
     () => props.show,
     async (open) => {
@@ -724,13 +572,8 @@ watch(
                 fetchLocation();
             }
             await nextTick();
-            initMap();
-            setTimeout(() => {
-                if (map) map.invalidateSize();
-                // Snapshot initial form data
-                initialFormData.value = JSON.stringify(form.data());
-                isDirty.value = false;
-            }, 300);
+            destroyMap();
+            setTimeout(() => mountWithRetry(), 300);
         } else {
             destroyMap();
         }
@@ -754,186 +597,12 @@ import { onMounted } from 'vue';
 onMounted(async () => {
     if (props.show) {
         await nextTick();
-        initMap();
-        setTimeout(() => {
-            if (map) map.invalidateSize();
-        }, 300);
+        setTimeout(() => mountWithRetry(), 300);
     }
 });
 
 function initMap() {
     if (!mapContainer.value || map) return;
-
-    const startLat = form.lat || defaultLat;
-    const startLng = form.lng || defaultLng;
-
-    map = L.map(mapContainer.value).setView([startLat, startLng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-
-    if (form.lat && form.lng) {
-        marker = L.marker([form.lat, form.lng], { draggable: true }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    map.on('click', onMapClick);
-    mapReady.value = true;
-}
-
-function destroyMap() {
-    if (map) {
-        map.off();
-        map.remove();
-        map = null;
-        marker = null;
-        mapReady.value = false;
-    }
-}
-
-function onMapClick(e) {
-    const { lat, lng } = e.latlng;
-    setMarker(lat, lng);
-}
-
-function onMarkerDrag(e) {
-    const { lat, lng } = e.target.getLatLng();
-    form.lat = parseFloat(lat.toFixed(7));
-    form.lng = parseFloat(lng.toFixed(7));
-    reverseGeocode(form.lat, form.lng);
-}
-
-function setMarker(lat, lng) {
-    form.lat = parseFloat(lat.toFixed(7));
-    form.lng = parseFloat(lng.toFixed(7));
-
-    if (marker) {
-        marker.setLatLng([lat, lng]);
-    } else {
-        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        marker.on('dragend', onMarkerDrag);
-    }
-
-    map.panTo([lat, lng]);
-    reverseGeocode(form.lat, form.lng);
-}
-
-function updateMarkerFromInputs() {
-    const lat = parseFloat(form.lat);
-    const lng = parseFloat(form.lng);
-
-    if (!isNaN(lat) && !isNaN(lng) && map) {
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-            marker.on('dragend', onMarkerDrag);
-        }
-        map.setView([lat, lng], 15);
-    }
-}
-
-function clearAddressFields() {
-    form.address = '';
-    form.building_number = '';
-    form.postal_code = '';
-    form.district = '';
-    form.city = '';
-    form.region = '';
-    form.country = '';
-    form.lat = null;
-    form.lng = null;
-    if (marker && map) {
-        map.removeLayer(marker);
-        marker = null;
-    }
-}
-
-async function reverseGeocode(lat, lng) {
-    if (geocodingLoading.value) return;
-    geocodingLoading.value = true;
-    try {
-        const lang = locale.value === 'ar' ? 'ar' : 'en';
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
-            { headers: { 'User-Agent': 'KhidmhPro-App/1.0' } }
-        );
-        if (!response.ok) throw new Error('Geocoding failed');
-        const data = await response.json();
-        if (data && data.address) {
-            const addr = data.address;
-            form.country = addr.country || form.country || '';
-            form.region = addr.state || addr.region || form.region || '';
-            form.city =
-                addr.city || addr.town || addr.village || addr.municipality || form.city || '';
-            form.district =
-                addr.suburb ||
-                addr.neighbourhood ||
-                addr.quarter ||
-                addr.district ||
-                form.district ||
-                '';
-
-            // Extraction helpers for numeric fields
-            const toEnglishDigits = (str) => {
-                if (!str) return '';
-                return str
-                    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-            };
-
-            const cleanDisplayName = toEnglishDigits(data.display_name || '');
-            const numbers = cleanDisplayName.match(/\d+/g) || [];
-
-            // 1. Building number
-            let bldNum = addr.house_number || '';
-            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
-            if (bldNum.length !== 4) {
-                bldNum = '';
-            }
-            if (!bldNum) {
-                // Find first 4-digit sequence
-                const fourDigit = numbers.find((n) => n.length === 4);
-                if (fourDigit) {
-                    bldNum = fourDigit;
-                }
-            }
-            form.building_number = bldNum || form.building_number || '';
-
-            // 2. Postal code
-            let postCode = addr.postcode || '';
-            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
-            if (postCode.length !== 5) {
-                postCode = '';
-            }
-            if (!postCode) {
-                // Find first 5-digit sequence
-                const fiveDigit = numbers.find((n) => n.length === 5);
-                if (fiveDigit) {
-                    postCode = fiveDigit;
-                }
-            }
-            form.postal_code = postCode || form.postal_code || '';
-
-            const addressParts = [];
-            if (addr.road) addressParts.push(addr.road);
-            if (addr.neighbourhood && addr.neighbourhood !== form.district)
-                addressParts.push(addr.neighbourhood);
-            form.address =
-                addressParts.length > 0
-                    ? addressParts.join('، ')
-                    : data.display_name?.split(',').slice(0, 2).join('،') || '';
-        }
-    } catch (error) {
-        // Silently fail or use toast if critical
-    } finally {
-        geocodingLoading.value = false;
-    }
-}
-
-// Helper to convert Arabic numerals to English
-function convertArabicToEnglish(value) {
     if (!value) return value;
     const arabic = '٠١٢٣٤٥٦٧٨٩';
     return value.replace(/[٠-٩]/g, (d) => arabic.indexOf(d));
@@ -1001,15 +670,4 @@ const submit = () => {
         });
     }
 };
-
-onUnmounted(() => {
-    destroyMap();
-});
 </script>
-
-<style>
-/* Leaflet RTL fixes */
-.leaflet-container {
-    z-index: 0;
-}
-</style>

@@ -56,15 +56,31 @@ trait ReportScopingTrait
      */
     protected function resolveCenterFilter(Request $request, ?int $activeCenterId): string
     {
+        $requested = null;
+
         if ($request->has('center_id') && $request->input('center_id') !== null && $request->input('center_id') !== '') {
-            return (string) $request->input('center_id');
+            $requested = (string) $request->input('center_id');
+        } elseif ($activeCenterId !== null) {
+            $requested = (string) $activeCenterId;
+        } else {
+            $requested = 'all';
         }
 
-        if ($activeCenterId !== null) {
-            return (string) $activeCenterId;
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        if ($accessibleCenterIds !== null) {
+            if ($requested !== 'all' && is_numeric($requested) && in_array((int) $requested, $accessibleCenterIds, true)) {
+                return (string) ((int) $requested);
+            }
+
+            if ($activeCenterId !== null && in_array($activeCenterId, $accessibleCenterIds, true)) {
+                return (string) $activeCenterId;
+            }
+
+            return $accessibleCenterIds !== [] ? (string) $accessibleCenterIds[0] : '0';
         }
 
-        return 'all';
+        return $requested;
     }
 
     /**

@@ -4,134 +4,23 @@
             <!-- Breadcrumbs -->
             <Breadcrumb :items="breadcrumbItems" class="px-1" />
 
-            <!-- Header Card (Unified Design & Colors) -->
-            <div class="relative group">
+            <!-- Header Card (Compact & Clean) -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+                <!-- Navigation & Actions Bar -->
                 <div
-                    class="absolute -inset-1 bg-action-primary hover:bg-action-primary-hover rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
-                ></div>
-
-                <div
-                    class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-focus-ring-soft border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex flex-wrap items-center justify-between gap-2"
+                    :dir="isRtl ? 'rtl' : 'ltr'"
                 >
-                    <!-- Navigation & Actions Bar -->
-                    <div
-                        class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20"
-                        :dir="isRtl ? 'rtl' : 'ltr'"
-                    >
-                        <BackButton :href="route('vehicles.index')" />
+                    <BackButton :href="route('vehicles.index')" />
 
-                        <div
-                            class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
-                        >
-                            <Tooltip :text="$t('common.edit')">
-                                <button
-                                    v-if="can('crm.vehicles.update') || isAnyAdmin()"
-                                    @click="showEditModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                        />
-                                    </svg>
-                                    <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
-                                </button>
-                            </Tooltip>
-
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Tooltip :text="$t('common.edit')">
                             <button
-                                v-if="canMerge && (can('crm.vehicles.update') || isAnyAdmin())"
-                                @click="showMergeModal = true"
-                                :title="$t('vehicles.merge.button')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-amber-100/70 dark:border-amber-800/30 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-white dark:hover:bg-amber-900/30 hover:shadow-md transition-all"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                                    />
-                                </svg>
-                                <span class="hidden sm:inline">
-                                    {{ $t('vehicles.merge.button') }}
-                                </span>
-                            </button>
-
-                            <Tooltip
-                                :text="
-                                    canDelete
-                                        ? $t('common.delete')
-                                        : $t('customers.cannot_delete_has_data')
-                                "
-                            >
-                                <button
-                                    v-if="can('crm.vehicles.delete') || isAnyAdmin()"
-                                    @click="confirmDelete"
-                                    :disabled="!canDelete"
-                                    :class="[
-                                        'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                        canDelete
-                                            ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
-                                            : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
-                                    ]"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                        />
-                                    </svg>
-                                    <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
-                                </button>
-                            </Tooltip>
-
-                            <button
-                                v-if="can('quotes.create') || isAnyAdmin()"
-                                @click="openQuoteModal"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-amber-100/70 dark:border-amber-800/30 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-white dark:hover:bg-amber-900/30 hover:shadow-md transition-all"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
-                                <span class="hidden sm:inline">
-                                    {{ $t('common.btn_create_quote') }}
-                                </span>
-                            </button>
-
-                            <button
-                                v-if="can('crm.work_orders.create') || isAnyAdmin()"
-                                @click="openWorkOrderModal"
-                                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-black text-xs bg-action-primary hover:bg-action-primary-hover text-white shadow-md shadow-focus-ring-soft hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 transition-all"
+                                v-if="can('crm.vehicles.update') || isAnyAdmin()"
+                                @click="showEditModal = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -142,51 +31,185 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 4v16m8-8H4"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                     />
                                 </svg>
-                                <span>
-                                    {{ $t('common.btn_create_work_order') }}
-                                </span>
+                                <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
                             </button>
-                        </div>
-                    </div>
+                        </Tooltip>
 
-                    <!-- Watermark Decoration -->
-                    <div
-                        class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none"
-                    >
-                        <svg
-                            class="w-80 h-80 text-selection-text dark:text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
+                        <button
+                            v-if="canMerge && (can('crm.vehicles.update') || isAnyAdmin())"
+                            @click="showMergeModal = true"
+                            :title="$t('vehicles.merge.button')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-amber-200/80 dark:border-amber-800/40 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100/70 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
                         >
-                            <path
-                                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
-                            />
-                        </svg>
-                    </div>
-
-                    <div class="relative z-10 p-6 pt-16">
-                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <div
-                                class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-6 flex-1"
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <!-- Vehicle Brand/Logo Container -->
-                                <div class="relative">
-                                    <div
-                                        class="w-24 h-24 rounded-[2.25rem] bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft flex items-center justify-center text-white ring-4 ring-action-primary/20 transition-transform group-hover:scale-[1.03] duration-500 overflow-hidden p-4"
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                />
+                            </svg>
+                            <span class="hidden sm:inline">
+                                {{ $t('vehicles.merge.button') }}
+                            </span>
+                        </button>
+
+                        <Tooltip
+                            :text="
+                                canDelete
+                                    ? $t('common.delete')
+                                    : $t('customers.cannot_delete_has_data')
+                            "
+                        >
+                            <button
+                                v-if="can('crm.vehicles.delete') || isAnyAdmin()"
+                                @click="confirmDelete"
+                                :disabled="!canDelete"
+                                :class="[
+                                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border transition-colors',
+                                    canDelete
+                                        ? 'border-red-200/80 dark:border-red-800/40 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100/70 dark:hover:bg-red-900/40 cursor-pointer'
+                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70',
+                                ]"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                                <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                            </button>
+                        </Tooltip>
+
+                        <button
+                            v-if="can('quotes.create') || isAnyAdmin()"
+                            @click="openQuoteModal"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-amber-200/80 dark:border-amber-800/40 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100/70 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <span class="hidden sm:inline">
+                                {{ $t('common.btn_create_quote') }}
+                            </span>
+                        </button>
+
+                        <button
+                            v-if="can('crm.work_orders.create') || isAnyAdmin()"
+                            @click="openWorkOrderModal"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs bg-action-primary hover:bg-action-primary-hover text-white shadow-xs active:scale-95 transition-all cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span>
+                                {{ $t('common.btn_create_work_order') }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-5">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                        <!-- Right: Vehicle Logo + Identity + Compact Metadata -->
+                        <div class="flex items-start gap-4 min-w-0 flex-1">
+                            <div class="relative shrink-0">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-action-primary flex items-center justify-center text-white shadow-sm overflow-hidden p-2.5"
+                                >
+                                    <img
+                                        v-if="vehicle.make?.logo_path"
+                                        :src="`/storage/${vehicle.make.logo_path}`"
+                                        class="w-full h-full object-contain brightness-0 invert"
+                                        alt=""
+                                    />
+                                    <svg
+                                        v-else
+                                        class="w-7 h-7"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <img
-                                            v-if="vehicle.make?.logo_path"
-                                            :src="`/storage/${vehicle.make.logo_path}`"
-                                            class="w-full h-full object-contain brightness-0 invert"
-                                            alt=""
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
                                         />
+                                    </svg>
+                                </div>
+                                <!-- Color Indicator Badge -->
+                                <div
+                                    v-if="vehicle.color"
+                                    class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600 flex items-center justify-center"
+                                >
+                                    <div
+                                        class="w-3.5 h-3.5 rounded border border-black/10"
+                                        :style="{ backgroundColor: getColorHex(vehicle.color) }"
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <h1
+                                        class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight truncate"
+                                    >
+                                        {{ getVehicleName(vehicle) }}
+                                    </h1>
+                                    <SaudiPlateDisplay
+                                        :plate-number="vehicle.plate_number"
+                                        size="md"
+                                    />
+                                </div>
+
+                                <div
+                                    class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300"
+                                >
+                                    <Link
+                                        v-if="vehicle.customer"
+                                        :href="route('customers.show', vehicle.customer.id)"
+                                        class="inline-flex items-center gap-1.5 text-action-primary hover:underline font-semibold"
+                                    >
                                         <svg
-                                            v-else
-                                            class="w-12 h-12"
+                                            class="w-4 h-4 shrink-0"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -194,192 +217,115 @@
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                                                stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                             />
                                         </svg>
-                                    </div>
-                                    <!-- Color Indicator Badge -->
-                                    <div
-                                        v-if="vehicle.color"
-                                        class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border-4 border-action-primary/25 flex items-center justify-center"
+                                        {{ vehicle.customer?.name }}
+                                    </Link>
+
+                                    <span
+                                        v-if="vehicle.customer?.contact_name"
+                                        class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300"
                                     >
-                                        <div
-                                            class="w-6 h-6 rounded-lg shadow-inner border border-black/5"
-                                            :style="{ backgroundColor: getColorHex(vehicle.color) }"
-                                        ></div>
-                                    </div>
-                                </div>
+                                        <svg
+                                            class="w-4 h-4 text-emerald-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                            />
+                                        </svg>
+                                        {{ $t('customers.form.contact_name') }}:
+                                        {{ vehicle.customer.contact_name }}
+                                    </span>
 
-                                <div class="flex-1">
-                                    <div
-                                        class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-4"
+                                    <span
+                                        v-if="vehicle.odometer"
+                                        class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300 font-mono"
                                     >
-                                        <h1
-                                            class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight"
+                                        <svg
+                                            class="w-4 h-4 text-teal-500 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            {{ getVehicleName(vehicle) }}
-                                        </h1>
-                                        <SaudiPlateDisplay
-                                            :plate-number="vehicle.plate_number"
-                                            size="md"
-                                            class="ms-2 shadow-lg"
-                                        />
-                                    </div>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                                            />
+                                        </svg>
+                                        {{ toEnglish(vehicle.odometer?.toLocaleString()) }}
+                                        {{ $t('common.km') }}
+                                    </span>
 
-                                    <div
-                                        class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400"
+                                    <span
+                                        v-if="vehicle.vin"
+                                        class="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 font-mono"
                                     >
-                                        <Link
-                                            v-if="vehicle.customer"
-                                            :href="route('customers.show', vehicle.customer.id)"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-selection-bg text-selection-text border border-action-primary/25 hover:bg-white transition-all shadow-sm"
+                                        <svg
+                                            class="w-4 h-4 text-gray-400 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-action-primary"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ vehicle.customer?.name }}
-                                        </Link>
-
-                                        <span
-                                            v-if="vehicle.customer?.contact_name"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100/50"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-emerald-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ $t('customers.form.contact_name') }}:
-                                            {{ vehicle.customer.contact_name }}
-                                        </span>
-
-                                        <span
-                                            v-if="vehicle.odometer"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-teal-50/50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border border-teal-100/50"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-teal-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            {{ toEnglish(vehicle.odometer?.toLocaleString()) }}
-                                            {{ $t('common.km') }}
-                                        </span>
-
-                                        <span
-                                            v-if="vehicle.vin"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-600"
-                                        >
-                                            <div
-                                                class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
-                                            >
-                                                <svg
-                                                    class="w-4.5 h-4.5 text-action-primary"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <span class="font-mono">
-                                                {{ toEnglish(vehicle.vin) }}
-                                            </span>
-                                        </span>
-                                    </div>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                                            />
+                                        </svg>
+                                        {{ toEnglish(vehicle.vin) }}
+                                    </span>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Stats Cards -->
+                        <!-- Left: Compact Stats Bar -->
+                        <div class="grid grid-cols-3 xl:flex items-center gap-2 shrink-0">
                             <div
-                                class="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full lg:w-auto"
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
                             >
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-selection-bg rounded-3xl border border-action-primary/25 hover:bg-white transition-all hover:shadow-lg hover:shadow-focus-ring-soft"
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
                                 >
-                                    <span
-                                        class="text-2xl font-black text-action-primary group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ toEnglish(counts.workOrders) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{ $t('customers.work_orders') }}
-                                    </span>
-                                </div>
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-amber-50/50 dark:bg-amber-900/20 rounded-3xl border border-amber-100/50 dark:border-amber-800/30 hover:bg-white dark:hover:bg-amber-900/40 transition-all hover:shadow-lg hover:shadow-amber-500/10"
+                                    {{ toEnglish(counts.workOrders) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('customers.work_orders') }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
+                            >
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
                                 >
-                                    <span
-                                        class="text-2xl font-black text-amber-600 dark:text-amber-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ toEnglish(counts.quotes) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{ $t('quotes.title') }}
-                                    </span>
-                                </div>
-                                <div
-                                    class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-3xl border border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10"
+                                    {{ toEnglish(counts.quotes) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('quotes.title') }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700 min-w-[76px]"
+                            >
+                                <span
+                                    class="text-base font-bold font-mono text-gray-900 dark:text-white"
                                 >
-                                    <span
-                                        class="text-2xl font-black text-emerald-600 dark:text-emerald-400 group-hover/stat:scale-110 transition-transform"
-                                    >
-                                        {{ toEnglish(counts.invoices) }}
-                                    </span>
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1"
-                                    >
-                                        {{ $t('invoices.title') }}
-                                    </span>
-                                </div>
+                                    {{ toEnglish(counts.invoices) }}
+                                </span>
+                                <span class="text-[11px] font-medium text-gray-500 mt-0.5">
+                                    {{ $t('invoices.title') }}
+                                </span>
                             </div>
                         </div>
                     </div>

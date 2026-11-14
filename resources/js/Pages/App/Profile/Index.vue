@@ -18,6 +18,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const props = defineProps({
     mustVerifyEmail: Boolean,
@@ -1576,14 +1577,11 @@ const regenerateCodes = () =>
 
                     <template v-else>
                         <!-- Search Box -->
-                        <div>
-                            <input
-                                type="text"
-                                v-model="permissionSearchQuery"
-                                :placeholder="$t('profile.permissions_modal.search_placeholder')"
-                                class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="permissionSearchQuery"
+                            type="text"
+                            :placeholder="$t('profile.permissions_modal.search_placeholder')"
+                        />
 
                         <!-- Permissions Grid -->
                         <div class="max-h-96 overflow-y-auto space-y-2 pr-1">
@@ -1650,16 +1648,11 @@ const regenerateCodes = () =>
             >
                 <form @submit.prevent="disable2FA">
                     <div class="mb-4">
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('security.enter_password_to_confirm') }}
-                        </label>
-                        <input
-                            type="password"
+                        <AppInput
                             v-model="disableForm.password"
+                            type="password"
+                            :label="$t('security.enter_password_to_confirm')"
                             required
-                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                         />
                     </div>
                     <div class="flex gap-3">
@@ -1689,16 +1682,11 @@ const regenerateCodes = () =>
                 </p>
                 <form @submit.prevent="regenerateCodes">
                     <div class="mb-4">
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('security.enter_password') }}
-                        </label>
-                        <input
-                            type="password"
+                        <AppInput
                             v-model="regenForm.password"
+                            type="password"
+                            :label="$t('security.enter_password')"
                             required
-                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                         />
                     </div>
                     <div class="flex gap-3">

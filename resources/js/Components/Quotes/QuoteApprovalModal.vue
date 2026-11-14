@@ -198,19 +198,12 @@
         </div>
 
         <template #footer>
-            <div class="flex w-full gap-3">
-                <button
-                    @click="$emit('close')"
-                    class="flex-1 px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    @click="$emit('confirm')"
-                    :disabled="hasOutOfStock"
-                    class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                </AppButton>
+                <AppButton variant="primary" :disabled="hasOutOfStock" @click="$emit('confirm')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -219,7 +212,7 @@
                         />
                     </svg>
                     {{ $t('quotes.actions.approve') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -233,6 +226,7 @@ import { computed } from 'vue';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,

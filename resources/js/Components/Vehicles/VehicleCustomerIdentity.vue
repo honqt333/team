@@ -172,6 +172,8 @@ const { getName } = useLocalized();
             </a>
         </div>
 
+        <slot name="extra-identity" />
+
         <div
             v-if="address"
             class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50/60 dark:bg-gray-900/30 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-700/40"

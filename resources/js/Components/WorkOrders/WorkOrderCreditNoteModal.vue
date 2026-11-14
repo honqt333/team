@@ -184,13 +184,14 @@
                                 </td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-1.5 justify-end">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             v-model.number="returnServices[svc.id]"
                                             :max="svc.remaining_refundable_subtotal"
                                             min="0"
                                             step="0.01"
-                                            class="w-28 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-danger focus:border-danger font-bold"
+                                            size="sm"
+                                            class="w-28 text-end font-mono font-bold"
                                             :disabled="svc.remaining_refundable_subtotal <= 0"
                                         />
                                         <button
@@ -285,13 +286,14 @@
                                 <td class="p-3">
                                     <div class="flex flex-col gap-1 items-end">
                                         <div class="flex items-center gap-1.5 justify-end">
-                                            <input
+                                            <AppInput
                                                 type="number"
                                                 v-model.number="returnParts[part.id]"
                                                 :max="part.remaining_refundable_qty"
                                                 min="0"
                                                 step="1"
-                                                class="w-24 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-focus-ring focus:border-action-primary font-bold"
+                                                size="sm"
+                                                class="w-24 text-end font-mono font-bold"
                                                 :disabled="part.remaining_refundable_qty <= 0"
                                             />
                                             <button
@@ -422,8 +424,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <!-- Option 1: Immediate Refund -->
-                    <label
-                        class="p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-1.5"
+                    <!-- Option 1: Immediate Refund -->
+                    <button
+                        type="button"
+                        @click="refundMode = 'immediate'"
+                        class="p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-1.5 text-start"
                         :class="
                             refundMode === 'immediate'
                                 ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20 shadow-sm'
@@ -431,12 +436,19 @@
                         "
                     >
                         <div class="flex items-center gap-2">
-                            <input
-                                type="radio"
-                                value="immediate"
-                                v-model="refundMode"
-                                class="w-4 h-4 text-rose-600 border-gray-300 focus:ring-danger"
-                            />
+                            <span
+                                class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
+                                :class="
+                                    refundMode === 'immediate'
+                                        ? 'border-rose-600 bg-rose-600'
+                                        : 'border-gray-300 dark:border-gray-600'
+                                "
+                            >
+                                <span
+                                    v-if="refundMode === 'immediate'"
+                                    class="w-1.5 h-1.5 rounded-full bg-white"
+                                ></span>
+                            </span>
                             <span class="font-bold text-gray-900 dark:text-white">
                                 {{ $t('invoices.credit_note.immediate_refund_option') }}
                             </span>
@@ -444,11 +456,13 @@
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 ps-6">
                             {{ $t('invoices.credit_note.immediate_refund_desc') }}
                         </p>
-                    </label>
+                    </button>
 
                     <!-- Option 2: Deferred / Customer Credit -->
-                    <label
-                        class="p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-1.5"
+                    <button
+                        type="button"
+                        @click="refundMode = 'deferred'"
+                        class="p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-1.5 text-start"
                         :class="
                             refundMode === 'deferred'
                                 ? 'border-amber-500 bg-amber-50/30 dark:bg-amber-950/20 shadow-sm'
@@ -456,12 +470,19 @@
                         "
                     >
                         <div class="flex items-center gap-2">
-                            <input
-                                type="radio"
-                                value="deferred"
-                                v-model="refundMode"
-                                class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-focus-ring"
-                            />
+                            <span
+                                class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
+                                :class="
+                                    refundMode === 'deferred'
+                                        ? 'border-amber-600 bg-amber-600'
+                                        : 'border-gray-300 dark:border-gray-600'
+                                "
+                            >
+                                <span
+                                    v-if="refundMode === 'deferred'"
+                                    class="w-1.5 h-1.5 rounded-full bg-white"
+                                ></span>
+                            </span>
                             <span class="font-bold text-gray-900 dark:text-white">
                                 {{ $t('invoices.credit_note.deferred_refund_option') }}
                             </span>
@@ -469,7 +490,7 @@
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 ps-6">
                             {{ $t('invoices.credit_note.deferred_refund_desc') }}
                         </p>
-                    </label>
+                    </button>
                 </div>
 
                 <!-- Immediate Options Fields -->
@@ -495,11 +516,11 @@
                         <label class="block text-gray-500 mb-1 font-semibold">
                             {{ $t('invoices.credit_note.refund_reference') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="refundReference"
+                            size="sm"
                             placeholder="مثال: رقم الحوالة أو إيصال الشبكة"
-                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-danger"
                         />
                     </div>
                 </div>
@@ -539,12 +560,12 @@
                         {{ preset }}
                     </button>
                 </div>
-                <textarea
+                <AppTextarea
                     v-model="returnReason"
                     rows="2"
                     :placeholder="$t('invoices.credit_note.reason_placeholder')"
-                    class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-danger resize-none"
-                ></textarea>
+                    class="text-xs resize-none"
+                />
             </div>
 
             <!-- Error Banner -->
@@ -557,28 +578,21 @@
         </form>
 
         <template #footer>
-            <div class="flex items-center justify-between w-full">
-                <button
-                    type="button"
-                    @click="handleClose"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" @click="handleClose">
                     {{ $t('common.cancel') }}
-                </button>
+                </AppButton>
 
-                <button
+                <AppButton
                     v-if="isPossible"
                     type="button"
+                    variant="primary"
                     @click="submitCreditNote"
+                    :loading="submitting"
                     :disabled="submitting || totalRefundAmount <= 0"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    <div
-                        v-if="submitting"
-                        class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                    ></div>
                     <svg
-                        v-else
+                        v-if="!submitting"
                         class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
@@ -604,7 +618,7 @@
                     >
                         {{ formatCurrency(totalRefundAmount) }}
                     </span>
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -619,6 +633,9 @@ import axios from 'axios';
 import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: {

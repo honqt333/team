@@ -34,3 +34,6 @@ cookies.txt
 .lighthouseci/
 
 openclaw.sh
+
+*.swp
+*.bak

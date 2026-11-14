@@ -42,16 +42,22 @@ const describedBy = computed(() =>
         :class="{ 'opacity-60 pointer-events-none': disabled }"
     >
         <!-- Label -->
-        <label
-            v-if="label || $slots.label"
-            :for="generatedId"
-            class="block text-sm font-medium text-text-primary"
+        <div
+            v-if="label || $slots.label || $slots['label-action']"
+            class="flex items-center justify-between gap-2"
         >
-            <slot name="label">
-                {{ label }}
-            </slot>
-            <span v-if="required" class="text-danger ms-1" aria-hidden="true">*</span>
-        </label>
+            <label
+                v-if="label || $slots.label"
+                :for="generatedId"
+                class="block text-sm font-medium text-text-primary"
+            >
+                <slot name="label">
+                    {{ label }}
+                </slot>
+                <span v-if="required" class="text-danger ms-1" aria-hidden="true">*</span>
+            </label>
+            <slot name="label-action" />
+        </div>
 
         <!-- Control / Input Slot -->
         <div class="relative">

@@ -74,47 +74,31 @@
         />
         <ImportResult v-if="importResults" :result="importResults" />
         <template #footer>
-            <button
-                type="button"
-                @click="close"
-                :disabled="importing"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
-                @click="importFile"
-                :disabled="!selectedFile || importing"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-            >
-                <svg v-if="importing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle
-                        class="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="4"
-                    ></circle>
-                    <path
-                        class="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                </svg>
-                {{
-                    importing
-                        ? $t('customers.import.importing')
-                        : $t('customers.import.start_import')
-                }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton type="button" variant="secondary" :disabled="importing" @click="close">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    type="button"
+                    variant="primary"
+                    :loading="importing"
+                    :disabled="!selectedFile"
+                    @click="importFile"
+                >
+                    {{
+                        importing
+                            ? $t('customers.import.importing')
+                            : $t('customers.import.start_import')
+                    }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 </template>
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import ImportFileField from '@/Components/Common/ImportFileField.vue';
 import ImportResult from '@/Components/Common/ImportResult.vue';
 import { ref } from 'vue';

@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class QuoteRequest extends FormRequest
 {
@@ -22,9 +23,17 @@ class QuoteRequest extends FormRequest
      */
     public function rules(): array
     {
+        $tenantId = $this->user()?->tenant_id;
+
         return [
-            'customer_id' => ['required', 'exists:customers,id'],
-            'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
+            'vehicle_id' => [
+                'required',
+                Rule::exists('vehicles', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
             'odometer' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
@@ -33,11 +42,13 @@ class QuoteRequest extends FormRequest
             'departments' => ['nullable', 'array'],
             'departments.*' => [
                 'required',
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use ($tenantId) {
                     if ($value === 'packages') {
                         return;
                     }
-                    $exists = Department::where('id', $value)->exists();
+                    $exists = Department::where('id', $value)
+                        ->when($tenantId !== null, fn ($q) => $q->where('tenant_id', $tenantId))
+                        ->exists();
 
                     if (! $exists) {
                         $fail(__('validation.exists', ['attribute' => $attribute]));
@@ -45,7 +56,10 @@ class QuoteRequest extends FormRequest
                 },
             ],
             'lines' => ['nullable', 'array'],
-            'lines.*.service_id' => ['nullable', 'exists:services,id'],
+            'lines.*.service_id' => [
+                'nullable',
+                Rule::exists('services', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
+            ],
             'lines.*.description' => ['required_with:lines', 'string', 'max:255'],
             'lines.*.qty' => ['required_with:lines', 'numeric', 'min:0.01'],
             'lines.*.unit_price' => ['required_with:lines', 'numeric', 'min:0'],

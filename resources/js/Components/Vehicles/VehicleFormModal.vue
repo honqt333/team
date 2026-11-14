@@ -118,12 +118,12 @@
                             :placeholder="$t('common.choose')"
                             :error="form.errors.model_id"
                         />
-                        <input
+                        <AppInput
                             v-else
                             type="text"
                             disabled
                             :placeholder="$t('vehicles.form.model')"
-                            class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-400 text-sm cursor-not-allowed"
+                            class="text-sm"
                         />
                     </div>
                 </div>
@@ -139,24 +139,18 @@
                                 {{ $t('vehicles.form.make_other') }}
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 name="make_other"
                                 v-model="form.make_other"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                :class="{ 'border-red-500': form.errors.make_other }"
+                                :error="form.errors.make_other"
                             />
                         </div>
                         <div v-if="form.make_id === '__other__' || form.model_id === '__other__'">
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 {{ $t('vehicles.form.model_other') }}
                             </label>
-                            <input
-                                type="text"
-                                name="model_other"
-                                v-model="form.model_other"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            />
+                            <AppInput type="text" name="model_other" v-model="form.model_other" />
                         </div>
                     </div>
                 </div>
@@ -304,7 +298,7 @@
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.odometer') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             name="odometer"
                             inputmode="numeric"
@@ -315,7 +309,6 @@
                                 ).replace(/[^0-9]/g, '')
                             "
                             :placeholder="$t('vehicles.form.odometer_placeholder')"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                     </div>
                 </div>
@@ -325,7 +318,7 @@
                     <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                         {{ $t('vehicles.form.vin') }}
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         name="vin"
                         v-model="form.vin"
@@ -336,12 +329,8 @@
                                 .toUpperCase()
                         "
                         :placeholder="$t('vehicles.form.vin_placeholder')"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                        :class="{ 'border-red-500 focus:ring-danger': form.errors.vin }"
+                        :error="form.errors.vin"
                     />
-                    <p v-if="form.errors.vin" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                        {{ form.errors.vin }}
-                    </p>
                 </div>
             </div>
 
@@ -350,12 +339,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('vehicles.form.notes') }}
                 </label>
-                <textarea
-                    name="notes"
-                    v-model="form.notes"
-                    rows="2"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
-                ></textarea>
+                <AppTextarea name="notes" v-model="form.notes" rows="2" class="resize-none" />
             </div>
         </form>
 
@@ -590,6 +574,8 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';

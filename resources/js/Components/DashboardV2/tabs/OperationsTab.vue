@@ -8,6 +8,7 @@ import RecentWorkOrders from '@/Components/DashboardV2/widgets/RecentWorkOrders.
 import TodaySchedule from '@/Components/DashboardV2/widgets/TodaySchedule.vue';
 import TopServices from '@/Components/DashboardV2/widgets/TopServices.vue';
 import TechnicianPerformance from '@/Components/DashboardV2/widgets/TechnicianPerformance.vue';
+import CustomerContactActions from '@/Components/DashboardV2/common/CustomerContactActions.vue';
 
 defineProps({
     userContext: { type: Object, default: () => ({}) },
@@ -73,6 +74,49 @@ const ICONS = {
                 icon-color="violet"
                 :subtitle="$t('dashboard.in_database')"
                 href="/app/vehicles"
+            />
+        </div>
+
+        <!-- Workshop Intelligence KPIs -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KPICard
+                :label="$t('dashboard.bays_utilization')"
+                :value="
+                    stats.workshop?.baysTotal
+                        ? Math.round(
+                              ((stats.workshop?.baysBookedToday ?? 0) / stats.workshop.baysTotal) *
+                                  100
+                          )
+                        : 0
+                "
+                suffix="%"
+                :icon="ICONS.vehicles"
+                icon-color="indigo"
+                :subtitle="
+                    stats.workshop?.baysTotal
+                        ? $t('dashboard.bays_booked_today', {
+                              booked: stats.workshop?.baysBookedToday ?? 0,
+                              total: stats.workshop?.baysTotal ?? 0,
+                          })
+                        : $t('dashboard.no_bays_configured')
+                "
+                href="/app/workshop"
+            />
+            <KPICard
+                :label="$t('dashboard.on_time_delivery')"
+                :value="stats.workshop?.onTimeRate ?? 0"
+                suffix="%"
+                :icon="ICONS.completed"
+                icon-color="emerald"
+                href="/app/work-orders"
+            />
+            <KPICard
+                :label="$t('dashboard.avg_cycle_time')"
+                :value="stats.workshop?.avgCycleHours ?? 0"
+                :suffix="` ${$t('dashboard.hours_unit')}`"
+                :icon="ICONS.active"
+                icon-color="amber"
+                href="/app/work-orders"
             />
         </div>
 
@@ -193,16 +237,13 @@ const ICONS = {
                             </div>
                         </div>
 
-                        <a
-                            v-if="item.whatsapp_phone"
-                            :href="`https://wa.me/${item.whatsapp_phone}`"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="shrink-0 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
-                            :title="item.customer_phone"
-                        >
-                            {{ $t('customers.quick.whatsapp') }}
-                        </a>
+                        <CustomerContactActions
+                            :phone="item.customer_phone"
+                            :whatsapp="item.whatsapp_phone"
+                            :work-order-code="item.code"
+                            :plate-number="item.plate_number"
+                            :compact="false"
+                        />
                     </div>
                 </div>
                 <div v-else class="py-8 text-center text-xs text-slate-400">

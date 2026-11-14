@@ -38,42 +38,18 @@
         </div>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
+            <AppButton type="button" variant="secondary" @click="$emit('close')">
                 {{ $t('common.cancel') }}
-            </button>
-            <button
+            </AppButton>
+            <AppButton
                 type="button"
+                variant="primary"
                 @click="submit"
+                :loading="form.processing"
                 :disabled="form.processing || selectedFiles.length === 0"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
-                <svg
-                    v-if="form.processing"
-                    class="animate-spin h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <circle
-                        class="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="4"
-                    ></circle>
-                    <path
-                        class="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                </svg>
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            </AppButton>
         </template>
     </BaseModal>
 </template>
@@ -85,6 +61,7 @@ import { useToast } from '@/Composables/useToast';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,

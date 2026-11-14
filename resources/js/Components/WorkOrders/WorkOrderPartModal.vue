@@ -34,7 +34,7 @@
             <!-- Part Source Segmented Control -->
             <div
                 v-if="!part"
-                class="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl"
+                class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl"
             >
                 <button
                     type="button"
@@ -205,14 +205,15 @@
                             >
                                 {{ $t('inventory.parts.part_number') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="form.part_number"
                                 name="part_number"
                                 data-field="part_number"
                                 dir="ltr"
+                                size="sm"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
-                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
+                                class="font-mono"
                             />
                         </div>
                         <div>
@@ -243,14 +244,15 @@
                             {{ $t('inventory.parts.name') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.name"
                             name="name"
                             data-field="name"
+                            size="sm"
                             required
                             :disabled="isReadOnly || form.source === 'warehouse'"
-                            class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
+                            class="font-bold"
                         />
                     </div>
 
@@ -285,13 +287,13 @@
                             >
                                 {{ $t('inventory.parts.description') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="form.notes"
                                 name="notes"
                                 data-field="notes"
+                                size="sm"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
-                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                                 :placeholder="$t('inventory.parts.description_placeholder')"
                             />
                         </div>
@@ -312,13 +314,14 @@
                             }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             inputmode="decimal"
                             v-model="form.unit_price"
                             name="unit_price"
                             data-field="unit_price"
                             dir="ltr"
+                            size="sm"
                             @input="
                                 form.unit_price = toEnglish($event.target.value).replace(
                                     /[^0-9.]/g,
@@ -326,15 +329,8 @@
                                 )
                             "
                             :readonly="!isPriceEditable"
-                            :class="[
-                                'w-full py-2 px-2 border rounded-xl font-mono text-center text-xs font-bold transition-all focus:ring-2',
-                                isPriceBelowMinimum
-                                    ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-danger'
-                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-focus-ring',
-                                !isPriceEditable
-                                    ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
-                                    : '',
-                            ]"
+                            :error="isPriceBelowMinimum ? ' ' : ''"
+                            class="font-mono text-center font-bold"
                         />
                         <p
                             v-if="isPriceBelowMinimum"
@@ -385,13 +381,14 @@
                                 </button>
                             </div>
                         </div>
-                        <input
+                        <AppInput
                             type="text"
                             inputmode="decimal"
                             v-model="form.discount_value"
                             name="discount_value"
                             data-field="discount_value"
                             dir="ltr"
+                            size="sm"
                             @input="
                                 form.discount_value = toEnglish($event.target.value).replace(
                                     /[^0-9.]/g,
@@ -399,15 +396,8 @@
                                 )
                             "
                             :readonly="form.include_in_package || isReadOnly"
-                            :class="[
-                                'w-full py-2 px-2 border rounded-xl font-mono text-center text-xs font-bold transition-all focus:ring-2',
-                                isPriceBelowMinimum
-                                    ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-danger'
-                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-focus-ring',
-                                form.include_in_package || isReadOnly
-                                    ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
-                                    : '',
-                            ]"
+                            :error="isPriceBelowMinimum ? ' ' : ''"
+                            class="font-mono text-center font-bold"
                         />
                     </div>
 
@@ -419,18 +409,19 @@
                             {{ $t('work_orders.item.qty') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             inputmode="decimal"
                             v-model="form.qty"
                             name="qty"
                             data-field="qty"
                             dir="ltr"
+                            size="sm"
                             :disabled="isReadOnly"
                             @input="
                                 form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')
                             "
-                            class="w-full py-2 px-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center text-xs font-bold focus:ring-2 focus:ring-focus-ring disabled:opacity-60 disabled:bg-gray-100"
+                            class="font-mono text-center font-bold"
                         />
                     </div>
 
@@ -441,12 +432,13 @@
                         >
                             {{ $t('work_orders.item.amount') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             readonly
-                            :value="formatCurrency(calculatedTotal)"
+                            size="sm"
+                            :model-value="formatCurrency(calculatedTotal)"
                             dir="ltr"
-                            class="w-full py-2 px-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 font-mono text-center text-xs font-bold cursor-not-allowed"
+                            class="font-mono text-center font-bold cursor-not-allowed"
                         />
                     </div>
                 </div>
@@ -516,15 +508,8 @@
 
         <!-- Footer -->
         <template #footer>
-            <div class="flex items-center justify-between w-full">
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
-                        {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
-                    </button>
+            <div class="flex flex-wrap items-center justify-between gap-2.5 w-full">
+                <div>
                     <span
                         v-if="Object.keys(form.errors).length > 0"
                         class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold rounded-lg bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900"
@@ -543,7 +528,14 @@
                         }}
                     </span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
+                    >
+                        {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
+                    </button>
                     <button
                         v-if="!isReadOnly && !props.part"
                         type="button"
@@ -627,6 +619,7 @@ import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { formatCurrency, formatQuantity, toEnglish, activeCurrencySymbol } = useNumberFormat();

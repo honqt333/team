@@ -65,12 +65,12 @@
                             </label>
                             <!-- Searchable Select -->
                             <div class="relative">
-                                <input
+                                <AppInput
                                     v-model="item.search"
                                     type="text"
+                                    size="sm"
                                     :placeholder="$t('common.search')"
                                     @focus="item.showDropdown = true"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                                 />
                                 <div
                                     v-if="item.id"
@@ -140,58 +140,41 @@
                         </div>
                         <!-- Start Month -->
                         <div v-if="item.period_type !== 'indefinite'">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('hr.financial.start_month') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.start_date"
                                 type="month"
+                                size="sm"
+                                :label="$t('hr.financial.start_month')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{
-                                    'border-red-500':
-                                        !item.start_date && item.period_type !== 'indefinite',
-                                }"
+                                :error="
+                                    !item.start_date && item.period_type !== 'indefinite' ? ' ' : ''
+                                "
                             />
                         </div>
                         <!-- End Month -->
                         <div v-if="item.period_type === 'fixed_period'">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('hr.financial.end_month') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.end_date"
                                 type="month"
+                                size="sm"
+                                :label="$t('hr.financial.end_month')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{
-                                    'border-red-500':
-                                        !item.end_date && item.period_type === 'fixed_period',
-                                }"
+                                :error="
+                                    !item.end_date && item.period_type === 'fixed_period' ? ' ' : ''
+                                "
                             />
                         </div>
                         <!-- Custom Amount (only if flexible) -->
                         <div v-if="getAllowanceById(item.id)?.is_flexible">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('common.amount') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.custom_amount"
                                 type="number"
                                 step="0.01"
                                 min="0"
+                                size="sm"
+                                :label="$t('common.amount')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{ 'border-red-500': !item.custom_amount }"
+                                :error="!item.custom_amount ? ' ' : ''"
                             />
                         </div>
                         <!-- Show fixed amount -->
@@ -225,19 +208,21 @@
             </div>
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <button
+                    <AppButton
+                        type="button"
+                        variant="secondary"
                         @click="showAllowancesModal = false"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
                     >
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="savingAllowances"
                         @click="saveAllowances"
-                        :disabled="savingAllowances"
-                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
                     >
                         {{ savingAllowances ? $t('common.saving') : $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -266,12 +251,12 @@
                             </label>
                             <!-- Searchable Select -->
                             <div class="relative">
-                                <input
+                                <AppInput
                                     v-model="item.search"
                                     type="text"
+                                    size="sm"
                                     :placeholder="$t('common.search')"
                                     @focus="item.showDropdown = true"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                                 />
                                 <div
                                     v-if="item.id"
@@ -341,58 +326,41 @@
                         </div>
                         <!-- Start Month -->
                         <div v-if="item.period_type !== 'indefinite'">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('hr.financial.start_month') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.start_date"
                                 type="month"
+                                size="sm"
+                                :label="$t('hr.financial.start_month')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{
-                                    'border-red-500':
-                                        !item.start_date && item.period_type !== 'indefinite',
-                                }"
+                                :error="
+                                    !item.start_date && item.period_type !== 'indefinite' ? ' ' : ''
+                                "
                             />
                         </div>
                         <!-- End Month -->
                         <div v-if="item.period_type === 'fixed_period'">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('hr.financial.end_month') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.end_date"
                                 type="month"
+                                size="sm"
+                                :label="$t('hr.financial.end_month')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{
-                                    'border-red-500':
-                                        !item.end_date && item.period_type === 'fixed_period',
-                                }"
+                                :error="
+                                    !item.end_date && item.period_type === 'fixed_period' ? ' ' : ''
+                                "
                             />
                         </div>
                         <!-- Custom Amount (only if flexible) -->
                         <div v-if="getDeductionById(item.id)?.is_flexible">
-                            <label
-                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('common.amount') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-model="item.custom_amount"
                                 type="number"
                                 step="0.01"
                                 min="0"
+                                size="sm"
+                                :label="$t('common.amount')"
                                 required
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                :class="{ 'border-red-500': !item.custom_amount }"
+                                :error="!item.custom_amount ? ' ' : ''"
                             />
                         </div>
                         <!-- Show fixed amount -->
@@ -426,19 +394,21 @@
             </div>
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <button
+                    <AppButton
+                        type="button"
+                        variant="secondary"
                         @click="showDeductionsModal = false"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
                     >
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
+                        type="button"
+                        variant="primary"
+                        :loading="savingDeductions"
                         @click="saveDeductions"
-                        :disabled="savingDeductions"
-                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
                     >
                         {{ savingDeductions ? $t('common.saving') : $t('common.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -453,6 +423,8 @@ import { useToast } from '@/Composables/useToast';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import BankInfoTab from '@/Components/HR/Tabs/Financial/BankInfoTab.vue';
 import SalariesTab from '@/Components/HR/Tabs/Financial/SalariesTab.vue';
 import PaymentHistoryTab from '@/Components/HR/Tabs/Financial/PaymentHistoryTab.vue';

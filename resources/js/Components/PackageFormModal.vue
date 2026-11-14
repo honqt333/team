@@ -125,20 +125,13 @@
                             {{ $t('services_management.form.name_ar') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.name_ar"
                             dir="rtl"
                             :placeholder="$t('services_management.form.name_ar_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.name_ar }"
+                            :error="form.errors.name_ar"
                         />
-                        <p
-                            v-if="form.errors.name_ar"
-                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.name_ar }}
-                        </p>
                     </div>
 
                     <!-- Name English -->
@@ -149,21 +142,14 @@
                             {{ $t('services_management.form.name_en') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             v-model="form.name_en"
                             dir="ltr"
                             required
                             :placeholder="$t('services_management.form.name_en_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.name_en }"
+                            :error="form.errors.name_en"
                         />
-                        <p
-                            v-if="form.errors.name_en"
-                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.name_en }}
-                        </p>
                     </div>
                 </div>
 
@@ -212,21 +198,24 @@
                                 <label class="block text-xs font-medium text-gray-500 mb-1">
                                     {{ $t('packages.quantity') }}
                                 </label>
-                                <input
+                                <AppInput
                                     type="number"
                                     v-model.number="newItem.quantity"
                                     min="1"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent"
+                                    size="sm"
+                                    class="w-full"
                                 />
                             </div>
-                            <button
+                            <AppButton
                                 type="button"
+                                variant="primary"
+                                size="sm"
                                 @click="addItem"
                                 :disabled="!newItem.id"
-                                class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
+                                class="h-[38px]"
                             >
                                 {{ $t('packages.add_item') }}
-                            </button>
+                            </AppButton>
                         </div>
 
                         <!-- Items List -->
@@ -322,15 +311,14 @@
                         </button>
                     </div>
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="number"
                             v-model.number="form.base_price"
                             inputmode="decimal"
                             lang="en"
                             step="0.01"
                             min="0"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                            :class="{ 'border-red-500': form.errors.base_price }"
+                            :error="form.errors.base_price"
                         />
                         <span
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
@@ -338,12 +326,6 @@
                             {{ activeCurrencySymbol }}
                         </span>
                     </div>
-                    <p
-                        v-if="form.errors.base_price"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.base_price }}
-                    </p>
                 </div>
 
                 <!-- Min Price Section with Toggle -->
@@ -367,7 +349,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Input field -->
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="number"
                                 v-model.number="minPriceInput"
                                 inputmode="decimal"
@@ -376,8 +358,7 @@
                                 min="0"
                                 :max="minPriceAsPercentage ? 100 : form.base_price"
                                 :placeholder="minPriceAsPercentage ? '10' : '0'"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
-                                :class="{ 'border-red-500': form.errors.min_price }"
+                                :error="form.errors.min_price ? ' ' : ''"
                             />
                             <span
                                 class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
@@ -445,25 +426,22 @@
             <div
                 class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
             >
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton type="button" variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="button"
+                    variant="primary"
                     @click="submitForm"
+                    :loading="form.processing"
                     :disabled="
                         form.processing ||
                         minPriceValidationError ||
                         (!service?.id && !selectedCatalogPackageId)
                     "
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -477,6 +455,8 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useLocalized } from '@/Composables/useLocalized';
 
 const props = defineProps({

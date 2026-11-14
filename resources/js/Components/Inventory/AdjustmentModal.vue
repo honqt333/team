@@ -128,18 +128,16 @@
                     {{ $t('inventory.stock.qty') }}
                     <span class="text-red-500">*</span>
                 </label>
-                <input
+                <AppInput
                     v-model="form.qty"
                     type="text"
                     inputmode="decimal"
                     @input="handleInput($event, 'qty')"
                     dir="ltr"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring font-mono shadow-sm"
+                    class="font-mono shadow-sm"
                     placeholder="0.000"
+                    :error="errors.qty"
                 />
-                <p v-if="errors.qty" class="mt-1 text-sm text-red-500 font-medium">
-                    {{ errors.qty }}
-                </p>
             </div>
 
             <!-- Notes (Required for adjustments) -->
@@ -148,35 +146,31 @@
                     {{ $t('common.notes') }}
                     <span class="text-red-500">*</span>
                 </label>
-                <textarea
+                <AppTextarea
                     v-model="form.notes"
                     rows="3"
                     required
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
-                    :placeholder="$t('inventory.moves.adjust') + ' - السبب مطلوب'"
-                ></textarea>
-                <p v-if="errors.notes" class="mt-1 text-sm text-red-500">{{ errors.notes }}</p>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="submit"
-                    :disabled="processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
-                    <span v-if="processing">{{ $t('common.saving') }}</span>
-                    <span v-else>{{ $t('common.save') }}</span>
-                </button>
+                    :placeholder="$t('common.notes_placeholder')"
+                    :error="errors.notes"
+                />
             </div>
         </form>
+
+        <template #footer>
+            <div class="flex justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="action"
+                    @click="submit"
+                    :disabled="processing"
+                    :loading="processing"
+                >
+                    {{ processing ? $t('common.saving') : $t('common.save') }}
+                </AppButton>
+            </div>
+        </template>
     </BaseModal>
 </template>
 
@@ -188,10 +182,14 @@ import { ref, reactive, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useLocalized } from '@/Composables/useLocalized';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -203,6 +201,7 @@ const emit = defineEmits(['close', 'saved']);
 const { success, error: showError } = useToast();
 const { formatQuantity, formatCurrency, toEnglish, sanitizeInput } = useNumberFormat();
 const { getName } = useLocalized();
+const { scrollToError } = useFormScrollToError();
 const processing = ref(false);
 const errors = reactive({});
 const parts = ref([]);
@@ -298,6 +297,7 @@ function submit() {
             },
             onError: (errs) => {
                 Object.assign(errors, errs);
+                scrollToError(errs);
                 showError(t('common.error_while_saving'));
             },
             onFinish: () => {

@@ -1,7 +1,7 @@
 <template>
-    <DialogModal :show="show" @close="handleClose" max-width="4xl">
+    <BaseModal :show="show" @close="handleClose" size="xl">
         <template #title>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between w-full">
                 <span class="text-xl font-bold">{{ $t('inventory.parts.warehouse_stock') }}</span>
                 <span
                     v-if="part"
@@ -12,224 +12,224 @@
             </div>
         </template>
 
-        <template #content>
-            <form @submit.prevent="submit" class="space-y-4">
-                <!-- Warehouse Selector -->
-                <div class="flex items-center gap-3 mb-4">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('inventory.parts.add_warehouse') }}:
-                    </label>
-                    <div class="flex-1">
-                        <SearchableSelect
-                            v-model="selectedWarehouseId"
-                            :options="availableWarehouses"
-                            :option-label="(wh) => `${wh.name} - ${wh.center_name}`"
-                            option-value="id"
-                            :placeholder="$t('inventory.parts.select_warehouse')"
-                            compact
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        @click="addWarehouse"
-                        :disabled="!selectedWarehouseId || isWarehouseAdded(selectedWarehouseId)"
-                        class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {{ $t('common.add') }}
-                    </button>
+        <form @submit.prevent="submit" class="space-y-4">
+            <!-- Warehouse Selector -->
+            <div class="flex items-center gap-3 mb-4">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ $t('inventory.parts.add_warehouse') }}:
+                </label>
+                <div class="flex-1">
+                    <SearchableSelect
+                        v-model="selectedWarehouseId"
+                        :options="availableWarehouses"
+                        :option-label="(wh) => `${wh.name} - ${wh.center_name}`"
+                        option-value="id"
+                        :placeholder="$t('inventory.parts.select_warehouse')"
+                        compact
+                    />
                 </div>
+                <AppButton
+                    type="button"
+                    variant="action"
+                    size="sm"
+                    @click="addWarehouse"
+                    :disabled="!selectedWarehouseId || isWarehouseAdded(selectedWarehouseId)"
+                >
+                    {{ $t('common.add') }}
+                </AppButton>
+            </div>
 
-                <!-- Stock Table -->
-                <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl">
-                    <DataTable structured class="min-w-full text-xs">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-3 py-2.5 text-start text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.warehouse') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.cost_price') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.sale_price') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.min_sale_price') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.min_stock') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.initial_stock') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.storage_location') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('inventory.parts.allow_price_change') }}
-                                </th>
-                                <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
-                                    {{ $t('common.status') }}
-                                </th>
-                                <th class="px-3 py-2.5 w-10"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                            <tr v-for="(row, index) in form.warehouse_data" :key="index">
-                                <td class="px-3 py-2">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ getWarehouseName(row.warehouse_id) }}
-                                    </div>
-                                    <div class="text-[10px] text-gray-500">
-                                        {{ getWarehouseCenter(row.warehouse_id) }}
-                                    </div>
-                                </td>
-                                <!-- Cost Price -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model.number="row.cost_price"
-                                        type="text"
-                                        inputmode="decimal"
-                                        dir="ltr"
-                                        @input="sanitizeNumber($event, row, 'cost_price')"
-                                        class="w-20 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center font-mono"
-                                        placeholder="0.00"
-                                    />
-                                </td>
-                                <!-- Sale Price -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model.number="row.sale_price"
-                                        type="text"
-                                        inputmode="decimal"
-                                        dir="ltr"
-                                        @input="sanitizeNumber($event, row, 'sale_price')"
-                                        class="w-20 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center font-mono"
-                                        placeholder="0.00"
-                                    />
-                                </td>
-                                <!-- Min Sale Price -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model.number="row.min_sale_price"
-                                        type="text"
-                                        inputmode="decimal"
-                                        dir="ltr"
-                                        @input="sanitizeNumber($event, row, 'min_sale_price')"
-                                        class="w-20 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center font-mono"
-                                        placeholder="0.00"
-                                    />
-                                </td>
-                                <!-- Min Stock -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model.number="row.min_stock"
-                                        type="text"
-                                        inputmode="decimal"
-                                        dir="ltr"
-                                        @input="sanitizeNumber($event, row, 'min_stock')"
-                                        class="w-16 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center font-mono"
-                                        placeholder="0"
-                                    />
-                                </td>
-                                <!-- Initial Stock -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model.number="row.initial_stock"
-                                        type="text"
-                                        inputmode="decimal"
-                                        dir="ltr"
-                                        @input="sanitizeNumber($event, row, 'initial_stock')"
-                                        class="w-16 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center font-mono"
-                                        placeholder="0"
-                                    />
-                                </td>
-                                <!-- Storage Location -->
-                                <td class="px-3 py-2">
-                                    <input
-                                        v-model="row.storage_location"
-                                        type="text"
-                                        dir="ltr"
-                                        class="w-14 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-center"
-                                        placeholder="A1"
-                                    />
-                                </td>
-                                <!-- Allow Price Change -->
-                                <td class="px-3 py-2 text-center">
-                                    <AppToggle v-model="row.allow_price_change" />
-                                </td>
-                                <!-- Active -->
-                                <td class="px-3 py-2 text-center">
-                                    <AppToggle v-model="row.is_active" />
-                                </td>
-                                <!-- Delete -->
-                                <td class="px-3 py-2 text-center">
-                                    <button
-                                        type="button"
-                                        @click="removeWarehouseRow(index)"
-                                        class="text-red-500 hover:text-red-700"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr v-if="form.warehouse_data.length === 0">
-                                <td
-                                    colspan="10"
-                                    class="px-3 py-8 text-center text-gray-500 dark:text-gray-400"
+            <!-- Stock Table -->
+            <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl">
+                <DataTable structured class="min-w-full text-xs">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th class="px-3 py-2.5 text-start text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.warehouse') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.cost_price') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.sale_price') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.min_sale_price') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.min_stock') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.initial_stock') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.storage_location') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('inventory.parts.allow_price_change') }}
+                            </th>
+                            <th class="px-3 py-2.5 text-center text-gray-500 font-semibold">
+                                {{ $t('common.status') }}
+                            </th>
+                            <th class="px-3 py-2.5 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tr v-for="(row, index) in form.warehouse_data" :key="index">
+                            <td class="px-3 py-2">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ getWarehouseName(row.warehouse_id) }}
+                                </div>
+                                <div class="text-[10px] text-gray-500">
+                                    {{ getWarehouseCenter(row.warehouse_id) }}
+                                </div>
+                            </td>
+                            <!-- Cost Price -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model.number="row.cost_price"
+                                    type="text"
+                                    inputmode="decimal"
+                                    dir="ltr"
+                                    @input="sanitizeNumber($event, row, 'cost_price')"
+                                    class="w-20 px-2 py-1.5 text-xs text-center font-mono"
+                                    placeholder="0.00"
+                                />
+                            </td>
+                            <!-- Sale Price -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model.number="row.sale_price"
+                                    type="text"
+                                    inputmode="decimal"
+                                    dir="ltr"
+                                    @input="sanitizeNumber($event, row, 'sale_price')"
+                                    class="w-20 px-2 py-1.5 text-xs text-center font-mono"
+                                    placeholder="0.00"
+                                />
+                            </td>
+                            <!-- Min Sale Price -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model.number="row.min_sale_price"
+                                    type="text"
+                                    inputmode="decimal"
+                                    dir="ltr"
+                                    @input="sanitizeNumber($event, row, 'min_sale_price')"
+                                    class="w-20 px-2 py-1.5 text-xs text-center font-mono"
+                                    placeholder="0.00"
+                                />
+                            </td>
+                            <!-- Min Stock -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model.number="row.min_stock"
+                                    type="text"
+                                    inputmode="decimal"
+                                    dir="ltr"
+                                    @input="sanitizeNumber($event, row, 'min_stock')"
+                                    class="w-16 px-2 py-1.5 text-xs text-center font-mono"
+                                    placeholder="0"
+                                />
+                            </td>
+                            <!-- Initial Stock -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model.number="row.initial_stock"
+                                    type="text"
+                                    inputmode="decimal"
+                                    dir="ltr"
+                                    @input="sanitizeNumber($event, row, 'initial_stock')"
+                                    class="w-16 px-2 py-1.5 text-xs text-center font-mono"
+                                    placeholder="0"
+                                />
+                            </td>
+                            <!-- Storage Location -->
+                            <td class="px-3 py-2">
+                                <AppInput
+                                    v-model="row.storage_location"
+                                    type="text"
+                                    dir="ltr"
+                                    class="w-14 px-2 py-1.5 text-xs text-center"
+                                    placeholder="A1"
+                                />
+                            </td>
+                            <!-- Allow Price Change -->
+                            <td class="px-3 py-2 text-center">
+                                <AppToggle v-model="row.allow_price_change" />
+                            </td>
+                            <!-- Active -->
+                            <td class="px-3 py-2 text-center">
+                                <AppToggle v-model="row.is_active" />
+                            </td>
+                            <!-- Delete -->
+                            <td class="px-3 py-2 text-center">
+                                <button
+                                    type="button"
+                                    @click="removeWarehouseRow(index)"
+                                    class="text-red-500 hover:text-red-700"
                                 >
-                                    {{ $t('common.no_records') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </DataTable>
-                </div>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="form.warehouse_data.length === 0">
+                            <td
+                                colspan="10"
+                                class="px-3 py-8 text-center text-gray-500 dark:text-gray-400"
+                            >
+                                {{ $t('common.no_records') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </DataTable>
+            </div>
 
-                <p v-if="form.errors.warehouse_data" class="text-sm text-red-500">
-                    {{ form.errors.warehouse_data }}
-                </p>
-            </form>
-        </template>
+            <p v-if="form.errors.warehouse_data" class="text-sm text-red-500">
+                {{ form.errors.warehouse_data }}
+            </p>
+        </form>
 
         <template #footer>
-            <div class="flex justify-end gap-3">
-                <button
-                    @click="handleClose"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+            <div class="flex justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="handleClose">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
+                    variant="action"
                     @click="submit"
                     :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                    :loading="form.processing"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
-    </DialogModal>
+    </BaseModal>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref, computed, watch } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import DialogModal from '@/Components/DialogModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -384,10 +384,13 @@ const handleClose = () => {
     close();
 };
 
+const { scrollToError } = useFormScrollToError();
+
 const submit = () => {
     form.post(route('app.inventory.parts.stock.update', form.part_id), {
         preserveScroll: true,
         onSuccess: () => close(),
+        onError: (errors) => scrollToError(errors),
     });
 };
 </script>

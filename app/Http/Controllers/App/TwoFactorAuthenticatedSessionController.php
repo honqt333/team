@@ -108,7 +108,7 @@ class TwoFactorAuthenticatedSessionController extends Controller
                 }
             } else {
                 // Verify via Cache (Email)
-                if (! $cachedCode || $cachedCode !== $request->code) {
+                if (! $cachedCode || ! hash_equals((string) $cachedCode, (string) $request->code)) {
                     return back()->withErrors(['code' => 'رمز التحقق غير صحيح أو منتهي الصلاحية']);
                 }
             }
@@ -137,6 +137,7 @@ class TwoFactorAuthenticatedSessionController extends Controller
 
         // Login user
         auth()->login($user);
+        $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
     }
