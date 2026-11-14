@@ -163,4 +163,42 @@ class PayrollCenterIsolationTest extends TestCase
                     && ($context['status'] ?? null) === 'approved';
             });
     }
+
+    public function test_user_can_export_wps_csv_for_own_center_payroll_run(): void
+    {
+        $payrollRunCenterA = PayrollRun::withoutGlobalScopes()->create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->centerA->id,
+            'period_start' => '2026-02-01',
+            'period_end' => '2026-02-28',
+            'status' => 'approved',
+            'created_by' => $this->userCenterA->id,
+        ]);
+
+        $response = $this->actingAs($this->userCenterA)
+            ->get(route('app.hr.payroll.export-wps', $payrollRunCenterA->id));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Employee Number', $content);
+        $this->assertStringContainsString('IBAN', $content);
+        $this->assertStringContainsString('Net Salary', $content);
+    }
+
+    public function test_user_cannot_export_wps_csv_for_other_center_payroll_run(): void
+    {
+        $payrollRunCenterB = PayrollRun::withoutGlobalScopes()->create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->centerB->id,
+            'period_start' => '2026-02-01',
+            'period_end' => '2026-02-28',
+            'status' => 'approved',
+            'created_by' => $this->userCenterA->id,
+        ]);
+
+        $this->actingAs($this->userCenterA)
+            ->get(route('app.hr.payroll.export-wps', $payrollRunCenterB->id))
+            ->assertNotFound();
+    }
 }

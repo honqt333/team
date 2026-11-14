@@ -416,9 +416,10 @@
                                 </template>
                                 <template #cell-status="{ item }">
                                     <span
-                                        class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-secondary text-content-primary"
+                                        class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                        :class="workOrderStatusClass(item.status)"
                                     >
-                                        {{ item.status }}
+                                        {{ $t(`work_orders.status.${item.status}`) }}
                                     </span>
                                 </template>
                             </DataTable>
@@ -542,6 +543,19 @@ function attendanceStatusClass(status) {
         default:
             return 'bg-surface-secondary text-content-muted';
     }
+}
+
+function workOrderStatusClass(status) {
+    const classes = {
+        draft: 'bg-surface-secondary text-content-muted border border-border-subtle',
+        open: 'bg-info-soft text-info border border-info/20',
+        in_progress: 'bg-action-primary/10 text-action-primary border border-action-primary/20',
+        on_hold: 'bg-warning-soft text-warning border border-warning/20',
+        ready_for_qc: 'bg-warning-soft text-warning border border-warning/20',
+        done: 'bg-success-soft text-success border border-success/20',
+        cancelled: 'bg-danger-soft text-danger border border-danger/20',
+    };
+    return classes[status] || classes.draft;
 }
 
 function toggleStatus(newStatus) {

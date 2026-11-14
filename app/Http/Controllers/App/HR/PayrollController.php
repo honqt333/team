@@ -484,6 +484,83 @@ class PayrollController extends Controller
     }
 
     /**
+     * Export WPS / Bank-compatible CSV file for a payroll run.
+     */
+    public function exportWps(PayrollRun $payrollRun)
+    {
+        $this->authorize('view', $payrollRun);
+
+        $payrollRun->load([
+            'items.employee',
+            'center',
+        ]);
+
+        $currency = auth()->user()?->tenant?->currency ?? 'SAR';
+        $periodStart = $payrollRun->period_start?->format('Y-m-d') ?? (string) $payrollRun->period_start;
+        $periodEnd = $payrollRun->period_end?->format('Y-m-d') ?? (string) $payrollRun->period_end;
+        $filename = "wps-payroll-{$periodStart}-to-{$periodEnd}.csv";
+
+        $sanitize = static function (?string $value): string {
+            $str = (string) ($value ?? '');
+
+            if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                return "'".$str;
+            }
+
+            return $str;
+        };
+
+        return response()->streamDownload(function () use ($payrollRun, $currency, $periodStart, $periodEnd, $sanitize): void {
+            $handle = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel / local banking portals
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'Employee Number',
+                'Employee Name (AR)',
+                'Employee Name (EN)',
+                'National ID / Iqama',
+                'Bank Name',
+                'IBAN',
+                'Account Number',
+                'Base Salary',
+                'Total Allowances',
+                'GOSI Deduction',
+                'Total Deductions',
+                'Net Salary',
+                'Currency',
+                'Period Start',
+                'Period End',
+            ]);
+
+            foreach ($payrollRun->items as $item) {
+                $emp = $item->employee;
+                fputcsv($handle, [
+                    $sanitize($emp?->employee_number),
+                    $sanitize($emp?->name_ar),
+                    $sanitize($emp?->name_en),
+                    $sanitize($emp?->national_id),
+                    $sanitize($emp?->bank_name),
+                    $sanitize($emp?->bank_iban),
+                    $sanitize($emp?->bank_account_number),
+                    number_format((float) $item->base_salary, 2, '.', ''),
+                    number_format((float) $item->total_allowances, 2, '.', ''),
+                    number_format((float) $item->gosi_amount, 2, '.', ''),
+                    number_format((float) $item->total_deductions, 2, '.', ''),
+                    number_format((float) $item->net_salary, 2, '.', ''),
+                    $currency,
+                    $periodStart,
+                    $periodEnd,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
      * Get payroll items for a specific employee.
      */
     public function employeePayroll(Employee $employee)

@@ -2651,7 +2651,8 @@
             "total_deductions": "Total discounts",
             "total_earnings": "Total earnings",
             "total_net": "Net gross",
-            "total_salaries": "Total salaries"
+            "total_salaries": "Total salaries",
+            "export_wps": "Export WPS / Bank File"
         },
         "payslip_title": "Payslip",
         "settings": {

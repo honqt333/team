@@ -118,6 +118,20 @@
                         <span>{{ $t('hr.payroll.mark_paid') }}</span>
                     </button>
                     <a
+                        :href="route('app.hr.payroll.export-wps', payrollRun.id)"
+                        class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                        </svg>
+                        <span>{{ $t('hr.payroll.export_wps') }}</span>
+                    </a>
+                    <a
                         :href="route('app.hr.payroll.print', payrollRun.id)"
                         target="_blank"
                         rel="noopener noreferrer"

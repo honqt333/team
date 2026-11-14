@@ -2651,7 +2651,8 @@
             "total_deductions": "إجمالي الخصومات",
             "total_earnings": "إجمالي الاستحقاقات",
             "total_net": "صافي الإجمالي",
-            "total_salaries": "إجمالي الرواتب"
+            "total_salaries": "إجمالي الرواتب",
+            "export_wps": "تصدير ملف حماية الأجور (WPS)"
         },
         "payslip_title": "كشف راتب",
         "settings": {

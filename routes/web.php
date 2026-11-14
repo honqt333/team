@@ -1066,6 +1066,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::delete('/payroll/{payrollRun}/items/{payrollItem}', [PayrollController::class, 'destroyItem'])->name('payroll.items.destroy');
         Route::put('/payroll/{payrollRun}/items/{payrollItem}', [PayrollController::class, 'updateItem'])->name('payroll.items.update');
         Route::get('/payroll/{payrollRun}/print', [PayrollController::class, 'print'])->name('payroll.print');
+        Route::get('/payroll/{payrollRun}/export-wps', [PayrollController::class, 'exportWps'])->name('payroll.export-wps');
 
         // Employee Payroll
         Route::get('/employees/{employee}/payroll', [PayrollController::class, 'employeePayroll'])->name('employees.payroll');
