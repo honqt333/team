@@ -2704,6 +2704,7 @@
             "accounting_reference": "القيد / المصروف المالي المرتبط",
             "accounting_tx_date": "تاريخ الترحيل",
             "allowances": "البدلات",
+            "commission_included": "عمولة الفنيين",
             "already_exists": "توجد مسيّرة لهذه الفترة مسبقاً",
             "amount": "المبلغ",
             "approve": "اعتماد",

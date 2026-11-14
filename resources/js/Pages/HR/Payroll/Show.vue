@@ -303,6 +303,13 @@
                                         {{ $t('hr.financial.other_payments.title') }}:
                                         {{ formatCurrency(item.allowances_breakdown.other) }}
                                     </div>
+                                    <div
+                                        v-if="item.allowances_breakdown?.commission > 0"
+                                        class="text-[10px] text-emerald-500 font-semibold"
+                                    >
+                                        {{ $t('hr.payroll.commission_included') }}:
+                                        {{ formatCurrency(item.allowances_breakdown.commission) }}
+                                    </div>
                                 </td>
                                 <td
                                     class="px-4 py-3 text-center font-mono text-red-600 align-middle"

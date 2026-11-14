@@ -405,6 +405,39 @@
                                     </span>
                                     {{ $t('hr.employees.profile.hours_unit') }}
                                 </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-success-soft text-success font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.first_time_fix_rate') }}:
+                                    <span class="font-mono">
+                                        {{
+                                            toEnglish(
+                                                workOrdersSummary?.first_time_fix_rate ?? 100
+                                            )
+                                        }}%
+                                    </span>
+                                </span>
+                                <span
+                                    v-if="
+                                        workOrdersSummary?.efficiency_rate !== null &&
+                                        workOrdersSummary?.efficiency_rate !== undefined
+                                    "
+                                    class="px-3 py-1.5 rounded-xl bg-info-soft text-info font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.efficiency_rate') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(workOrdersSummary.efficiency_rate) }}%
+                                    </span>
+                                </span>
+                                <span
+                                    v-if="(workOrdersSummary?.commission_amount || 0) > 0"
+                                    class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.month_commission') }}:
+                                    <span class="font-mono">
+                                        {{ formatMoney(workOrdersSummary.commission_amount) }}
+                                    </span>
+                                </span>
                             </div>
 
                             <DataTable
