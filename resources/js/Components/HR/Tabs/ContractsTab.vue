@@ -252,6 +252,7 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -263,6 +264,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { activeCurrencySymbol } = useNumberFormat();
 const { success } = useToast();
+const { confirm } = useConfirm();
 const showModal = ref(false);
 const editingId = ref(null);
 
@@ -324,8 +326,8 @@ function submit() {
     }
 }
 
-function deleteContract(id) {
-    if (confirm(t('hr.contracts.delete_confirm'))) {
+async function deleteContract(id) {
+    if (await confirm(t('hr.contracts.delete_confirm'))) {
         router.delete(route('app.hr.contracts.destroy', id), {
             onSuccess: () => success(),
         });

@@ -331,9 +331,11 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
+const { formatDateTime: formatDate } = useFormatters();
 const { success } = useToast();
 
 const props = defineProps({
@@ -447,8 +449,6 @@ const applyFilters = () => {
         { preserveState: true }
     );
 };
-
-const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '—');
 
 const statusClass = (status) =>
     ({

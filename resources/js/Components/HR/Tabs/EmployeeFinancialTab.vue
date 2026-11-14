@@ -449,6 +449,7 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useToast } from '@/Composables/useToast';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -466,6 +467,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { activeCurrencySymbol } = useNumberFormat();
+const { error: toastError } = useToast();
 
 const periodTypeOptions = computed(() => [
     { value: 'indefinite', label: t('hr.financial.periods.indefinite') },
@@ -617,18 +619,18 @@ function saveAllowances() {
     for (const item of validItems) {
         // Validate start_date for non-indefinite periods
         if (item.period_type !== 'indefinite' && !item.start_date) {
-            alert(t('hr.financial.select_start_month'));
+            toastError(t('hr.financial.select_start_month'));
             return;
         }
         // Validate end_date for fixed_period
         if (item.period_type === 'fixed_period' && !item.end_date) {
-            alert(t('hr.financial.select_end_month'));
+            toastError(t('hr.financial.select_end_month'));
             return;
         }
         // Validate custom_amount for flexible allowances
         const allowance = getAllowanceById(item.id);
         if (allowance?.is_flexible && !item.custom_amount) {
-            alert(t('hr.financial.select_flexible_allowance'));
+            toastError(t('hr.financial.select_flexible_allowance'));
             return;
         }
     }
@@ -658,18 +660,18 @@ function saveDeductions() {
     for (const item of validItems) {
         // Validate start_date for non-indefinite periods
         if (item.period_type !== 'indefinite' && !item.start_date) {
-            alert(t('hr.financial.select_start_month'));
+            toastError(t('hr.financial.select_start_month'));
             return;
         }
         // Validate end_date for fixed_period
         if (item.period_type === 'fixed_period' && !item.end_date) {
-            alert(t('hr.financial.select_end_month'));
+            toastError(t('hr.financial.select_end_month'));
             return;
         }
         // Validate custom_amount for flexible deductions
         const deduction = getDeductionById(item.id);
         if (deduction?.is_flexible && !item.custom_amount) {
-            alert(t('hr.financial.select_flexible_deduction'));
+            toastError(t('hr.financial.select_flexible_deduction'));
             return;
         }
     }

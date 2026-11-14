@@ -156,7 +156,10 @@ import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useServerTable } from '@/Composables/useServerTable';
+
+const { formatDateTime: formatDate } = useFormatters();
 
 const actionOptions = computed(() => [
     { value: 'login', label: t('hr.attendance.check_in') },
@@ -178,8 +181,6 @@ const { filters: tableFilters, applyFilters } = useServerTable({
         action: props.filters?.action || '',
     },
 });
-
-const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 
 const getActionClass = (action) =>
     ({

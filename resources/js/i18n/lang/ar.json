@@ -8319,7 +8319,7 @@
             "confirm_remove_image": "هل تريد فعلاً حذف هذه الصورة؟",
             "custom_domain": {
                 "badge_pro": "ميزة احترافية",
-                "dns_cname": "أنشئ سجل CNAME يوجه إلى sites.carag.app أو سجل A يوجه إلى عنوان السيرفر المخصص.",
+                "dns_cname": "أنشئ سجل CNAME يوجه إلى sites.khidmh.pro أو سجل A يوجه إلى عنوان السيرفر المخصص.",
                 "dns_instructions_title": "طريقة ضبط سجلات الـ DNS لدى مزود النطاق:",
                 "input_label": "اسم النطاق الخاص",
                 "input_placeholder": "workshop.com أو www.garage.sa",

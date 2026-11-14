@@ -8316,7 +8316,7 @@
             "confirm_remove_image": "Are you sure you want to remove this image?",
             "custom_domain": {
                 "badge_pro": "Pro Feature",
-                "dns_cname": "Create a CNAME record pointing to sites.carag.app or an A record pointing to the server IP.",
+                "dns_cname": "Create a CNAME record pointing to sites.khidmh.pro or an A record pointing to the server IP.",
                 "dns_instructions_title": "DNS Configuration Instructions:",
                 "input_label": "Custom Domain Name",
                 "input_placeholder": "workshop.com or www.garage.sa",

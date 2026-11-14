@@ -349,8 +349,10 @@ import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { confirm } = useConfirm();
+const { formatDateTime: formatDate } = useFormatters();
 
 const props = defineProps({
     integration: Object,
@@ -433,6 +435,4 @@ const fetchBalance = async () => {
         balanceLoading.value = false;
     }
 };
-
-const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 </script>

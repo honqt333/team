@@ -307,9 +307,11 @@ import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
+const { formatDate } = useFormatters();
 
 const props = defineProps({
     tenants: Object,
@@ -340,11 +342,6 @@ const planOptions = computed(() => [
         label: p.name_ar || p.name_en,
     })),
 ]);
-
-const formatDate = (date) => {
-    if (!date) return t('common.na');
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
-};
 
 const getStatusClass = (status) => {
     const classes = {

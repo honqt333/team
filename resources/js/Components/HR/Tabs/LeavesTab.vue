@@ -210,6 +210,7 @@ import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const props = defineProps({
     employee: Object,
@@ -220,6 +221,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const leaveTypeOptions = computed(() => [
     { value: 'annual', label: t('hr.leaves.types.annual') },
@@ -293,8 +295,8 @@ function submitLeave() {
     });
 }
 
-function deleteLeave(leave) {
-    if (!confirm(t('common.confirm_delete'))) return;
+async function deleteLeave(leave) {
+    if (!(await confirm(t('common.confirm_delete')))) return;
 
     router.delete(route('app.hr.leaves.destroy', leave.id), {
         preserveScroll: true,

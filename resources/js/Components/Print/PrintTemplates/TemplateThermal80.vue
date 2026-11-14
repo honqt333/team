@@ -177,12 +177,12 @@
                         {{ data.vehicle?.make || (isRtl ? 'تويوتا' : 'Toyota') }}
                     </span>
                 </div>
-                <div class="flex justify-between items-center">
+                <div class="flex flex-wrap justify-between items-center gap-1 min-w-0">
                     <span>{{ $t('work_orders.print_view.plate') }}:</span>
                     <SaudiPlateDisplay
                         v-if="data.vehicle?.plate"
                         :plate-number="data.vehicle.plate"
-                        size="sm"
+                        size="xs"
                     />
                     <span v-else class="font-bold text-gray-900">-</span>
                 </div>

@@ -231,11 +231,13 @@ import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { formatDate } = useFormatters();
 const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
@@ -255,9 +257,6 @@ const { filters: tableFilters, applyFilters } = useServerTable({
         status: props.filters?.status || '',
     },
 });
-
-const formatDate = (date) =>
-    date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : t('common.na');
 
 const getTypeLabel = (type) =>
     ({

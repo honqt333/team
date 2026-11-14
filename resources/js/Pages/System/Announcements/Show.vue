@@ -172,6 +172,9 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DOMPurify from 'dompurify';
+import { useFormatters } from '@/Composables/useFormatters';
+
+const { formatDate, formatDateTime } = useFormatters();
 
 const props = defineProps({
     announcement: Object,
@@ -196,8 +199,6 @@ const getTargetLabel = (target) =>
         expired: t('system.announcements.target.expired'),
         specific: t('system.announcements.target.specific'),
     })[target] || target;
-const formatDate = (date) => (date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : '-');
-const formatDateTime = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 
 const publish = () => router.post(`/system/announcements/${props.announcement.id}/publish`);
 const unpublish = () => router.post(`/system/announcements/${props.announcement.id}/unpublish`);

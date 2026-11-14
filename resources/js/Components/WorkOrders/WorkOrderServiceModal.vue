@@ -1767,7 +1767,7 @@ function handlePartEdit(part) {
     }
 }
 
-function handlePartDelete(part) {
+async function handlePartDelete(part) {
     if (!part.id) {
         pendingParts.value = pendingParts.value.filter((p) => p.tempId !== part.tempId);
         return;
@@ -1775,7 +1775,7 @@ function handlePartDelete(part) {
     if (part.source === 'warehouse' && part.status === 'issued') {
         openReturnModal(part);
     } else {
-        if (confirm(t('common.confirm_delete'))) {
+        if (await confirm(t('common.confirm_delete'))) {
             router.delete(route('work-orders.parts.destroy', { workOrderPart: part.id }), {
                 onSuccess: () => {
                     linkedParts.value = linkedParts.value.filter((p) => p.id !== part.id);

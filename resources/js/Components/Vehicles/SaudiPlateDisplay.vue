@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="isValidPlate"
-        class="inline-flex shrink-0 items-stretch bg-white rounded border-2 border-gray-700 shadow overflow-hidden select-none align-middle"
+        class="inline-flex w-fit max-w-full print:min-w-0 print:max-w-full items-stretch bg-white rounded border-2 border-gray-700 shadow overflow-hidden select-none align-middle"
         :class="[sizeClass]"
     >
         <!-- KSA Badge -->

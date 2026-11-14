@@ -404,10 +404,12 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { formatDateTime: formatDate } = useFormatters();
 
 const roleOptions = computed(() => [
     { value: 'super_admin', label: t('system.admin_users.roles.super_admin') },
@@ -508,11 +510,6 @@ const submitForm = () => {
             onSuccess: () => closeModal(),
         });
     }
-};
-
-const formatDate = (date) => {
-    if (!date) return t('common.na');
-    return new Date(date).toLocaleString('ar-SA-u-nu-latn');
 };
 
 const getRoleLabel = (role) =>

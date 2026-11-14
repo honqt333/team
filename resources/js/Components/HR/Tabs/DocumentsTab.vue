@@ -218,6 +218,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -229,6 +230,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { success, error } = useToast();
+const { confirm } = useConfirm();
 const showUploadModal = ref(false);
 
 const typeOptions = computed(() => [
@@ -258,8 +260,8 @@ function submit() {
     });
 }
 
-function deleteDocument(id) {
-    if (confirm(t('hr.documents.delete_confirm'))) {
+async function deleteDocument(id) {
+    if (await confirm(t('hr.documents.delete_confirm'))) {
         router.delete(route('app.hr.documents.destroy', id), {
             onSuccess: () => success(),
         });

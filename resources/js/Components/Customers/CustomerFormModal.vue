@@ -1064,7 +1064,7 @@ async function reverseGeocode(lat, lng, isInit = false) {
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
             {
                 headers: {
-                    'User-Agent': 'Carag-App/1.0',
+                    'User-Agent': 'KhidmhPro-App/1.0',
                 },
             }
         );

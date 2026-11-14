@@ -286,10 +286,12 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { formatDateTime: formatDate, formatFileSize } = useFormatters();
 const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
@@ -371,20 +373,7 @@ const statCards = computed(() => [
     },
 ]);
 
-const formatDate = (date) =>
-    date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : t('common.na');
-
-const humanSize = (bytes) => {
-    if (!bytes) return t('common.na');
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    let size = Number(bytes);
-    while (size >= 1024 && i < units.length - 1) {
-        size /= 1024;
-        i++;
-    }
-    return `${size.toFixed(2)} ${units[i]}`;
-};
+const humanSize = (bytes) => (bytes ? formatFileSize(Number(bytes)) : t('common.na'));
 
 const getTypeClass = (type) =>
     ({
