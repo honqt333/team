@@ -3,7 +3,7 @@
         <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
-                :title="employee.name_ar"
+                :title="getName(employee) || employee.display_name || employee.name_ar"
                 gradientFrom="from-action-primary"
                 gradientTo="to-purple-700"
                 glowFrom="from-action-primary"
@@ -26,7 +26,7 @@
                             class="w-full h-full object-cover"
                         />
                         <span v-else class="text-white text-2xl font-black">
-                            {{ employee.name_ar?.charAt(0) }}
+                            {{ (getName(employee) || employee.name_ar)?.charAt(0) }}
                         </span>
                     </div>
                 </template>
@@ -40,7 +40,11 @@
                         </span>
                         <span class="text-gray-300 dark:text-gray-600">|</span>
                         <span>
-                            {{ employee.job_title?.name_ar || $t('hr.employees.no_job_title') }}
+                            {{
+                                employee.job_title
+                                    ? getName(employee.job_title)
+                                    : $t('hr.employees.no_job_title')
+                            }}
                         </span>
                         <template v-if="employee.center">
                             <span class="text-gray-300 dark:text-gray-600">|</span>
@@ -98,6 +102,71 @@
                 </template>
             </PageHeader>
 
+            <!-- Employee Quick Summary KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div
+                    class="bg-surface-primary rounded-2xl p-4 border border-border-subtle shadow-2xs"
+                >
+                    <p class="text-xs text-content-muted">
+                        {{ $t('hr.employees.profile.base_salary') }}
+                    </p>
+                    <p class="mt-1 text-xl font-bold font-mono text-content-primary">
+                        {{ formatMoney(employee.base_salary || 0) }}
+                    </p>
+                </div>
+
+                <div
+                    class="bg-surface-primary rounded-2xl p-4 border border-border-subtle shadow-2xs"
+                >
+                    <p class="text-xs text-content-muted">
+                        {{ $t('hr.employees.profile.attendance_this_month') }}
+                    </p>
+                    <div class="mt-1 flex items-baseline gap-2">
+                        <span class="text-xl font-bold font-mono text-success">
+                            {{ toEnglish(attendanceSummary?.present || 0) }}
+                        </span>
+                        <span class="text-xs text-content-muted">
+                            {{ $t('hr.employees.profile.present_days') }}
+                        </span>
+                        <span class="text-xs font-mono text-warning">
+                            ({{ toEnglish(attendanceSummary?.late || 0) }}
+                            {{ $t('hr.attendance.late') }})
+                        </span>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-surface-primary rounded-2xl p-4 border border-border-subtle shadow-2xs"
+                >
+                    <p class="text-xs text-content-muted">
+                        {{ $t('hr.leaves.title') }}
+                    </p>
+                    <p class="mt-1 text-xl font-bold font-mono text-content-primary">
+                        {{ toEnglish((employee.leaves || []).length) }}
+                    </p>
+                </div>
+
+                <div
+                    class="bg-surface-primary rounded-2xl p-4 border border-border-subtle shadow-2xs"
+                >
+                    <p class="text-xs text-content-muted">
+                        {{ $t('hr.employees.profile.labor_hours_month') }}
+                    </p>
+                    <div class="mt-1 flex items-baseline gap-2">
+                        <span class="text-xl font-bold font-mono text-action-primary">
+                            {{ toEnglish(workOrdersSummary?.labor_hours || 0) }}
+                        </span>
+                        <span class="text-xs text-content-muted">
+                            {{ $t('hr.employees.profile.hours_unit') }}
+                        </span>
+                        <span class="text-xs font-mono text-content-muted">
+                            · {{ toEnglish(workOrdersSummary?.completed_tasks || 0) }}
+                            {{ $t('hr.employees.profile.completed_tasks') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tabs -->
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
@@ -151,40 +220,209 @@
                     <!-- Permissions Tab -->
                     <PermissionsTab v-show="activeTab === 'permissions'" :employee="employee" />
 
-                    <!-- Attendance Tab (Coming Soon) -->
-                    <div v-show="activeTab === 'attendance'" class="py-12 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4"
-                        >
-                            <span class="text-2xl">📅</span>
+                    <!-- Attendance Tab -->
+                    <div v-show="activeTab === 'attendance'" class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-success-soft text-success font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.present_days') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(attendanceSummary?.present || 0) }}
+                                    </span>
+                                </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-warning-soft text-warning font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.late_days') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(attendanceSummary?.late || 0) }}
+                                    </span>
+                                </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-danger-soft text-danger font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.absent_days') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(attendanceSummary?.absent || 0) }}
+                                    </span>
+                                </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-info-soft text-info font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.overtime_minutes') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(attendanceSummary?.overtime_minutes || 0) }}
+                                    </span>
+                                    {{ $t('hr.employees.profile.minutes_unit') }}
+                                </span>
+                            </div>
+
+                            <Link
+                                :href="route('app.hr.attendance.index')"
+                                class="text-xs font-semibold text-action-primary hover:underline"
+                            >
+                                {{ $t('hr.employees.profile.open_attendance') }}
+                            </Link>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ $t('common.coming_soon') }}
-                        </p>
+
+                        <DataTable
+                            :columns="attendanceColumns"
+                            :items="recentAttendances || []"
+                            :empty-text="$t('hr.employees.profile.attendance_empty')"
+                        >
+                            <template #cell-date="{ item }">
+                                <span class="font-mono text-xs">{{ item.date }}</span>
+                            </template>
+                            <template #cell-status="{ item }">
+                                <span
+                                    class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                    :class="attendanceStatusClass(item.status)"
+                                >
+                                    {{ $t(`hr.attendance.${item.status}`) }}
+                                </span>
+                            </template>
+                            <template #cell-check_in="{ item }">
+                                <span class="font-mono text-xs">{{ item.check_in || '—' }}</span>
+                            </template>
+                            <template #cell-check_out="{ item }">
+                                <span class="font-mono text-xs">{{ item.check_out || '—' }}</span>
+                            </template>
+                            <template #cell-late_minutes="{ item }">
+                                <span class="font-mono text-xs">
+                                    {{ toEnglish(item.late_minutes || 0) }}
+                                </span>
+                            </template>
+                            <template #cell-overtime_minutes="{ item }">
+                                <span class="font-mono text-xs">
+                                    {{ toEnglish(item.overtime_minutes || 0) }}
+                                </span>
+                            </template>
+                        </DataTable>
                     </div>
 
-                    <!-- Payroll Tab (Coming Soon) -->
-                    <div v-show="activeTab === 'payroll'" class="py-12 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4"
+                    <!-- Payroll Tab -->
+                    <div v-show="activeTab === 'payroll'" class="space-y-4">
+                        <DataTable
+                            :columns="payrollColumns"
+                            :items="payrollItems || []"
+                            :empty-text="$t('hr.employees.profile.payroll_empty')"
                         >
-                            <span class="text-2xl">💰</span>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ $t('common.coming_soon') }}
-                        </p>
+                            <template #cell-period="{ item }">
+                                <Link
+                                    v-if="item.payroll_run"
+                                    :href="route('app.hr.payroll.show', item.payroll_run.id)"
+                                    class="font-mono text-xs font-semibold text-action-primary hover:underline"
+                                >
+                                    {{ item.payroll_run.period_start }} →
+                                    {{ item.payroll_run.period_end }}
+                                </Link>
+                                <span v-else class="text-xs text-content-muted">—</span>
+                            </template>
+                            <template #cell-base_salary="{ item }">
+                                <span class="font-mono text-xs">
+                                    {{ formatMoney(item.base_salary || 0) }}
+                                </span>
+                            </template>
+                            <template #cell-total_allowances="{ item }">
+                                <span class="font-mono text-xs text-success">
+                                    +{{ formatMoney(item.total_allowances || 0) }}
+                                </span>
+                            </template>
+                            <template #cell-total_deductions="{ item }">
+                                <span class="font-mono text-xs text-danger">
+                                    -{{ formatMoney(item.total_deductions || 0) }}
+                                </span>
+                            </template>
+                            <template #cell-net_salary="{ item }">
+                                <span class="font-mono text-xs font-bold text-content-primary">
+                                    {{ formatMoney(item.net_salary || 0) }}
+                                </span>
+                            </template>
+                            <template #cell-status="{ item }">
+                                <span
+                                    v-if="item.payroll_run?.status"
+                                    class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-secondary text-content-primary"
+                                >
+                                    {{ $t(`hr.payroll.statuses.${item.payroll_run.status}`) }}
+                                </span>
+                            </template>
+                        </DataTable>
                     </div>
 
-                    <!-- Work Orders Tab (Coming Soon) -->
-                    <div v-show="activeTab === 'work_orders'" class="py-12 text-center">
+                    <!-- Work Orders Tab -->
+                    <div v-show="activeTab === 'work_orders'" class="space-y-4">
                         <div
-                            class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4"
+                            v-if="!employee.user_id"
+                            class="py-10 text-center text-sm text-content-muted"
                         >
-                            <span class="text-2xl">🔧</span>
+                            {{ $t('hr.employees.profile.work_orders_no_user') }}
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ $t('common.coming_soon') }}
-                        </p>
+
+                        <template v-else>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-warning-soft text-warning font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.active_tasks') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(workOrdersSummary?.active_tasks || 0) }}
+                                    </span>
+                                </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-success-soft text-success font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.completed_tasks') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(workOrdersSummary?.completed_tasks || 0) }}
+                                    </span>
+                                </span>
+                                <span
+                                    class="px-3 py-1.5 rounded-xl bg-action-primary/10 text-action-primary font-semibold"
+                                >
+                                    {{ $t('hr.employees.profile.labor_hours_month') }}:
+                                    <span class="font-mono">
+                                        {{ toEnglish(workOrdersSummary?.labor_hours || 0) }}
+                                    </span>
+                                    {{ $t('hr.employees.profile.hours_unit') }}
+                                </span>
+                            </div>
+
+                            <DataTable
+                                :columns="workOrderColumns"
+                                :items="recentWorkOrders || []"
+                                :empty-text="$t('hr.employees.profile.work_orders_empty')"
+                            >
+                                <template #cell-work_order_number="{ item }">
+                                    <Link
+                                        :href="route('work-orders.show', item.id)"
+                                        class="font-mono text-xs font-semibold text-action-primary hover:underline"
+                                    >
+                                        {{ item.work_order_number }}
+                                    </Link>
+                                </template>
+                                <template #cell-vehicle="{ item }">
+                                    <span class="text-xs">
+                                        {{
+                                            item.vehicle?.make
+                                                ? `${getName(item.vehicle.make)} ${item.vehicle.model ? getName(item.vehicle.model) : ''}`
+                                                : '—'
+                                        }}
+                                    </span>
+                                </template>
+                                <template #cell-customer="{ item }">
+                                    <span class="text-xs">{{ item.customer?.name || '—' }}</span>
+                                </template>
+                                <template #cell-status="{ item }">
+                                    <span
+                                        class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-secondary text-content-primary"
+                                    >
+                                        {{ item.status }}
+                                    </span>
+                                </template>
+                            </DataTable>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -200,6 +438,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
 import EmployeeInfoTab from '@/Components/HR/Tabs/EmployeeInfoTab.vue';
 
 import EmployeeFinancialTab from '@/Components/HR/Tabs/EmployeeFinancialTab.vue';
@@ -207,9 +446,13 @@ import EmployeeScheduleTab from '@/Components/HR/Tabs/EmployeeScheduleTab.vue';
 import LeavesTab from '@/Components/HR/Tabs/LeavesTab.vue';
 import PermissionsTab from '@/Components/HR/Tabs/PermissionsTab.vue';
 import { useToast } from '@/Composables/useToast';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useLocalized } from '@/Composables/useLocalized';
 
 const { t } = useI18n();
 const { success } = useToast();
+const { formatMoney, toEnglish } = useNumberFormat();
+const { getName } = useLocalized();
 
 const props = defineProps({
     employee: Object,
@@ -225,6 +468,22 @@ const props = defineProps({
     weeklySchedule: Object,
     payrollItems: Array,
     otherPayments: Array,
+    recentAttendances: {
+        type: Array,
+        default: () => [],
+    },
+    attendanceSummary: {
+        type: Object,
+        default: () => ({}),
+    },
+    recentWorkOrders: {
+        type: Array,
+        default: () => [],
+    },
+    workOrdersSummary: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'info');
@@ -245,6 +504,45 @@ watch(activeTab, (newTab) => {
     url.searchParams.set('tab', newTab);
     window.history.replaceState({}, '', url);
 });
+
+const attendanceColumns = computed(() => [
+    { key: 'date', label: t('hr.attendance.date') },
+    { key: 'status', label: t('hr.attendance.status') },
+    { key: 'check_in', label: t('hr.attendance.check_in') },
+    { key: 'check_out', label: t('hr.attendance.check_out') },
+    { key: 'late_minutes', label: t('hr.attendance.late') },
+    { key: 'overtime_minutes', label: t('hr.employees.profile.overtime_minutes') },
+    { key: 'notes', label: t('hr.attendance.notes') },
+]);
+
+const payrollColumns = computed(() => [
+    { key: 'period', label: t('hr.payroll.period') },
+    { key: 'base_salary', label: t('hr.employees.profile.base_salary') },
+    { key: 'total_allowances', label: t('hr.payroll.total_allowances') },
+    { key: 'total_deductions', label: t('hr.payroll.total_deductions') },
+    { key: 'net_salary', label: t('hr.payroll.total_net') },
+    { key: 'status', label: t('common.status') },
+]);
+
+const workOrderColumns = computed(() => [
+    { key: 'work_order_number', label: '#' },
+    { key: 'vehicle', label: t('common.vehicle') },
+    { key: 'customer', label: t('common.customer') },
+    { key: 'status', label: t('common.status') },
+]);
+
+function attendanceStatusClass(status) {
+    switch (status) {
+        case 'present':
+            return 'bg-success-soft text-success';
+        case 'late':
+            return 'bg-warning-soft text-warning';
+        case 'absent':
+            return 'bg-danger-soft text-danger';
+        default:
+            return 'bg-surface-secondary text-content-muted';
+    }
+}
 
 function toggleStatus(newStatus) {
     router.put(

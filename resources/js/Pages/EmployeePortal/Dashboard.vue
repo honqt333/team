@@ -7,16 +7,22 @@
             >
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold"
+                        class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold shrink-0"
                     >
-                        {{ employee?.name_ar?.charAt(0) || '?' }}
+                        {{ (getName(employee) || employee?.name_ar)?.charAt(0) || '?' }}
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold">
-                            {{ $t('employee_portal.welcome') }}، {{ employee?.name_ar }}
+                            {{ $t('employee_portal.welcome') }}،
+                            {{ getName(employee) || employee?.display_name || employee?.name_ar }}
                         </h1>
                         <p class="text-white/80">
-                            {{ employee?.job_title?.name_ar || $t('common.employee') }} •
+                            {{
+                                employee?.job_title
+                                    ? getName(employee.job_title)
+                                    : $t('common.employee')
+                            }}
+                            •
                             {{ employee?.center?.name }}
                         </p>
                     </div>
@@ -342,8 +348,10 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useLocalized } from '@/Composables/useLocalized';
 
 const { formatMoney } = useNumberFormat();
+const { getName } = useLocalized();
 
 const props = defineProps({
     employee: Object,

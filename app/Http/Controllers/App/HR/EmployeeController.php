@@ -16,6 +16,9 @@ use App\Models\HR\Shift;
 use App\Models\Nationality;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
+use App\Models\WorkOrderLaborEntry;
 use App\Support\TenancyContext;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -268,7 +271,94 @@ class EmployeeController extends Controller
                 ->orderByDesc('created_at')
                 ->take(20)
                 ->get(),
+            // Attendance Data
+            'recentAttendances' => $employee->attendance()
+                ->orderByDesc('date')
+                ->take(30)
+                ->get(),
+            'attendanceSummary' => $this->buildAttendanceSummary($employee),
+            // Work Orders & Technician Productivity Data
+            ...$this->buildWorkOrdersData($employee),
         ]);
+    }
+
+    private function buildAttendanceSummary(Employee $employee): array
+    {
+        $summary = $employee->attendance()
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->selectRaw("
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                COALESCE(SUM(overtime_minutes), 0) as overtime_minutes
+            ")
+            ->first();
+
+        return [
+            'present' => (int) ($summary?->present ?? 0),
+            'late' => (int) ($summary?->late ?? 0),
+            'absent' => (int) ($summary?->absent ?? 0),
+            'overtime_minutes' => (int) ($summary?->overtime_minutes ?? 0),
+        ];
+    }
+
+    private function buildWorkOrdersData(Employee $employee): array
+    {
+        $userId = $employee->user_id;
+
+        if (! $userId) {
+            return [
+                'recentWorkOrders' => [],
+                'workOrdersSummary' => [
+                    'active_tasks' => 0,
+                    'completed_tasks' => 0,
+                    'labor_hours' => 0,
+                ],
+            ];
+        }
+
+        $activeTasks = WorkOrderItem::query()
+            ->whereHas('workOrder', fn ($q) => $q->where('center_id', $employee->center_id))
+            ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+            ->whereIn('status', [
+                WorkOrderItem::STATUS_PENDING,
+                WorkOrderItem::STATUS_IN_PROGRESS,
+                WorkOrderItem::STATUS_ON_HOLD,
+                WorkOrderItem::STATUS_READY_FOR_QC,
+            ])
+            ->count();
+
+        $completedTasks = WorkOrderItem::query()
+            ->whereHas('workOrder', fn ($q) => $q->where('center_id', $employee->center_id))
+            ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+            ->where('status', WorkOrderItem::STATUS_COMPLETED)
+            ->count();
+
+        $laborSeconds = WorkOrderLaborEntry::query()
+            ->where('center_id', $employee->center_id)
+            ->where('user_id', $userId)
+            ->whereMonth('started_at', now()->month)
+            ->whereYear('started_at', now()->year)
+            ->get()
+            ->sum(fn ($entry) => $entry->effectiveDurationSeconds());
+
+        $recentWorkOrders = WorkOrder::query()
+            ->where('center_id', $employee->center_id)
+            ->whereHas('items.technicians', fn ($q) => $q->where('users.id', $userId))
+            ->with(['customer:id,name', 'vehicle.make:id,name_ar,name_en', 'vehicle.model:id,name_ar,name_en'])
+            ->orderByDesc('created_at')
+            ->take(15)
+            ->get(['id', 'work_order_number', 'customer_id', 'vehicle_id', 'status', 'created_at']);
+
+        return [
+            'recentWorkOrders' => $recentWorkOrders,
+            'workOrdersSummary' => [
+                'active_tasks' => $activeTasks,
+                'completed_tasks' => $completedTasks,
+                'labor_hours' => round($laborSeconds / 3600, 1),
+            ],
+        ];
     }
 
     /**
