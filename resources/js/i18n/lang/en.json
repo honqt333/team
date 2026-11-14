@@ -1,7 +1,12 @@
 {
     "appointments": {
         "all": "All",
+        "all_dates": "All dates",
+        "auto_end_hint": "Calculated automatically from selected services when start time is set",
         "bay": "Bay",
+        "calendar_day_bays": "Day (Bays)",
+        "calendar_month": "Month",
+        "calendar_week": "Week",
         "cancel": "Cancel",
         "cancel_reason_placeholder": "Reason for cancellation",
         "cancel_title": "Cancel appointment",
@@ -9,22 +14,32 @@
         "clear_filters": "Clear filters",
         "confirm_convert": "Convert this appointment to a work order?",
         "confirm_no_show": "Mark this appointment as a no-show?",
+        "conflict_warning": "Warning: Time overlap detected with another appointment on the same bay or technician",
         "convert": "Convert to work order",
         "customer": "Customer",
         "customer_placeholder": "Select customer...",
+        "edit": "Edit appointment",
         "empty": "No appointments for the current filters",
+        "estimated_duration": "Estimated duration",
         "estimated_end_at": "Estimated end",
         "filter_bay": "Bay",
         "filter_date": "Date",
         "filter_status": "Status",
         "filter_tech": "Technician",
+        "hour": "Hour",
+        "minutes_short": "m",
+        "more_count": "+{count} more",
         "new": "New appointment",
+        "next": "Next",
         "no_bay": "No specific bay",
+        "no_appointments_in_bay": "No appointments in this bay",
         "no_show": "No show",
         "no_tech": "No specific technician",
         "no_vehicles": "No vehicles registered for this customer",
         "notes": "Notes",
+        "prev": "Prev",
         "scheduled_at": "Start",
+        "search_placeholder": "Search by customer, phone, or plate...",
         "search_vehicle_or_customer": "Quick search by plate or customer name...",
         "select_customer_first": "Please select a customer first",
         "selected_vehicle": "Selected Vehicle",
@@ -39,8 +54,13 @@
         },
         "subtitle": "Schedule, check in and convert appointments to work orders",
         "tech": "Technician",
+        "this_week": "This week",
+        "timeline_view": "Timeline",
         "title": "Appointments",
-        "total_count": "{count} appointments",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "total_count": "appointments",
+        "unassigned_bay": "Unassigned Bay",
         "vehicle": "Vehicle",
         "vehicle_placeholder": "Select vehicle..."
     },
@@ -479,6 +499,7 @@
         "unit_price": "Unit price",
         "unknown": "Unknown",
         "unsaved_changes": "Unsaved Changes",
+        "type_to_search": "Type at least 2 characters to search...",
         "unsaved_changes_message": "You have unsaved changes. Are you sure you want to close?",
         "until_now": "Until now",
         "update": "Update",
@@ -516,7 +537,8 @@
         "yes": "Yes",
         "yes_close": "Yes, Close",
         "page": "Page",
-        "available_now": "Available Now"
+        "available_now": "Available Now",
+        "submit": "Submit"
     },
     "communications": {
         "appointment_messages": {
@@ -561,7 +583,7 @@
                 "reminder_24h": "Reminder (24 hours)",
                 "reminder_2h": "Reminder (2 hours)"
             },
-            "results_count": "{count} entries",
+            "results_count": "entries",
             "retry": {
                 "rejected": "This message can no longer be resent. The status may have changed, or the appointment may have been cancelled or moved.",
                 "success": "The message has been queued for resend."
@@ -637,13 +659,13 @@
             "add": "Add branch",
             "branch_name": "Center Name",
             "center_type": "Center Type",
-            "center_type_branch": "Sub Branch",
-            "center_type_main": "Main Branch",
+            "center_type_branch": "Branch",
+            "center_type_main": "Main Center",
             "center_type_warehouse": "Warehouse",
             "center_type_workshop": "Workshop",
             "city": "City",
             "coming_soon": "Full branch management (add/edit/delete) will be available soon",
-            "count_label": "{count} branch(es)",
+            "count_label": "branch(es)",
             "created_successfully": "Branch added successfully",
             "district": "District",
             "edit": "Edit branch",
@@ -793,6 +815,7 @@
             "postal_code": "Zip code",
             "saudi_arabia": "Kingdom of Saudi Arabia",
             "street": "Street name",
+            "tenant_id": "Company ID",
             "trade_name": "Trade name",
             "vat_help": "The tax number is fetched from the main company file and cannot be modified here",
             "vat_number": "Tax number"
@@ -1685,7 +1708,6 @@
         "period_today": "Today",
         "refresh": "Refresh",
         "auto_refresh": "Auto-refresh",
-        "customize": "Customize",
         "bays_utilization": "Service Bays Utilization",
         "bays_booked_today": "{booked} of {total} bays booked today",
         "on_time_delivery": "On-Time Delivery",
@@ -1731,7 +1753,6 @@
         "recent_invoices": "Recent Invoices",
         "recent_registrations": "Recent Registrations",
         "recent_work_orders": "Recent Work Orders",
-        "refresh": "Refresh",
         "reports": "Reports",
         "reset": "Reset",
         "revenue_chart_title": "Revenue",
@@ -2594,7 +2615,8 @@
                 "completed_tasks": "Completed Tasks",
                 "hours_unit": "hrs",
                 "efficiency_rate": "Efficiency Rate",
-                "first_time_fix_rate": "First-Time Fix",
+                "first_time_fix_rate": "Non-Warranty Share",
+                "non_warranty_share": "Non-Warranty Share",
                 "labor_hours_month": "Labor Hours (Month)",
                 "month_commission": "Month Commission",
                 "late_days": "Late Days",
@@ -3679,7 +3701,7 @@
         "quote_created": "New price offer",
         "quote_rejected": "The quote was rejected",
         "title": "Notifications",
-        "unread_count": "{count} Unread notification",
+        "unread_count": "Unread notification",
         "view_all": "View all notifications",
         "work_order_created": "New work order",
         "work_order_status_changed": "Update the status of a work order"
@@ -4197,6 +4219,7 @@
             "title": "User Permissions"
         },
         "photo": {
+            "deleted": "Profile photo deleted successfully",
             "hr_locked": "Image management is done via the HR file",
             "success": "Profile photo updated successfully",
             "update": "Update photo"
@@ -6050,6 +6073,21 @@
                 "rental": "Car Rental",
                 "corporate": "Partner"
             }
+        },
+        "hub_cards": {
+            "payments": "Track receipts, disbursements, payment methods, and collection details.",
+            "tickets": "Analyze work orders, statuses, turnaround times, and service revenue.",
+            "services": "Performance of top-requested services, packages, and department revenue.",
+            "invoices": "Summary of sales invoices, VAT totals, payments, and outstanding balances.",
+            "purchase_invoices": "Track purchase invoices, supplier payables, and input VAT.",
+            "stock_activities": "Inventory movement log across receiving, issuing, and adjustments.",
+            "customers": "Customer profiles, vehicle history, billing, and outstanding balances.",
+            "suppliers": "Overview of supplier transactions, purchase orders, and payables.",
+            "employees": "Technician and staff productivity, labor hours, and commissions.",
+            "vehicles": "Vehicle registry, maintenance history, and inspection records.",
+            "financial_summary": "Comprehensive overview of revenues, expenses, and net profit.",
+            "cash_register": "Track cash drawer movements, shifts, and over/short balances.",
+            "tax_periods": "Summary of VAT liabilities and tax declaration preparation."
         }
     },
     "roles": {
@@ -7089,8 +7127,9 @@
                 "renew_now": "Renew now"
             },
             "card": {
-                "auto_renew_disabled": "Auto-renewal disabled",
-                "auto_renew_enabled": "Auto-renewal enabled",
+                "auto_renew_disabled": "Automatic renewal invoicing disabled",
+                "auto_renew_enabled": "Automatic renewal invoicing enabled",
+                "auto_renew_hint": "At expiry, a renewal invoice is issued and emailed for manual payment (card or bank transfer) with no auto-debit.",
                 "billing_yearly": "year",
                 "cancel_subscription": "Cancel Renewal / Subscription",
                 "current_label": "Current subscription",
@@ -8518,6 +8557,12 @@
         "title": "Something Great is Coming"
     },
     "tenant_site": {
+        "public": {
+            "all_rights_reserved": "© All rights reserved.",
+            "featured_service": "⭐ Featured Service",
+            "inquire": "Inquire",
+            "whatsapp_service_inquiry": "Hello, I would like to inquire about service: {name}"
+        },
         "admin": {
             "announcement": {
                 "enable": "Enable announcement bar at top of website",

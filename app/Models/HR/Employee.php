@@ -24,7 +24,7 @@ class Employee extends Model
         'default_shift_id', 'nationality_id', 'national_id', 'national_id_expiry', 'passport_number',
         'passport_expiry', 'border_entry_number', 'border_port', 'sponsor_name', 'profession_on_id',
         'insurance_company', 'insurance_card_number', 'insurance_policy_number', 'insurance_expiry',
-        'insurance_classification', 'insurance_details', 'base_salary', 'commission_enabled', 'commission_type',
+        'insurance_classification', 'insurance_details', 'base_salary', 'housing_allowance', 'commission_enabled', 'commission_type',
         'commission_rate', 'status', 'termination_date', 'termination_reason', 'notes', 'biometric_id',
         'bank_name', 'bank_iban', 'bank_account_number', 'bank_notes', 'gosi_rate',
     ];
@@ -32,7 +32,7 @@ class Employee extends Model
     protected $casts = [
         'hire_date' => 'date:Y-m-d', 'contract_end_date' => 'date:Y-m-d', 'termination_date' => 'date:Y-m-d',
         'birth_date' => 'date:Y-m-d', 'national_id_expiry' => 'date:Y-m-d', 'passport_expiry' => 'date:Y-m-d',
-        'insurance_expiry' => 'date:Y-m-d', 'base_salary' => 'float', 'commission_enabled' => 'boolean',
+        'insurance_expiry' => 'date:Y-m-d', 'base_salary' => 'float', 'housing_allowance' => 'float', 'commission_enabled' => 'boolean',
         'commission_rate' => 'float',
     ];
 
@@ -230,6 +230,54 @@ class Employee extends Model
         }
 
         return round($total, 2);
+    }
+
+    // Calculate housing allowance for EOSB wage base (direct housing_allowance + housing-flagged allowances)
+    public function calculateHousingAllowance(): float
+    {
+        $total = (float) ($this->housing_allowance ?? 0);
+
+        foreach ($this->allowances as $allowance) {
+            $nameAr = (string) ($allowance->name_ar ?? '');
+            $nameEn = strtolower((string) ($allowance->name_en ?? ''));
+            $isHousing = (bool) ($allowance->is_housing ?? false)
+                || str_contains($nameAr, 'سكن')
+                || str_contains($nameEn, 'housing');
+
+            if (! $isHousing) {
+                continue;
+            }
+
+            $amount = (float) ($allowance->pivot->custom_amount ?? $allowance->amount ?? 0);
+
+            if ($allowance->type === 'percentage') {
+                $base = $this->getCalculationBase($allowance->calculation_base);
+                $total += ($base * $amount / 100);
+            } else {
+                $total += $amount;
+            }
+        }
+
+        return round($total, 2);
+    }
+
+    public function isNonSaudi(): bool
+    {
+        if (! $this->nationality_id) {
+            return false;
+        }
+
+        $nationality = $this->relationLoaded('nationality')
+            ? $this->nationality
+            : $this->nationality()->first();
+
+        if ($nationality === null) {
+            return false;
+        }
+
+        $code = strtoupper((string) ($nationality->code ?? ''));
+
+        return $code !== '' && $code !== 'SA' && $code !== 'SAU';
     }
 
     // Calculate total deductions for this employee (excluding GOSI)

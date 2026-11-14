@@ -84,21 +84,30 @@
                         </svg>
                         <span>{{ $t('hr.employees.deactivate') }}</span>
                     </button>
-                    <button
+                    <AppButton
                         v-else
                         @click="toggleStatus('active')"
-                        class="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+                        variant="primary"
+                        size="sm"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-500/20"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                        <span>{{ $t('hr.employees.activate') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('hr.employees.activate') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -408,11 +417,13 @@
                                 <span
                                     class="px-3 py-1.5 rounded-xl bg-success-soft text-success font-semibold"
                                 >
-                                    {{ $t('hr.employees.profile.first_time_fix_rate') }}:
+                                    {{ $t('hr.employees.profile.non_warranty_share') }}:
                                     <span class="font-mono">
                                         {{
                                             toEnglish(
-                                                workOrdersSummary?.first_time_fix_rate ?? 100
+                                                workOrdersSummary?.non_warranty_share ??
+                                                    workOrdersSummary?.first_time_fix_rate ??
+                                                    100
                                             )
                                         }}%
                                     </span>
@@ -488,6 +499,7 @@ import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';

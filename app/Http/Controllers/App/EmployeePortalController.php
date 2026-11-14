@@ -18,7 +18,10 @@ use App\Models\WorkOrderPhoto;
 use App\Services\WorkOrderLaborService;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use RuntimeException;
@@ -198,10 +201,13 @@ class EmployeePortalController extends Controller
         $validated = $request->validate([
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
         ]);
 
-        if ($errorResponse = $this->verifyGeofence($employee, $validated)) {
-            return $errorResponse;
+        $geofenceCheck = $this->verifyGeofence($employee, $validated, 'clock_in');
+
+        if ($geofenceCheck['response'] !== null) {
+            return $geofenceCheck['response'];
         }
 
         $today = Carbon::today()->toDateString();
@@ -223,8 +229,24 @@ class EmployeePortalController extends Controller
 
         $attendance->check_in = $now->format('H:i');
         $attendance->status = 'present';
+        $attendance->latitude = $geofenceCheck['latitude'];
+        $attendance->longitude = $geofenceCheck['longitude'];
+        $attendance->accuracy = $geofenceCheck['accuracy'];
+        $attendance->distance_meters = $geofenceCheck['distance_meters'];
+        $attendance->geofence_verified = $geofenceCheck['geofence_verified'];
+        $attendance->low_confidence = $geofenceCheck['low_confidence'];
         $attendance->calculateTimes();
         $attendance->save();
+
+        $this->recordGeofenceAuditLog($employee, 'clock_in', 'accepted', $geofenceCheck, $attendance->id);
+        $attendance->logActivity('clock_in', [
+            'latitude' => $attendance->latitude,
+            'longitude' => $attendance->longitude,
+            'accuracy' => $attendance->accuracy,
+            'distance_meters' => $attendance->distance_meters,
+            'geofence_verified' => $attendance->geofence_verified,
+            'low_confidence' => $attendance->low_confidence,
+        ]);
 
         return back()->with('success', __('hr.attendance.checked_in_success'));
     }
@@ -240,10 +262,13 @@ class EmployeePortalController extends Controller
         $validated = $request->validate([
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
         ]);
 
-        if ($errorResponse = $this->verifyGeofence($employee, $validated)) {
-            return $errorResponse;
+        $geofenceCheck = $this->verifyGeofence($employee, $validated, 'clock_out');
+
+        if ($geofenceCheck['response'] !== null) {
+            return $geofenceCheck['response'];
         }
 
         $today = Carbon::today()->toDateString();
@@ -260,8 +285,27 @@ class EmployeePortalController extends Controller
         }
 
         $attendance->check_out = Carbon::now()->format('H:i');
+
+        if ($geofenceCheck['latitude'] !== null) {
+            $attendance->latitude = $geofenceCheck['latitude'];
+            $attendance->longitude = $geofenceCheck['longitude'];
+            $attendance->accuracy = $geofenceCheck['accuracy'];
+            $attendance->distance_meters = $geofenceCheck['distance_meters'];
+            $attendance->geofence_verified = $geofenceCheck['geofence_verified'];
+            $attendance->low_confidence = $attendance->low_confidence || $geofenceCheck['low_confidence'];
+        }
         $attendance->calculateTimes();
         $attendance->save();
+
+        $this->recordGeofenceAuditLog($employee, 'clock_out', 'accepted', $geofenceCheck, $attendance->id);
+        $attendance->logActivity('clock_out', [
+            'latitude' => $attendance->latitude,
+            'longitude' => $attendance->longitude,
+            'accuracy' => $attendance->accuracy,
+            'distance_meters' => $attendance->distance_meters,
+            'geofence_verified' => $attendance->geofence_verified,
+            'low_confidence' => $attendance->low_confidence,
+        ]);
 
         return back()->with('success', __('hr.attendance.checked_out_success'));
     }
@@ -308,44 +352,120 @@ class EmployeePortalController extends Controller
         return back()->with('success', __('hr.attendance.correction_submitted'));
     }
 
-    private function verifyGeofence(Employee $employee, array $validated)
+    /**
+     * Verify geofence and compute telemetry (coordinates, distance, accuracy, low_confidence).
+     *
+     * @param array<string, mixed> $validated
+     * @return array{
+     *     response: RedirectResponse|null,
+     *     latitude: float|null,
+     *     longitude: float|null,
+     *     accuracy: float|null,
+     *     distance_meters: float|null,
+     *     radius_meters: int|null,
+     *     geofence_verified: bool,
+     *     low_confidence: bool,
+     *     rejection_reason: string|null
+     * }
+     */
+    private function verifyGeofence(Employee $employee, array $validated, string $action = 'clock_in'): array
     {
+        $latitude = isset($validated['latitude']) && $validated['latitude'] !== null ? (float) $validated['latitude'] : null;
+        $longitude = isset($validated['longitude']) && $validated['longitude'] !== null ? (float) $validated['longitude'] : null;
+        $accuracy = isset($validated['accuracy']) && $validated['accuracy'] !== null ? (float) $validated['accuracy'] : null;
+        $lowConfidence = $accuracy !== null && $accuracy > 100.0;
+
         $settings = AttendanceSettings::getForCenter((int) $employee->center_id);
-
-        if (! $settings->geofence_enabled) {
-            return null;
-        }
-
         $coords = $settings->resolvedCoordinates();
-
-        if (! $coords) {
-            return null;
-        }
-
-        if (! isset($validated['latitude'], $validated['longitude'])) {
-            return back()
-                ->withErrors(['location' => __('hr.attendance.location_required')])
-                ->with('error', __('hr.attendance.location_required'));
-        }
-
-        $distance = $settings->distanceMetersFrom(
-            (float) $validated['latitude'],
-            (float) $validated['longitude']
-        );
+        $distance = ($coords && $latitude !== null && $longitude !== null)
+            ? $settings->distanceMetersFrom($latitude, $longitude)
+            : null;
         $radius = (int) ($settings->geofence_radius_meters ?? 150);
 
+        $telemetry = [
+            'response' => null,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'accuracy' => $accuracy,
+            'distance_meters' => $distance,
+            'radius_meters' => $radius,
+            'geofence_verified' => false,
+            'low_confidence' => $lowConfidence,
+            'rejection_reason' => null,
+        ];
+
+        if (! $settings->geofence_enabled || ! $coords) {
+            return $telemetry;
+        }
+
+        if ($latitude === null || $longitude === null) {
+            $telemetry['rejection_reason'] = 'location_required';
+            $this->recordGeofenceAuditLog($employee, $action, 'rejected', $telemetry, null);
+
+            $telemetry['response'] = back()
+                ->withErrors(['location' => __('hr.attendance.location_required')])
+                ->with('error', __('hr.attendance.location_required'));
+
+            return $telemetry;
+        }
+
         if ($distance !== null && $distance > $radius) {
+            $telemetry['rejection_reason'] = 'outside_geofence';
+            $this->recordGeofenceAuditLog($employee, $action, 'rejected', $telemetry, null);
+
             $message = __('hr.attendance.outside_geofence', [
                 'distance' => (int) round($distance),
                 'radius' => $radius,
             ]);
 
-            return back()
+            $telemetry['response'] = back()
                 ->withErrors(['location' => $message])
                 ->with('error', $message);
+
+            return $telemetry;
         }
 
-        return null;
+        $telemetry['geofence_verified'] = true;
+
+        return $telemetry;
+    }
+
+    /**
+     * Persist geofence attempt (accepted or rejected) to hr_attendance_geofence_logs and application logs.
+     *
+     * @param array<string, mixed> $telemetry
+     */
+    private function recordGeofenceAuditLog(
+        Employee $employee,
+        string $action,
+        string $status,
+        array $telemetry,
+        ?int $attendanceId = null
+    ): void {
+        $payload = [
+            'tenant_id' => $employee->tenant_id,
+            'center_id' => $employee->center_id,
+            'employee_id' => $employee->id,
+            'attendance_id' => $attendanceId,
+            'action' => $action,
+            'status' => $status,
+            'latitude' => $telemetry['latitude'],
+            'longitude' => $telemetry['longitude'],
+            'accuracy' => $telemetry['accuracy'],
+            'distance_meters' => $telemetry['distance_meters'],
+            'radius_meters' => $telemetry['radius_meters'],
+            'geofence_verified' => (bool) $telemetry['geofence_verified'],
+            'low_confidence' => (bool) $telemetry['low_confidence'],
+            'rejection_reason' => $telemetry['rejection_reason'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        DB::table('hr_attendance_geofence_logs')->insert($payload);
+
+        if ($status === 'rejected') {
+            Log::warning('hr.attendance.geofence_rejected', $payload);
+        }
     }
 
     /**

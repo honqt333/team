@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace App\Models\HR;
 
 use App\Models\Center;
-use App\Models\Concerns\TenantScoped;
+use App\Models\Concerns\CenterScoped;
 use App\Models\Tenant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
+// @bypass-tenancy-scanner - Scoped via CenterScoped trait (includes tenant_id + center_id)
 class Attendance extends Model
 {
-    use SoftDeletes, TenantScoped;
+    use CenterScoped, SoftDeletes;
 
     protected $table = 'hr_attendances';
 
@@ -30,6 +32,12 @@ class Attendance extends Model
         'early_leave_minutes',
         'overtime_minutes',
         'notes',
+        'latitude',
+        'longitude',
+        'accuracy',
+        'distance_meters',
+        'geofence_verified',
+        'low_confidence',
     ];
 
     protected $casts = [
@@ -39,7 +47,24 @@ class Attendance extends Model
         'late_minutes' => 'integer',
         'early_leave_minutes' => 'integer',
         'overtime_minutes' => 'integer',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'accuracy' => 'float',
+        'distance_meters' => 'float',
+        'geofence_verified' => 'boolean',
+        'low_confidence' => 'boolean',
     ];
+
+    /**
+     * Resolve route binding within the tenant scope so cross-branch requests
+     * reach AttendancePolicy and return 403 Forbidden while cross-tenant requests return 404.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return static::withoutGlobalScope('center_scoped')
+            ->where($field ?? $this->getRouteKeyName(), $value)
+            ->first();
+    }
 
     public function tenant(): BelongsTo
     {
@@ -69,7 +94,7 @@ class Attendance extends Model
         }
 
         // Get center settings for grace period
-        $settings = AttendanceSettings::getForCenter($this->center_id);
+        $settings = AttendanceSettings::getForCenter((int) $this->center_id);
         $gracePeriod = $settings->grace_period_minutes;
 
         $this->late_minutes = 0;
@@ -86,6 +111,7 @@ class Attendance extends Model
 
         $shiftStartTime = $shift->start_time;
         $shiftEndTime = $shift->end_time;
+        $shiftStart = null;
 
         // حساب التأخير
         if ($this->check_in && $shiftStartTime) {
@@ -101,6 +127,7 @@ class Attendance extends Model
 
         // حساب الانصراف المبكر والوقت الإضافي
         if ($this->check_out && $shiftEndTime) {
+            $shiftStart ??= $shiftStartTime ? Carbon::parse($this->date->format('Y-m-d').' '.$shiftStartTime) : Carbon::parse($this->date->format('Y-m-d').' 00:00');
             $shiftEnd = Carbon::parse($this->date->format('Y-m-d').' '.$shiftEndTime);
             $checkOut = Carbon::parse($this->date->format('Y-m-d').' '.Carbon::parse($this->check_out)->format('H:i'));
 
@@ -117,5 +144,15 @@ class Attendance extends Model
                 $this->overtime_minutes = abs($checkOut->diffInMinutes($shiftEnd));
             }
         }
+    }
+
+    public function logActivity(string $action, array $context = []): void
+    {
+        Log::notice('attendance.'.$action, array_merge($context, [
+            'tenant_id' => $this->tenant_id,
+            'center_id' => $this->center_id,
+            'attendance_id' => $this->id,
+            'user_id' => auth()->id(),
+        ]));
     }
 }

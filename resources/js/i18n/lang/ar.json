@@ -1,7 +1,12 @@
 {
     "appointments": {
         "all": "الكل",
+        "all_dates": "كل التواريخ",
+        "auto_end_hint": "يُحسب تلقائياً من مدة الخدمات المختارة عند تحديد وقت البدء",
         "bay": "الباي",
+        "calendar_day_bays": "يومي (البايات)",
+        "calendar_month": "شهري",
+        "calendar_week": "أسبوعي",
         "cancel": "إلغاء",
         "cancel_reason_placeholder": "سبب الإلغاء",
         "cancel_title": "إلغاء الموعد",
@@ -9,22 +14,32 @@
         "clear_filters": "مسح الفلاتر",
         "confirm_convert": "تحويل هذا الموعد إلى أمر عمل؟",
         "confirm_no_show": "تأكيد تسجيل عدم الحضور؟",
+        "conflict_warning": "تنبيه: يوجد تداخل زمني مع موعد آخر في نفس الباي أو لنفس الفني",
         "convert": "تحويل إلى أمر عمل",
         "customer": "العميل",
         "customer_placeholder": "اختر العميل...",
+        "edit": "تعديل الموعد",
         "empty": "لا توجد مواعيد بهذه الفلاتر",
+        "estimated_duration": "المدة المقدرة",
         "estimated_end_at": "وقت الانتهاء المتوقع",
         "filter_bay": "الباي",
         "filter_date": "التاريخ",
         "filter_status": "الحالة",
         "filter_tech": "الفني",
+        "hour": "الساعة",
+        "minutes_short": "د",
+        "more_count": "+{count} أخرى",
         "new": "موعد جديد",
+        "next": "التالي",
         "no_bay": "بدون باي محدد",
+        "no_appointments_in_bay": "لا توجد مواعيد في هذا الباي",
         "no_show": "لم يحضر",
         "no_tech": "بدون فني محدد",
         "no_vehicles": "لا توجد مركبات مسجلة لهذا العميل",
         "notes": "ملاحظات",
+        "prev": "السابق",
         "scheduled_at": "وقت البدء",
+        "search_placeholder": "ابحث بالعميل أو الجوال أو اللوحة...",
         "search_vehicle_or_customer": "بحث سريع باللوحة أو اسم العميل...",
         "select_customer_first": "يرجى اختيار العميل أولاً",
         "selected_vehicle": "المركبة المحددة",
@@ -39,8 +54,13 @@
         },
         "subtitle": "حجز المواعيد، تسجيل الوصول، وتحويلها إلى أوامر عمل",
         "tech": "الفني",
+        "this_week": "هذا الأسبوع",
+        "timeline_view": "الجدول الزمني",
         "title": "المواعيد",
-        "total_count": "{count} موعد",
+        "today": "اليوم",
+        "tomorrow": "غداً",
+        "total_count": "موعد",
+        "unassigned_bay": "بدون باي",
         "vehicle": "المركبة",
         "vehicle_placeholder": "اختر المركبة..."
     },
@@ -479,6 +499,7 @@
         "unit_price": "سعر الوحدة",
         "unknown": "غير معروف",
         "unsaved_changes": "تغييرات غير محفوظة",
+        "type_to_search": "اكتب حرفين على الأقل للبحث...",
         "unsaved_changes_message": "لم يتم حفظ التغييرات. هل أنت متأكد من إغلاق هذا النموذج؟",
         "until_now": "حتى الآن",
         "update": "تحديث",
@@ -516,7 +537,8 @@
         "yes": "نعم",
         "yes_close": "نعم، إغلاق",
         "page": "صفحة",
-        "available_now": "متاح الآن"
+        "available_now": "متاح الآن",
+        "submit": "إرسال"
     },
     "communications": {
         "appointment_messages": {
@@ -561,7 +583,7 @@
                 "reminder_24h": "تذكير قبل 24 ساعة",
                 "reminder_2h": "تذكير قبل ساعتين"
             },
-            "results_count": "{count} سجل",
+            "results_count": "سجل",
             "retry": {
                 "rejected": "لا يمكن إعادة إرسال هذه الرسالة. قد تكون الحالة قد تغيّرت أو الموعد أُلغي أو نُقل.",
                 "success": "تمت إعادة إرسال الرسالة إلى الطابور."
@@ -637,13 +659,13 @@
             "add": "إضافة فرع",
             "branch_name": "اسم المركز",
             "center_type": "نوع المركز",
-            "center_type_branch": "فرع فرعي",
-            "center_type_main": "الفرع الرئيسي",
+            "center_type_branch": "فرع",
+            "center_type_main": "المركز الرئيسي",
             "center_type_warehouse": "مستودع",
             "center_type_workshop": "ورشة",
             "city": "المدينة",
             "coming_soon": "إدارة الفروع بشكل كامل (إضافة/تعديل/حذف) ستكون متاحة قريباً",
-            "count_label": "{count} فرع",
+            "count_label": "فرع",
             "created_successfully": "تم إضافة الفرع بنجاح",
             "district": "الحي",
             "edit": "تعديل الفرع",
@@ -793,6 +815,7 @@
             "postal_code": "الرمز البريدي",
             "saudi_arabia": "المملكة العربية السعودية",
             "street": "اسم الشارع",
+            "tenant_id": "رقم الشركة",
             "trade_name": "الاسم التجاري",
             "vat_help": "يتم جلب الرقم الضريبي من ملف الشركة الرئيسي ولا يمكن تعديله هنا",
             "vat_number": "الرقم الضريبي"
@@ -1644,7 +1667,7 @@
         "closed_today": "أُنجزت اليوم",
         "completed_short": ":n منجزة",
         "completed_today": "مكتملة اليوم",
-        "customize": "تخصيص",
+        "customize": "تخصيص اللوحة",
         "customize_hint": "اسحب وأفلت لتنظيم أو إخفاء عناصر لوحة التحكم",
         "daily_avg": "متوسط يومي",
         "drag_to_reorder": "اسحب لإعادة الترتيب",
@@ -1685,7 +1708,6 @@
         "period_today": "اليوم",
         "refresh": "تحديث",
         "auto_refresh": "تحديث تلقائي",
-        "customize": "تخصيص اللوحة",
         "bays_utilization": "إشغال أحواض الصيانة",
         "bays_booked_today": "{booked} من {total} حوض محجوز اليوم",
         "on_time_delivery": "التسليم في الموعد",
@@ -1731,7 +1753,6 @@
         "recent_invoices": "أحدث الفواتير",
         "recent_registrations": "التسجيلات الأخيرة",
         "recent_work_orders": "أحدث كروت العمل",
-        "refresh": "تحديث",
         "reports": "التقارير",
         "reset": "إعادة تعيين",
         "revenue_chart_title": "الإيرادات",
@@ -2594,7 +2615,8 @@
                 "completed_tasks": "مهام منجزة",
                 "hours_unit": "ساعة",
                 "efficiency_rate": "كفاءة الإنجاز",
-                "first_time_fix_rate": "جودة الإصلاح الأول",
+                "first_time_fix_rate": "نسبة الأعمال غير الضمانية",
+                "non_warranty_share": "نسبة الأعمال غير الضمانية",
                 "labor_hours_month": "ساعات العمل (الشهر)",
                 "month_commission": "عمولات الشهر",
                 "late_days": "أيام التأخير",
@@ -3679,7 +3701,7 @@
         "quote_created": "عرض سعر جديد",
         "quote_rejected": "تم رفض عرض السعر",
         "title": "الإشعارات",
-        "unread_count": "{count} إشعار غير مقروء",
+        "unread_count": "إشعار غير مقروء",
         "view_all": "عرض جميع الإشعارات",
         "work_order_created": "أمر عمل جديد",
         "work_order_status_changed": "تحديث حالة أمر عمل"
@@ -4197,6 +4219,7 @@
             "title": "صلاحيات المستخدم"
         },
         "photo": {
+            "deleted": "تم حذف الصورة الشخصية بنجاح",
             "hr_locked": "تتم إدارة الصورة عبر ملف الموارد البشرية",
             "success": "تم تحديث الصورة الشخصية بنجاح",
             "update": "تحديث الصورة الشخصية"
@@ -6053,6 +6076,21 @@
                 "rental": "تأجير سيارات",
                 "corporate": "شريك"
             }
+        },
+        "hub_cards": {
+            "payments": "تتبع المقبوضات والمدفوعات وطرق السداد وتفاصيل التحصيل.",
+            "tickets": "تحليل كروت العمل وحالاتها وأوقات الإنجاز وإيرادات الصيانة.",
+            "services": "أداء الخدمات والباقات الأكثر طلباً وإيرادات كل قسم.",
+            "invoices": "كشف فواتير المبيعات والضرائب والمدفوعات والمبالغ المستحقة.",
+            "purchase_invoices": "متابعة فواتير المشتريات ومستحقات الموردين وضريبة المدخلات.",
+            "stock_activities": "سجل حركات المخزون من توريد وصرف وتعديل وجرد القطع.",
+            "customers": "بيانات العملاء وسجل مركباتهم وفواتيرهم والأرصدة المستحقة.",
+            "suppliers": "ملخص تعاملات الموردين وأوامر الشراء والرصيد الدائن.",
+            "employees": "إنتاجية الفنيين والموظفين وساعات العمل والعمولات.",
+            "vehicles": "سجل المركبات وتاريخ الصيانة والفحوصات لكل مركبة.",
+            "financial_summary": "نظرة شاملة على الإيرادات والمصروفات وصافي الأرباح.",
+            "cash_register": "متابعة حركة الصندوق النقدي والورديات والعجز والزيادة.",
+            "tax_periods": "ملخص الضرائب المستحقة وإعداد الإقرار الضريبي للفترات."
         }
     },
     "roles": {
@@ -7092,8 +7130,9 @@
                 "renew_now": "جدّد الاشتراك الآن"
             },
             "card": {
-                "auto_renew_disabled": "التجديد التلقائي معطّل",
-                "auto_renew_enabled": "التجديد التلقائي مفعّل",
+                "auto_renew_disabled": "إصدار فاتورة التجديد التلقائي معطّل",
+                "auto_renew_enabled": "إصدار فاتورة التجديد التلقائي مفعّل",
+                "auto_renew_hint": "عند انتهاء المدة تُصدر فاتورة تجديد وترسل لبريدك للسداد يدوياً (بطاقة أو تحويل بنكي) دون أي خصم تلقائي.",
                 "billing_yearly": "سنوي",
                 "cancel_subscription": "إلغاء التجديد / الاشتراك",
                 "current_label": "اشتراكك الحالي",
@@ -8521,6 +8560,12 @@
         "title": "شيء رائع قادم قريباً"
     },
     "tenant_site": {
+        "public": {
+            "all_rights_reserved": "© جميع الحقوق محفوظة.",
+            "featured_service": "⭐ خدمة مميزة",
+            "inquire": "استفسار",
+            "whatsapp_service_inquiry": "مرحباً، أود الاستفسار عن خدمة: {name}"
+        },
         "admin": {
             "announcement": {
                 "enable": "تفعيل شريط الإعلانات أعلى الموقع",

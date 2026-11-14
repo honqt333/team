@@ -11,15 +11,24 @@ use Carbon\Carbon;
 
 class TechnicianCommissionService
 {
+    public const MAX_PERCENTAGE_COMMISSION_RATE = 100.0;
+
+    public const MAX_FIXED_COMMISSION_RATE = 50000.0;
+
     /**
      * Calculate technician productivity KPIs and commission for a payroll period.
+     *
+     * Note on `non_warranty_share`:
+     * Measures the percentage of completed service items that are billable (non-warranty) out of
+     * total completed items (`billable_items_count / total_items_count * 100`).
+     * Replaces the deprecated `first_time_fix_rate` payload key.
      *
      * @return array{
      *     commission_amount: float,
      *     billable_items_count: int,
      *     warranty_items_count: int,
      *     billable_revenue: float,
-     *     first_time_fix_rate: float,
+     *     non_warranty_share: float,
      *     estimated_hours: float,
      *     actual_hours: float,
      *     efficiency_rate: float|null
@@ -68,7 +77,7 @@ class TechnicianCommissionService
         }
         $billableRevenue = round($billableRevenue, 2);
 
-        $firstTimeFixRate = $totalCount > 0
+        $nonWarrantyShare = $totalCount > 0
             ? round(($billableCount / $totalCount) * 100, 1)
             : 100.0;
 
@@ -93,12 +102,16 @@ class TechnicianCommissionService
             : null;
 
         $commissionAmount = 0.0;
-        $rate = (float) ($employee->commission_rate ?? 0);
+        $rawRate = max(0.0, (float) ($employee->commission_rate ?? 0));
 
-        if ($employee->commission_enabled && $rate > 0 && $billableCount > 0) {
-            $commissionAmount = $employee->commission_type === 'fixed'
-                ? round($billableCount * $rate, 2)
-                : round($billableRevenue * ($rate / 100.0), 2);
+        if ($employee->commission_enabled && $rawRate > 0 && $billableCount > 0) {
+            if ($employee->commission_type === 'fixed') {
+                $rate = min($rawRate, self::MAX_FIXED_COMMISSION_RATE);
+                $commissionAmount = round($billableCount * $rate, 2);
+            } else {
+                $rate = min($rawRate, self::MAX_PERCENTAGE_COMMISSION_RATE);
+                $commissionAmount = round($billableRevenue * ($rate / 100.0), 2);
+            }
         }
 
         return [
@@ -106,7 +119,7 @@ class TechnicianCommissionService
             'billable_items_count' => $billableCount,
             'warranty_items_count' => $warrantyCount,
             'billable_revenue' => $billableRevenue,
-            'first_time_fix_rate' => $firstTimeFixRate,
+            'non_warranty_share' => $nonWarrantyShare,
             'estimated_hours' => $estimatedHours,
             'actual_hours' => $actualHours,
             'efficiency_rate' => $efficiencyRate,
@@ -120,7 +133,7 @@ class TechnicianCommissionService
             'billable_items_count' => 0,
             'warranty_items_count' => 0,
             'billable_revenue' => 0.0,
-            'first_time_fix_rate' => 100.0,
+            'non_warranty_share' => 100.0,
             'estimated_hours' => 0.0,
             'actual_hours' => 0.0,
             'efficiency_rate' => null,

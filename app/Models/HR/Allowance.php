@@ -23,6 +23,7 @@ class Allowance extends Model
         'name_en',
         'type',
         'amount',
+        'is_housing',
         'calculation_base',
         'is_flexible',
         'is_active',
@@ -31,6 +32,7 @@ class Allowance extends Model
 
     protected $casts = [
         'amount' => 'float',
+        'is_housing' => 'boolean',
         'is_flexible' => 'boolean',
         'is_active' => 'boolean',
     ];

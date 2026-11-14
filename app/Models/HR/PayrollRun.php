@@ -7,7 +7,6 @@ namespace App\Models\HR;
 use App\Models\Center;
 use App\Models\CompanyTransaction;
 use App\Models\Concerns\CenterScoped;
-use App\Models\Concerns\TenantScoped;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,9 +15,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 
+// @bypass-tenancy-scanner - Scoped via CenterScoped trait (includes tenant_id + center_id)
 class PayrollRun extends Model
 {
-    use CenterScoped, TenantScoped;
+    use CenterScoped;
     use HasFactory, SoftDeletes;
 
     protected $table = 'hr_payroll_runs';

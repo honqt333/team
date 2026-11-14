@@ -60,31 +60,6 @@ class TenancyContext
     }
 
     /**
-     * Whether the current request is targeting the system administration panel or public routes.
-     */
-    public static function isSystemOrPublicContext(): bool
-    {
-        if (auth('admin')->check()) {
-            return true;
-        }
-
-        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
-            return true;
-        }
-
-        if (! app()->bound('request')) {
-            return false;
-        }
-
-        $request = request();
-
-        return $request->is('system/*')
-            || $request->is('system')
-            || $request->is('portal/*')
-            || $request->is('site/*');
-    }
-
-    /**
      * Get the currently authenticated user.
      */
     public static function user(): ?User
@@ -101,7 +76,7 @@ class TenancyContext
             return self::$overrideTenantId;
         }
 
-        if (request()->is('system/*') || request()->is('system')) {
+        if (app()->bound('request') && (request()->is('system/*') || request()->is('system'))) {
             return null;
         }
 

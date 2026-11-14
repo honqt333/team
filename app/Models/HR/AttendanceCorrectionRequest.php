@@ -34,11 +34,21 @@ class AttendanceCorrectionRequest extends Model
         'requested_check_in',
         'requested_check_out',
         'reason',
-        'status',
-        'reviewed_by',
-        'reviewed_at',
         'review_notes',
     ];
+
+    /**
+     * Allow setting initial status (e.g. STATUS_PENDING) on unpersisted records while blocking mass assignment of status/reviewed_* on existing records.
+     */
+    public function fill(array $attributes)
+    {
+        if (! $this->exists && array_key_exists('status', $attributes)) {
+            $this->setAttribute('status', $attributes['status']);
+            unset($attributes['status']);
+        }
+
+        return parent::fill($attributes);
+    }
 
     protected $casts = [
         'date' => 'date:Y-m-d',

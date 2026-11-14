@@ -295,6 +295,7 @@ return [
         'total_deductions' => 'Total Deductions',
         'total_net' => 'Total Net',
         'total_salaries' => 'Total Salaries',
+        'transferred_attendance_note' => 'Transferred — includes attendance records from previous branch (:centers)',
     ],
     'settings' => [
         'allowances' => [

@@ -1,1 +1,0 @@
-import{o as a,Q as o}from"./vendor-vue-husyvYtj.js";function s(t){a(()=>{if(typeof window>"u"||typeof t!="function")return;const e=new URL(window.location.href);if(e.searchParams.get("create")!=="1")return;e.searchParams.delete("create");const n=`${e.pathname}${e.search}${e.hash}`;window.history.replaceState(window.history.state,"",n),o(()=>{t()})})}export{s as u};

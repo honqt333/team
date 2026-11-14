@@ -326,13 +326,13 @@ class AttendanceController extends Controller
             $attendance->calculateTimes();
             $attendance->save();
 
-            $correctionRequest->update([
+            $correctionRequest->forceFill([
                 'attendance_id' => $attendance->id,
                 'status' => AttendanceCorrectionRequest::STATUS_APPROVED,
                 'reviewed_by' => $request->user()?->id,
                 'reviewed_at' => now(),
                 'review_notes' => $validated['review_notes'] ?? null,
-            ]);
+            ])->save();
 
             $correctionRequest->logActivity('approved', ['attendance_id' => $attendance->id]);
         });
@@ -352,12 +352,12 @@ class AttendanceController extends Controller
             'review_notes' => 'nullable|string|max:500',
         ]);
 
-        $correctionRequest->update([
+        $correctionRequest->forceFill([
             'status' => AttendanceCorrectionRequest::STATUS_REJECTED,
             'reviewed_by' => $request->user()?->id,
             'reviewed_at' => now(),
             'review_notes' => $validated['review_notes'] ?? null,
-        ]);
+        ])->save();
 
         $correctionRequest->logActivity('rejected');
 

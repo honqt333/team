@@ -172,7 +172,8 @@ class TechnicianCommissionPayrollTest extends TestCase
         $this->assertEquals(1, $metrics['warranty_items_count']);
         $this->assertEquals(1500.0, $metrics['billable_revenue']);
         $this->assertEquals(150.0, $metrics['commission_amount']);
-        $this->assertEquals(66.7, $metrics['first_time_fix_rate']);
+        $this->assertEquals(66.7, $metrics['non_warranty_share']);
+        $this->assertArrayNotHasKey('first_time_fix_rate', $metrics);
         // Estimated = 240m, Actual = 240m => 100.0%
         $this->assertEquals(100.0, $metrics['efficiency_rate']);
 

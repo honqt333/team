@@ -318,6 +318,20 @@ class PayrollController extends Controller
 
             $netSalary = $grossWage - $totalDeductions;
 
+            $transferredCenterIds = Attendance::withoutGlobalScope('center_scoped')
+                ->where('tenant_id', $employee->tenant_id)
+                ->where('employee_id', $employee->id)
+                ->whereBetween('date', [$payrollRun->period_start->toDateString(), $payrollRun->period_end->toDateString()])
+                ->whereNotNull('center_id')
+                ->pluck('center_id')
+                ->unique()
+                ->filter(fn ($attCenterId) => (int) $attCenterId !== (int) $employee->center_id)
+                ->values();
+
+            $transferNote = $transferredCenterIds->isNotEmpty()
+                ? __('hr.payroll.transferred_attendance_note', ['centers' => $transferredCenterIds->implode(', ')])
+                : null;
+
             // Create payroll item
             PayrollItem::create([
                 'payroll_run_id' => $payrollRun->id,
@@ -335,7 +349,7 @@ class PayrollController extends Controller
                     'productivity' => [
                         'billable_items' => $commissionData['billable_items_count'],
                         'warranty_items' => $commissionData['warranty_items_count'],
-                        'first_time_fix_rate' => $commissionData['first_time_fix_rate'],
+                        'non_warranty_share' => $commissionData['non_warranty_share'],
                         'efficiency_rate' => $commissionData['efficiency_rate'],
                     ],
                 ],
@@ -347,7 +361,9 @@ class PayrollController extends Controller
                     'cap_percentage' => $maxCapPct,
                     'capped_amount' => $cappedAmount,
                     'is_capped' => $cappedAmount > 0,
+                    'transferred_from_center_ids' => $transferredCenterIds->all(),
                 ],
+                'notes' => $transferNote,
                 'created_by' => auth()->id(),
             ]);
         }
@@ -358,7 +374,9 @@ class PayrollController extends Controller
      */
     private function calculateAttendanceDeductions(Employee $employee, Carbon $start, Carbon $end, AttendanceSettings $settings): float
     {
-        $attendances = Attendance::where('employee_id', $employee->id)
+        $attendances = Attendance::withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $employee->tenant_id)
+            ->where('employee_id', $employee->id)
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->get();
 
@@ -440,7 +458,9 @@ class PayrollController extends Controller
             return 0;
         }
 
-        $totalOvertimeMinutes = Attendance::where('employee_id', $employee->id)
+        $totalOvertimeMinutes = Attendance::withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $employee->tenant_id)
+            ->where('employee_id', $employee->id)
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->sum('overtime_minutes');
 

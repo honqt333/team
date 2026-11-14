@@ -295,6 +295,7 @@ return [
         'total_deductions' => 'إجمالي الاستقطاعات',
         'total_net' => 'إجمالي الصافي',
         'total_salaries' => 'إجمالي الرواتب',
+        'transferred_attendance_note' => 'منقول — يتضمن سجلات حضور من فرع سابق (:centers)',
     ],
     'settings' => [
         'allowances' => [

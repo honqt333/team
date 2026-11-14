@@ -379,7 +379,7 @@ class EmployeeController extends Controller
                 'completed_tasks' => $completedTasks,
                 'labor_hours' => round($laborSeconds / 3600, 1),
                 'commission_amount' => $productivity['commission_amount'],
-                'first_time_fix_rate' => $productivity['first_time_fix_rate'],
+                'non_warranty_share' => $productivity['non_warranty_share'],
                 'efficiency_rate' => $productivity['efficiency_rate'],
             ],
         ];
@@ -391,6 +391,11 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $this->authorize('update', $employee);
+
+        $commissionType = $request->input('commission_type', $employee->commission_type ?? 'percentage');
+        $maxCommissionRate = $commissionType === 'fixed'
+            ? TechnicianCommissionService::MAX_FIXED_COMMISSION_RATE
+            : TechnicianCommissionService::MAX_PERCENTAGE_COMMISSION_RATE;
 
         $validated = $request->validate([
             // Basic Info
@@ -443,9 +448,10 @@ class EmployeeController extends Controller
             'insurance_details' => 'nullable|string',
             // Salary (kept for compatibility)
             'base_salary' => 'nullable|numeric|min:0',
+            'housing_allowance' => 'nullable|numeric|min:0',
             'commission_enabled' => 'boolean',
             'commission_type' => 'nullable|in:fixed,percentage',
-            'commission_rate' => 'nullable|numeric|min:0',
+            'commission_rate' => ['nullable', 'numeric', 'min:0', 'max:'.$maxCommissionRate],
             'termination_date' => 'nullable|date',
             'termination_reason' => 'nullable|string',
         ]);
