@@ -1968,8 +1968,9 @@
         />
 
         <!-- Statement of Account Modal -->
-        <DealerStatementModal
+        <AccountStatementModal
             :show="showStatementModal"
+            mode="dealer"
             :dealer="dealer"
             :financial-summary="financialSummary"
             :ledger="ledger"
@@ -2324,7 +2325,7 @@ import SaudiPlateInput from '@/Components/Vehicles/SaudiPlateInput.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import DealerFormModal from '@/Components/Dealers/DealerFormModal.vue';
-import DealerStatementModal from '@/Components/Dealers/DealerStatementModal.vue';
+import AccountStatementModal from '@/Components/Common/AccountStatementModal.vue';
 import { usePermission } from '@/Composables/usePermission';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

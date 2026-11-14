@@ -46,21 +46,24 @@
                         </Link>
                     </div>
 
-                    <button
-                        v-if="isSuperAdmin"
-                        @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
+                    <AppButton v-if="isSuperAdmin" variant="action" @click="openCreateModal">
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
                         {{ $t('system.admin_users.create') }}
-                    </button>
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -363,10 +366,11 @@
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button
+                    <AppButton
+                        variant="action"
                         type="submit"
                         :disabled="form.processing"
-                        class="inline-flex items-center px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                        :loading="form.processing"
                     >
                         {{
                             form.processing
@@ -375,14 +379,10 @@
                                   ? $t('system.actions.save')
                                   : $t('system.admin_users.form.create_action')
                         }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="closeModal"
-                        class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
+                    </AppButton>
+                    <AppButton variant="secondary" @click="closeModal">
                         {{ $t('system.actions.cancel') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -398,6 +398,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';

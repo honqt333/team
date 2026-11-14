@@ -647,15 +647,14 @@
             </div>
         </div>
 
-        <!-- Direct Purchase Invoice Form Modal -->
-        <PurchaseInvoiceFormModal
-            v-if="showCreateModal"
+        <!-- Purchase Invoice Form Modal -->
+        <PurchaseOrderFormModal
             :show="showCreateModal"
+            mode="invoice"
             :suppliers="suppliers"
             :warehouses="warehouses"
             :units="units"
-            :defaultWarehouse="defaultWarehouse"
-            :work-orders="workOrders"
+            :default-warehouse="defaultWarehouse"
             @close="showCreateModal = false"
             @saved="onInvoiceSaved"
         />
@@ -678,7 +677,7 @@ import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
-import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
+import PurchaseOrderFormModal from '@/Components/Purchasing/PurchaseOrderFormModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { usePermission } from '@/Composables/usePermission';
 import { useServerTable } from '@/Composables/useServerTable';

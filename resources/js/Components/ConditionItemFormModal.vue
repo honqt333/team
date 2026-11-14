@@ -1,179 +1,142 @@
 <template>
-    <Modal :show="show" :max-width="'md'" @close="close">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl">
-            <!-- Header -->
-            <div
-                class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between"
+    <BaseModal
+        :show="show"
+        size="md"
+        :title="
+            isEdit
+                ? hasCategories
+                    ? $t('services_management.edit_inspection')
+                    : $t('system_settings.condition_items.edit')
+                : hasCategories
+                  ? $t('services_management.add_inspection')
+                  : $t('system_settings.condition_items.add')
+        "
+        @close="close"
+    >
+        <form id="condition-item-form" @submit.prevent="submit" class="space-y-5">
+            <SearchableSelect
+                v-if="hasCategories"
+                v-model="form.category_id"
+                :options="categories"
+                option-label="name"
+                option-value="id"
+                :label="$t('common.category')"
+                :placeholder="$t('common.select')"
+                :error="form.errors.category_id"
+                required
+            />
+
+            <FormField
+                v-slot="field"
+                :label="
+                    hasCategories
+                        ? $t('services_management.form.name_ar')
+                        : $t('system_settings.form.name_ar')
+                "
+                :error="form.errors.name_ar"
+                required
             >
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center"
-                    >
-                        <svg
-                            class="w-5 h-5 text-amber-600 dark:text-amber-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                            />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{
-                                isEdit
-                                    ? $t('services_management.edit_inspection')
-                                    : $t('services_management.add_inspection')
-                            }}
-                        </h2>
-                    </div>
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
+                    v-model="form.name_ar"
+                    :placeholder="
+                        hasCategories ? '' : $t('system_settings.form.name_ar_placeholder')
+                    "
+                    class="w-full"
+                    required
+                />
+            </FormField>
+
+            <FormField
+                v-slot="field"
+                :label="
+                    hasCategories
+                        ? $t('services_management.form.name_en')
+                        : $t('system_settings.form.name_en')
+                "
+                :error="form.errors.name_en"
+                required
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
+                    v-model="form.name_en"
+                    :placeholder="
+                        hasCategories ? '' : $t('system_settings.form.name_en_placeholder')
+                    "
+                    dir="ltr"
+                    class="w-full"
+                    required
+                />
+            </FormField>
+
+            <div
+                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700"
+            >
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">
+                        {{
+                            hasCategories
+                                ? $t('common.active')
+                                : $t('system_settings.form.is_active')
+                        }}
+                    </p>
+                    <p v-if="hasCategories" class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('services_management.active_hint') }}
+                    </p>
                 </div>
-                <button
-                    @click="close"
-                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
+                <AppToggle v-model="form.is_active" color="amber" />
             </div>
+        </form>
 
-            <!-- Form -->
-            <form @submit.prevent="submit" class="p-6">
-                <div class="space-y-5">
-                    <!-- Category Dropdown -->
-                    <div>
-                        <SearchableSelect
-                            v-model="form.category_id"
-                            :options="categories"
-                            option-label="name"
-                            option-value="id"
-                            :label="$t('common.category')"
-                            :placeholder="$t('common.select')"
-                            :error="form.errors.category_id"
-                            required
-                        />
-                    </div>
-
-                    <!-- Arabic Name -->
-                    <FormField
-                        v-slot="field"
-                        :label="$t('services_management.form.name_ar')"
-                        :error="form.errors.name_ar"
-                        required
-                    >
-                        <AppInput
-                            :id="field.id"
-                            :aria-describedby="field.describedBy"
-                            :invalid="field.hasError"
-                            v-model="form.name_ar"
-                            class="w-full"
-                            required
-                        />
-                    </FormField>
-
-                    <!-- English Name -->
-                    <FormField
-                        v-slot="field"
-                        :label="$t('services_management.form.name_en')"
-                        :error="form.errors.name_en"
-                        required
-                    >
-                        <AppInput
-                            :id="field.id"
-                            :aria-describedby="field.describedBy"
-                            :invalid="field.hasError"
-                            v-model="form.name_en"
-                            dir="ltr"
-                            class="w-full"
-                            required
-                        />
-                    </FormField>
-
-                    <!-- Active Toggle -->
-                    <div
-                        class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700"
-                    >
-                        <div>
-                            <p class="font-medium text-gray-900 dark:text-white">
-                                {{ $t('common.active') }}
-                            </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ $t('services_management.active_hint') }}
-                            </p>
-                        </div>
-                        <AppToggle v-model="form.is_active" color="amber" />
-                    </div>
-                </div>
-
-                <!-- Footer Actions -->
-                <div class="mt-8 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        @click="close"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                        :disabled="form.processing"
-                    >
-                        {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                        :disabled="form.processing"
-                    >
-                        <svg
-                            v-if="form.processing"
-                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        {{ form.processing ? $t('common.saving') : $t('common.save') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </Modal>
+        <template #footer>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="close" :disabled="form.processing">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    type="submit"
+                    form="condition-item-form"
+                    variant="primary"
+                    :loading="form.processing"
+                >
+                    {{ form.processing ? $t('common.saving') : $t('common.save') }}
+                </AppButton>
+            </div>
+        </template>
+    </BaseModal>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
-    show: Boolean,
-    item: Object,
+    show: {
+        type: Boolean,
+        default: true,
+    },
+    item: {
+        type: Object,
+        default: null,
+    },
+    conditionItem: {
+        type: Object,
+        default: null,
+    },
     categories: {
         type: Array,
-        default: () => [],
+        default: null,
     },
     initialCategoryId: {
         type: [Number, String],
@@ -183,7 +146,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
-const isEdit = computed(() => !!props.item);
+const { scrollToError } = useFormScrollToError();
+const activeItem = computed(() => props.item || props.conditionItem);
+const isEdit = computed(() => !!activeItem.value);
+const hasCategories = computed(() => Array.isArray(props.categories));
 
 const form = useForm({
     name_ar: '',
@@ -193,22 +159,23 @@ const form = useForm({
 });
 
 watch(
-    () => props.show,
-    (show) => {
-        if (show) {
-            if (props.item) {
-                form.name_ar = props.item.name_ar || '';
-                form.name_en = props.item.name_en || '';
-                form.category_id = props.item.category_id || '';
-                form.is_active = props.item.is_active ?? true;
-            } else {
-                form.reset();
-                if (props.initialCategoryId) {
-                    form.category_id = props.initialCategoryId;
-                }
+    [() => props.show, activeItem],
+    ([isVisible, current]) => {
+        if (!isVisible) return;
+        form.clearErrors();
+        if (current) {
+            form.name_ar = current.name_ar || '';
+            form.name_en = current.name_en || '';
+            form.category_id = current.category_id || '';
+            form.is_active = current.is_active ?? true;
+        } else {
+            form.reset();
+            if (props.initialCategoryId) {
+                form.category_id = props.initialCategoryId;
             }
         }
-    }
+    },
+    { immediate: true }
 );
 
 const close = () => {
@@ -218,22 +185,32 @@ const close = () => {
 };
 
 const submit = () => {
+    const options = {
+        preserveScroll: true,
+        onSuccess: () => {
+            emit('saved');
+            close();
+        },
+        onError: () => scrollToError(form.errors),
+    };
+
+    if (hasCategories.value) {
+        if (isEdit.value) {
+            form.put(route('app.condition-items.update', activeItem.value.id), options);
+        } else {
+            form.post(route('app.condition-items.store'), options);
+        }
+        return;
+    }
+
+    const url = isEdit.value
+        ? `/app/settings/condition-items/${activeItem.value.id}`
+        : '/app/settings/condition-items';
+
     if (isEdit.value) {
-        form.put(route('app.condition-items.update', props.item.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit('saved');
-                close();
-            },
-        });
+        form.put(url, options);
     } else {
-        form.post(route('app.condition-items.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit('saved');
-                close();
-            },
-        });
+        form.post(url, options);
     }
 };
 </script>

@@ -778,6 +778,10 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    mode: {
+        type: String,
+        default: 'order', // 'order', 'invoice'
+    },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -787,6 +791,7 @@ const { sanitizeInput, formatCurrency: formatCurrencyEn, toEnglish } = useNumber
 const modalTitle = computed(() => {
     if (props.title) return props.title;
     if (props.order) return t('purchasing.orders.edit');
+    if (props.mode === 'invoice') return t('invoices.purchases.add');
     if (props.purpose === 'external_part') {
         return `${t('purchasing.orders.add')} - ${t('purchasing.purposes.external_parts')}`;
     }
@@ -996,12 +1001,20 @@ const isFormValid = computed(() => {
 const submit = () => {
     if (submitting.value) return;
 
-    const url = props.order
-        ? route('app.purchasing.orders.update', props.order.id)
-        : route('app.purchasing.orders.store');
+    const isInvoiceMode = props.mode === 'invoice' && !props.order;
+    const url = isInvoiceMode
+        ? route('app.invoices.purchases.store')
+        : props.order
+          ? route('app.purchasing.orders.update', props.order.id)
+          : route('app.purchasing.orders.store');
 
-    // Validation: Payment Type
-    if (form.payment_type === 'cash') {
+    if (isInvoiceMode) {
+        if (remainingBalance.value > 0.01 && !form.create_credit_invoice) {
+            form.setError('payments', t('purchasing.orders.errors.full_payment_required'));
+            return;
+        }
+    } else if (form.payment_type === 'cash') {
+        // Validation: Payment Type
         // For cash, we expect the user to add payments covering the total
         // OR the user considers "Cash" to mean "I will pay now" and the backend should handle it.
         // But since we have a payments table, we enforce adding a row.
@@ -1040,6 +1053,19 @@ const submit = () => {
             const rate = (tenantTaxSettings.value?.parts_vat_rate || 15) / 100;
             unitCost = unitCost / (1 + rate);
         }
+        if (isInvoiceMode) {
+            return {
+                part_id: item.part_id || null,
+                name: item.name || item.custom_name || item.part?.name_ar || '',
+                custom_name: item.custom_name || null,
+                sku: item.sku || item.part?.sku || null,
+                qty: item.qty,
+                unit_cost: unitCost,
+                tax_rate: form.tax_included ? tenantTaxSettings.value?.parts_vat_rate || 15 : 0,
+                purchase_unit_id: item.purchase_unit_id || null,
+                purchase_conversion_factor: item.conversion_factor || 1,
+            };
+        }
         return {
             part_id: item.part_id,
             qty_ordered: item.qty,
@@ -1055,6 +1081,14 @@ const submit = () => {
             ...data,
             items: transformedItems,
         })).put(url, options);
+    } else if (isInvoiceMode) {
+        form.transform((data) => ({
+            ...data,
+            invoice_number: data.supplier_reference,
+            issue_date: data.order_date,
+            purchase_type: 'inventory',
+            items: transformedItems,
+        })).post(url, options);
     } else {
         form.transform((data) => ({
             ...data,

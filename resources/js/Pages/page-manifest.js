@@ -191,8 +191,6 @@ export const pageManifest = {
     'Settings/System/Index': () => import('./Settings/System/Index.vue'),
     'Settings/System/Modals/ColorFormModal': () =>
         import('./Settings/System/Modals/ColorFormModal.vue'),
-    'Settings/System/Modals/ConditionItemFormModal': () =>
-        import('./Settings/System/Modals/ConditionItemFormModal.vue'),
     'Settings/System/Modals/IncomeCategoryFormModal': () =>
         import('./Settings/System/Modals/IncomeCategoryFormModal.vue'),
     'Settings/System/Modals/MakeFormModal': () =>

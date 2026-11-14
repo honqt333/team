@@ -924,58 +924,7 @@
                                     </svg>
                                     {{ $t('invoices.purchases.add') }}
                                 </button>
-                                <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                                    <Tooltip :text="$t('common.grid_view')">
-                                        <button
-                                            @click="invoiceViewMode = 'grid'"
-                                            :class="[
-                                                'p-2 rounded-lg transition-all',
-                                                invoiceViewMode === 'grid'
-                                                    ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </Tooltip>
-                                    <Tooltip :text="$t('common.list_view')">
-                                        <button
-                                            @click="invoiceViewMode = 'list'"
-                                            :class="[
-                                                'p-2 rounded-lg transition-all',
-                                                invoiceViewMode === 'list'
-                                                    ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M4 6h16M4 12h16M4 18h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </Tooltip>
-                                </div>
+                                <AppViewModeToggle v-model="invoiceViewMode" />
                             </div>
                         </div>
 
@@ -1852,6 +1801,7 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { printDocument } from '@/Composables/usePrint';

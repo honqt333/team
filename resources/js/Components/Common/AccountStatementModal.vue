@@ -17,32 +17,30 @@
                     </div>
                     <div>
                         <h2 class="text-base font-black text-gray-900 dark:text-white">
-                            {{ $t('dealers.show.statement_title') }}
+                            {{ labels.title }}
                         </h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ dealer?.name }}
-                            <span v-if="dealer?.phone" class="font-mono ms-1" dir="ltr">
-                                ({{ dealer?.phone }})
+                            {{ activeEntity?.name }}
+                            <span v-if="activeEntity?.phone" class="font-mono ms-1" dir="ltr">
+                                ({{ activeEntity.phone }})
                             </span>
                         </p>
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    @click="handlePrint"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft transition-all hover:-translate-y-0.5 cursor-pointer"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                        />
-                    </svg>
-                    <span>{{ $t('dealers.show.print_statement') }}</span>
-                </button>
+                <AppButton variant="primary" size="sm" @click="handlePrint">
+                    <template #iconLeft>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                            />
+                        </svg>
+                    </template>
+                    {{ labels.printBtn }}
+                </AppButton>
             </div>
         </template>
 
@@ -55,7 +53,7 @@
                     <span
                         class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block"
                     >
-                        {{ $t('dealers.show.total_invoiced') }}
+                        {{ labels.totalInvoiced }}
                     </span>
                     <span
                         class="text-xl font-black text-gray-900 dark:text-white font-mono mt-1 block"
@@ -70,7 +68,7 @@
                     <span
                         class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block"
                     >
-                        {{ $t('dealers.show.total_paid') }}
+                        {{ labels.totalPaid }}
                     </span>
                     <span
                         class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-1 block"
@@ -95,7 +93,7 @@
                                 : 'text-gray-500'
                         "
                     >
-                        {{ $t('dealers.show.balance_due') }}
+                        {{ labels.totalDue }}
                     </span>
                     <span
                         class="text-xl font-black font-mono mt-1 block"
@@ -114,7 +112,7 @@
             <div
                 class="print-header-area print-only hidden print:block border-b-2 border-gray-800 pb-4 mb-4"
             >
-                <div class="grid grid-cols-3 items-center text-xs">
+                <div class="grid grid-cols-3 items-start text-xs">
                     <!-- Column 1: Workshop / Center Info -->
                     <div class="text-start space-y-1">
                         <h2 class="text-base font-black text-black">
@@ -149,17 +147,19 @@
                             </span>
                         </div>
                         <span class="text-sm font-black text-black uppercase tracking-wider">
-                            {{ $t('dealers.show.statement_title') }}
+                            {{ labels.title }}
                         </span>
                     </div>
 
-                    <!-- Column 3: Partner Info & Print Date -->
+                    <!-- Column 3: Entity Info & Print Date -->
                     <div class="text-end space-y-1">
-                        <p class="font-black text-black text-sm">{{ dealer?.name }}</p>
-                        <p v-if="dealer?.phone" class="font-mono" dir="ltr">{{ dealer?.phone }}</p>
-                        <p v-if="dealer?.tax_number" class="text-gray-600">
+                        <p class="font-black text-black text-sm">{{ activeEntity?.name }}</p>
+                        <p v-if="activeEntity?.phone" class="font-mono" dir="ltr">
+                            {{ activeEntity.phone }}
+                        </p>
+                        <p v-if="activeEntity?.tax_number" class="text-gray-600">
                             {{ $t('common.tax_number_label') }}
-                            <span class="font-mono">{{ dealer?.tax_number }}</span>
+                            <span class="font-mono">{{ activeEntity.tax_number }}</span>
                         </p>
                         <p class="text-gray-500">
                             {{ $t('common.print_date_label') }}
@@ -174,7 +174,7 @@
                 >
                     <div>
                         <span class="text-gray-600 block">
-                            {{ $t('dealers.show.total_invoiced') }}
+                            {{ labels.printTotalInvoiced }}
                         </span>
                         <strong class="font-mono">
                             {{ formatMoney(financialSummary?.total_invoiced) }}
@@ -182,7 +182,7 @@
                     </div>
                     <div>
                         <span class="text-gray-600 block">
-                            {{ $t('dealers.show.total_paid') }}
+                            {{ labels.totalPaid }}
                         </span>
                         <strong class="font-mono text-emerald-700">
                             {{ formatMoney(financialSummary?.total_paid) }}
@@ -190,7 +190,7 @@
                     </div>
                     <div>
                         <span class="text-gray-600 block">
-                            {{ $t('dealers.show.balance_due') }}
+                            {{ labels.printRemainingBalance }}
                         </span>
                         <strong class="font-mono text-red-700">
                             {{ formatMoney(financialSummary?.total_due) }}
@@ -209,27 +209,15 @@
                             <tr>
                                 <th class="px-3 py-3 text-center">#</th>
                                 <th class="px-3 py-3 text-center">{{ $t('common.date') }}</th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.columns.type') }}
-                                </th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.show.reference') }}
-                                </th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.show.vehicle') }}
-                                </th>
-                                <th class="px-3 py-3 text-center">
+                                <th class="px-3 py-3 text-center">{{ labels.colType }}</th>
+                                <th class="px-3 py-3 text-center">{{ labels.colReference }}</th>
+                                <th class="px-3 py-3 text-center">{{ labels.colVehicle }}</th>
+                                <th v-if="isDealer" class="px-3 py-3 text-center">
                                     {{ $t('dealers.show.customer') }}
                                 </th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.show.debit') }}
-                                </th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.show.credit') }}
-                                </th>
-                                <th class="px-3 py-3 text-center">
-                                    {{ $t('dealers.show.running_balance') }}
-                                </th>
+                                <th class="px-3 py-3 text-center">{{ labels.colDebit }}</th>
+                                <th class="px-3 py-3 text-center">{{ labels.colCredit }}</th>
+                                <th class="px-3 py-3 text-center">{{ labels.colBalance }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 font-medium">
@@ -270,15 +258,39 @@
                                     {{ entry.reference }}
                                 </td>
                                 <td class="px-3 py-2.5 text-xs text-gray-500">
-                                    <span
-                                        v-if="entry.vehicle_plate"
-                                        class="font-mono text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ entry.vehicle_plate }}
-                                    </span>
-                                    <span v-else class="text-gray-400">—</span>
+                                    <template v-if="isDealer">
+                                        <span
+                                            v-if="entry.vehicle_plate"
+                                            class="font-mono text-gray-700 dark:text-gray-300"
+                                        >
+                                            {{ entry.vehicle_plate }}
+                                        </span>
+                                        <span v-else class="text-gray-400">—</span>
+                                    </template>
+                                    <template v-else>
+                                        <span
+                                            v-if="entry.work_order_number"
+                                            class="font-mono text-action-primary"
+                                        >
+                                            {{ entry.work_order_number }}
+                                        </span>
+                                        <span
+                                            v-if="entry.vehicle_plate"
+                                            class="text-gray-400 ms-1 font-mono"
+                                        >
+                                            ({{ entry.vehicle_plate }})
+                                        </span>
+                                        <span
+                                            v-if="!entry.work_order_number && !entry.vehicle_plate"
+                                        >
+                                            —
+                                        </span>
+                                    </template>
                                 </td>
-                                <td class="px-3 py-2.5 text-xs text-gray-700 dark:text-gray-300">
+                                <td
+                                    v-if="isDealer"
+                                    class="px-3 py-2.5 text-xs text-gray-700 dark:text-gray-300"
+                                >
                                     {{ entry.customer_name || '—' }}
                                 </td>
                                 <td class="px-3 py-2.5 font-mono text-gray-900 dark:text-white">
@@ -302,7 +314,10 @@
                             </tr>
 
                             <tr v-if="!ledger || ledger.length === 0">
-                                <td colspan="9" class="px-4 py-8 text-center text-gray-400 text-xs">
+                                <td
+                                    :colspan="isDealer ? 9 : 8"
+                                    class="px-4 py-8 text-center text-gray-400 text-xs"
+                                >
                                     {{ $t('customers.statement.no_transactions') }}
                                 </td>
                             </tr>
@@ -345,6 +360,7 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { printDocument } from '@/Composables/usePrint';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
@@ -356,17 +372,25 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    mode: {
+        type: String,
+        default: null,
+    },
+    entity: {
+        type: Object,
+        default: null,
+    },
+    customer: {
+        type: Object,
+        default: null,
+    },
     dealer: {
         type: Object,
         default: null,
     },
     financialSummary: {
         type: Object,
-        default: () => ({
-            total_invoiced: 0,
-            total_paid: 0,
-            total_due: 0,
-        }),
+        default: () => ({}),
     },
     ledger: {
         type: Array,
@@ -380,6 +404,43 @@ const props = defineProps({
 
 defineEmits(['close']);
 
+const isDealer = computed(() => props.mode === 'dealer' || (!!props.dealer && !props.customer));
+const activeEntity = computed(() => props.entity || props.dealer || props.customer);
+
+const labels = computed(() =>
+    isDealer.value
+        ? {
+              title: t('dealers.show.statement_title'),
+              printBtn: t('dealers.show.print_statement'),
+              totalInvoiced: t('dealers.show.total_invoiced'),
+              totalPaid: t('dealers.show.total_paid'),
+              totalDue: t('dealers.show.balance_due'),
+              printTotalInvoiced: t('dealers.show.total_invoiced'),
+              printRemainingBalance: t('dealers.show.balance_due'),
+              colType: t('dealers.columns.type'),
+              colReference: t('dealers.show.reference'),
+              colVehicle: t('dealers.show.vehicle'),
+              colDebit: t('dealers.show.debit'),
+              colCredit: t('dealers.show.credit'),
+              colBalance: t('dealers.show.running_balance'),
+          }
+        : {
+              title: t('customers.statement.title'),
+              printBtn: t('common.print'),
+              totalInvoiced: t('customers.statement.total_invoiced'),
+              totalPaid: t('customers.statement.total_paid'),
+              totalDue: t('customers.statement.total_due'),
+              printTotalInvoiced: t('customers.statement.total_invoices'),
+              printRemainingBalance: t('customers.statement.remaining_balance'),
+              colType: t('customers.statement.type'),
+              colReference: t('common.reference_document_number'),
+              colVehicle: t('customers.statement.work_order_vehicle'),
+              colDebit: t('customers.statement.debtor_invoices'),
+              colCredit: t('customers.statement.credit'),
+              colBalance: t('customers.statement.balance'),
+          }
+);
+
 const resolvedCompanyInfo = computed(() => {
     if (props.companyInfo && props.companyInfo.name) {
         return props.companyInfo;
@@ -387,11 +448,21 @@ const resolvedCompanyInfo = computed(() => {
     const center = page.props.center || {};
     const tenant = page.props.tenant || {};
     return {
-        name: center.name_ar || center.name || tenant.trade_name || tenant.name || 'خدمة برو',
-        branch: center.name || '',
-        tax_number: tenant.vat_number || center.vat_number || '',
-        cr_number: tenant.cr_number || '',
-        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || null,
+        name:
+            center.name_ar ||
+            center.name ||
+            tenant.trade_name ||
+            tenant.legal_name ||
+            tenant.name ||
+            t('common.app_name'),
+        branch: center.name || center.name_ar || '',
+        tax_number: tenant.vat_number || tenant.tax_number || center.vat_number || '',
+        cr_number: tenant.cr_number || center.cr_number || '',
+        logo:
+            center.logo_invoice_url ||
+            center.logo_light_url ||
+            tenant.logo_url ||
+            (tenant.logo_path ? '/storage/' + tenant.logo_path : null),
     };
 });
 
@@ -406,7 +477,15 @@ const printDateFormatted = computed(() => {
 });
 
 const handlePrint = () => {
-    printDocument();
+    if (!isDealer.value && activeEntity.value?.id) {
+        window.open(
+            route('customers.statement.print', activeEntity.value.id),
+            '_blank',
+            'noopener,noreferrer'
+        );
+    } else {
+        printDocument();
+    }
 };
 </script>
 

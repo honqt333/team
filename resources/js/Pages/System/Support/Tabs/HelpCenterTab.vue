@@ -136,73 +136,57 @@
                         </svg>
                     </a>
 
-                    <button
-                        type="button"
+                    <AppButton
+                        variant="secondary"
+                        size="sm"
                         @click="handleResetDefaults"
                         :disabled="resetting || form.processing"
-                        class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-bold transition-all disabled:opacity-50 w-full sm:w-auto"
+                        class="w-full sm:w-auto border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                        </svg>
-                        <span>{{ $t('help.admin.restore_defaults') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('help.admin.restore_defaults') }}
+                    </AppButton>
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                    <button
-                        type="button"
+                    <AppButton
+                        variant="action"
                         @click="submitForm"
                         :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-sm font-bold shadow-lg shadow-focus-ring-soft transition-all hover:-translate-y-0.5 disabled:opacity-50 w-full sm:w-auto"
+                        :loading="form.processing"
+                        class="w-full sm:w-auto"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="w-4 h-4 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
                                 stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                        <span>
-                            {{
-                                form.processing
-                                    ? $t('help.admin.saving')
-                                    : $t('common.save_changes')
-                            }}
-                        </span>
-                    </button>
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </template>
+                        {{ form.processing ? $t('help.admin.saving') : $t('common.save_changes') }}
+                    </AppButton>
                 </div>
             </div>
 
@@ -964,20 +948,12 @@
 
             <template #footer>
                 <div class="flex justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="videoModal.open = false"
-                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                    >
+                    <AppButton variant="secondary" size="sm" @click="videoModal.open = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="saveVideoModal"
-                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                    >
+                    </AppButton>
+                    <AppButton variant="action-sm" @click="saveVideoModal">
                         {{ $t('help.admin.videos.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1138,20 +1114,12 @@
 
             <template #footer>
                 <div class="flex justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="topicModal.open = false"
-                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                    >
+                    <AppButton variant="secondary" size="sm" @click="topicModal.open = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="saveTopicModal"
-                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                    >
+                    </AppButton>
+                    <AppButton variant="action-sm" @click="saveTopicModal">
                         {{ $t('help.admin.topics.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1195,20 +1163,12 @@
 
             <template #footer>
                 <div class="flex justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="categoryModal.open = false"
-                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                    >
+                    <AppButton variant="secondary" size="sm" @click="categoryModal.open = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="saveCategoryModal"
-                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                    >
+                    </AppButton>
+                    <AppButton variant="action-sm" @click="saveCategoryModal">
                         {{ $t('help.admin.categories.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1246,20 +1206,12 @@
 
             <template #footer>
                 <div class="flex justify-end gap-2.5 w-full">
-                    <button
-                        type="button"
-                        @click="faqModal.open = false"
-                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                    >
+                    <AppButton variant="secondary" size="sm" @click="faqModal.open = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="saveFaqModal"
-                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                    >
+                    </AppButton>
+                    <AppButton variant="action-sm" @click="saveFaqModal">
                         {{ $t('help.admin.faq.save') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -1274,6 +1226,7 @@ import { ref, computed, h } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';

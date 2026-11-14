@@ -20,20 +20,24 @@
                 </template>
 
                 <template #actions>
-                    <button
-                        @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
+                    <AppButton variant="action" @click="openModal()">
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
                         {{ $t('system.promo_codes.create') }}
-                    </button>
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -368,24 +372,21 @@
 
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <button
-                        @click="closeModal"
-                        type="button"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton variant="ghost" @click="closeModal">
                         {{ $t('system.actions.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
+                        variant="action"
                         @click="submit"
                         :disabled="form.processing"
-                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
+                        :loading="form.processing"
                     >
                         {{
                             editingCode
                                 ? $t('system.promo_codes.save_changes')
                                 : $t('system.promo_codes.create_action')
                         }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -399,6 +400,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';

@@ -2079,9 +2079,10 @@
             :counts="counts"
             @close="showMergeModal = false"
         />
-        <CustomerStatementModal
+        <AccountStatementModal
             v-if="showStatementModal"
             :show="showStatementModal"
+            mode="customer"
             :customer="customer"
             :financialSummary="financialSummary"
             :ledger="ledger"
@@ -2112,7 +2113,7 @@ import { usePermission } from '@/Composables/usePermission';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
-import CustomerStatementModal from '@/Components/Customers/CustomerStatementModal.vue';
+import AccountStatementModal from '@/Components/Common/AccountStatementModal.vue';
 
 const props = defineProps({
     customer: Object,

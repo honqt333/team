@@ -440,7 +440,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';
 import ColorFormModal from './Modals/ColorFormModal.vue';
-import ConditionItemFormModal from './Modals/ConditionItemFormModal.vue';
+import ConditionItemFormModal from '@/Components/ConditionItemFormModal.vue';
 import IncomeCategoryFormModal from './Modals/IncomeCategoryFormModal.vue';
 import StorageUsageSection from './Sections/StorageUsageSection.vue';
 import AttachmentsManagerSection from './Sections/AttachmentsManagerSection.vue';
