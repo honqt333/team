@@ -156,12 +156,12 @@ class PayrollCenterIsolationTest extends TestCase
         $this->assertEquals('approved', $payrollRunCenterA->fresh()->status);
 
         Log::shouldHaveReceived('notice')
-            ->once()
             ->withArgs(function ($message, $context) use ($payrollRunCenterA) {
                 return $message === 'payroll.approved'
                     && ($context['payroll_run_id'] ?? null) === $payrollRunCenterA->id
                     && ($context['status'] ?? null) === 'approved';
-            });
+            })
+            ->once();
     }
 
     public function test_user_can_export_wps_csv_for_own_center_payroll_run(): void
