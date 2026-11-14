@@ -675,6 +675,9 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useServerTable } from '@/Composables/useServerTable';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
+
+useAutoOpenCreate(() => openCreateModal());
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';

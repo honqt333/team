@@ -3586,26 +3586,46 @@
         <!-- Floating Quick Create SpeedDial (Hidden on Print) -->
         <div
             v-if="quickCreateItems.length > 0"
-            class="fixed bottom-6 end-6 z-40 print:hidden quick-speeddial-root"
+            class="fixed bottom-6 end-6 z-40 flex flex-col items-end print:hidden quick-speeddial-root"
         >
             <Transition name="dropdown">
                 <div
                     v-if="quickSpeedDialOpen"
-                    class="mb-3 flex flex-col gap-2 min-w-[200px] rounded-2xl border border-border-subtle bg-surface/95 dark:bg-gray-800/95 backdrop-blur-md p-2 shadow-2xl"
+                    class="mb-3 flex max-h-[70vh] min-w-[230px] flex-col gap-1 overflow-y-auto rounded-2xl border border-border-subtle bg-surface/95 dark:bg-gray-800/95 backdrop-blur-md p-2 shadow-2xl"
                 >
+                    <div
+                        class="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted border-b border-border-subtle/60 mb-0.5"
+                    >
+                        {{ $t('dashboard.quick_create') }}
+                    </div>
                     <Link
                         v-for="qItem in quickCreateItems"
                         :key="qItem.href"
                         :href="qItem.href"
                         @click="quickSpeedDialOpen = false"
-                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-text-primary hover:bg-action-primary-soft hover:text-action-primary transition-colors"
+                        class="group flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-text-primary hover:bg-action-primary-soft hover:text-action-primary transition-colors"
                     >
                         <span
-                            class="w-6 h-6 rounded-lg bg-action-primary/10 text-action-primary flex items-center justify-center text-xs font-black"
+                            :class="[
+                                'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105',
+                                qItem.badgeClass,
+                            ]"
                         >
-                            +
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    :d="qItem.icon"
+                                />
+                            </svg>
                         </span>
-                        <span>{{ qItem.label }}</span>
+                        <span class="truncate">{{ qItem.label }}</span>
                     </Link>
                 </div>
             </Transition>
@@ -3614,6 +3634,7 @@
                 type="button"
                 @click="quickSpeedDialOpen = !quickSpeedDialOpen"
                 :aria-expanded="quickSpeedDialOpen"
+                :aria-label="$t('dashboard.quick_create')"
                 :title="$t('dashboard.quick_create')"
                 class="flex h-12 w-12 items-center justify-center rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white shadow-xl shadow-focus-ring-soft transition-all active:scale-95 cursor-pointer"
             >
@@ -3676,23 +3697,88 @@ const quickSpeedDialOpen = ref(false);
 const quickCreateItems = computed(() => {
     const items = [];
     if (can('crm.work_orders.create') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_work_order'), href: '/app/work-orders/create' });
+        items.push({
+            label: t('dashboard.new_work_order'),
+            href: '/app/work-orders?create=1',
+            icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+            badgeClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+        });
+        items.push({
+            label: t('dashboard.quick_sale'),
+            href: '/app/purchasing/sales?create=1',
+            icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
+            badgeClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+        });
+    }
+    if (can('crm.work_orders.view') || can('invoices.sales.view') || isAnyAdmin()) {
+        items.push({
+            label: t('dashboard.sales_return'),
+            href: '/app/purchasing/sales?tab=returns',
+            icon: 'M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6',
+            badgeClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+        });
     }
     if (can('quotes.create') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_quote'), href: '/app/quotes' });
+        items.push({
+            label: t('dashboard.new_quote'),
+            href: '/app/quotes?create=1',
+            icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+            badgeClass: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+        });
     }
     if (can('crm.appointments.manage') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_appointment'), href: '/app/appointments' });
+        items.push({
+            label: t('dashboard.new_appointment'),
+            href: '/app/appointments?create=1',
+            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+            badgeClass: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+        });
     }
     if (can('crm.customers.create') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_customer'), href: '/app/customers' });
-        items.push({ label: t('dashboard.new_dealer'), href: '/app/dealers' });
+        items.push({
+            label: t('dashboard.new_customer'),
+            href: '/app/customers?create=1',
+            icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
+            badgeClass: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+        });
+        items.push({
+            label: t('dashboard.new_dealer'),
+            href: '/app/dealers?create=1',
+            icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+            badgeClass: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+        });
     }
     if (can('crm.vehicles.create') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_vehicle'), href: '/app/vehicles' });
+        items.push({
+            label: t('dashboard.new_vehicle'),
+            href: '/app/vehicles?create=1',
+            icon: 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0',
+            badgeClass: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+        });
+    }
+    if (can('inventory.moves.create') || isAnyAdmin()) {
+        items.push({
+            label: t('dashboard.new_part'),
+            href: '/app/inventory/parts?create=1',
+            icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+            badgeClass: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+        });
     }
     if (can('purchasing.invoices.create') || isAnyAdmin()) {
-        items.push({ label: t('dashboard.new_purchase_invoice'), href: '/app/invoices/purchases' });
+        items.push({
+            label: t('dashboard.new_purchase_invoice'),
+            href: '/app/invoices/purchases?create=1',
+            icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
+            badgeClass: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+        });
+    }
+    if (can('hr.employees.create') || isAnyAdmin()) {
+        items.push({
+            label: t('dashboard.new_employee'),
+            href: '/app/hr/employees?create=1',
+            icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+            badgeClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+        });
     }
     return items;
 });

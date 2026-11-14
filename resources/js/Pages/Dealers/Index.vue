@@ -391,6 +391,9 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import DealerFormModal from '@/Components/Dealers/DealerFormModal.vue';
 import { usePermission } from '@/Composables/usePermission';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
+
+useAutoOpenCreate(() => openCreateModal());
 
 const { t } = useI18n();
 const { can, isAnyAdmin } = usePermission();

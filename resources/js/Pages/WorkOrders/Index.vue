@@ -977,6 +977,7 @@
 <script setup>
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import { printDocument } from '@/Composables/usePrint';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed, watch, h } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1077,6 +1078,9 @@ const pageSubtitle = computed(() => {
 
 // View mode & modals
 const showCreateModal = ref(false);
+useAutoOpenCreate(() => {
+    showCreateModal.value = true;
+});
 const viewMode = ref(localStorage.getItem('workOrdersViewMode') || 'grid');
 const exporting = ref(false);
 

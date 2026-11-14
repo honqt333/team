@@ -759,6 +759,7 @@
 
 <script setup>
 import { printDocument } from '@/Composables/usePrint';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -823,6 +824,9 @@ watch(viewMode, (newMode) => {
 
 // Modals State
 const showCreateModal = ref(false);
+useAutoOpenCreate(() => {
+    showCreateModal.value = true;
+});
 const editingPart = ref(null);
 const showStockModal = ref(false);
 const stockEditingPart = ref(null);

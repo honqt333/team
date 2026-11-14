@@ -610,6 +610,9 @@ import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
+
+useAutoOpenCreate(() => openCreateModal());
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import { usePermission } from '@/Composables/usePermission';

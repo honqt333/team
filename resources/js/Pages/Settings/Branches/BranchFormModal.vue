@@ -5,7 +5,11 @@ import { computed } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useToast } from '@/Composables/useToast';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: Boolean,
@@ -14,6 +18,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { success, error } = useToast();
+const { scrollToError } = useFormScrollToError();
 
 const form = useForm({
     name_ar: '',
@@ -45,7 +50,10 @@ const submit = () => {
             emit('saved');
             close();
         },
-        onError: () => error(t('common.error_occurred')),
+        onError: () => {
+            error(t('common.error_occurred'));
+            scrollToError(form.errors);
+        },
         preserveScroll: true,
     });
 };
@@ -78,122 +86,103 @@ const submit = () => {
             </div>
         </template>
 
-        <form @submit.prevent="submit" class="space-y-5">
-            <!-- Name AR + Name EN -->
+        <form id="branch-form" @submit.prevent="submit" class="space-y-5">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                        {{ t('company_profile.branches.name_ar') }}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <input
-                        v-model="form.name_ar"
-                        type="text"
-                        required
-                        dir="rtl"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
-                            form.errors.name_ar ? 'border-danger' : 'border-border-subtle',
-                        ]"
-                        :placeholder="t('company_profile.branches.name_ar_placeholder')"
-                    />
-                    <p v-if="form.errors.name_ar" class="mt-1.5 text-xs text-danger">
-                        {{ form.errors.name_ar }}
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                        {{ t('company_profile.branches.name_en') }}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <input
-                        v-model="form.name_en"
-                        type="text"
-                        required
-                        dir="ltr"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
-                            form.errors.name_en ? 'border-danger' : 'border-border-subtle',
-                        ]"
-                        :placeholder="t('company_profile.branches.name_en_placeholder')"
-                    />
-                    <p v-if="form.errors.name_en" class="mt-1.5 text-xs text-danger">
-                        {{ form.errors.name_en }}
-                    </p>
-                </div>
-            </div>
-
-            <!-- Center Type -->
-            <div>
-                <SearchableSelect
-                    v-model="form.center_type"
-                    :options="centerTypeOptions"
-                    option-label="label"
-                    option-value="value"
-                    :label="t('company_profile.branches.center_type')"
-                    :placeholder="t('common.select')"
+                <FormField
+                    v-slot="field"
+                    :label="t('company_profile.branches.name_ar')"
+                    :error="form.errors.name_ar"
                     required
-                    :error="form.errors.center_type"
-                />
-            </div>
-
-            <!-- Manager + Phone -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                        {{ t('company_profile.branches.manager_name') }}
-                    </label>
-                    <input
-                        v-model="form.manager_name"
-                        type="text"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
-                            form.errors.manager_name ? 'border-danger' : 'border-border-subtle',
-                        ]"
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
+                        v-model="form.name_ar"
+                        dir="rtl"
+                        :placeholder="t('company_profile.branches.name_ar_placeholder')"
+                        class="w-full"
+                        required
                     />
-                    <p v-if="form.errors.manager_name" class="mt-1.5 text-xs text-danger">
-                        {{ form.errors.manager_name }}
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                        {{ t('company_profile.branches.phone') }}
-                    </label>
-                    <input
-                        v-model="form.phone"
-                        type="text"
+                </FormField>
+
+                <FormField
+                    v-slot="field"
+                    :label="t('company_profile.branches.name_en')"
+                    :error="form.errors.name_en"
+                    required
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
+                        v-model="form.name_en"
                         dir="ltr"
-                        :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
-                            form.errors.phone ? 'border-danger' : 'border-border-subtle',
-                        ]"
+                        :placeholder="t('company_profile.branches.name_en_placeholder')"
+                        class="w-full"
+                        required
                     />
-                    <p v-if="form.errors.phone" class="mt-1.5 text-xs text-danger">
-                        {{ form.errors.phone }}
-                    </p>
-                </div>
+                </FormField>
             </div>
 
-            <!-- Email -->
-            <div>
-                <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                    {{ t('company_profile.branches.email') }}
-                </label>
-                <input
+            <SearchableSelect
+                v-model="form.center_type"
+                :options="centerTypeOptions"
+                option-label="label"
+                option-value="value"
+                :label="t('company_profile.branches.center_type')"
+                :placeholder="t('common.select')"
+                required
+                :error="form.errors.center_type"
+            />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                    v-slot="field"
+                    :label="t('company_profile.branches.manager_name')"
+                    :error="form.errors.manager_name"
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
+                        v-model="form.manager_name"
+                        class="w-full"
+                    />
+                </FormField>
+
+                <FormField
+                    v-slot="field"
+                    :label="t('company_profile.branches.phone')"
+                    :error="form.errors.phone"
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
+                        v-model="form.phone"
+                        dir="ltr"
+                        class="w-full"
+                    />
+                </FormField>
+            </div>
+
+            <FormField
+                v-slot="field"
+                :label="t('company_profile.branches.email')"
+                :error="form.errors.email"
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
                     v-model="form.email"
                     type="email"
                     dir="ltr"
-                    :class="[
-                        'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
-                        form.errors.email ? 'border-danger' : 'border-border-subtle',
-                    ]"
+                    class="w-full"
                 />
-                <p v-if="form.errors.email" class="mt-1.5 text-xs text-danger">
-                    {{ form.errors.email }}
-                </p>
-            </div>
+            </FormField>
 
-            <!-- Active Toggle -->
             <div
                 class="flex items-center justify-between p-4 bg-surface-secondary/70 rounded-xl border border-border-subtle"
             >
@@ -210,20 +199,19 @@ const submit = () => {
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="close"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ t('common.cancel') }}
-            </button>
-            <button
-                @click="submit"
-                :disabled="form.processing"
-                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-            >
-                {{ form.processing ? t('common.loading') : t('common.save') }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="close" :disabled="form.processing">
+                    {{ t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    type="submit"
+                    form="branch-form"
+                    variant="primary"
+                    :loading="form.processing"
+                >
+                    {{ form.processing ? t('common.loading') : t('common.save') }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 </template>

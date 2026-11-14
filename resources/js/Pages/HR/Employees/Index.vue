@@ -584,6 +584,7 @@ import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import BackButton from '@/Components/BackButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import EmployeeFormModal from '@/Components/HR/EmployeeFormModal.vue';
@@ -634,6 +635,9 @@ const props = defineProps({
 });
 
 const showAddModal = ref(false);
+useAutoOpenCreate(() => {
+    showAddModal.value = true;
+});
 const viewMode = ref(localStorage.getItem('employees_view_mode') || 'grid');
 
 const statusTabs = computed(() => [

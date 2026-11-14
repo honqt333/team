@@ -25,56 +25,34 @@
             </div>
         </template>
 
-        <!-- Form Body -->
-        <div class="space-y-6">
-            <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                    {{ $t('print_settings.name_ar') }}
-                </label>
-                <textarea
-                    v-model="localTerm.text_ar"
-                    rows="4"
-                    class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all text-end"
-                ></textarea>
-            </div>
+        <form id="term-edit-form" @submit.prevent="handleSave" class="space-y-5">
+            <FormField v-slot="field" :label="$t('print_settings.name_ar')">
+                <AppTextarea :id="field.id" v-model="localTerm.text_ar" :rows="4" class="w-full" />
+            </FormField>
 
-            <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                    {{ $t('print_settings.name_en') }}
-                </label>
-                <textarea
+            <FormField v-slot="field" :label="$t('print_settings.name_en')">
+                <AppTextarea
+                    :id="field.id"
                     v-model="localTerm.text_en"
-                    rows="4"
-                    class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all"
-                ></textarea>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                    {{ $t('print_settings.order_by') }}
-                </label>
-                <input
-                    v-model="localTerm.order"
-                    type="number"
-                    class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all"
+                    :rows="4"
+                    dir="ltr"
+                    class="w-full"
                 />
-            </div>
-        </div>
+            </FormField>
+
+            <FormField v-slot="field" :label="$t('print_settings.order_by')">
+                <AppInput :id="field.id" v-model="localTerm.order" type="number" class="w-full" />
+            </FormField>
+        </form>
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="$emit('close')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    @click="handleSave"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
+                </AppButton>
+                <AppButton type="submit" form="term-edit-form" variant="primary">
                     {{ $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -82,6 +60,10 @@
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref } from 'vue';
 
 const props = defineProps({

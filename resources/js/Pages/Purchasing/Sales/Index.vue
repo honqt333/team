@@ -684,6 +684,7 @@
 
 <script setup>
 import { printDocument } from '@/Composables/usePrint';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -725,6 +726,9 @@ const props = defineProps({
 
 const activeTab = ref(props.filters?.tab === 'returns' ? 'returns' : 'invoices');
 const showCreateModal = ref(false);
+useAutoOpenCreate(() => {
+    showCreateModal.value = true;
+});
 
 const viewMode = ref(localStorage.getItem('sales_invoices_view_mode') || 'list');
 

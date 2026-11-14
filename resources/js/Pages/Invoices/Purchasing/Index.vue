@@ -674,6 +674,7 @@ import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import BackButton from '@/Components/BackButton.vue';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -699,6 +700,9 @@ const props = defineProps({
 });
 
 const showCreateModal = ref(false);
+useAutoOpenCreate(() => {
+    showCreateModal.value = true;
+});
 
 const onInvoiceSaved = () => {
     router.reload({ only: ['invoices'] });

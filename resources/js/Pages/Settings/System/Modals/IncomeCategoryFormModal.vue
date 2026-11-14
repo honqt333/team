@@ -9,59 +9,53 @@
         "
         @close="$emit('close')"
     >
-        <!-- Form -->
         <form id="income-category-form" @submit.prevent="submit" class="space-y-4">
-            <!-- Name AR -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('system_settings.form.name_ar') }}
-                    <span class="text-red-500">*</span>
-                </label>
-                <input
+            <FormField
+                v-slot="field"
+                :label="$t('system_settings.form.name_ar')"
+                :error="form.errors.name_ar"
+                required
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
                     v-model="form.name_ar"
-                    type="text"
-                    required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                     :placeholder="$t('system_settings.form.name_ar_placeholder')"
+                    class="w-full"
+                    required
                 />
-                <p v-if="form.errors.name_ar" class="mt-1 text-sm text-red-500">
-                    {{ form.errors.name_ar }}
-                </p>
-            </div>
+            </FormField>
 
-            <!-- Name EN -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('system_settings.form.name_en') }}
-                    <span class="text-red-500">*</span>
-                </label>
-                <input
+            <FormField
+                v-slot="field"
+                :label="$t('system_settings.form.name_en')"
+                :error="form.errors.name_en"
+                required
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
                     v-model="form.name_en"
-                    type="text"
-                    required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                     :placeholder="$t('system_settings.form.name_en_placeholder')"
-                />
-                <p v-if="form.errors.name_en" class="mt-1 text-sm text-red-500">
-                    {{ form.errors.name_en }}
-                </p>
-            </div>
-
-            <!-- Transaction Type -->
-            <div>
-                <SearchableSelect
-                    v-model="form.transaction_type"
-                    :options="transactionTypeOptions"
-                    option-label="label"
-                    option-value="value"
-                    :label="$t('system_settings.form.transaction_type')"
-                    :placeholder="$t('common.choose')"
+                    dir="ltr"
+                    class="w-full"
                     required
-                    :error="form.errors.transaction_type"
                 />
-            </div>
+            </FormField>
 
-            <!-- Is Taxable (Default Taxable) -->
+            <SearchableSelect
+                v-model="form.transaction_type"
+                :options="transactionTypeOptions"
+                option-label="label"
+                option-value="value"
+                :label="$t('system_settings.form.transaction_type')"
+                :placeholder="$t('common.choose')"
+                required
+                :error="form.errors.transaction_type"
+            />
+
             <div
                 class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
             >
@@ -76,7 +70,6 @@
                 <AppToggle v-model="form.is_taxable" color="success" />
             </div>
 
-            <!-- Is Active -->
             <div
                 class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
             >
@@ -89,21 +82,17 @@
 
         <template #footer>
             <div class="flex items-center justify-end gap-3 w-full">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton variant="secondary" @click="$emit('close')" :disabled="form.processing">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     type="submit"
                     form="income-category-form"
-                    :disabled="form.processing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                    variant="primary"
+                    :loading="form.processing"
                 >
                     {{ $t('common.save') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -115,8 +104,13 @@ import { useForm } from '@inertiajs/vue3';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     incomeCategory: Object,
@@ -141,13 +135,11 @@ function submit() {
     const url = props.incomeCategory
         ? `/app/settings/income-categories/${props.incomeCategory.id}`
         : '/app/settings/income-categories';
-
     const method = props.incomeCategory ? 'put' : 'post';
 
     form[method](url, {
-        onSuccess: () => {
-            emit('saved');
-        },
+        onSuccess: () => emit('saved'),
+        onError: () => scrollToError(form.errors),
     });
 }
 </script>
