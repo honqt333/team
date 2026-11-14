@@ -1044,6 +1044,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
         // Employee Asset Custody
         Route::post('/employees/{employee}/custodies', [EmployeeCustodyController::class, 'store'])->name('employees.custodies.store');
+        Route::put('/employees/{employee}/custodies/{custody}', [EmployeeCustodyController::class, 'update'])->name('employees.custodies.update');
         Route::get('/employees/{employee}/custodies/{custody}/print', [EmployeeCustodyController::class, 'print'])->name('employees.custodies.print');
         Route::put('/employees/{employee}/custodies/{custody}/return', [EmployeeCustodyController::class, 'returnAsset'])->name('employees.custodies.return');
         Route::delete('/employees/{employee}/custodies/{custody}', [EmployeeCustodyController::class, 'destroy'])->name('employees.custodies.destroy');

@@ -2348,6 +2348,7 @@
                 "new": "New"
             },
             "delete_confirm": "Are you sure you want to delete this custody record?",
+            "edit": "Edit Custody",
             "employee_info": "Recipient Employee Information",
             "empty": "No asset or tool custodies recorded for this employee",
             "estimated_value": "Estimated Value",

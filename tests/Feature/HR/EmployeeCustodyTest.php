@@ -127,6 +127,35 @@ class EmployeeCustodyTest extends TestCase
         $this->assertEquals('issued', $custody->status);
         $this->assertEquals('AUTEL-9988', $custody->serial_number);
 
+        $this->actingAs($this->unauthorizedUser)
+            ->put(route('app.hr.employees.custodies.update', [
+                'employee' => $this->employeeA->id,
+                'custody' => $custody->id,
+            ]), [
+                'asset_name' => 'اسم غير مصرح',
+                'category' => 'diagnostic_device',
+                'condition_on_issue' => 'good',
+                'issued_date' => '2026-11-14',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($this->authorizedUser)
+            ->put(route('app.hr.employees.custodies.update', [
+                'employee' => $this->employeeA->id,
+                'custody' => $custody->id,
+            ]), [
+                'asset_name' => 'جهاز فحص Autel Ultra',
+                'category' => 'diagnostic_device',
+                'serial_number' => 'AUTEL-ULTRA-1',
+                'estimated_value' => 5200,
+                'condition_on_issue' => 'good',
+                'issued_date' => '2026-11-14',
+            ])
+            ->assertRedirect();
+
+        $this->assertEquals('جهاز فحص Autel Ultra', $custody->fresh()->asset_name);
+        $this->assertEquals('AUTEL-ULTRA-1', $custody->fresh()->serial_number);
+
         $this->actingAs($this->authorizedUser)
             ->put(route('app.hr.employees.custodies.return', [
                 'employee' => $this->employeeA->id,

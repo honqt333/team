@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <AppButton variant="primary" size="sm" @click="openIssueModal">
+            <AppButton v-if="canManageCustody" variant="primary" size="sm" @click="openIssueModal">
                 + {{ $t('hr.custody.add') }}
             </AppButton>
         </div>
@@ -74,14 +74,27 @@
                     </AppButton>
                     <AppPrintButton variant="icon" @click="printCustody(item)" />
                     <AppButton
-                        v-if="item.status === 'issued'"
+                        v-if="canManageCustody"
+                        variant="secondary"
+                        size="sm"
+                        @click="openEditModal(item)"
+                    >
+                        {{ $t('common.edit') }}
+                    </AppButton>
+                    <AppButton
+                        v-if="canManageCustody && item.status === 'issued'"
                         variant="secondary"
                         size="sm"
                         @click="openReturnModal(item)"
                     >
                         {{ $t('hr.custody.return_action') }}
                     </AppButton>
-                    <AppButton variant="danger" size="sm" @click="deleteCustody(item)">
+                    <AppButton
+                        v-if="canManageCustody"
+                        variant="danger"
+                        size="sm"
+                        @click="deleteCustody(item)"
+                    >
                         {{ $t('common.delete') }}
                     </AppButton>
                 </div>
@@ -196,10 +209,10 @@
             </template>
         </BaseModal>
 
-        <!-- Issue Custody Modal -->
+        <!-- Issue / Edit Custody Modal -->
         <BaseModal
             :show="showIssueModal"
-            :title="$t('hr.custody.add')"
+            :title="editingCustody ? $t('hr.custody.edit') : $t('hr.custody.add')"
             size="lg"
             @close="showIssueModal = false"
         >
@@ -359,7 +372,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -388,15 +401,22 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const page = usePage();
 const { confirm } = useConfirm();
 const { success } = useToast();
 const { formatMoney, toEnglish } = useNumberFormat();
 const { scrollToError } = useFormScrollToError();
 
+const canManageCustody = computed(() => {
+    const auth = page.props.auth || {};
+    return Boolean(auth.is_super_admin || (auth.permissions || []).includes('hr.employees.update'));
+});
+
 const showIssueModal = ref(false);
 const showReturnModal = ref(false);
 const showViewModal = ref(false);
 const selectedCustody = ref(null);
+const editingCustody = ref(null);
 
 const activeCustodies = computed(() => props.custodies.filter((c) => c.status === 'issued'));
 
@@ -455,21 +475,50 @@ const returnForm = useForm({
 });
 
 function openIssueModal() {
+    editingCustody.value = null;
     issueForm.reset();
     issueForm.issued_date = new Date().toISOString().slice(0, 10);
     issueForm.clearErrors();
     showIssueModal.value = true;
 }
 
+function openEditModal(custody) {
+    editingCustody.value = custody;
+    issueForm.asset_name = custody.asset_name || '';
+    issueForm.category = custody.category || 'tool_kit';
+    issueForm.serial_number = custody.serial_number || '';
+    issueForm.estimated_value = custody.estimated_value ?? '';
+    issueForm.condition_on_issue = custody.condition_on_issue || 'good';
+    issueForm.issued_date = custody.issued_date || new Date().toISOString().slice(0, 10);
+    issueForm.issue_signature = custody.issue_signature || null;
+    issueForm.notes = custody.notes || '';
+    issueForm.clearErrors();
+    showIssueModal.value = true;
+}
+
 function submitIssue() {
-    issueForm.post(route('app.hr.employees.custodies.store', props.employee.id), {
+    const options = {
         preserveScroll: true,
         onSuccess: () => {
             showIssueModal.value = false;
+            editingCustody.value = null;
             success(t('common.saved_success'));
         },
         onError: () => scrollToError(),
-    });
+    };
+
+    if (editingCustody.value) {
+        issueForm.put(
+            route('app.hr.employees.custodies.update', {
+                employee: props.employee.id,
+                custody: editingCustody.value.id,
+            }),
+            options
+        );
+        return;
+    }
+
+    issueForm.post(route('app.hr.employees.custodies.store', props.employee.id), options);
 }
 
 function openViewModal(custody) {

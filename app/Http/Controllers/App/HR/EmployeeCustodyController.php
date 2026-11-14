@@ -55,6 +55,41 @@ class EmployeeCustodyController extends Controller
     }
 
     /**
+     * Update an existing custody record.
+     */
+    public function update(Request $request, Employee $employee, EmployeeAssetCustody $custody): RedirectResponse
+    {
+        $this->authorize('update', $employee);
+        abort_if((int) $custody->employee_id !== (int) $employee->id, 404);
+
+        $validated = $request->validate([
+            'asset_name' => 'required|string|max:255',
+            'category' => ['required', Rule::in(EmployeeAssetCustody::CATEGORIES)],
+            'serial_number' => 'nullable|string|max:100',
+            'estimated_value' => 'nullable|numeric|min:0|max:9999999.99',
+            'condition_on_issue' => 'required|in:new,good,fair',
+            'issued_date' => 'required|date',
+            'issue_signature' => 'nullable|string|max:500000',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $custody->update([
+            'asset_name' => $validated['asset_name'],
+            'category' => $validated['category'],
+            'serial_number' => $validated['serial_number'] ?? null,
+            'estimated_value' => $validated['estimated_value'] ?? 0,
+            'condition_on_issue' => $validated['condition_on_issue'],
+            'issued_date' => $validated['issued_date'],
+            'issue_signature' => array_key_exists('issue_signature', $validated) && $validated['issue_signature'] !== null
+                ? $validated['issue_signature']
+                : $custody->issue_signature,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return back()->with('success', __('common.saved_success'));
+    }
+
+    /**
      * Record return (or damage/loss) of an issued custody item.
      */
     public function returnAsset(Request $request, Employee $employee, EmployeeAssetCustody $custody): RedirectResponse
