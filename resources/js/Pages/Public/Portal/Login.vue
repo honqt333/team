@@ -32,39 +32,34 @@
                 <label for="phone" class="mb-2 block text-sm font-bold text-slate-800">
                     {{ t('customer_portal.login.phone_label') }}
                 </label>
-                <div
-                    class="flex h-14 overflow-hidden rounded-2xl border bg-white transition focus-within:border-transparent focus-within:ring-4"
-                    :class="form.errors.phone ? 'border-rose-400' : 'border-slate-200'"
-                    :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
-                >
-                    <select
-                        v-model="selectedCountryCode"
-                        aria-label="Country code"
-                        class="border-0 border-e border-slate-200 bg-slate-50 px-3 text-sm font-extrabold text-slate-700 outline-none focus:ring-0"
-                        dir="ltr"
+                <div class="flex items-stretch gap-2">
+                    <div class="w-36 shrink-0" dir="ltr">
+                        <SearchableSelect
+                            v-model="selectedCountryCode"
+                            :options="countrySelectOptions"
+                            :searchable="false"
+                        />
+                    </div>
+                    <div
+                        class="flex h-14 min-w-0 flex-1 overflow-hidden rounded-2xl border bg-white transition focus-within:border-transparent focus-within:ring-4"
+                        :class="form.errors.phone ? 'border-rose-400' : 'border-slate-200'"
+                        :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
                     >
-                        <option
-                            v-for="country in countryDialOptions"
-                            :key="country.code"
-                            :value="country.code"
-                        >
-                            {{ country.flag }} {{ country.code }} {{ country.dial_code }}
-                        </option>
-                    </select>
-                    <input
-                        id="phone"
-                        v-model="form.phone"
-                        type="tel"
-                        inputmode="numeric"
-                        autocomplete="tel"
-                        dir="ltr"
-                        :placeholder="
-                            activeCountryMeta.local_placeholder ||
-                            t('customer_portal.login.local_phone_placeholder')
-                        "
-                        class="min-w-0 flex-1 border-0 bg-white px-4 text-lg font-semibold tracking-wide text-slate-950 outline-none ring-0 placeholder:text-slate-300 focus:ring-0"
-                        @input="onPhoneInput"
-                    />
+                        <input
+                            id="phone"
+                            v-model="form.phone"
+                            type="tel"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                            dir="ltr"
+                            :placeholder="
+                                activeCountryMeta.local_placeholder ||
+                                t('customer_portal.login.local_phone_placeholder')
+                            "
+                            class="min-w-0 flex-1 border-0 bg-white px-4 text-lg font-semibold tracking-wide text-slate-950 outline-none ring-0 placeholder:text-slate-300 focus:ring-0"
+                            @input="onPhoneInput"
+                        />
+                    </div>
                 </div>
                 <p v-if="form.errors.phone" class="mt-2 text-sm font-medium text-rose-600">
                     {{ form.errors.phone }}
@@ -131,6 +126,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AuthShell from '@/Components/CustomerPortal/AuthShell.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { COUNTRIES, getCountryMeta } from '@/Utils/currency';
 
 const props = defineProps({
@@ -143,6 +139,10 @@ const props = defineProps({
 const { t } = useI18n();
 
 const countryDialOptions = Object.values(COUNTRIES);
+const countrySelectOptions = countryDialOptions.map((c) => ({
+    value: c.code,
+    label: `${c.flag} ${c.code} ${c.dial_code}`,
+}));
 const selectedCountryCode = ref(
     props.tenant?.country && COUNTRIES[String(props.tenant.country).toUpperCase()]
         ? String(props.tenant.country).toUpperCase()

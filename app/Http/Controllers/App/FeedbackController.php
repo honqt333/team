@@ -187,7 +187,7 @@ class FeedbackController extends Controller
     }
 
     /**
-     * List of available modules in Carag.
+     * List of available modules in Khidmh Pro.
      *
      * @return array<int, array{id: string, name: string}>
      */

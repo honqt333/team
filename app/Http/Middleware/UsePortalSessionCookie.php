@@ -149,10 +149,10 @@ class UsePortalSessionCookie
     ) {}
 
     /**
-     * The portal session cookie name. The
-     * `carag_` prefix is the project brand (the
-     * project ships as "Carag" / "Khidmh Pro" — see
-     * the project root AGENTS.md). The
+     * The portal session cookie name. The legacy
+     * cookie prefix is preserved for backward
+     * compatibility (the project ships as "Khidmh Pro"
+     * — see the project root AGENTS.md). The
      * `_customer_portal_` segment makes the
      * purpose self-documenting in a browser's
      * cookie jar. The suffix `_session` matches

@@ -1,6 +1,6 @@
 <script setup>
 /**
- * AppTextarea — Carag V2 Design System primitive.
+ * AppTextarea — Khidmh Pro Design System primitive.
  *
  * Multi-line text input that follows the AppField pattern. No
  * legacy wrapper exists for textarea in the project, so this is

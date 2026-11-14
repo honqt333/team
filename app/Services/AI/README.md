@@ -1,4 +1,4 @@
-# Carag AI Layer
+# Khidmh Pro AI Layer
 
 Backend-only AI foundation for provider abstraction, deterministic tests, and per-tenant usage tracking.
 

@@ -1,6 +1,6 @@
 <script setup>
 /**
- * AppButton — Carag V2 Design System primitive.
+ * AppButton — Khidmh Pro Design System primitive.
  *
  * Variants: primary (gold) | secondary (slate outline) | ghost | danger
  * Sizes:    sm | md | lg

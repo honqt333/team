@@ -330,9 +330,11 @@ import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
 import { debounce } from 'lodash-es';
 import AppButton from '@/Components/App/AppButton.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useToast } from '@/Composables/useToast';
 
 const { t, locale } = useI18n();
+const { formatDate } = useFormatters();
 const { toEnglish } = useNumberFormat();
 const { confirm } = useConfirm();
 const { error: toastError } = useToast();
@@ -403,16 +405,6 @@ const getTypeName = (type) => {
 const getTypeIcon = (type) => {
     const map = { bug: '🐞', feature_request: '💡', suggestion: '✨' };
     return map[type] || '📝';
-};
-
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const loc = locale.value === 'ar' ? 'ar-SA' : 'en-US';
-    return new Date(dateStr).toLocaleDateString(loc, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
 };
 
 const openVideo = (url, title) => {

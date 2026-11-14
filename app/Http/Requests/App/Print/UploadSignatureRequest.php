@@ -31,7 +31,7 @@ class UploadSignatureRequest extends FormRequest
      *
      * The `signature` field is the uploaded image. We restrict the MIME
      * types to PNG, JPG, JPEG, WEBP and SVG+xml. SVG is allowed because
-     * Carag V2 prints vector-based signatures for invoices.
+     * Khidmh Pro prints vector-based signatures for invoices.
      *
      * `name` is a short human label for the signature (e.g. "CEO signature",
      * "Accountant signature") and is what gets shown in the print layout.

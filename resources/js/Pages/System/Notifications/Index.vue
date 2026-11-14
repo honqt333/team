@@ -114,8 +114,10 @@ import { Head, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
+const { formatDateTime } = useFormatters();
 const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
@@ -130,17 +132,6 @@ const unreadCount = computed(
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content || '';
-}
-
-function formatDateTime(iso) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 }
 
 async function markRead(id) {

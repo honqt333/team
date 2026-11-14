@@ -1,6 +1,6 @@
 <script setup>
 /**
- * AppCheckbox — Carag V2 Design System primitive.
+ * AppCheckbox — Khidmh Pro Design System primitive.
  *
  * Renders a native checkbox with token-driven visuals, full
  * a11y (aria-invalid, aria-describedby), and label/hint/error.

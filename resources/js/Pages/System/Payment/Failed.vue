@@ -109,9 +109,11 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { formatDateTime: formatDate } = useFormatters();
 const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
@@ -133,17 +135,6 @@ const getPaymentMethodLabel = (method) => {
         bank_transfer: 'Bank Transfer',
     };
     return map[method] || method;
-};
-
-const formatDate = (dateStr) => {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 };
 
 const retryPayment = () => {

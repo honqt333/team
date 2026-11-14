@@ -242,8 +242,10 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link } from '@inertiajs/vue3';
 import KpiCard from '@/Components/System/KpiCard.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
+const { formatNumber } = useFormatters();
 
 const props = defineProps({
     kpis: {
@@ -294,11 +296,7 @@ onMounted(async () => {
     }
 });
 
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
-        maximumFractionDigits: 0,
-    }).format(amount || 0);
-}
+const formatCurrency = (amount) => formatNumber(amount, 0);
 
 function gatewayLabel(g) {
     const map = {

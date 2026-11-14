@@ -1,6 +1,6 @@
 <script setup>
 /**
- * AppSelect — Carag V2 Design System primitive.
+ * AppSelect — Khidmh Pro Design System primitive.
  *
  * Renders a native select for static options and exposes the same field API as AppInput (label, hint, error,
  * aria-*). Visual styling is token-driven.

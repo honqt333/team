@@ -1,6 +1,6 @@
 <script setup>
 /**
- * AppInput — Carag V2 Design System primitive.
+ * AppInput — Khidmh Pro Design System primitive.
  *
  * Renders a native input and exposes a token-styled surface, full
  * a11y (aria-invalid, aria-describedby, aria-required), and

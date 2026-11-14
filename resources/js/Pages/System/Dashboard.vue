@@ -440,8 +440,10 @@ import { useI18n } from 'vue-i18n';
 import { Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
+const { formatDate } = useFormatters();
 const page = usePage();
 
 const props = defineProps({
@@ -508,11 +510,6 @@ const statCards = computed(() => [
             'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636',
     },
 ]);
-
-const formatDate = (date) => {
-    if (!date) return t('common.na');
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
-};
 
 const getStatusClass = (status) => {
     const classes = {
