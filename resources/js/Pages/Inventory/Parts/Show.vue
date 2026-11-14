@@ -827,33 +827,13 @@
                     </div>
 
                     <!-- Movements Pagination -->
-                    <div
+                    <AppPagination
                         v-if="moves.links?.length > 3"
-                        class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3"
-                    >
-                        <span class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $t('common.showing') }} {{ toEnglish(moves.from) }} -
-                            {{ toEnglish(moves.to) }} {{ $t('common.of') }}
-                            {{ toEnglish(moves.total) }}
-                        </span>
-                        <div class="flex gap-1">
-                            <Link
-                                v-for="link in moves.links"
-                                :key="link.label"
-                                :href="link.url || '#'"
-                                preserve-scroll
-                                :class="[
-                                    'px-2.5 py-1 rounded-lg text-xs font-medium transition-all',
-                                    link.active
-                                        ? 'bg-action-primary text-white shadow-sm font-bold'
-                                        : link.url
-                                          ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                          : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700',
-                                ]"
-                                v-safe-html="link.label"
-                            />
-                        </div>
-                    </div>
+                        :links="moves.links"
+                        :from="moves.from"
+                        :to="moves.to"
+                        :total="moves.total"
+                    />
                 </div>
             </div>
 
@@ -885,6 +865,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

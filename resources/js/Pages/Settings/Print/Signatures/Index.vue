@@ -1,18 +1,14 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('settings.print.signatures.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('settings.print.signatures.subtitle') }}
-                    </p>
-                </div>
-                <BackButton :href="route('settings.print')" />
-            </div>
+            <PageHeader
+                :title="$t('settings.print.signatures.title')"
+                :subtitle="$t('settings.print.signatures.subtitle')"
+            >
+                <template #actions>
+                    <BackButton :href="route('settings.print')" />
+                </template>
+            </PageHeader>
 
             <!-- Empty state -->
             <div
@@ -128,6 +124,7 @@
 import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 
 const props = defineProps({
