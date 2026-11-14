@@ -26,19 +26,18 @@
         <VehicleMileageList v-if="vehicle?.id" :vehicle-id="vehicle.id" />
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-            >
-                {{ $t('common.close') }}
-            </button>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <AppButton variant="secondary" @click="$emit('close')">
+                    {{ $t('common.close') }}
+                </AppButton>
+            </div>
         </template>
     </BaseModal>
 </template>
 
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import VehicleMileageList from '@/Components/Vehicles/VehicleMileageList.vue';
 
 const props = defineProps({

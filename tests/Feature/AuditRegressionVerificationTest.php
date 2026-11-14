@@ -392,17 +392,26 @@ class AuditRegressionVerificationTest extends TestCase
         ]);
         $invoice->saveQuietly();
 
-        // Attempting mass-assignment on existing Invoice must ignore status and payment_status
+        // Attempting mass-assignment on existing Invoice must ignore status, payment_status, and financial totals
         $invoice->fill([
             'notes' => 'Safe note',
             'status' => 'issued',
             'payment_status' => 'paid',
+            'total_excl_tax' => 9999,
+            'total_tax' => 999,
+            'total_incl_tax' => 10998,
+            'total_taxable_amount' => 9999,
+            'total_paid' => 10998,
         ])->saveQuietly();
 
         $invoice->refresh();
         $this->assertSame('Safe note', $invoice->notes);
         $this->assertSame('draft', $invoice->status);
         $this->assertSame('unpaid', $invoice->payment_status);
+        $this->assertEqualsWithDelta(100.0, (float) $invoice->total_excl_tax, 0.01);
+        $this->assertEqualsWithDelta(15.0, (float) $invoice->total_tax, 0.01);
+        $this->assertEqualsWithDelta(115.0, (float) $invoice->total_incl_tax, 0.01);
+        $this->assertEqualsWithDelta(0.0, (float) $invoice->total_paid, 0.01);
     }
 
     public function test_leave_controller_blocks_self_approval(): void

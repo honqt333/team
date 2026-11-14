@@ -88,6 +88,7 @@ export const pageManifest = {
     'Invoices/Print': () => import('./Invoices/Print.vue'),
     'Invoices/Purchasing/Index': () => import('./Invoices/Purchasing/Index.vue'),
     'Invoices/Sales/Index': () => import('./Invoices/Sales/Index.vue'),
+    'Invoices/Sales/Print': () => import('./Invoices/Sales/Print.vue'),
     'Invoices/Show': () => import('./Invoices/Show.vue'),
     'Notifications/Index': () => import('./Notifications/Index.vue'),
     'Public/CustomPage': () => import('./Public/CustomPage.vue'),

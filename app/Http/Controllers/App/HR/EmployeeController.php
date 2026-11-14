@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderLaborEntry;
+use App\Services\HR\TechnicianCommissionService;
 use App\Support\TenancyContext;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -365,12 +366,21 @@ class EmployeeController extends Controller
             ->take(15)
             ->get(['id', 'code', 'customer_id', 'vehicle_id', 'status', 'created_at']);
 
+        $productivity = app(TechnicianCommissionService::class)->calculateForPeriod(
+            $employee,
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        );
+
         return [
             'recentWorkOrders' => $recentWorkOrders,
             'workOrdersSummary' => [
                 'active_tasks' => $activeTasks,
                 'completed_tasks' => $completedTasks,
                 'labor_hours' => round($laborSeconds / 3600, 1),
+                'commission_amount' => $productivity['commission_amount'],
+                'first_time_fix_rate' => $productivity['first_time_fix_rate'],
+                'efficiency_rate' => $productivity['efficiency_rate'],
             ],
         ];
     }

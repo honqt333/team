@@ -677,46 +677,20 @@
                         }}
                     </span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3">
+                    <AppButton variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="submitForm"
+                    </AppButton>
+                    <AppButton
+                        variant="primary"
+                        :loading="form.processing"
                         :disabled="
-                            form.processing ||
-                            !selectedVehicle ||
-                            (showOdometerWarning && !form.allow_lower_odometer)
+                            !selectedVehicle || (showOdometerWarning && !form.allow_lower_odometer)
                         "
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                        @click="submitForm"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                        </svg>
-                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                    </button>
+                        {{ $t('common.save') }}
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -756,6 +730,7 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';

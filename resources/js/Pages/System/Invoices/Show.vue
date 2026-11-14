@@ -248,24 +248,13 @@
                 <AppTextarea v-model="markPaidForm.notes" :rows="2" :label="$t('common.notes')" />
             </div>
             <template #footer>
-                <div class="flex gap-3 w-full">
-                    <button
-                        @click="markAsPaid"
-                        :disabled="markingPaid"
-                        class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                        {{
-                            markingPaid
-                                ? $t('system.invoices.confirming')
-                                : $t('system.invoices.mark_as_paid')
-                        }}
-                    </button>
-                    <button
-                        @click="showMarkPaidModal = false"
-                        class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                    >
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton variant="secondary" @click="showMarkPaidModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
+                    </AppButton>
+                    <AppButton variant="success" :loading="markingPaid" @click="markAsPaid">
+                        {{ $t('system.invoices.mark_as_paid') }}
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -284,6 +273,7 @@ import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormatters } from '@/Composables/useFormatters';
 import StatusBadge from '@/Components/Billing/StatusBadge.vue';

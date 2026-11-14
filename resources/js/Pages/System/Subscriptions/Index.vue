@@ -432,24 +432,17 @@
 
                 <template #footer>
                     <div class="flex justify-end gap-3 w-full">
-                        <button
-                            @click="closeModal"
-                            type="button"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                        >
+                        <AppButton variant="secondary" @click="closeModal">
                             {{ $t('system.actions.cancel') }}
-                        </button>
-                        <button
+                        </AppButton>
+                        <AppButton
+                            variant="primary"
+                            :loading="form.processing"
+                            :disabled="!form.tenant_id"
                             @click="submit"
-                            :disabled="form.processing || !form.tenant_id"
-                            class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                         >
-                            {{
-                                form.processing
-                                    ? $t('system.subscriptions.create_modal.submitting')
-                                    : $t('system.subscriptions.create_modal.submit')
-                            }}
-                        </button>
+                            {{ $t('system.subscriptions.create_modal.submit') }}
+                        </AppButton>
                     </div>
                 </template>
             </BaseModal>
@@ -467,6 +460,7 @@ import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

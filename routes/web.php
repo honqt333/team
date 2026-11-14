@@ -1206,6 +1206,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
         // Sales Invoices
         Route::get('/sales', [InvoicesController::class, 'salesIndex'])->name('sales.index');
+        Route::get('/sales/export', [InvoicesController::class, 'salesExport'])->name('sales.export');
+        Route::get('/sales/print', [InvoicesController::class, 'salesPrint'])->name('sales.print');
 
         // Purchase Invoices
         Route::get('/purchases', [InvoicesController::class, 'purchasesIndex'])->name('purchases.index');

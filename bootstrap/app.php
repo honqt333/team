@@ -92,7 +92,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // /login on their next request.
         //
         // The fix is to give the portal its own cookie
-        // name (carag_customer_portal_session) for the
+        // name (khidmh_customer_portal_session) for the
         // duration of a portal request. The middleware
         // runs at the START of the web group, BEFORE
         // StartSession, so it can rewrite
@@ -219,7 +219,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // /login on their next request.
         //
         // The fix is to give the portal its own cookie
-        // name (carag_customer_portal_session) for the
+        // name (khidmh_customer_portal_session) for the
         // duration of a portal request. The middleware
         // runs BEFORE StartSession in the priority
         // list, rewrites `session.cookie` in-process

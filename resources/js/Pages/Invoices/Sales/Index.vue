@@ -34,10 +34,38 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2">
-                        <!-- View Mode Toggle -->
+                        <!-- Actions Toolbar -->
                         <div
                             class="flex items-center gap-1.5 p-1 bg-surface-muted rounded-xl border border-border"
                         >
+                            <!-- Export Button -->
+                            <button
+                                type="button"
+                                @click="exportSalesInvoices"
+                                :disabled="exporting"
+                                :title="$t('common.export')"
+                                class="p-2 text-text-secondary hover:text-action-primary hover:bg-surface rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <!-- Print Button -->
+                            <AppPrintButton variant="icon" @click="printSalesInvoices" />
+
+                            <div class="w-px h-5 bg-border mx-0.5"></div>
+
                             <AppViewModeToggle
                                 v-model="viewMode"
                                 storage-key="salesInvoicesViewMode"
@@ -549,6 +577,7 @@ import AppTabs from '@/Components/Common/AppTabs.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -804,4 +833,43 @@ const isOverdueInvoice = (invoice) =>
     invoice?.type !== 'credit_note' &&
     Number(invoice?.balance) > 0 &&
     getOverdueDays(invoice?.due_date) > 0;
+
+const exporting = ref(false);
+
+const buildSalesExportQuery = () => {
+    const params = new URLSearchParams();
+    params.set('tab', activeTab.value || 'invoices');
+    if (tableFilters.search) params.set('search', tableFilters.search);
+    if (tableFilters.payment_status) params.set('payment_status', tableFilters.payment_status);
+    if (tableFilters.date_from) params.set('date_from', tableFilters.date_from);
+    if (tableFilters.date_to) params.set('date_to', tableFilters.date_to);
+    if (sortColumn.value) {
+        params.set('sort', sortColumn.value);
+        params.set('direction', sortDirection.value || 'desc');
+    }
+    return params.toString();
+};
+
+const printSalesInvoices = () => {
+    const queryString = buildSalesExportQuery();
+    const url = route('app.invoices.sales.print') + (queryString ? `?${queryString}` : '');
+    window.open(url, '_blank');
+};
+
+const exportSalesInvoices = () => {
+    exporting.value = true;
+    const queryString = buildSalesExportQuery();
+    const url = route('app.invoices.sales.export') + (queryString ? `?${queryString}` : '');
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+        exporting.value = false;
+    }, 2000);
+};
 </script>

@@ -896,7 +896,6 @@ class WorkOrderController
             'items.*.description' => ['nullable', 'string', 'max:255'],
             'items.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
             'items.*.qty' => ['nullable', 'numeric', 'min:0.001'],
-            'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
         $rawLines = $validated['lines'] ?? [];
@@ -905,15 +904,10 @@ class WorkOrderController
             foreach ($validated['items'] as $item) {
                 $qty = (float) ($item['qty'] ?? 1);
                 $cost = (float) ($item['unit_cost'] ?? 0);
-                $rate = isset($item['tax_rate']) ? (float) $item['tax_rate'] : 15.0;
-                $lineSubtotal = round($qty * $cost, 2);
-                $lineTax = round($lineSubtotal * ($rate / 100), 2);
                 $rawLines[] = [
                     'item_description' => $item['description'] ?? '',
                     'allocated_qty' => $qty,
                     'unit_cost' => $cost,
-                    'tax_amount' => $lineTax,
-                    'total_cost' => $lineSubtotal + $lineTax,
                 ];
             }
         }

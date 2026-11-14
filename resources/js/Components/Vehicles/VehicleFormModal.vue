@@ -362,42 +362,13 @@
                         }}
                     </span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3">
+                    <AppButton variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="submitForm"
-                        :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
-                        <svg
-                            v-if="form.processing"
-                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                    </button>
+                    </AppButton>
+                    <AppButton variant="primary" :loading="form.processing" @click="submitForm">
+                        {{ $t('common.save') }}
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -545,21 +516,13 @@
             </div>
 
             <template #footer>
-                <div class="flex justify-end gap-2">
-                    <button
-                        type="button"
-                        @click="showDuplicateModal = false"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton variant="secondary" @click="showDuplicateModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="navigateToDuplicateVehicle"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                    >
+                    </AppButton>
+                    <AppButton variant="primary" @click="navigateToDuplicateVehicle">
                         {{ $t('vehicles.view_details') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -574,6 +537,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

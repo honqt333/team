@@ -714,21 +714,19 @@
             </form>
 
             <template #footer>
-                <button
-                    type="button"
-                    @click="showDeptModal = false"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                    {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="submitAddDepartments"
-                    :disabled="savingDepts || selectedDepts.length === 0"
-                    class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all shadow-md shadow-focus-ring-soft"
-                >
-                    {{ savingDepts ? $t('common.loading') : $t('common.save') }}
-                </button>
+                <div class="flex items-center justify-end gap-3 w-full">
+                    <AppButton variant="secondary" @click="showDeptModal = false">
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                    <AppButton
+                        variant="primary"
+                        :loading="savingDepts"
+                        :disabled="selectedDepts.length === 0"
+                        @click="submitAddDepartments"
+                    >
+                        {{ $t('common.save') }}
+                    </AppButton>
+                </div>
             </template>
         </BaseModal>
     </div>
@@ -745,6 +743,7 @@ import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 
 const props = defineProps({

@@ -829,18 +829,21 @@
 
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <SecondaryButton
+                    <AppButton
+                        variant="secondary"
                         @click="showSignatureModal = false"
                         :disabled="isSavingSignature"
                     >
                         {{ $t('common.cancel') }}
-                    </SecondaryButton>
-                    <PrimaryButton
+                    </AppButton>
+                    <AppButton
+                        variant="primary"
                         @click="saveQuoteSignature"
-                        :disabled="!signatureData || isSavingSignature"
+                        :loading="isSavingSignature"
+                        :disabled="!signatureData"
                     >
-                        {{ isSavingSignature ? $t('common.saving') : $t('common.save') }}
-                    </PrimaryButton>
+                        {{ $t('common.save') }}
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -866,6 +869,7 @@ import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
 import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';

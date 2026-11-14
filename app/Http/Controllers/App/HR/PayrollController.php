@@ -13,6 +13,7 @@ use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
 use App\Models\HR\PayrollRun;
 use App\Services\HR\PayrollAccountingService;
+use App\Services\HR\TechnicianCommissionService;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -245,6 +246,7 @@ class PayrollController extends Controller
     private function processPayrollItems(PayrollRun $payrollRun)
     {
         $settings = AttendanceSettings::getForCenter($payrollRun->center_id);
+        $commissionService = app(TechnicianCommissionService::class);
 
         // Get all active employees in this center
         $employees = Employee::where('tenant_id', $payrollRun->tenant_id)
@@ -270,10 +272,19 @@ class PayrollController extends Controller
                 $settings
             );
 
+            // Calculate technician commission & productivity KPIs
+            $commissionData = $commissionService->calculateForPeriod(
+                $employee,
+                $payrollRun->period_start,
+                $payrollRun->period_end
+            );
+            $commissionAmount = $commissionData['commission_amount'];
+
             // Calculate base values
             $baseSalary = $employee->base_salary ?? 0;
             $gosiAmount = $employee->calculateGosiAmount();
-            $totalAllowances = $employee->calculateTotalAllowances() + $overtimePayment;
+            $regularAllowances = $employee->calculateTotalAllowances();
+            $totalAllowances = $regularAllowances + $overtimePayment + $commissionAmount;
             $totalDeductions = $employee->calculateTotalDeductions() + $gosiAmount + $attendanceDeduction;
             $netSalary = $baseSalary + $totalAllowances - $totalDeductions;
 
@@ -288,8 +299,15 @@ class PayrollController extends Controller
                 'total_deductions' => $totalDeductions,
                 'net_salary' => max(0, $netSalary),
                 'allowances_breakdown' => [
-                    'regular' => $employee->calculateTotalAllowances(),
+                    'regular' => $regularAllowances,
                     'overtime' => $overtimePayment,
+                    'commission' => $commissionAmount,
+                    'productivity' => [
+                        'billable_items' => $commissionData['billable_items_count'],
+                        'warranty_items' => $commissionData['warranty_items_count'],
+                        'first_time_fix_rate' => $commissionData['first_time_fix_rate'],
+                        'efficiency_rate' => $commissionData['efficiency_rate'],
+                    ],
                 ],
                 'deductions_breakdown' => [
                     'regular' => $employee->calculateTotalDeductions(),

@@ -57,14 +57,6 @@ class Invoice extends Model
         'tax_rate_snapshot',
         'currency_code',
 
-        // Totals
-        'total_excl_tax',
-        'total_tax',
-        'total_incl_tax',
-        'total_taxable_amount',
-        'total_paid',
-        'tax_breakdown',
-
         // ZATCA
         'zatca_qr_tlv',
         'zatca_uuid',
@@ -90,16 +82,25 @@ class Invoice extends Model
     ];
 
     /**
-     * Allow setting initial lifecycle statuses only when creating a new record,
-     * while preventing mass-assignment mutation of status / payment_status on existing invoices.
+     * Allow setting initial lifecycle statuses and financial totals only when creating a new record,
+     * while preventing mass-assignment mutation of status, payment_status, or financial totals on existing invoices.
      */
     public function fill(array $attributes)
     {
         if (! $this->exists) {
-            foreach (['status', 'payment_status'] as $lifecycleKey) {
-                if (array_key_exists($lifecycleKey, $attributes)) {
-                    $this->setAttribute($lifecycleKey, $attributes[$lifecycleKey]);
-                    unset($attributes[$lifecycleKey]);
+            foreach ([
+                'status',
+                'payment_status',
+                'total_excl_tax',
+                'total_tax',
+                'total_incl_tax',
+                'total_taxable_amount',
+                'total_paid',
+                'tax_breakdown',
+            ] as $protectedKey) {
+                if (array_key_exists($protectedKey, $attributes)) {
+                    $this->setAttribute($protectedKey, $attributes[$protectedKey]);
+                    unset($attributes[$protectedKey]);
                 }
             }
         }

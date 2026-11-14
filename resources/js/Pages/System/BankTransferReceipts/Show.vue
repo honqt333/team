@@ -8,6 +8,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
@@ -700,28 +701,24 @@ const amountState = computed(() => {
                 "
             />
             <template #footer>
-                <div class="flex justify-end gap-2 w-full">
-                    <button
-                        type="button"
-                        @click="showRejectModal = false"
-                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                    >
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton variant="secondary" @click="showRejectModal = false">
                         {{
                             locale === 'ar' ? $t('system.bank_transfer_receipts.cancel') : 'Cancel'
                         }}
-                    </button>
-                    <button
-                        type="button"
+                    </AppButton>
+                    <AppButton
+                        variant="danger"
+                        :loading="processing"
+                        :disabled="!rejectNotes.trim()"
                         @click="reject"
-                        :disabled="!rejectNotes.trim() || processing"
-                        class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                     >
                         {{
                             locale === 'ar'
                                 ? $t('system.bank_transfer_receipts.confirm_reject_2')
                                 : 'Confirm reject'
                         }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -894,28 +891,19 @@ const amountState = computed(() => {
             </div>
 
             <template #footer>
-                <div class="flex justify-end gap-2 w-full">
-                    <button
-                        type="button"
-                        @click="showApproveModal = false"
-                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                    >
+                <div class="flex justify-end gap-3 w-full">
+                    <AppButton variant="secondary" @click="showApproveModal = false">
                         {{
                             locale === 'ar' ? $t('system.bank_transfer_receipts.cancel') : 'Cancel'
                         }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="confirmApprove"
-                        :disabled="!canApprove"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-                    >
+                    </AppButton>
+                    <AppButton variant="success" :disabled="!canApprove" @click="confirmApprove">
                         {{
                             locale === 'ar'
                                 ? $t('system.bank_transfer_receipts.confirm_approve_2')
                                 : 'Confirm approve'
                         }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>

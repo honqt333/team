@@ -9,6 +9,7 @@ use App\Models\AppointmentMessageDelivery;
 use App\Models\Customer;
 use App\Services\Messaging\AppointmentMessageTemplate;
 use App\Services\Messaging\SmsService;
+use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -170,6 +171,21 @@ class SendAppointmentMessage implements ShouldQueue
 
             return;
         }
+
+        TenancyContext::set((int) $delivery->tenant_id, $delivery->center_id ? (int) $delivery->center_id : null);
+
+        try {
+            $this->processDelivery($delivery, $template, $sms);
+        } finally {
+            TenancyContext::clear();
+        }
+    }
+
+    private function processDelivery(
+        AppointmentMessageDelivery $delivery,
+        AppointmentMessageTemplate $template,
+        SmsService $sms,
+    ): void {
 
         // Re-fetch the appointment and re-evaluate
         // the "should we send?" rules. The

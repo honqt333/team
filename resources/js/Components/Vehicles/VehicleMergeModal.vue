@@ -360,59 +360,27 @@
 
         <template #footer>
             <div class="flex items-center justify-between w-full">
-                <button
-                    v-if="selectedTarget"
-                    type="button"
-                    @click="selectedTarget = null"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
+                <AppButton v-if="selectedTarget" variant="secondary" @click="selectedTarget = null">
                     {{ $t('common.back') }}
-                </button>
+                </AppButton>
                 <div v-else></div>
 
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex items-center justify-end gap-3">
+                    <AppButton variant="secondary" @click="$emit('close')">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         v-if="selectedTarget"
-                        type="button"
+                        variant="primary"
+                        :loading="submitting"
                         @click="executeMerge"
-                        :disabled="submitting"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <svg
-                            v-if="submitting"
-                            class="w-4 h-4 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <span>
-                            {{
-                                submitting
-                                    ? $t('vehicles.merge.merging')
-                                    : $t('vehicles.merge.confirm_button')
-                            }}
-                        </span>
-                    </button>
+                        {{
+                            submitting
+                                ? $t('vehicles.merge.merging')
+                                : $t('vehicles.merge.confirm_button')
+                        }}
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -423,6 +391,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import axios from 'axios';

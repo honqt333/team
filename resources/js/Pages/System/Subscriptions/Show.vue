@@ -313,18 +313,12 @@
             </div>
             <template #footer>
                 <div class="flex gap-3 justify-end w-full">
-                    <button
-                        @click="showExtendModal = false"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton variant="secondary" @click="showExtendModal = false">
                         {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                        @click="extendSubscription"
-                        class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
-                    >
+                    </AppButton>
+                    <AppButton variant="primary" @click="extendSubscription">
                         {{ $t('system.subscriptions.extend') }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -340,6 +334,7 @@ import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormatters } from '@/Composables/useFormatters';

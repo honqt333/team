@@ -475,13 +475,11 @@
                 </div>
 
                 <template #footer>
-                    <button
-                        type="button"
-                        @click="showPeriodModal = false"
-                        class="px-5 py-2 text-sm font-semibold rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300"
-                    >
-                        {{ $t('common.close') }}
-                    </button>
+                    <div class="flex items-center justify-end gap-3 w-full">
+                        <AppButton variant="secondary" @click="showPeriodModal = false">
+                            {{ $t('common.close') }}
+                        </AppButton>
+                    </div>
                 </template>
             </BaseModal>
         </div>
@@ -491,6 +489,7 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\App;
 
 use App\Enums\InvoiceType;
 use App\Http\Controllers\Controller;
+use App\Models\Center;
 use App\Models\InventoryUnit;
 use App\Models\Invoice;
 use App\Models\InvoiceTemplate;
@@ -19,11 +20,15 @@ use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
 use App\Support\Permissions;
+use App\Support\TenancyContext;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoicesController extends Controller
 {
@@ -421,13 +426,8 @@ class InvoicesController extends Controller
         ]);
     }
 
-    /**
-     * Sales Invoices index
-     */
-    public function salesIndex(Request $request)
+    private function buildSalesBaseQuery(Request $request): Builder
     {
-        $this->authorize(Permissions::INVOICES_VIEW);
-
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
@@ -467,22 +467,41 @@ class InvoicesController extends Controller
                 ->orderBy('id', 'desc');
         }
 
+        return $baseQuery;
+    }
+
+    private function applySalesTabFilter(Builder $query, string $tab): Builder
+    {
+        if ($tab === 'returns') {
+            return $query->where(function ($q) {
+                $q->where('type', 'credit_note')
+                    ->orWhere('type', InvoiceType::CREDIT_NOTE);
+            });
+        }
+
+        return $query->where(function ($q) {
+            $q->where('type', 'invoice')
+                ->orWhere('type', InvoiceType::INVOICE)
+                ->orWhereNull('type');
+        });
+    }
+
+    /**
+     * Sales Invoices index
+     */
+    public function salesIndex(Request $request)
+    {
+        $this->authorize(Permissions::INVOICES_VIEW);
+
+        $baseQuery = $this->buildSalesBaseQuery($request);
+
         // Sales Invoices tab: standard sales invoices (exclude credit notes)
-        $invoices = (clone $baseQuery)
-            ->where(function ($q) {
-                $q->where('type', 'invoice')
-                    ->orWhere('type', InvoiceType::INVOICE)
-                    ->orWhereNull('type');
-            })
+        $invoices = $this->applySalesTabFilter(clone $baseQuery, 'invoices')
             ->paginate(25, ['*'], 'invoices_page')
             ->withQueryString();
 
         // Return Invoices tab: credit notes
-        $returns = (clone $baseQuery)
-            ->where(function ($q) {
-                $q->where('type', 'credit_note')
-                    ->orWhere('type', InvoiceType::CREDIT_NOTE);
-            })
+        $returns = $this->applySalesTabFilter(clone $baseQuery, 'returns')
             ->paginate(25, ['*'], 'returns_page')
             ->withQueryString();
 
@@ -490,6 +509,94 @@ class InvoicesController extends Controller
             'invoices' => $invoices,
             'returns' => $returns,
             'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab', 'sort', 'direction']),
+        ]);
+    }
+
+    /**
+     * Print Sales Invoices / Returns list
+     */
+    public function salesPrint(Request $request)
+    {
+        $this->authorize(Permissions::INVOICES_VIEW);
+
+        $tab = $request->input('tab') === 'returns' ? 'returns' : 'invoices';
+        $rows = $this->applySalesTabFilter($this->buildSalesBaseQuery($request), $tab)->get();
+
+        $user = $request->user();
+        $tenant = $user->tenant;
+        $centerId = TenancyContext::centerId();
+        $center = $centerId ? Center::find($centerId) : null;
+
+        return Inertia::render('Invoices/Sales/Print', [
+            'rows' => $rows,
+            'tab' => $tab,
+            'companyInfo' => [
+                'name' => $center?->name_ar ?? $center?->name ?? $tenant?->trade_name ?? $tenant?->name ?? config('app.name_ar', 'خدمة برو'),
+                'vat_number' => $tenant?->vat_number ?? '',
+                'cr_number' => $tenant?->cr_number ?? '',
+                'logo_path' => $tenant?->logo_path ?? '',
+                'center_name' => $center?->name ?? '',
+                'phone' => $center?->phone ?? $tenant?->phone ?? '',
+            ],
+        ]);
+    }
+
+    /**
+     * Export Sales Invoices / Returns to CSV
+     */
+    public function salesExport(Request $request): StreamedResponse
+    {
+        $this->authorize(Permissions::INVOICES_VIEW);
+
+        $tab = $request->input('tab') === 'returns' ? 'returns' : 'invoices';
+        $rows = $this->applySalesTabFilter($this->buildSalesBaseQuery($request), $tab)->get();
+
+        $prefix = $tab === 'returns' ? 'sales_returns_' : 'sales_invoices_';
+        $filename = $prefix.Carbon::now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($rows, $tab) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            $headers = [
+                $tab === 'returns' ? __('invoices.return_code') : __('invoices.invoice_number'),
+                __('invoices.issue_date'),
+                __('common.customer'),
+                __('invoices.subtotal'),
+                __('common.vat'),
+                $tab === 'returns' ? __('invoices.credit_note.total_credit_note') : __('invoices.grand_total'),
+                __('invoices.balance'),
+                __('common.status'),
+            ];
+
+            if ($tab === 'returns') {
+                array_splice($headers, 1, 0, [__('invoices.original_invoice')]);
+            }
+            fputcsv($handle, $headers);
+
+            foreach ($rows as $row) {
+                $customerName = $row->customer_name_snapshot ?: ($row->customer?->name ?? '');
+                $statusLabel = $row->payment_status ? __("invoices.status.{$row->payment_status}") : '';
+                $data = [
+                    $row->invoice_number,
+                    $row->issue_date ? Carbon::parse($row->issue_date)->format('Y-m-d') : '',
+                    $customerName,
+                    number_format((float) ($row->total_excl_tax ?? 0), 2, '.', ''),
+                    number_format((float) ($row->total_tax ?? 0), 2, '.', ''),
+                    number_format((float) ($row->total_incl_tax ?? 0), 2, '.', ''),
+                    number_format((float) ($row->balance ?? 0), 2, '.', ''),
+                    $statusLabel,
+                ];
+
+                if ($tab === 'returns') {
+                    array_splice($data, 1, 0, [$row->originalInvoice?->invoice_number ?? '']);
+                }
+                fputcsv($handle, $data);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 

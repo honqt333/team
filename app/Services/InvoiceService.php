@@ -239,12 +239,12 @@ class InvoiceService
             $sumIncl = $lines->sum('line_total_incl_tax');
             $sumTax = $lines->sum('tax_amount');
 
-            $invoice->update([
+            $invoice->forceFill([
                 'total_excl_tax' => round($sumExcl, 2),
                 'total_tax' => round($sumTax, 2),
                 'total_incl_tax' => round($sumIncl, 2),
                 'total_taxable_amount' => round($sumExcl, 2),
-            ]);
+            ])->save();
 
             // 6. Recalculate and sync invoice payment status
             $invoice->refresh();

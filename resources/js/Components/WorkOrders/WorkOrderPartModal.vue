@@ -528,18 +528,13 @@
                         }}
                     </span>
                 </div>
-                <div class="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
-                    <button
-                        type="button"
-                        @click="$emit('close')"
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                    >
+                <div class="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
+                    <AppButton variant="secondary" @click="$emit('close')">
                         {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         v-if="!isReadOnly && !props.part"
-                        type="button"
-                        @click="submitForm(false)"
+                        variant="secondary"
                         :disabled="
                             form.processing ||
                             !form.name ||
@@ -550,20 +545,19 @@
                                 (!form.warehouse_id || !form.part_id)) ||
                             isPriceBelowMinimum
                         "
-                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                        @click="submitForm(false)"
                     >
                         {{
                             form.processing
                                 ? $t('common.loading')
                                 : $t('quotes.service_modal.add_and_another')
                         }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         v-if="!isReadOnly"
-                        type="button"
-                        @click="submitForm(true)"
+                        variant="primary"
+                        :loading="form.processing"
                         :disabled="
-                            form.processing ||
                             !form.name ||
                             !form.qty ||
                             form.unit_price === '' ||
@@ -572,36 +566,10 @@
                                 (!form.warehouse_id || !form.part_id)) ||
                             isPriceBelowMinimum
                         "
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                        @click="submitForm(true)"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                        </svg>
-                        {{
-                            form.processing
-                                ? $t('common.loading')
-                                : part
-                                  ? $t('common.save')
-                                  : $t('common.add')
-                        }}
-                    </button>
+                        {{ part ? $t('common.save') : $t('common.add') }}
+                    </AppButton>
                 </div>
             </div>
         </template>
@@ -610,6 +578,7 @@
 
 <script setup>
 import InventoryPartPicker from '@/Components/Inventory/InventoryPartPicker.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
