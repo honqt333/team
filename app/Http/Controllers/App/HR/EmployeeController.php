@@ -229,6 +229,7 @@ class EmployeeController extends Controller
             'employeeShifts.shift',
             'documents' => fn ($q) => $q->orderBy('created_at', 'desc'),
             'contracts' => fn ($q) => $q->orderBy('start_date', 'desc'),
+            'assetCustodies' => fn ($q) => $q->orderByDesc('issued_date')->orderByDesc('id'),
         ]);
 
         // Get weekly schedule (day_of_week based)

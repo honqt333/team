@@ -2325,6 +2325,49 @@
             },
             "title": "عقود العمل"
         },
+        "custody": {
+            "add": "تسليم عهدة جديدة",
+            "asset_name": "اسم العهدة / الأداة",
+            "categories": {
+                "diagnostic_device": "جهاز فحص وتشخيص",
+                "laptop": "جهاز حاسب / لوحي",
+                "other": "أخرى",
+                "sim_card": "شريحة اتصال",
+                "tool_kit": "حقيبة عدد وأدوات",
+                "uniform": "زي عمل",
+                "vehicle": "مركبة خدمة"
+            },
+            "category": "التصنيف",
+            "condition": "الحالة عند التسليم",
+            "condition_return": "الحالة عند الاسترجاع",
+            "conditions": {
+                "damaged": "تالف",
+                "fair": "مقبول",
+                "good": "جيد",
+                "lost": "مفقود",
+                "new": "جديد"
+            },
+            "delete_confirm": "هل أنت متأكد من حذف سجل العهدة؟",
+            "empty": "لا توجد عُهد أو أدوات مسجلة لهذا الموظف",
+            "estimated_value": "القيمة التقديرية",
+            "issue_signature": "توقيع الموظف بالاستلام",
+            "issued_count": "عُهد بحوزة الموظف",
+            "issued_date": "تاريخ التسليم",
+            "return_action": "استرجاع العهدة",
+            "return_modal_title": "تسجيل استرجاع / تسوية عهدة",
+            "return_signature": "توقيع الإرجاع",
+            "returned_date": "تاريخ الاسترجاع",
+            "serial_number": "الرقم التسلسلي",
+            "statuses": {
+                "damaged": "تالف",
+                "issued": "مسلّمة للموظف",
+                "lost": "مفقود",
+                "returned": "مُسترجعة"
+            },
+            "tab_title": "العُهد والأدوات",
+            "title": "سجل العُهد والأدوات",
+            "total_issued_value": "قيمة العُهد الحالية"
+        },
         "documents": {
             "add": "إضافة وثيقة",
             "delete_confirm": "هل أنت متأكد من حذف هذه الوثيقة؟",

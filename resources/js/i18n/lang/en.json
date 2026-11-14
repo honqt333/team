@@ -2325,6 +2325,49 @@
             },
             "title": "Employment contracts"
         },
+        "custody": {
+            "add": "Issue New Custody",
+            "asset_name": "Asset / Tool Name",
+            "categories": {
+                "diagnostic_device": "Diagnostic Scanner",
+                "laptop": "Laptop / Tablet",
+                "other": "Other",
+                "sim_card": "SIM Card",
+                "tool_kit": "Tool Kit",
+                "uniform": "Work Uniform",
+                "vehicle": "Service Vehicle"
+            },
+            "category": "Category",
+            "condition": "Condition on Issue",
+            "condition_return": "Condition on Return",
+            "conditions": {
+                "damaged": "Damaged",
+                "fair": "Fair",
+                "good": "Good",
+                "lost": "Lost",
+                "new": "New"
+            },
+            "delete_confirm": "Are you sure you want to delete this custody record?",
+            "empty": "No asset or tool custodies recorded for this employee",
+            "estimated_value": "Estimated Value",
+            "issue_signature": "Employee Receipt Signature",
+            "issued_count": "Active Custodies",
+            "issued_date": "Issued Date",
+            "return_action": "Return Custody",
+            "return_modal_title": "Record Custody Return / Settlement",
+            "return_signature": "Return Signature",
+            "returned_date": "Returned Date",
+            "serial_number": "Serial Number",
+            "statuses": {
+                "damaged": "Damaged",
+                "issued": "Issued",
+                "lost": "Lost",
+                "returned": "Returned"
+            },
+            "tab_title": "Asset Custody",
+            "title": "Asset & Tool Custody",
+            "total_issued_value": "Active Custody Value"
+        },
         "documents": {
             "add": "Add document",
             "delete_confirm": "Are you sure you want to delete this document?",

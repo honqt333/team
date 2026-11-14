@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\HR\Allowance;
 use App\Models\HR\Attendance;
 use App\Models\HR\Deduction;
+use App\Models\HR\EmployeeAssetCustody;
 use App\Models\HR\EmployeeContract;
 use App\Models\HR\EmployeeDocument;
 use App\Models\HR\EmployeeShift;
@@ -84,6 +85,11 @@ trait HasEmployeeRelations
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
+    }
+
+    public function assetCustodies(): HasMany
+    {
+        return $this->hasMany(EmployeeAssetCustody::class);
     }
 
     public function payrollItems(): HasMany

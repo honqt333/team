@@ -29,6 +29,7 @@ use App\Http\Controllers\App\HR\AttendanceController;
 use App\Http\Controllers\App\HR\BiometricDeviceController;
 use App\Http\Controllers\App\HR\EmployeeContractsController;
 use App\Http\Controllers\App\HR\EmployeeController;
+use App\Http\Controllers\App\HR\EmployeeCustodyController;
 use App\Http\Controllers\App\HR\EmployeeDocumentsController;
 use App\Http\Controllers\App\HR\EmployeeFinancialsController;
 use App\Http\Controllers\App\HR\EmployeePermissionsController;
@@ -1040,6 +1041,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/employees/{employee}/documents', [EmployeeDocumentsController::class, 'store'])->name('employees.documents.store');
         Route::get('/documents/{document}/download', [EmployeeDocumentsController::class, 'download'])->name('documents.download');
         Route::delete('/documents/{document}', [EmployeeDocumentsController::class, 'destroy'])->name('documents.destroy');
+
+        // Employee Asset Custody
+        Route::post('/employees/{employee}/custodies', [EmployeeCustodyController::class, 'store'])->name('employees.custodies.store');
+        Route::put('/employees/{employee}/custodies/{custody}/return', [EmployeeCustodyController::class, 'returnAsset'])->name('employees.custodies.return');
+        Route::delete('/employees/{employee}/custodies/{custody}', [EmployeeCustodyController::class, 'destroy'])->name('employees.custodies.destroy');
 
         // Contracts
         Route::post('/employees/{employee}/contracts', [EmployeeContractsController::class, 'store'])->name('employees.contracts.store');

@@ -220,6 +220,13 @@
                     <!-- Permissions Tab -->
                     <PermissionsTab v-show="activeTab === 'permissions'" :employee="employee" />
 
+                    <!-- Asset Custody Tab -->
+                    <EmployeeCustodyTab
+                        v-show="activeTab === 'custody'"
+                        :employee="employee"
+                        :custodies="employee.asset_custodies || []"
+                    />
+
                     <!-- Attendance Tab -->
                     <div v-show="activeTab === 'attendance'" class="space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -446,6 +453,7 @@ import EmployeeFinancialTab from '@/Components/HR/Tabs/EmployeeFinancialTab.vue'
 import EmployeeScheduleTab from '@/Components/HR/Tabs/EmployeeScheduleTab.vue';
 import LeavesTab from '@/Components/HR/Tabs/LeavesTab.vue';
 import PermissionsTab from '@/Components/HR/Tabs/PermissionsTab.vue';
+import EmployeeCustodyTab from '@/Components/HR/Tabs/EmployeeCustodyTab.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -494,6 +502,7 @@ const tabs = computed(() => [
     { id: 'financial', label: t('hr.employees.tabs.financial'), emoji: '💵' },
     { id: 'schedule', label: t('hr.employees.tabs.schedule'), emoji: '⏰' },
     { id: 'leaves', label: t('hr.leaves.title'), emoji: '🏖️' },
+    { id: 'custody', label: t('hr.custody.tab_title'), emoji: '🧰' },
     { id: 'permissions', label: t('hr.employees.tabs.permissions'), emoji: '🔐' },
     { id: 'attendance', label: t('hr.employees.tabs.attendance'), emoji: '📅' },
     { id: 'payroll', label: t('hr.employees.tabs.payroll'), emoji: '💰' },
