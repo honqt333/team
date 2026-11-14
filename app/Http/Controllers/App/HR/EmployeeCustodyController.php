@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class EmployeeCustodyController extends Controller
 {
@@ -91,5 +93,23 @@ class EmployeeCustodyController extends Controller
         $custody->delete();
 
         return back()->with('success', __('common.deleted_success'));
+    }
+
+    /**
+     * Print an official handover / return receipt for a custody item.
+     */
+    public function print(Employee $employee, EmployeeAssetCustody $custody): Response
+    {
+        $this->authorize('view', $employee);
+        abort_if((int) $custody->employee_id !== (int) $employee->id, 404);
+
+        $employee->load(['jobTitle', 'department', 'center', 'tenant']);
+        $custody->load(['creator:id,name', 'returner:id,name']);
+
+        return Inertia::render('HR/Employees/CustodyPrint', [
+            'employee' => $employee,
+            'custody' => $custody,
+            'tenant' => $employee->tenant,
+        ]);
     }
 }

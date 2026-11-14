@@ -140,6 +140,13 @@ class EmployeeCustodyTest extends TestCase
         $this->assertEquals('returned', $custody->fresh()->status);
 
         $this->actingAs($this->authorizedUser)
+            ->get(route('app.hr.employees.custodies.print', [
+                'employee' => $this->employeeA->id,
+                'custody' => $custody->id,
+            ]))
+            ->assertOk();
+
+        $this->actingAs($this->authorizedUser)
             ->delete(route('app.hr.employees.custodies.destroy', [
                 'employee' => $this->employeeA->id,
                 'custody' => $custody->id,

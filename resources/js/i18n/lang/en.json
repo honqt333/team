@@ -2348,14 +2348,20 @@
                 "new": "New"
             },
             "delete_confirm": "Are you sure you want to delete this custody record?",
+            "employee_info": "Recipient Employee Information",
             "empty": "No asset or tool custodies recorded for this employee",
             "estimated_value": "Estimated Value",
             "issue_signature": "Employee Receipt Signature",
+            "issued_by": "Issued By",
             "issued_count": "Active Custodies",
             "issued_date": "Issued Date",
+            "no_signature": "No signature recorded",
+            "print_title": "Asset Custody Handover & Return Receipt",
+            "receipt_declaration": "I, the employee named above, acknowledge receipt of the specified asset in good condition and undertake to safeguard and return it upon request or termination of service.",
             "return_action": "Return Custody",
             "return_modal_title": "Record Custody Return / Settlement",
             "return_signature": "Return Signature",
+            "returned_by": "Returned To",
             "returned_date": "Returned Date",
             "serial_number": "Serial Number",
             "statuses": {
@@ -2366,7 +2372,8 @@
             },
             "tab_title": "Asset Custody",
             "title": "Asset & Tool Custody",
-            "total_issued_value": "Active Custody Value"
+            "total_issued_value": "Active Custody Value",
+            "view_details": "Custody Details"
         },
         "documents": {
             "add": "Add document",

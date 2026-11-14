@@ -69,20 +69,132 @@
 
             <template #cell-actions="{ item }">
                 <div class="flex items-center justify-end gap-2">
+                    <AppButton variant="ghost" size="sm" @click="openViewModal(item)">
+                        {{ $t('common.view') }}
+                    </AppButton>
+                    <AppPrintButton variant="icon" @click="printCustody(item)" />
                     <AppButton
                         v-if="item.status === 'issued'"
                         variant="secondary"
-                        size="xs"
+                        size="sm"
                         @click="openReturnModal(item)"
                     >
                         {{ $t('hr.custody.return_action') }}
                     </AppButton>
-                    <AppButton variant="danger" size="xs" @click="deleteCustody(item)">
+                    <AppButton variant="danger" size="sm" @click="deleteCustody(item)">
                         {{ $t('common.delete') }}
                     </AppButton>
                 </div>
             </template>
         </DataTable>
+
+        <!-- View Custody Details Modal -->
+        <BaseModal
+            :show="showViewModal"
+            :title="$t('hr.custody.view_details')"
+            size="lg"
+            @close="showViewModal = false"
+        >
+            <div v-if="selectedCustody" class="space-y-4 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">{{ $t('hr.custody.asset_name') }}</p>
+                        <p class="mt-0.5 font-semibold text-text-primary">
+                            {{ selectedCustody.asset_name }}
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">{{ $t('hr.custody.category') }}</p>
+                        <p class="mt-0.5 font-semibold text-text-primary">
+                            {{ $t(`hr.custody.categories.${selectedCustody.category}`) }}
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">{{ $t('hr.custody.serial_number') }}</p>
+                        <p class="mt-0.5 font-mono text-text-primary">
+                            {{ selectedCustody.serial_number || '—' }}
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">
+                            {{ $t('hr.custody.estimated_value') }}
+                        </p>
+                        <p class="mt-0.5 font-mono text-text-primary">
+                            {{ formatMoney(selectedCustody.estimated_value || 0) }}
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">{{ $t('hr.custody.issued_date') }}</p>
+                        <p class="mt-0.5 font-mono text-text-primary">
+                            {{ selectedCustody.issued_date }}
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-muted border border-border">
+                        <p class="text-xs text-text-muted">{{ $t('common.status') }}</p>
+                        <span
+                            class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                            :class="statusClass(selectedCustody.status)"
+                        >
+                            {{ $t(`hr.custody.statuses.${selectedCustody.status}`) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div
+                    v-if="selectedCustody.notes"
+                    class="p-3 rounded-xl bg-surface-muted border border-border"
+                >
+                    <p class="text-xs text-text-muted">{{ $t('common.notes') }}</p>
+                    <p class="mt-1 text-text-primary">{{ selectedCustody.notes }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-3 rounded-xl border border-border text-center space-y-2">
+                        <p class="text-xs font-semibold text-text-secondary">
+                            {{ $t('hr.custody.issue_signature') }}
+                        </p>
+                        <img
+                            v-if="selectedCustody.issue_signature"
+                            :src="selectedCustody.issue_signature"
+                            alt="Issue Signature"
+                            class="h-24 mx-auto object-contain bg-white rounded-lg p-1"
+                        />
+                        <p v-else class="text-xs text-text-muted py-6">
+                            {{ $t('hr.custody.no_signature') }}
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-xl border border-border text-center space-y-2">
+                        <p class="text-xs font-semibold text-text-secondary">
+                            {{ $t('hr.custody.return_signature') }}
+                        </p>
+                        <img
+                            v-if="selectedCustody.return_signature"
+                            :src="selectedCustody.return_signature"
+                            alt="Return Signature"
+                            class="h-24 mx-auto object-contain bg-white rounded-lg p-1"
+                        />
+                        <p v-else class="text-xs text-text-muted py-6">
+                            {{ $t('hr.custody.no_signature') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <AppButton type="button" variant="secondary" @click="showViewModal = false">
+                        {{ $t('common.close') }}
+                    </AppButton>
+                    <AppPrintButton
+                        v-if="selectedCustody"
+                        variant="button"
+                        :label="$t('common.print')"
+                        @click="printCustody(selectedCustody)"
+                    />
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- Issue Custody Modal -->
         <BaseModal
@@ -255,6 +367,7 @@ import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
@@ -282,6 +395,7 @@ const { scrollToError } = useFormScrollToError();
 
 const showIssueModal = ref(false);
 const showReturnModal = ref(false);
+const showViewModal = ref(false);
 const selectedCustody = ref(null);
 
 const activeCustodies = computed(() => props.custodies.filter((c) => c.status === 'issued'));
@@ -356,6 +470,19 @@ function submitIssue() {
         },
         onError: () => scrollToError(),
     });
+}
+
+function openViewModal(custody) {
+    selectedCustody.value = custody;
+    showViewModal.value = true;
+}
+
+function printCustody(custody) {
+    const url = route('app.hr.employees.custodies.print', {
+        employee: props.employee.id,
+        custody: custody.id,
+    });
+    window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function openReturnModal(custody) {
