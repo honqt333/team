@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::table('hr_allowances', function (Blueprint $table) {
             if (! Schema::hasColumn('hr_allowances', 'is_housing')) {
-                $table->boolean('is_housing')->default(false)->after('value');
+                $table->boolean('is_housing')->default(false)->after('amount');
             }
         });
 
