@@ -42,6 +42,7 @@
                     <a
                         :href="`/storage/${photo.path}`"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-all"
                         :title="$t('common.view')"
                     >

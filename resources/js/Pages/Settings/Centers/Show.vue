@@ -740,6 +740,7 @@
                                                     <a
                                                         :href="route('app.invoices.print', inv.id)"
                                                         target="_blank"
+                                                        rel="noopener noreferrer"
                                                         class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         {{ $t('common.print_emoji') }}
@@ -880,6 +881,7 @@
                                                             )
                                                         "
                                                         target="_blank"
+                                                        rel="noopener noreferrer"
                                                         class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         {{ $t('common.print_emoji') }}

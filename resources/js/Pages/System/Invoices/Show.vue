@@ -195,6 +195,7 @@
                         <a
                             :href="pdfUrl || `/system/invoices/${invoice.id}/download?inline=1`"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="text-xs font-semibold text-action-primary hover:text-selection-text"
                         >
                             {{ $t('system.invoices.open_in_new_tab') }} ↗

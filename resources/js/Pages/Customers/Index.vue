@@ -404,6 +404,7 @@
                                         v-if="customer.whatsapp || customer.phone"
                                         :href="`https://wa.me/${getWhatsAppNumber(customer)}`"
                                         target="_blank"
+                                        rel="noopener noreferrer"
                                         @click.stop
                                         class="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-success-soft hover:bg-success hover:text-white text-success transition-colors text-xs font-semibold"
                                     >

@@ -256,6 +256,7 @@ onUnmounted(() => {
                 <a
                     :href="previewUrl"
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="p-1.5 text-gray-500 hover:text-action-primary dark:text-gray-400 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     :title="t('system.website.open_new_tab')"
                 >

@@ -160,6 +160,7 @@ const { getName } = useLocalized();
                 v-if="customer?.phone"
                 :href="`https://wa.me/${String(customer.phone).replace(/[^0-9]/g, '')}`"
                 target="_blank"
+                rel="noopener noreferrer"
                 class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 transition-all shadow-sm flex items-center justify-center shrink-0"
                 :title="$t('common.open_in_whatsapp')"
             >

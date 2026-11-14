@@ -70,6 +70,7 @@
                             <a
                                 :href="route('app.invoices.purchases.print', invoice.id)"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
                             >
                                 <svg

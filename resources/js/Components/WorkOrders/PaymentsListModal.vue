@@ -228,6 +228,7 @@
                                         payment.id
                                     "
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     class="text-gray-500 hover:text-action-primary transition-colors"
                                     :title="$t('common.print')"
                                 >

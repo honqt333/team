@@ -128,6 +128,7 @@
                     <a
                         :href="getAttachmentUrl(attachment)"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         :title="$t('common.view')"
                     >

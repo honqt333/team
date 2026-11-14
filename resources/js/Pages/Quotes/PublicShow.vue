@@ -294,6 +294,7 @@
                         v-if="quote.center?.phone"
                         :href="`https://wa.me/${cleanPhone(quote.center.phone)}`"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="flex flex-col items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-xl transition-all active:scale-95 border border-emerald-100 dark:border-emerald-800/50"
                     >
                         <div

@@ -120,6 +120,7 @@
                     <a
                         :href="route('app.hr.payroll.print', payrollRun.id)"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,6 +287,7 @@
                                     <a
                                         :href="route('app.hr.payroll.payslip', item.id)"
                                         target="_blank"
+                                        rel="noopener noreferrer"
                                         class="text-gray-400 hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all p-1 inline-block"
                                         :title="$t('hr.payroll.print_payslip')"
                                     >

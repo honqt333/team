@@ -49,6 +49,7 @@
                         <a
                             :href="route('app.hr.documents.download', doc.id)"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="p-2 text-gray-400 hover:text-action-primary"
                         >
                             <svg

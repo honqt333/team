@@ -44,6 +44,7 @@
                                     route('app.invoices.purchases.returns.print', returnInvoice.id)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
                             >
                                 <svg
@@ -706,6 +707,7 @@
                         <a
                             :href="`/storage/${returnInvoice.purchase_invoice.attachment_path}`"
                             target="_blank"
+                            rel="noopener noreferrer"
                             download
                             class="text-rose-600 hover:text-rose-700 font-bold hover:underline transition-colors flex items-center gap-1"
                         >

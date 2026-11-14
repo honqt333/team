@@ -155,6 +155,7 @@
             v-if="tenant.id"
             :href="`/app/settings/billing?tenant_id=${tenant.id}`"
             target="_blank"
+            rel="noopener noreferrer"
             class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

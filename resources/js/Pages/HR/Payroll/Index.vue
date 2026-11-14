@@ -276,6 +276,7 @@
                                     <a
                                         :href="route('app.hr.payroll.print', run.id)"
                                         target="_blank"
+                                        rel="noopener noreferrer"
                                         class="p-2 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                         :title="$t('common.print')"
                                     >
@@ -412,6 +413,7 @@
                                 <a
                                     :href="route('app.hr.payroll.print', item.id)"
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     class="p-2 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                     :title="$t('common.print')"
                                 >

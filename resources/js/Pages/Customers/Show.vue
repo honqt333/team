@@ -310,6 +310,7 @@
                                             v-if="customer.whatsapp"
                                             :href="`https://wa.me/${getWhatsAppNumber(customer)}`"
                                             target="_blank"
+                                            rel="noopener noreferrer"
                                             class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-white dark:hover:bg-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5 transition-all border border-transparent hover:border-emerald-100"
                                             dir="ltr"
                                         >

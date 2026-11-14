@@ -653,6 +653,7 @@ const amountState = computed(() => {
                         <a
                             :href="receipt.receipt_url"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="mt-4 inline-flex rounded-lg bg-action-primary px-4 py-2 text-xs font-semibold text-white hover:bg-action-primary-hover"
                         >
                             {{

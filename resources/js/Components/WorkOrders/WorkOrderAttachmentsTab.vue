@@ -80,6 +80,7 @@
                     <a
                         :href="`/storage/${attachment.path}`"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="p-2 text-gray-400 hover:text-action-primary transition-colors"
                         :title="$t('common.view')"
                     >

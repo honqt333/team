@@ -56,6 +56,7 @@
                 <a
                     :href="videoUrl"
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
                 >
                     {{ $t('feedback.video_modal.open_download') }}
@@ -77,6 +78,7 @@
                         v-if="videoUrl"
                         :href="videoUrl"
                         target="_blank"
+                        rel="noopener noreferrer"
                         download
                         class="px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-xs font-medium flex items-center gap-1 transition-colors"
                         :title="$t('feedback.video_modal.open_download')"

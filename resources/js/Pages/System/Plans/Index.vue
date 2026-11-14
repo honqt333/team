@@ -20,20 +20,24 @@
                 </template>
 
                 <template #actions>
-                    <button
-                        @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
+                    <AppButton variant="action" @click="openModal()">
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
                         {{ $t('system.plans.create') }}
-                    </button>
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -199,44 +203,47 @@
 
                         <!-- Actions -->
                         <div class="mt-6 flex gap-2">
-                            <button
+                            <AppButton
+                                variant="secondary"
+                                size="sm"
+                                class="flex-1"
                                 @click="openModal(plan)"
-                                class="flex-1 inline-flex items-center justify-center gap-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                </svg>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('system.actions.edit') }}
-                            </button>
-                            <button
-                                @click="deletePlan(plan)"
-                                class="inline-flex items-center justify-center gap-1 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
+                            </AppButton>
+                            <AppButton variant="danger" size="sm" @click="deletePlan(plan)">
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('system.actions.delete') }}
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
                 </div>
@@ -477,20 +484,21 @@
 
             <template #footer>
                 <div class="flex justify-end gap-3 w-full">
-                    <button
-                        @click="closeModal"
-                        type="button"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                    >
+                    <AppButton variant="ghost" @click="closeModal">
                         {{ $t('system.actions.cancel') }}
-                    </button>
-                    <button @click="submit" :disabled="form.processing" class="btn-primary">
+                    </AppButton>
+                    <AppButton
+                        variant="primary"
+                        @click="submit"
+                        :disabled="form.processing"
+                        :loading="form.processing"
+                    >
                         {{
                             editingPlan
                                 ? $t('system.plans.save_changes')
                                 : $t('system.plans.create')
                         }}
-                    </button>
+                    </AppButton>
                 </div>
             </template>
         </BaseModal>
@@ -498,6 +506,7 @@
 </template>
 
 <script setup>
+import AppButton from '@/Components/App/AppButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';

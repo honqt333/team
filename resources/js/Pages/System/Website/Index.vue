@@ -319,6 +319,7 @@ watch(
                         <a
                             :href="route('public.landing.preview', { preview: 1 })"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
                             <svg

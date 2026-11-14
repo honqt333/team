@@ -169,6 +169,7 @@
                                         payment.id
                                     "
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                                     :title="$t('common.print')"
                                 >

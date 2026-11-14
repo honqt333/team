@@ -188,77 +188,20 @@
                     {{ $t('services_management.form.type') }}
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label
-                        :class="[
-                            'relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
-                            form.type === 'internal'
-                                ? 'border-action-primary bg-selection-bg'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
-                        ]"
-                    >
-                        <input type="radio" v-model="form.type" value="internal" class="sr-only" />
-                        <div
-                            class="w-10 h-10 rounded-lg bg-action-primary hover:bg-action-primary-hover flex items-center justify-center flex-shrink-0"
-                        >
-                            <svg
-                                class="w-5 h-5 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        </div>
-                        <span class="font-medium text-gray-900 dark:text-white">
-                            {{ $t('services_management.types.internal') }}
-                        </span>
-                    </label>
-                    <label
-                        :class="[
-                            'relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all',
-                            form.type === 'external'
-                                ? 'border-purple-500 bg-purple-50'
-                                : 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed',
-                        ]"
-                    >
-                        <input
-                            type="radio"
-                            v-model="form.type"
-                            value="external"
-                            class="sr-only"
-                            disabled
-                        />
-                        <div
-                            class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0"
-                        >
-                            <svg
-                                class="w-5 h-5 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-900 dark:text-white">
-                                {{ $t('services_management.types.external') }}
-                            </span>
-                            <span class="block text-xs text-purple-600">
-                                {{ $t('services_management.coming_soon') }}
-                            </span>
-                        </div>
-                    </label>
+                    <SelectableCard
+                        v-model="form.type"
+                        type="radio"
+                        value="internal"
+                        :title="$t('services_management.types.internal')"
+                    />
+                    <SelectableCard
+                        v-model="form.type"
+                        type="radio"
+                        value="external"
+                        :title="$t('services_management.types.external')"
+                        :description="$t('services_management.coming_soon')"
+                        disabled
+                    />
                 </div>
             </div>
 
@@ -332,6 +275,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 

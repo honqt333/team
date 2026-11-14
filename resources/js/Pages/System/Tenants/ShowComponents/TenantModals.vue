@@ -33,20 +33,17 @@
                 </div>
             </div>
             <div class="flex gap-3 justify-end">
-                <button
-                    type="button"
-                    @click="$emit('close', 'security')"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                >
+                <AppButton variant="ghost" @click="$emit('close', 'security')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
+                    variant="action"
                     type="submit"
                     :disabled="securityForm.processing"
-                    class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
+                    :loading="securityForm.processing"
                 >
                     {{ $t('common.save_changes') }}
-                </button>
+                </AppButton>
             </div>
         </form>
     </BaseModal>
@@ -67,21 +64,12 @@
         </div>
         <template #footer>
             <div class="flex gap-3 justify-end w-full">
-                <button
-                    type="button"
-                    @click="$emit('close', 'suspend')"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                >
+                <AppButton variant="ghost" @click="$emit('close', 'suspend')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="emitSuspend"
-                    :disabled="!local.suspendReason"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
-                >
+                </AppButton>
+                <AppButton variant="danger" @click="emitSuspend" :disabled="!local.suspendReason">
                     {{ $t('system.tenants.actions.suspend') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -106,21 +94,12 @@
         </div>
         <template #footer>
             <div class="flex gap-3 justify-end w-full">
-                <button
-                    type="button"
-                    @click="$emit('close', 'extend')"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                >
+                <AppButton variant="ghost" @click="$emit('close', 'extend')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    @click="emitExtend"
-                    :disabled="!local.extendDays"
-                    class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg disabled:opacity-50"
-                >
+                </AppButton>
+                <AppButton variant="primary" @click="emitExtend" :disabled="!local.extendDays">
                     {{ $t('system.tenants.actions.extend_trial') }}
-                </button>
+                </AppButton>
             </div>
         </template>
     </BaseModal>
@@ -184,26 +163,16 @@
             />
         </div>
         <div class="flex gap-3 justify-end">
-            <button
-                type="button"
-                @click="$emit('close', 'delete')"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
+            <AppButton variant="ghost" @click="$emit('close', 'delete')">
                 {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
+            </AppButton>
+            <AppButton
+                variant="danger"
                 @click="emitDelete"
                 :disabled="local.deleteConfirmation !== tenant.name"
-                :class="
-                    local.deleteConfirmation === tenant.name
-                        ? 'bg-red-600 hover:bg-red-700'
-                        : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
-                "
-                class="px-4 py-2 text-white rounded-lg"
             >
                 {{ $t('system.tenants.actions.delete_permanent') }}
-            </button>
+            </AppButton>
         </div>
     </BaseModal>
 
@@ -380,29 +349,27 @@
 
             <!-- Modal Actions -->
             <div class="flex gap-3 justify-end pt-2">
-                <button
-                    type="button"
-                    @click="$emit('close', 'assignPlan')"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm"
-                >
+                <AppButton variant="ghost" @click="$emit('close', 'assignPlan')">
                     {{ $t('common.cancel') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
+                    variant="action"
                     type="submit"
                     :disabled="!local.assignPlanId || local.isSubmitting"
-                    class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
+                    :loading="local.isSubmitting"
                 >
                     <span v-if="local.isSubmitting">{{ $t('common.saving') }}</span>
                     <span v-else>
                         {{ $t('system.tenants.confirm_and_activate_the_package') }}
                     </span>
-                </button>
+                </AppButton>
             </div>
         </form>
     </BaseModal>
 </template>
 
 <script setup>
+import AppButton from '@/Components/App/AppButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
