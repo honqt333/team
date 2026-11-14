@@ -257,6 +257,7 @@ return [
         'cannot_approve' => 'لا يمكن اعتماد هذا المسير',
         'cannot_delete_item' => 'لا يمكن حذف موظف من مسير معتمد',
         'cannot_edit_item' => 'لا يمكن تعديل موظف في مسير معتمد أو مدفوع',
+        'deduction_exceeds_statutory_cap' => 'إجمالي الخصومات يتجاوز الحد الأقصى النظامي المسموح به (:percent% من إجمالي الأجر)',
         'cannot_regenerate' => 'لا يمكن إعادة إنشاء مسير معتمد أو مدفوع',
         'deductions' => 'الاستقطاعات',
         'details' => 'التفاصيل',

@@ -218,7 +218,19 @@ class PayrollController extends Controller
 
             $item = $locked->items()->lockForUpdate()->findOrFail($payrollItem->id);
 
-            $netSalary = max(0, (float) $validated['base_salary'] + (float) $validated['total_allowances'] - (float) $validated['total_deductions']);
+            $settings = AttendanceSettings::getForCenter($locked->center_id);
+            $maxCapPct = (float) ($settings->max_deduction_percentage ?? 50.0);
+            $grossWage = (float) $validated['base_salary'] + (float) $validated['total_allowances'];
+
+            if ($maxCapPct > 0 && $maxCapPct < 100 && $grossWage > 0) {
+                $maxAllowed = round($grossWage * ($maxCapPct / 100), 2);
+
+                if ((float) $validated['total_deductions'] > $maxAllowed) {
+                    return back()->with('error', __('hr.payroll.deduction_exceeds_statutory_cap', ['percent' => $maxCapPct]));
+                }
+            }
+
+            $netSalary = max(0, $grossWage - (float) $validated['total_deductions']);
 
             $item->update([
                 'base_salary' => $validated['base_salary'],
@@ -285,8 +297,26 @@ class PayrollController extends Controller
             $gosiAmount = $employee->calculateGosiAmount();
             $regularAllowances = $employee->calculateTotalAllowances();
             $totalAllowances = $regularAllowances + $overtimePayment + $commissionAmount;
-            $totalDeductions = $employee->calculateTotalDeductions() + $gosiAmount + $attendanceDeduction;
-            $netSalary = $baseSalary + $totalAllowances - $totalDeductions;
+            $grossWage = $baseSalary + $totalAllowances;
+
+            $regularDeductions = $employee->calculateTotalDeductions();
+            $rawTotalDeductions = round($regularDeductions + $gosiAmount + $attendanceDeduction, 2);
+            $maxCapPct = (float) ($settings->max_deduction_percentage ?? 50.0);
+
+            $totalDeductions = $rawTotalDeductions;
+            $cappedAmount = 0.0;
+
+            if ($maxCapPct > 0 && $maxCapPct < 100 && $grossWage > 0) {
+                $maxAllowed = round($grossWage * ($maxCapPct / 100), 2);
+
+                if ($rawTotalDeductions > $maxAllowed) {
+                    // GOSI is statutory; cap discretionary/attendance deductions so total stays within statutory limit
+                    $totalDeductions = max($gosiAmount, $maxAllowed);
+                    $cappedAmount = round($rawTotalDeductions - $totalDeductions, 2);
+                }
+            }
+
+            $netSalary = $grossWage - $totalDeductions;
 
             // Create payroll item
             PayrollItem::create([
@@ -310,9 +340,13 @@ class PayrollController extends Controller
                     ],
                 ],
                 'deductions_breakdown' => [
-                    'regular' => $employee->calculateTotalDeductions(),
+                    'regular' => $regularDeductions,
                     'gosi' => $gosiAmount,
                     'attendance' => $attendanceDeduction,
+                    'raw_total' => $rawTotalDeductions,
+                    'cap_percentage' => $maxCapPct,
+                    'capped_amount' => $cappedAmount,
+                    'is_capped' => $cappedAmount > 0,
                 ],
                 'created_by' => auth()->id(),
             ]);

@@ -190,6 +190,7 @@ class SettingsController extends Controller
             'geofence_latitude' => 'nullable|numeric|between:-90,90',
             'geofence_longitude' => 'nullable|numeric|between:-180,180',
             'geofence_radius_meters' => 'nullable|integer|min:20|max:10000',
+            'max_deduction_percentage' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $settings = AttendanceSettings::getForCenter($centerId);

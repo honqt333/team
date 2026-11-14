@@ -455,13 +455,13 @@
                                         ⏰ {{ $t('hr.settings.attendance_settings.grace_period') }}
                                     </label>
                                     <div class="flex items-center gap-2">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             name="grace_period_minutes"
                                             v-model="attendanceSettingsForm.grace_period_minutes"
-                                            min="0"
-                                            max="60"
-                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                            :min="0"
+                                            :max="60"
+                                            input-class="w-24 text-center font-bold text-lg"
                                         />
                                         <span class="text-amber-700 dark:text-amber-300">
                                             {{ $t('common.minutes') }}
@@ -484,15 +484,15 @@
                                         {{ $t('hr.settings.attendance_settings.late_deduction') }}
                                     </label>
                                     <div class="flex items-center gap-2">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             name="late_deduction_per_minute"
                                             v-model="
                                                 attendanceSettingsForm.late_deduction_per_minute
                                             "
-                                            min="0"
+                                            :min="0"
                                             step="0.01"
-                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                            input-class="w-24 text-center font-bold text-lg"
                                         />
                                         <span class="text-red-700 dark:text-red-300">
                                             {{ activeCurrencySymbol }} / {{ $t('common.minute') }}
@@ -536,13 +536,13 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             name="absence_deduction_value"
                                             v-model="attendanceSettingsForm.absence_deduction_value"
-                                            min="0"
+                                            :min="0"
                                             step="0.01"
-                                            class="w-32 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                            input-class="w-32 text-center font-bold text-lg"
                                         />
                                         <span class="text-red-700 dark:text-red-300">
                                             {{
@@ -578,13 +578,13 @@
                                         ⏱️ {{ $t('hr.settings.attendance_settings.overtime_rate') }}
                                     </label>
                                     <div class="flex items-center gap-2">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             name="overtime_rate_per_hour"
                                             v-model="attendanceSettingsForm.overtime_rate_per_hour"
-                                            min="0"
+                                            :min="0"
                                             step="0.01"
-                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                            input-class="w-24 text-center font-bold text-lg"
                                         />
                                         <span class="text-emerald-700 dark:text-emerald-300">
                                             {{ activeCurrencySymbol }} / {{ $t('common.hour') }}
@@ -602,6 +602,43 @@
                                             size="sm"
                                         />
                                     </div>
+                                </div>
+
+                                <!-- Max Monthly Deduction Cap -->
+                                <div
+                                    class="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 border border-rose-200 dark:border-rose-800"
+                                >
+                                    <label
+                                        class="block text-sm font-medium text-rose-900 dark:text-rose-200 mb-2"
+                                    >
+                                        ⚖️
+                                        {{
+                                            $t(
+                                                'hr.settings.attendance_settings.max_deduction_percentage'
+                                            )
+                                        }}
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            name="max_deduction_percentage"
+                                            v-model="
+                                                attendanceSettingsForm.max_deduction_percentage
+                                            "
+                                            min="0"
+                                            max="100"
+                                            step="0.5"
+                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                        />
+                                        <span class="text-rose-700 dark:text-rose-300">%</span>
+                                    </div>
+                                    <p class="text-xs text-rose-700/80 dark:text-rose-300/80 mt-2">
+                                        {{
+                                            $t(
+                                                'hr.settings.attendance_settings.max_deduction_percentage_hint'
+                                            )
+                                        }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -944,7 +981,7 @@
 <script setup>
 import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -1262,6 +1299,7 @@ const attendanceSettingsForm = ref({
     overtime_rate_per_hour: props.attendanceSettings?.overtime_rate_per_hour ?? 0,
     overtime_enabled: props.attendanceSettings?.overtime_enabled ?? true,
     working_days: props.attendanceSettings?.working_days ?? [0, 1, 2, 3, 4],
+    max_deduction_percentage: props.attendanceSettings?.max_deduction_percentage ?? 50,
 });
 
 function saveAttendanceSettings() {

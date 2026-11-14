@@ -322,6 +322,19 @@
                                         {{ $t('hr.financial.other_payments.title') }}:
                                         {{ formatCurrency(item.deductions_breakdown.other) }}
                                     </div>
+                                    <div
+                                        v-if="item.deductions_breakdown?.is_capped"
+                                        class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5"
+                                    >
+                                        {{
+                                            $t('hr.payroll.statutory_cap_applied', {
+                                                percent: item.deductions_breakdown.cap_percentage,
+                                            })
+                                        }}
+                                        (-{{
+                                            formatCurrency(item.deductions_breakdown.capped_amount)
+                                        }})
+                                    </div>
                                 </td>
                                 <td
                                     class="px-4 py-3 text-center font-mono text-orange-600 align-middle"

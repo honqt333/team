@@ -257,6 +257,7 @@ return [
         'cannot_approve' => 'Cannot approve this payroll',
         'cannot_delete_item' => 'Cannot delete item from approved payroll',
         'cannot_edit_item' => 'Cannot edit item in approved or paid payroll',
+        'deduction_exceeds_statutory_cap' => 'Total deductions exceed the statutory monthly cap (:percent% of gross wage)',
         'cannot_regenerate' => 'Cannot regenerate approved or paid payroll',
         'deductions' => 'Deductions',
         'details' => 'Details',

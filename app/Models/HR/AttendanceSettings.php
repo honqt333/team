@@ -32,6 +32,7 @@ class AttendanceSettings extends Model
         'geofence_latitude',
         'geofence_longitude',
         'geofence_radius_meters',
+        'max_deduction_percentage',
     ];
 
     protected $casts = [
@@ -47,6 +48,7 @@ class AttendanceSettings extends Model
         'geofence_latitude' => 'float',
         'geofence_longitude' => 'float',
         'geofence_radius_meters' => 'integer',
+        'max_deduction_percentage' => 'float',
     ];
 
     public function center(): BelongsTo
@@ -78,6 +80,7 @@ class AttendanceSettings extends Model
             'overtime_enabled' => true,
             'auto_mark_absent' => false,
             'working_days' => [0, 1, 2, 3, 4], // Sunday to Thursday
+            'max_deduction_percentage' => 50.0,
         ]);
     }
 
