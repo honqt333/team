@@ -61,7 +61,7 @@ class HRController extends Controller
 
         $expiringDocumentsCount = (clone $expiringDocumentsQuery)->count();
         $expiringDocuments = (clone $expiringDocumentsQuery)
-            ->with(['employee:id,first_name,last_name,employee_number'])
+            ->with(['employee:id,name_ar,name_en,employee_number'])
             ->orderBy('expiry_date')
             ->take(5)
             ->get()
@@ -72,7 +72,7 @@ class HRController extends Controller
                 'expiry_date' => $doc->expiry_date?->toDateString(),
                 'is_expired' => $doc->expiry_date?->isPast() ?? false,
                 'employee_id' => $doc->employee_id,
-                'employee_name' => $doc->employee?->full_name,
+                'employee_name' => $doc->employee?->display_name,
             ]);
 
         $expiringContractsQuery = EmployeeContract::where('tenant_id', $tenantId)
@@ -83,7 +83,7 @@ class HRController extends Controller
 
         $expiringContractsCount = (clone $expiringContractsQuery)->count();
         $expiringContracts = (clone $expiringContractsQuery)
-            ->with(['employee:id,first_name,last_name,employee_number'])
+            ->with(['employee:id,name_ar,name_en,employee_number'])
             ->orderBy('end_date')
             ->take(5)
             ->get()
@@ -94,7 +94,7 @@ class HRController extends Controller
                 'expiry_date' => $contract->end_date?->toDateString(),
                 'is_expired' => $contract->end_date?->isPast() ?? false,
                 'employee_id' => $contract->employee_id,
-                'employee_name' => $contract->employee?->full_name,
+                'employee_name' => $contract->employee?->display_name,
             ]);
 
         $currentPayroll = Payroll::where('tenant_id', $tenantId)

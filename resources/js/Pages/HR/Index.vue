@@ -417,10 +417,16 @@
                         >
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-content-primary truncate">
-                                    {{ emp.full_name || `${emp.first_name} ${emp.last_name}` }}
+                                    {{ getName(emp) || emp.display_name || '—' }}
                                 </p>
                                 <p class="text-xs text-content-muted truncate">
-                                    {{ emp.job_title?.name || emp.department?.name || '—' }}
+                                    {{
+                                        emp.job_title
+                                            ? getName(emp.job_title)
+                                            : emp.department
+                                              ? getName(emp.department)
+                                              : '—'
+                                    }}
                                 </p>
                             </div>
                             <span
@@ -444,8 +450,10 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useLocalized } from '@/Composables/useLocalized';
 
 const { toEnglish, formatMoney } = useNumberFormat();
+const { getName } = useLocalized();
 
 const props = defineProps({
     stats: Object,
