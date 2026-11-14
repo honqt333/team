@@ -28,6 +28,10 @@ class AttendanceSettings extends Model
         'auto_mark_absent',
         'absence_cutoff_time',
         'working_days',
+        'geofence_enabled',
+        'geofence_latitude',
+        'geofence_longitude',
+        'geofence_radius_meters',
     ];
 
     protected $casts = [
@@ -39,6 +43,10 @@ class AttendanceSettings extends Model
         'auto_mark_absent' => 'boolean',
         'absence_cutoff_time' => 'datetime:H:i',
         'working_days' => 'array',
+        'geofence_enabled' => 'boolean',
+        'geofence_latitude' => 'float',
+        'geofence_longitude' => 'float',
+        'geofence_radius_meters' => 'integer',
     ];
 
     public function center(): BelongsTo
@@ -81,5 +89,53 @@ class AttendanceSettings extends Model
         $workingDays = $this->working_days ?? [0, 1, 2, 3, 4];
 
         return in_array($dayOfWeek, $workingDays);
+    }
+
+    /**
+     * Resolve configured geofence coordinates (settings first, then center address fallback).
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function resolvedCoordinates(): ?array
+    {
+        if ($this->geofence_latitude !== null && $this->geofence_longitude !== null) {
+            return ['lat' => (float) $this->geofence_latitude, 'lng' => (float) $this->geofence_longitude];
+        }
+
+        $address = $this->center?->address;
+
+        if ($address && $address->latitude !== null && $address->longitude !== null) {
+            return ['lat' => (float) $address->latitude, 'lng' => (float) $address->longitude];
+        }
+
+        return null;
+    }
+
+    /**
+     * Calculate Haversine distance in meters from the center's geofence coordinates.
+     */
+    public function distanceMetersFrom(float $latitude, float $longitude): ?float
+    {
+        $coords = $this->resolvedCoordinates();
+
+        if (! $coords) {
+            return null;
+        }
+
+        $earthRadius = 6371000.0;
+        $latFrom = deg2rad($coords['lat']);
+        $lonFrom = deg2rad($coords['lng']);
+        $latTo = deg2rad($latitude);
+        $lonTo = deg2rad($longitude);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(
+            (sin($latDelta / 2) ** 2)
+            + cos($latFrom) * cos($latTo) * (sin($lonDelta / 2) ** 2)
+        ));
+
+        return round($angle * $earthRadius, 2);
     }
 }

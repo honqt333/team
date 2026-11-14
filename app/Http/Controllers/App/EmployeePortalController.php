@@ -6,6 +6,8 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\Attendance;
+use App\Models\HR\AttendanceCorrectionRequest;
+use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
@@ -158,12 +160,192 @@ class EmployeePortalController extends Controller
             }), 1),
         ];
 
+        $settings = AttendanceSettings::getForCenter((int) $employee->center_id);
+        $todayAttendance = Attendance::where('employee_id', $employee->id)
+            ->whereDate('date', Carbon::today()->toDateString())
+            ->first();
+
+        $correctionRequests = AttendanceCorrectionRequest::query()
+            ->where('employee_id', $employee->id)
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->take(20)
+            ->get();
+
         return Inertia::render('EmployeePortal/Attendance', [
             'attendance' => $attendance,
             'summary' => $summary,
             'month' => $month,
             'employee' => $employee->only(['id', 'name_ar', 'name_en']),
+            'todayAttendance' => $todayAttendance,
+            'geofence' => [
+                'enabled' => (bool) $settings->geofence_enabled,
+                'radius_meters' => (int) ($settings->geofence_radius_meters ?? 150),
+                'has_coordinates' => $settings->resolvedCoordinates() !== null,
+            ],
+            'correctionRequests' => $correctionRequests,
         ]);
+    }
+
+    /**
+     * Clock in from employee portal with optional geofence verification.
+     */
+    public function clockIn(Request $request)
+    {
+        $this->authorize('viewOwn', Employee::class);
+
+        $employee = $this->getEmployee();
+        $validated = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        if ($errorResponse = $this->verifyGeofence($employee, $validated)) {
+            return $errorResponse;
+        }
+
+        $today = Carbon::today()->toDateString();
+        $existing = Attendance::where('employee_id', $employee->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if ($existing && $existing->check_in) {
+            return back()->with('error', __('hr.attendance.already_checked_in'));
+        }
+
+        $now = Carbon::now();
+        $attendance = $existing ?? new Attendance([
+            'tenant_id' => $employee->tenant_id,
+            'center_id' => $employee->center_id,
+            'employee_id' => $employee->id,
+            'date' => $today,
+        ]);
+
+        $attendance->check_in = $now->format('H:i');
+        $attendance->status = 'present';
+        $attendance->calculateTimes();
+        $attendance->save();
+
+        return back()->with('success', __('hr.attendance.checked_in_success'));
+    }
+
+    /**
+     * Clock out from employee portal with optional geofence verification.
+     */
+    public function clockOut(Request $request)
+    {
+        $this->authorize('viewOwn', Employee::class);
+
+        $employee = $this->getEmployee();
+        $validated = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        if ($errorResponse = $this->verifyGeofence($employee, $validated)) {
+            return $errorResponse;
+        }
+
+        $today = Carbon::today()->toDateString();
+        $attendance = Attendance::where('employee_id', $employee->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if (! $attendance || ! $attendance->check_in) {
+            return back()->with('error', __('hr.attendance.must_check_in_first'));
+        }
+
+        if ($attendance->check_out) {
+            return back()->with('error', __('hr.attendance.already_checked_out'));
+        }
+
+        $attendance->check_out = Carbon::now()->format('H:i');
+        $attendance->calculateTimes();
+        $attendance->save();
+
+        return back()->with('success', __('hr.attendance.checked_out_success'));
+    }
+
+    /**
+     * Submit an attendance correction request.
+     */
+    public function storeCorrectionRequest(Request $request)
+    {
+        $this->authorize('viewOwn', Employee::class);
+
+        $employee = $this->getEmployee();
+        $validated = $request->validate([
+            'date' => ['required', 'date', 'before_or_equal:today'],
+            'requested_check_in' => ['nullable', 'date_format:H:i'],
+            'requested_check_out' => ['nullable', 'date_format:H:i'],
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        if (empty($validated['requested_check_in']) && empty($validated['requested_check_out'])) {
+            return back()
+                ->withErrors(['requested_check_in' => __('hr.attendance.correction_time_required')])
+                ->with('error', __('hr.attendance.correction_time_required'));
+        }
+
+        $existingAttendance = Attendance::where('employee_id', $employee->id)
+            ->whereDate('date', $validated['date'])
+            ->first();
+
+        $correction = AttendanceCorrectionRequest::create([
+            'tenant_id' => $employee->tenant_id,
+            'center_id' => $employee->center_id,
+            'employee_id' => $employee->id,
+            'attendance_id' => $existingAttendance?->id,
+            'date' => $validated['date'],
+            'requested_check_in' => $validated['requested_check_in'] ?? null,
+            'requested_check_out' => $validated['requested_check_out'] ?? null,
+            'reason' => $validated['reason'],
+            'status' => AttendanceCorrectionRequest::STATUS_PENDING,
+        ]);
+
+        $correction->logActivity('submitted', ['date' => $validated['date']]);
+
+        return back()->with('success', __('hr.attendance.correction_submitted'));
+    }
+
+    private function verifyGeofence(Employee $employee, array $validated)
+    {
+        $settings = AttendanceSettings::getForCenter((int) $employee->center_id);
+
+        if (! $settings->geofence_enabled) {
+            return null;
+        }
+
+        $coords = $settings->resolvedCoordinates();
+
+        if (! $coords) {
+            return null;
+        }
+
+        if (! isset($validated['latitude'], $validated['longitude'])) {
+            return back()
+                ->withErrors(['location' => __('hr.attendance.location_required')])
+                ->with('error', __('hr.attendance.location_required'));
+        }
+
+        $distance = $settings->distanceMetersFrom(
+            (float) $validated['latitude'],
+            (float) $validated['longitude']
+        );
+        $radius = (int) ($settings->geofence_radius_meters ?? 150);
+
+        if ($distance !== null && $distance > $radius) {
+            $message = __('hr.attendance.outside_geofence', [
+                'distance' => (int) round($distance),
+                'radius' => $radius,
+            ]);
+
+            return back()
+                ->withErrors(['location' => $message])
+                ->with('error', $message);
+        }
+
+        return null;
     }
 
     /**

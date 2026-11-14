@@ -186,6 +186,10 @@ class SettingsController extends Controller
             'overtime_enabled' => 'boolean',
             'working_days' => 'array',
             'working_days.*' => 'integer|min:0|max:6',
+            'geofence_enabled' => 'boolean',
+            'geofence_latitude' => 'nullable|numeric|between:-90,90',
+            'geofence_longitude' => 'nullable|numeric|between:-180,180',
+            'geofence_radius_meters' => 'nullable|integer|min:20|max:10000',
         ]);
 
         $settings = AttendanceSettings::getForCenter($centerId);

@@ -45,6 +45,66 @@
                 </div>
             </div>
 
+            <!-- Smart Check-In / Check-Out & Correction Request Bar -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+            >
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">
+                            {{ $t('hr.attendance.today_status') }}:
+                        </span>
+                        <span
+                            class="font-mono text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                        >
+                            {{ $t('hr.attendance.check_in') }}:
+                            {{ todayAttendance?.check_in || '—' }}
+                        </span>
+                        <span
+                            class="font-mono text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                        >
+                            {{ $t('hr.attendance.check_out') }}:
+                            {{ todayAttendance?.check_out || '—' }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{
+                            geofence?.enabled
+                                ? $t('hr.attendance.geofence_active', {
+                                      radius: geofence.radius_meters,
+                                  })
+                                : $t('hr.attendance.geofence_disabled')
+                        }}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <AppButton
+                        v-if="!todayAttendance?.check_in"
+                        variant="success"
+                        size="sm"
+                        :loading="clocking"
+                        @click="submitClock('in')"
+                    >
+                        {{ $t('hr.attendance.clock_in_now') }}
+                    </AppButton>
+
+                    <AppButton
+                        v-else-if="!todayAttendance?.check_out"
+                        variant="warning"
+                        size="sm"
+                        :loading="clocking"
+                        @click="submitClock('out')"
+                    >
+                        {{ $t('hr.attendance.clock_out_now') }}
+                    </AppButton>
+
+                    <AppButton variant="secondary" size="sm" @click="showCorrectionModal = true">
+                        {{ $t('hr.attendance.request_correction') }}
+                    </AppButton>
+                </div>
+            </div>
+
             <!-- Summary Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <div
@@ -297,24 +357,205 @@
                     </DataTable>
                 </div>
             </div>
+            <!-- Correction Requests History -->
+            <div
+                v-if="correctionRequests?.length"
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-base font-bold text-gray-900 dark:text-white">
+                        {{ $t('hr.attendance.correction_requests') }}
+                    </h2>
+                </div>
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <div
+                        v-for="req in correctionRequests"
+                        :key="req.id"
+                        class="px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-sm"
+                    >
+                        <div>
+                            <div class="font-semibold text-gray-900 dark:text-white font-mono">
+                                {{ req.date }}
+                                <span
+                                    v-if="req.requested_check_in"
+                                    class="ms-2 text-xs text-gray-500"
+                                >
+                                    {{ $t('hr.attendance.check_in') }}: {{ req.requested_check_in }}
+                                </span>
+                                <span
+                                    v-if="req.requested_check_out"
+                                    class="ms-2 text-xs text-gray-500"
+                                >
+                                    {{ $t('hr.attendance.check_out') }}:
+                                    {{ req.requested_check_out }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {{ req.reason }}
+                            </p>
+                        </div>
+                        <span
+                            :class="[
+                                'px-2.5 py-1 rounded-full text-xs font-semibold',
+                                req.status === 'approved'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : req.status === 'rejected'
+                                      ? 'bg-red-100 text-red-700'
+                                      : 'bg-amber-100 text-amber-700',
+                            ]"
+                        >
+                            {{ $t(`hr.attendance.correction_status_${req.status}`) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Correction Request Modal -->
+        <BaseModal
+            :show="showCorrectionModal"
+            :title="$t('hr.attendance.correction_modal_title')"
+            size="md"
+            @close="showCorrectionModal = false"
+        >
+            <div class="space-y-4">
+                <FormField
+                    :label="$t('hr.attendance.date')"
+                    :error="correctionForm.errors.date"
+                    required
+                >
+                    <CustomDatePicker v-model="correctionForm.date" />
+                </FormField>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                        :label="$t('hr.attendance.requested_check_in')"
+                        :error="correctionForm.errors.requested_check_in"
+                    >
+                        <AppInput v-model="correctionForm.requested_check_in" type="time" />
+                    </FormField>
+                    <FormField
+                        :label="$t('hr.attendance.requested_check_out')"
+                        :error="correctionForm.errors.requested_check_out"
+                    >
+                        <AppInput v-model="correctionForm.requested_check_out" type="time" />
+                    </FormField>
+                </div>
+
+                <FormField
+                    :label="$t('hr.attendance.correction_reason')"
+                    :error="correctionForm.errors.reason"
+                    required
+                >
+                    <AppTextarea v-model="correctionForm.reason" :rows="3" />
+                </FormField>
+            </div>
+
+            <template #footer>
+                <AppButton variant="secondary" @click="showCorrectionModal = false">
+                    {{ $t('common.cancel') }}
+                </AppButton>
+                <AppButton
+                    variant="primary"
+                    :loading="correctionForm.processing"
+                    @click="submitCorrection"
+                >
+                    {{ $t('common.submit') }}
+                </AppButton>
+            </template>
+        </BaseModal>
     </EmployeePortalLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import { useToast } from '@/Composables/useToast';
 import { ref } from 'vue';
+
+const { t } = useI18n();
+const { error: toastError } = useToast();
 
 const props = defineProps({
     attendance: Array,
     summary: Object,
     month: String,
     employee: Object,
+    todayAttendance: { type: Object, default: null },
+    geofence: {
+        type: Object,
+        default: () => ({ enabled: false, radius_meters: 150, has_coordinates: false }),
+    },
+    correctionRequests: { type: Array, default: () => [] },
 });
 
 const selectedMonth = ref(props.month);
+const clocking = ref(false);
+const showCorrectionModal = ref(false);
+
+const correctionForm = useForm({
+    date: new Date().toISOString().slice(0, 10),
+    requested_check_in: '',
+    requested_check_out: '',
+    reason: '',
+});
+
+const submitClock = (direction) => {
+    const routeName =
+        direction === 'in' ? 'employee.attendance.clock-in' : 'employee.attendance.clock-out';
+
+    const sendRequest = (coords = {}) => {
+        clocking.value = true;
+        router.post(route(routeName), coords, {
+            preserveScroll: true,
+            onFinish: () => {
+                clocking.value = false;
+            },
+        });
+    };
+
+    if (props.geofence?.enabled && props.geofence?.has_coordinates) {
+        if (!navigator.geolocation) {
+            toastError(t('hr.attendance.location_denied'));
+            return;
+        }
+        clocking.value = true;
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                sendRequest({
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                });
+            },
+            () => {
+                clocking.value = false;
+                toastError(t('hr.attendance.location_denied'));
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+        return;
+    }
+
+    sendRequest({});
+};
+
+const submitCorrection = () => {
+    correctionForm.post(route('employee.attendance.corrections.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showCorrectionModal.value = false;
+            correctionForm.reset('requested_check_in', 'requested_check_out', 'reason');
+        },
+    });
+};
 
 function changeMonth() {
     router.get(

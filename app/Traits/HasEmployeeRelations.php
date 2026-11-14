@@ -8,6 +8,7 @@ use App\Models\Center;
 use App\Models\Department;
 use App\Models\HR\Allowance;
 use App\Models\HR\Attendance;
+use App\Models\HR\AttendanceCorrectionRequest;
 use App\Models\HR\Deduction;
 use App\Models\HR\EmployeeAssetCustody;
 use App\Models\HR\EmployeeContract;
@@ -96,6 +97,11 @@ trait HasEmployeeRelations
     public function offboardings(): HasMany
     {
         return $this->hasMany(EmployeeOffboarding::class);
+    }
+
+    public function correctionRequests(): HasMany
+    {
+        return $this->hasMany(AttendanceCorrectionRequest::class);
     }
 
     public function payrollItems(): HasMany

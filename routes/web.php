@@ -405,6 +405,9 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
         Route::get('/tasks', [EmployeePortalController::class, 'tasks'])->name('employee.tasks');
         Route::get('/profile', [EmployeePortalController::class, 'profile'])->name('employee.profile');
         Route::get('/attendance', [EmployeePortalController::class, 'attendance'])->name('employee.attendance');
+        Route::post('/attendance/clock-in', [EmployeePortalController::class, 'clockIn'])->name('employee.attendance.clock-in');
+        Route::post('/attendance/clock-out', [EmployeePortalController::class, 'clockOut'])->name('employee.attendance.clock-out');
+        Route::post('/attendance/corrections', [EmployeePortalController::class, 'storeCorrectionRequest'])->name('employee.attendance.corrections.store');
         Route::get('/leaves', [EmployeePortalController::class, 'leaves'])->name('employee.leaves');
         Route::post('/leaves', [EmployeePortalController::class, 'requestLeave'])->name('employee.leaves.request');
         Route::get('/payslips', [EmployeePortalController::class, 'payslips'])->name('employee.payslips');
@@ -1096,6 +1099,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
         Route::put('/attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
         Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
+        Route::put('/attendance/corrections/{correctionRequest}/approve', [AttendanceController::class, 'approveCorrection'])->name('attendance.corrections.approve');
+        Route::put('/attendance/corrections/{correctionRequest}/reject', [AttendanceController::class, 'rejectCorrection'])->name('attendance.corrections.reject');
 
         // Leaves
         Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');

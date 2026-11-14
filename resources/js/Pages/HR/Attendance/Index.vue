@@ -248,6 +248,57 @@
                 </div>
             </div>
 
+            <!-- Pending Attendance Correction Requests -->
+            <div
+                v-if="pendingCorrections?.length"
+                class="bg-surface-primary rounded-2xl border border-warning/30 p-4 shadow-2xs space-y-3"
+            >
+                <h3 class="text-sm font-bold text-content-primary">
+                    {{ $t('hr.attendance.pending_corrections_title') }}
+                    ({{ pendingCorrections.length }})
+                </h3>
+                <div class="divide-y divide-border-subtle">
+                    <div
+                        v-for="req in pendingCorrections"
+                        :key="req.id"
+                        class="py-3 flex flex-wrap items-center justify-between gap-3 text-xs"
+                    >
+                        <div>
+                            <span class="font-bold text-content-primary">
+                                {{ getName(req.employee) || req.employee?.name_ar }}
+                            </span>
+                            <span class="ms-2 font-mono text-content-muted">{{ req.date }}</span>
+                            <span v-if="req.requested_check_in" class="ms-2 font-mono text-success">
+                                {{ $t('hr.attendance.check_in') }}: {{ req.requested_check_in }}
+                            </span>
+                            <span
+                                v-if="req.requested_check_out"
+                                class="ms-2 font-mono text-warning"
+                            >
+                                {{ $t('hr.attendance.check_out') }}: {{ req.requested_check_out }}
+                            </span>
+                            <p class="text-content-muted mt-0.5">{{ req.reason }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <AppButton
+                                variant="success"
+                                size="sm"
+                                @click="handleCorrection(req.id, 'approve')"
+                            >
+                                {{ $t('hr.attendance.approve_correction') }}
+                            </AppButton>
+                            <AppButton
+                                variant="danger"
+                                size="sm"
+                                @click="handleCorrection(req.id, 'reject')"
+                            >
+                                {{ $t('hr.attendance.reject_correction') }}
+                            </AppButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Attendance Data Table -->
             <div class="space-y-4">
                 <DataTable
@@ -497,7 +548,6 @@ import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppInput from '@/Components/App/AppInput.vue';
@@ -526,7 +576,19 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    pendingCorrections: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const handleCorrection = (id, action) => {
+    const routeName =
+        action === 'approve'
+            ? 'app.hr.attendance.corrections.approve'
+            : 'app.hr.attendance.corrections.reject';
+    router.put(route(routeName, id), {}, { preserveScroll: true });
+};
 
 const { t } = useI18n();
 const { success, error } = useToast();

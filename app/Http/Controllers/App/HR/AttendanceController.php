@@ -6,12 +6,14 @@ namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\Attendance;
+use App\Models\HR\AttendanceCorrectionRequest;
 use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Inertia\Inertia;
@@ -153,6 +155,12 @@ class AttendanceController extends Controller
                 'grace_period_minutes' => $settings?->grace_period_minutes ?? 10,
                 'overtime_enabled' => $settings?->overtime_enabled ?? true,
             ],
+            'pendingCorrections' => AttendanceCorrectionRequest::query()
+                ->with(['employee:id,name_ar,name_en,employee_number'])
+                ->where('status', AttendanceCorrectionRequest::STATUS_PENDING)
+                ->orderByDesc('created_at')
+                ->take(30)
+                ->get(),
         ]);
     }
 
@@ -284,5 +292,75 @@ class AttendanceController extends Controller
         $attendance->delete();
 
         return back()->with('success', __('messages.deleted_successfully'));
+    }
+
+    public function approveCorrection(Request $request, AttendanceCorrectionRequest $correctionRequest)
+    {
+        $this->authorize('create', Attendance::class);
+
+        if ($correctionRequest->status !== AttendanceCorrectionRequest::STATUS_PENDING) {
+            return back()->with('error', __('hr.attendance.correction_already_reviewed'));
+        }
+
+        $validated = $request->validate([
+            'review_notes' => 'nullable|string|max:500',
+        ]);
+
+        DB::transaction(function () use ($request, $correctionRequest, $validated): void {
+            $attendance = Attendance::firstOrNew([
+                'tenant_id' => $correctionRequest->tenant_id,
+                'center_id' => $correctionRequest->center_id,
+                'employee_id' => $correctionRequest->employee_id,
+                'date' => $correctionRequest->date->format('Y-m-d'),
+            ]);
+
+            if ($correctionRequest->requested_check_in) {
+                $attendance->check_in = $correctionRequest->requested_check_in;
+            }
+
+            if ($correctionRequest->requested_check_out) {
+                $attendance->check_out = $correctionRequest->requested_check_out;
+            }
+
+            $attendance->status = 'present';
+            $attendance->calculateTimes();
+            $attendance->save();
+
+            $correctionRequest->update([
+                'attendance_id' => $attendance->id,
+                'status' => AttendanceCorrectionRequest::STATUS_APPROVED,
+                'reviewed_by' => $request->user()?->id,
+                'reviewed_at' => now(),
+                'review_notes' => $validated['review_notes'] ?? null,
+            ]);
+
+            $correctionRequest->logActivity('approved', ['attendance_id' => $attendance->id]);
+        });
+
+        return back()->with('success', __('hr.attendance.correction_approved'));
+    }
+
+    public function rejectCorrection(Request $request, AttendanceCorrectionRequest $correctionRequest)
+    {
+        $this->authorize('create', Attendance::class);
+
+        if ($correctionRequest->status !== AttendanceCorrectionRequest::STATUS_PENDING) {
+            return back()->with('error', __('hr.attendance.correction_already_reviewed'));
+        }
+
+        $validated = $request->validate([
+            'review_notes' => 'nullable|string|max:500',
+        ]);
+
+        $correctionRequest->update([
+            'status' => AttendanceCorrectionRequest::STATUS_REJECTED,
+            'reviewed_by' => $request->user()?->id,
+            'reviewed_at' => now(),
+            'review_notes' => $validated['review_notes'] ?? null,
+        ]);
+
+        $correctionRequest->logActivity('rejected');
+
+        return back()->with('success', __('hr.attendance.correction_rejected'));
     }
 }
