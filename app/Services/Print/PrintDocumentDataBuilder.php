@@ -7,9 +7,8 @@ namespace App\Services\Print;
 use App\DTOs\Print\InvoicePrintDTO;
 use App\Models\CenterAddress;
 use App\Models\Invoice;
-use App\Models\InvoiceLine;
-use App\Models\Payment;
 use App\Models\TenantAddress;
+use BackedEnum;
 
 class PrintDocumentDataBuilder
 {
@@ -66,7 +65,7 @@ class PrintDocumentDataBuilder
         $items = $invoice->lines
             ->sortBy('id')
             ->values()
-            ->map(static function (InvoiceLine $line): array {
+            ->map(static function ($line): array {
                 return [
                     'id' => $line->id,
                     'service_name' => $line->description ?? '',
@@ -87,7 +86,7 @@ class PrintDocumentDataBuilder
 
         $badDebt = (float) $invoice->payments
             ->where('type', 'bad_debt')
-            ->sum(static fn (Payment $p) => (float) ($p->amount ?? 0));
+            ->sum(static fn ($p) => (float) ($p->amount ?? 0));
 
         $totalInclTax = (float) ($invoice->total_incl_tax ?? 0);
         $totalPaid = (float) ($invoice->total_paid ?? 0);
@@ -109,7 +108,7 @@ class PrintDocumentDataBuilder
 
         $payments = $invoice->payments
             ->values()
-            ->map(static function (Payment $p): array {
+            ->map(static function ($p): array {
                 return [
                     'id' => $p->id,
                     'payment_date' => $p->payment_date?->toDateString(),
@@ -156,10 +155,10 @@ class PrintDocumentDataBuilder
             originalInvoiceNumber: $invoice->originalInvoice?->invoice_number,
             returnReason: $invoice->return_reason,
             notes: $invoice->notes,
-            warrantyText: $tenant?->warranty_terms ?? null,
+            warrantyText: $tenant?->print_settings['warranty_terms'] ?? null,
             termsAndConditions: $tenant?->invoice_terms ?? null,
             signatures: [
-                'customer_signature' => $invoice->workOrder?->customer_signature ?? null,
+                'customer_signature' => $invoice->workOrder?->reception_signature ?? null,
                 'delivery_signature' => $invoice->workOrder?->delivery_signature ?? null,
             ],
             settings: $printSettings,
@@ -169,7 +168,7 @@ class PrintDocumentDataBuilder
 
     private function resolveInvoiceDocumentType(Invoice $invoice): string
     {
-        $type = $invoice->type instanceof \BackedEnum
+        $type = $invoice->type instanceof BackedEnum
             ? (string) $invoice->type->value
             : (string) ($invoice->type ?? '');
 
@@ -188,7 +187,7 @@ class PrintDocumentDataBuilder
      * Resolve seller identity preserving frozen snapshots on issued invoices.
      * Never falls back to platform identity ("Khidmah Pro").
      *
-     * @param  array<int, string>  $missingSnapshots
+     * @param array<int, string> $missingSnapshots
      * @return array<string, mixed>
      */
     private function resolveSellerIdentity(
@@ -272,6 +271,7 @@ class PrintDocumentDataBuilder
     private function resolveVehicle(Invoice $invoice): ?array
     {
         $wo = $invoice->workOrder;
+
         if (! $wo) {
             return null;
         }
@@ -299,8 +299,10 @@ class PrintDocumentDataBuilder
 
         if (is_string($address)) {
             $trimmed = trim($address);
+
             if (str_starts_with($trimmed, '{')) {
                 $decoded = json_decode($trimmed, true);
+
                 if (is_array($decoded)) {
                     if (! empty($decoded['address_line'])) {
                         return (string) $decoded['address_line'];

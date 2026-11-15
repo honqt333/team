@@ -161,8 +161,10 @@ class NotificationSettingsController extends Controller
         $incomingEvents = $validated['events'] ?? [];
 
         $mergedEvents = $existing['events'] ?? [];
+
         foreach ($incomingEvents as $eventKey => $flags) {
             $currentFlags = $mergedEvents[$eventKey] ?? [];
+
             foreach (['in_app', 'email', 'sms', 'whatsapp'] as $channel) {
                 if (array_key_exists($channel, $flags)) {
                     $currentFlags[$channel] = (bool) $flags[$channel];

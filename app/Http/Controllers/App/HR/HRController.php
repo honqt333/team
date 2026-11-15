@@ -60,7 +60,7 @@ class HRController extends Controller
         $expiringDocumentsQuery = EmployeeDocument::where('tenant_id', $tenantId)
             ->whereNotNull('expiry_date')
             ->whereDate('expiry_date', '<=', $expiryCutoff)
-            ->whereHas('employee', fn ($q) => $q->where('center_id', $centerId)->active());
+            ->whereHas('employee', fn ($q) => $q->where('center_id', $centerId)->where('status', 'active'));
 
         $expiringDocumentsCount = (clone $expiringDocumentsQuery)->count();
         $expiringDocuments = (clone $expiringDocumentsQuery)
@@ -82,7 +82,7 @@ class HRController extends Controller
             ->where('status', 'active')
             ->whereNotNull('end_date')
             ->whereDate('end_date', '<=', $expiryCutoff)
-            ->whereHas('employee', fn ($q) => $q->where('center_id', $centerId)->active());
+            ->whereHas('employee', fn ($q) => $q->where('center_id', $centerId)->where('status', 'active'));
 
         $expiringContractsCount = (clone $expiringContractsQuery)->count();
         $expiringContracts = (clone $expiringContractsQuery)

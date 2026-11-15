@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use stdClass;
 use Tests\TestCase;
 
 class R2cPrintLocalizationAndPdfTest extends TestCase
@@ -147,6 +148,6 @@ class R2cPrintLocalizationAndPdfTest extends TestCase
     public function test_print_service_throws_clear_exception_for_missing_pdf_view(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        app(PrintService::class)->generate('proforma_invoice', new \stdClass());
+        app(PrintService::class)->generate('proforma_invoice', new stdClass);
     }
 }

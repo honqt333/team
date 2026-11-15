@@ -121,11 +121,13 @@ class PaymentSettings extends Model
     {
         $raw = Setting::get('payment.footer_badges');
         $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+
         if (! is_array($decoded)) {
             $decoded = [];
         }
 
         $result = [];
+
         foreach (self::DEFAULT_FOOTER_BADGES as $key => $default) {
             $result[$key] = array_key_exists($key, $decoded) ? (bool) $decoded[$key] : $default;
         }
@@ -160,6 +162,7 @@ class PaymentSettings extends Model
     {
         $raw = Setting::get('payment.icons_config');
         $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+
         if (! is_array($decoded)) {
             $decoded = [];
         }
@@ -170,6 +173,7 @@ class PaymentSettings extends Model
 
         $logos = [];
         $rawLogos = is_array($decoded['logos'] ?? null) ? $decoded['logos'] : [];
+
         foreach (array_keys(self::DEFAULT_PAYMENT_ICONS['logos']) as $key) {
             $val = $rawLogos[$key] ?? null;
             $logos[$key] = is_string($val) && $val !== '' ? $val : null;

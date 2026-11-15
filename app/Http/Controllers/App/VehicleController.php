@@ -259,9 +259,9 @@ class VehicleController
             ->orderBy('name')
             ->get();
 
-        // Get active makes (for add/edit modal) and all makes (for table filter)
-        $makes = VehicleMake::active()->ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
-        $filterMakes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        // Get all makes for filter dropdown and derive active makes for add/edit modal from collection (avoids duplicate query)
+        $filterMakes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path', 'is_active']);
+        $makes = $filterMakes->where('is_active', true)->values();
 
         // Get active colors
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);

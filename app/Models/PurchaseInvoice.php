@@ -38,10 +38,6 @@ class PurchaseInvoice extends Model
         'balance' => 'decimal:2',
     ];
 
-    protected $appends = [
-        'source_type',
-    ];
-
     public function getSourceTypeAttribute(): string
     {
         if (! empty($this->attributes['source_type'])) {

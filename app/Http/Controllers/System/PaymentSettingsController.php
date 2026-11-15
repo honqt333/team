@@ -125,6 +125,7 @@ class PaymentSettingsController extends Controller
 
         if (array_key_exists('footer_badges', $validated)) {
             $badges = [];
+
             foreach (PaymentSettings::DEFAULT_FOOTER_BADGES as $key => $default) {
                 $badges[$key] = (bool) ($validated['footer_badges'][$key] ?? $default);
             }
@@ -137,6 +138,7 @@ class PaymentSettingsController extends Controller
                 ? (string) $rawIcons['style']
                 : PaymentSettings::DEFAULT_PAYMENT_ICONS['style'];
             $logos = [];
+
             foreach (array_keys(PaymentSettings::DEFAULT_PAYMENT_ICONS['logos']) as $key) {
                 $val = $rawIcons['logos'][$key] ?? null;
                 $logos[$key] = is_string($val) && $val !== '' ? $val : null;

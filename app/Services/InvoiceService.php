@@ -653,7 +653,7 @@ class InvoiceService
             $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
 
             $sellerNameAr = $tenant->legal_name ?: ($tenant->trade_name ?: $tenant->name);
-            $sellerNameEn = $tenant->name_en ?: $sellerNameAr;
+            $sellerNameEn = $tenant->legal_name_en ?: $sellerNameAr;
             $sellerVat = $taxSetting?->tax_number ?? $tenant->vat_number;
             $sellerCr = $tenant->cr_number;
 

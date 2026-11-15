@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 
 // @bypass-tenancy-scanner - Scoped via CenterScoped trait (includes tenant_id + center_id)
+/**
+ * @property int|numeric-string|null $present_count
+ * @property int|numeric-string|null $late_count
+ * @property int|numeric-string|null $absent_count
+ */
 class Attendance extends Model
 {
     use CenterScoped, SoftDeletes;

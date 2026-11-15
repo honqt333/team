@@ -120,6 +120,29 @@ class PerformanceBaselineTest extends TestCase
      * with the data would have been an N+1, and raising the budget
      * would have hidden it.
      */
+    /**
+     * @group perf
+     * Endpoint 2: Work orders show
+     * Budget: < 2000ms, < 60 queries (measured at 58 fixed queries in SQLite test env)
+     *
+     * QUERY BUDGET NOTE:
+     *
+     * The original < 55 budget was established when fixed overhead was 52 queries.
+     * Since then, new architecture capabilities were added:
+     *   1. WorkOrder labor entries relation (+1 query)
+     *   2. Middleware multi-country tax & currency settings (+2 queries)
+     *   3. Middleware subscription lifecycle resolution (+3 queries)
+     *
+     * Total fixed overhead is now 58 queries:
+     *   - ~25 shared Inertia-middleware queries (permissions, tenancy, announcements,
+     *     multi-country tax settings, subscriptions lifecycle, centers, notifications).
+     *   - 33 controller queries (the work order, its 17 eager loads, 13 modal/tab
+     *     reference datasets, 2 systematic inspection settings, 1 labor entries).
+     *
+     * PerfQueryShapeTest proves empirically that this has 0 delta (0 N+1):
+     *   small data -> 58 queries
+     *   large data -> 58 queries (delta 0)
+     */
     public function test_work_orders_show_meets_perf_budget(): void
     {
         $wo = WorkOrder::first();
@@ -127,7 +150,7 @@ class PerformanceBaselineTest extends TestCase
         fwrite(STDERR, sprintf("\n[RESULT 2] GET /app/work-orders/%d: %0.2fms, %d queries\n", $wo->id, $duration, $queries));
         $response->assertStatus(200);
         $this->assertLessThan(2000, $duration, "Show took {$duration}ms (target 2000ms in SQLite test env)");
-        $this->assertLessThan(55, $queries, "Used {$queries} queries (target 55)");
+        $this->assertLessThan(60, $queries, "Used {$queries} queries (target 60)");
     }
 
     /**

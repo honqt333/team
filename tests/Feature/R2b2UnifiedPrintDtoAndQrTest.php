@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Print\PrintDocumentDataBuilder;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
@@ -224,7 +225,7 @@ class R2b2UnifiedPrintDtoAndQrTest extends TestCase
             'balance' => 0,
         ]);
 
-        \Illuminate\Support\Facades\DB::table('invoices')
+        DB::table('invoices')
             ->where('id', $legacyIssued->id)
             ->update([
                 'seller_name_snapshot' => null,

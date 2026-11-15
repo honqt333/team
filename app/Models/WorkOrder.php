@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $pricing_mode_snapshot
  * @property numeric-string|float|null $total_incl_tax
  * @property numeric-string|float|null $tax_rate_snapshot
+ * @property string|null $reception_signature
+ * @property string|null $delivery_signature
  */
 class WorkOrder extends Model
 {

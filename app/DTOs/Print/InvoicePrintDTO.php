@@ -7,15 +7,15 @@ namespace App\DTOs\Print;
 final readonly class InvoicePrintDTO
 {
     /**
-     * @param  array<string, mixed>  $seller
-     * @param  array<string, mixed>  $party
-     * @param  array<string, mixed>|null  $vehicle
-     * @param  array<int, array<string, mixed>>  $items
-     * @param  array<string, mixed>  $totals
-     * @param  array<int, array<string, mixed>>  $payments
-     * @param  array<string, mixed>  $signatures
-     * @param  array<string, mixed>  $settings
-     * @param  array<int, string>  $missingSnapshots
+     * @param array<string, mixed> $seller
+     * @param array<string, mixed> $party
+     * @param array<string, mixed>|null $vehicle
+     * @param array<int, array<string, mixed>> $items
+     * @param array<string, mixed> $totals
+     * @param array<int, array<string, mixed>> $payments
+     * @param array<string, mixed> $signatures
+     * @param array<string, mixed> $settings
+     * @param array<int, string> $missingSnapshots
      */
     public function __construct(
         public string $documentType,

@@ -13,6 +13,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @property float|null $outstanding_balance
+ * @property float|numeric-string|null $balance
+ * @property bool|null $is_credit_exceeded
+ * @property float|numeric-string|null $available_credit
+ * @property float|numeric-string|null $credit_used_percent
+ */
 class Dealer extends Model
 {
     use HasFactory, SoftDeletes, TenantScoped;
