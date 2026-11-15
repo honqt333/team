@@ -22,7 +22,10 @@ class BankTransferReceipt extends Model
         'subscription_id',
         'subscription_payment_id',
         'transfer_amount',
+        'approved_amount',
         'transfer_reference',
+        'idempotency_key',
+        'request_hash',
         'transfer_date',
         'bank_name',
         'account_name',
@@ -41,6 +44,7 @@ class BankTransferReceipt extends Model
     {
         return [
             'transfer_amount' => 'decimal:2',
+            'approved_amount' => 'decimal:2',
             'transfer_date' => 'date',
             'receipt_size_bytes' => 'integer',
             'reviewed_at' => 'datetime',

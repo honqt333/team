@@ -109,7 +109,8 @@ trait HasWorkOrderOperations
     {
         $netTotal = max(0.0, (float) $this->total - $this->total_credit_notes);
 
-        return max(0.0, round($netTotal - $this->total_paid - $this->bad_debt, 2));
+        // total_paid already includes bad_debt (payment + bad_debt - refund).
+        return max(0.0, round($netTotal - $this->total_paid, 2));
     }
 
     /**

@@ -42,9 +42,24 @@ class PricingHelperTest extends TestCase
     public function test_line_total_with_quantity(): void
     {
         $result = PricingHelper::computeLineTotal(100, 'percentage', 10, 3, 0);
-        $this->assertEquals(10, $result['discount_amount']);
+        $this->assertEquals(30, $result['discount_amount']);
         $this->assertEquals(90, $result['final_unit_price']);
         $this->assertEquals(270, $result['line_total']);
+    }
+
+    public function test_line_total_discount_scales_with_quantity_for_fixed_and_percentage(): void
+    {
+        foreach ([1, 2, 5] as $qty) {
+            $fixed = PricingHelper::computeLineTotal(100, 'fixed', 15, $qty, 0);
+            $this->assertEquals(15 * $qty, $fixed['discount_amount']);
+            $this->assertEquals(85, $fixed['final_unit_price']);
+            $this->assertEquals(85 * $qty, $fixed['line_total']);
+
+            $pct = PricingHelper::computeLineTotal(200, 'percentage', 10, $qty, 0);
+            $this->assertEquals(20 * $qty, $pct['discount_amount']);
+            $this->assertEquals(180, $pct['final_unit_price']);
+            $this->assertEquals(180 * $qty, $pct['line_total']);
+        }
     }
 
     public function test_rounding_to_2_decimals(): void

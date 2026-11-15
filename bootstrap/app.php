@@ -14,6 +14,7 @@ use App\Http\Middleware\PortalLocale;
 use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\RequestId;
 use App\Http\Middleware\ResolveTenantFromUrl;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
@@ -148,6 +149,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // SentryContext) can read the id from $request->attributes.
         $middleware->append(RequestId::class);
         $middleware->append(SentryContext::class);
+        $middleware->append(SecurityHeaders::class);
 
         // Exempt locale switching from CSRF — it's a safe, session-only action
         $middleware->validateCsrfTokens(except: [

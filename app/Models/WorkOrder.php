@@ -104,26 +104,56 @@ class WorkOrder extends Model
         $partsDiscount = $activeParts->sum('discount');
 
         $netTotal = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
-        $this->total_excl_tax = $netTotal;
 
         if (! ($this->tax_enabled_snapshot ?? false)) {
+            $this->total_excl_tax = round($netTotal, 2);
             $this->total_tax = 0;
-            $this->total_incl_tax = $netTotal;
+            $this->total_incl_tax = round($netTotal, 2);
         } else {
-            $taxRate = (float) ($this->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($this->tenant?->country));
+            $defaultTaxRate = (float) ($this->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($this->tenant?->country));
             $isInclusive = ($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+            $taxCalculator = app(TaxCalculator::class);
+            $taxLines = [];
 
-            $calc = app(TaxCalculator::class)->calculateLine(
-                unitPrice: $netTotal,
-                qty: 1.0,
-                discount: 0.0,
-                taxRate: $taxRate,
-                isInclusive: $isInclusive,
-            );
+            foreach ($activeItems as $item) {
+                $itemTaxable = $item->is_taxable !== false;
+                $itemRate = $itemTaxable ? (float) ($item->tax_rate_snapshot ?? $defaultTaxRate) : 0.0;
+                $itemCategory = $item->tax_category_code ?: ($itemRate > 0 ? 'S' : 'Z');
 
-            $this->total_excl_tax = $calc['line_total_excl_tax'];
-            $this->total_tax = $calc['tax_amount'];
-            $this->total_incl_tax = $calc['line_total_incl_tax'];
+                $lineCalc = $taxCalculator->calculateLine(
+                    unitPrice: (float) $item->unit_price,
+                    qty: (float) $item->qty,
+                    discount: (float) ($item->discount_amount ?? 0),
+                    taxRate: $itemRate,
+                    isInclusive: $isInclusive,
+                );
+                $lineCalc['tax_category_code'] = $itemCategory;
+                $taxLines[] = $lineCalc;
+            }
+
+            foreach ($activeParts as $part) {
+                $partCategory = $defaultTaxRate > 0 ? 'S' : 'Z';
+                $lineCalc = $taxCalculator->calculateLine(
+                    unitPrice: (float) $part->unit_price,
+                    qty: (float) $part->qty,
+                    discount: (float) ($part->discount ?? 0),
+                    taxRate: $defaultTaxRate,
+                    isInclusive: $isInclusive,
+                );
+                $lineCalc['tax_category_code'] = $partCategory;
+                $taxLines[] = $lineCalc;
+            }
+
+            if (empty($taxLines)) {
+                $this->total_excl_tax = 0;
+                $this->total_tax = 0;
+                $this->total_incl_tax = 0;
+            } else {
+                $docTax = $taxCalculator->calculateDocument($taxLines);
+                $this->total_excl_tax = $docTax['total_excl_tax'];
+                $this->total_tax = $docTax['total_tax'];
+                $this->total_incl_tax = $docTax['total_incl_tax'];
+            }
         }
     }
 
@@ -346,7 +376,7 @@ class WorkOrder extends Model
      */
     public static function outstandingBalanceSql(): string
     {
-        return '((COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id AND status != "cancelled"), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id AND status NOT IN ("cancelled", "reversed")), 0) - COALESCE((SELECT SUM(total_incl_tax) FROM invoices WHERE work_order_id = work_orders.id AND type = "credit_note" AND status != "cancelled"), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0)) + 0.001)';
+        return '((COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id AND status != "cancelled"), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id AND status NOT IN ("cancelled", "reversed")), 0) - COALESCE((SELECT SUM(total_incl_tax) FROM invoices WHERE work_order_id = work_orders.id AND type = "credit_note" AND status != "cancelled"), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0)) + 0.001)';
     }
 
     /**

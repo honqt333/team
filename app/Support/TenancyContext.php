@@ -60,11 +60,13 @@ class TenancyContext
     }
 
     /**
-     * Get the currently authenticated user.
+     * Get the currently authenticated tenant user.
      */
     public static function user(): ?User
     {
-        return auth()->user();
+        $user = auth()->user();
+
+        return $user instanceof User ? $user : null;
     }
 
     /**
@@ -92,6 +94,10 @@ class TenancyContext
     {
         if (self::$hasOverride) {
             return self::$overrideCenterId;
+        }
+
+        if (app()->bound('request') && (request()->is('system/*') || request()->is('system'))) {
+            return null;
         }
 
         $user = self::user();

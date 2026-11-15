@@ -11,14 +11,24 @@ class NotifyOwnerOnCreation
 {
     public function handle(WorkOrderCreated $event): void
     {
-        if (class_exists(NotificationService::class) && method_exists(NotificationService::class, 'notifyOwner')) {
-            NotificationService::notifyOwner(
-                tenantId: $event->workOrder->tenant_id,
-                type: 'work_order.created',
-                title: 'أمر عمل جديد #'.($event->workOrder->code ?? $event->workOrder->id),
-                body: 'تم إنشاء أمر عمل جديد',
-                actionUrl: '/app/work-orders/'.$event->workOrder->id,
-            );
-        }
+        $workOrder = $event->workOrder;
+        $workOrder->loadMissing('customer');
+
+        $code = (string) ($workOrder->code ?? $workOrder->id);
+        $customerName = $workOrder->customer?->name;
+
+        $body = $customerName
+            ? __('notifications.work_order_created_body_customer', ['customer' => $customerName])
+            : __('notifications.work_order_created_body');
+
+        NotificationService::notifyTenantUsers(
+            tenantId: $workOrder->tenant_id,
+            type: 'work_order.created',
+            title: __('notifications.work_order_created_title', ['code' => $code]),
+            body: $body,
+            actionUrl: '/app/work-orders/'.$workOrder->id,
+            actorId: $workOrder->created_by ?? auth()->id(),
+            centerId: $workOrder->center_id,
+        );
     }
 }

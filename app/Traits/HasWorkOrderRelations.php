@@ -82,6 +82,7 @@ trait HasWorkOrderRelations
         return $this->hasMany(Invoice::class, 'work_order_id')->where('type', 'credit_note');
     }
 
+    /** @return HasMany<WorkOrderItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(WorkOrderItem::class);

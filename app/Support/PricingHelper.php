@@ -82,9 +82,10 @@ class PricingHelper
         }
 
         $lineTotal = $finalUnitPrice * $qty;
+        $lineDiscountAmount = $discountAmount * $qty;
 
         return [
-            'discount_amount' => round($discountAmount, 2),
+            'discount_amount' => round($lineDiscountAmount, 2),
             'final_unit_price' => round($finalUnitPrice, 2),
             'line_total' => round($lineTotal, 2),
         ];

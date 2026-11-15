@@ -94,6 +94,31 @@ class WorkOrderPolicy
     }
 
     /**
+     * Determine whether the user can capture a reception or delivery signature.
+     */
+    public function sign(User $user, WorkOrder $workOrder, string $type = 'reception'): bool
+    {
+        if (! $user->can(Permissions::WORK_ORDERS_UPDATE)) {
+            return false;
+        }
+
+        if ($workOrder->status === WorkOrder::STATUS_CANCELLED) {
+            return false;
+        }
+
+        // Delivery signatures may be captured after a work order is marked done;
+        // reception signatures are restricted to editable work orders.
+        if (! $workOrder->canBeEdited()) {
+            if (! ($type === 'delivery' && $workOrder->status === WorkOrder::STATUS_DONE)) {
+                return false;
+            }
+        }
+
+        return $workOrder->tenant_id === $user->tenant_id
+            && (int) $workOrder->center_id === (int) $user->current_center_id;
+    }
+
+    /**
      * Determine whether the user can resume the model.
      */
     public function resume(User $user, WorkOrder $workOrder): bool

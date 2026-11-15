@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Models\Vehicle;
-use App\Models\WorkOrder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -56,11 +55,7 @@ class WorkOrderUpdateRequest extends FormRequest
                     }
                 },
             ],
-            'status' => [
-                'sometimes',
-                'string',
-                Rule::in(WorkOrder::STATUSES),
-            ],
+            'status' => ['prohibited'],
             'notes' => ['nullable', 'string', 'max:2000'],
 
             // New fields
@@ -99,26 +94,15 @@ class WorkOrderUpdateRequest extends FormRequest
 
             // Items (if needed)
             'items' => ['nullable', 'array'],
+            'items.*.id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_items', 'id')
+                    ->where('work_order_id', ($this->route('workOrder') ?? $this->route('work_order'))?->id ?? 0),
+            ],
             'items.*.title' => ['required_with:items', 'string', 'max:255'],
             'items.*.qty' => ['required_with:items', 'numeric', 'min:0.01'],
             'items.*.unit_price' => ['required_with:items', 'numeric', 'min:0'],
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function ($validator) {
-                $workOrder = $this->route('workOrder') ?? $this->route('work_order');
-
-                if ($this->status === WorkOrder::STATUS_CANCELLED && $workOrder && ! $workOrder->canBeCancelled()) {
-                    $validator->errors()->add('status', __('messages.cannot_cancel_has_relations'));
-                }
-
-                if ($this->status === WorkOrder::STATUS_DONE && $workOrder && $workOrder->hasExcessPayment()) {
-                    $validator->errors()->add('status', __('messages.cannot_complete_excess_payments'));
-                }
-            },
         ];
     }
 }

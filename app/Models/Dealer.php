@@ -99,6 +99,7 @@ class Dealer extends Model
         return $this->hasMany(Vehicle::class, 'dealer_id');
     }
 
+    /** @return HasMany<WorkOrder, $this> */
     public function workOrders(): HasMany
     {
         return $this->hasMany(WorkOrder::class, 'dealer_id');
@@ -141,23 +142,18 @@ class Dealer extends Model
      */
     public function getOutstandingBalance(): float
     {
-        $invoicedDue = (float) $this->invoices()
-            ->withoutGlobalScope('center_scoped')
-            ->whereNotIn('status', ['cancelled'])
-            ->toBase()
-            ->selectRaw("COALESCE(SUM(CASE
-                WHEN type = 'credit_note' THEN -(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END)
-                WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0))
-                ELSE 0
-            END), 0) as total_balance")
-            ->value('total_balance');
+        $invoicedDue = Invoice::outstandingSumForOwner(
+            'dealer_id',
+            (int) $this->id,
+            $this->tenant_id !== null ? (int) $this->tenant_id : null
+        );
 
         $uninvoicedWorkOrders = $this->workOrders()
             ->withoutGlobalScope('center_scoped')
             ->whereNotIn('status', ['cancelled'])
             ->whereDoesntHave('invoice', function ($q) {
                 $q->withoutGlobalScope('center_scoped')
-                    ->whereNotIn('status', ['cancelled']);
+                    ->whereNotIn('status', ['draft', 'cancelled']);
             })
             ->with(['payments', 'creditNotes'])
             ->get();

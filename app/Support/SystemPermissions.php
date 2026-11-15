@@ -86,6 +86,7 @@ class SystemPermissions
             Permissions::SYSTEM_PROMOCODES_MANAGE => 'إدارة الرموز الترويجية',
             Permissions::SYSTEM_PAYMENT_SETTINGS => 'إعدادات بوابات الدفع',
             Permissions::SYSTEM_PAYMENT_RETRY => 'إعادة محاولة الدفعات',
+            Permissions::SYSTEM_RECEIPTS_OVERRIDE => 'تجاوز اختلاف مبلغ إيصالات التحويل البنكي',
         ],
         'settings' => [
             Permissions::SYSTEM_SETTINGS_MANAGE => 'إعدادات المنصة',

@@ -80,9 +80,9 @@ class UpdateWorkOrderActionTest extends TestCase
         $action = new UpdateWorkOrderAction;
         $updatedWorkOrder = $action->execute($workOrder, $user, $data);
 
-        $this->assertEquals(WorkOrder::STATUS_DONE, $updatedWorkOrder->status);
+        $this->assertEquals(WorkOrder::STATUS_OPEN, $updatedWorkOrder->status);
         $this->assertEquals('Updated notes', $updatedWorkOrder->notes);
-        $this->assertNotNull($updatedWorkOrder->closed_at);
+        $this->assertNull($updatedWorkOrder->closed_at);
         $this->assertCount(1, $updatedWorkOrder->items);
         $this->assertEquals('New Service', $updatedWorkOrder->items->first()->title);
     }

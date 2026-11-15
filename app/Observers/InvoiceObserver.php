@@ -7,6 +7,7 @@ namespace App\Observers;
 use App\Models\Invoice;
 use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
+use BackedEnum;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -238,6 +239,26 @@ class InvoiceObserver
         // that mixes an allowed change with a forbidden one: the mixed
         // save still carries the forbidden field in its dirty set.
         $this->assertSettlableFieldsOnly($invoice, $dirty);
+    }
+
+    public function updated(Invoice $invoice): void
+    {
+        $type = $invoice->type instanceof BackedEnum ? $invoice->type->value : (string) $invoice->type;
+
+        if ($type === 'credit_note' && $invoice->original_invoice_id && $invoice->wasChanged('status')) {
+            $originalInvoice = Invoice::withoutGlobalScopes()
+                ->where('tenant_id', $invoice->tenant_id)
+                ->where('center_id', $invoice->center_id)
+                ->find($invoice->original_invoice_id);
+
+            if ($originalInvoice) {
+                $originalType = $originalInvoice->type instanceof BackedEnum ? $originalInvoice->type->value : (string) $originalInvoice->type;
+
+                if ($originalType !== 'credit_note') {
+                    $originalInvoice->updatePaymentStatus();
+                }
+            }
+        }
     }
 
     public function deleting(Invoice $invoice): void

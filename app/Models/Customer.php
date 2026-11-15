@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Response-only credit summaries populated by customer/vehicle queries.
@@ -104,14 +103,11 @@ class Customer extends Model
 
     public function getOutstandingBalance(): float
     {
-        $result = DB::table('invoices')
-            ->where('customer_id', $this->id)
-            ->whereNull('deleted_at')
-            ->whereNotIn('status', ['cancelled'])
-            ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0) as total_due')
-            ->first();
-
-        return (float) ($result?->total_due ?? 0.0);
+        return Invoice::outstandingSumForOwner(
+            'customer_id',
+            (int) $this->id,
+            $this->tenant_id !== null ? (int) $this->tenant_id : null
+        );
     }
 
     public function isCreditLimitExceeded(?float $additionalAmount = 0.0): bool

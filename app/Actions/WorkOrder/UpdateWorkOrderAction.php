@@ -8,18 +8,20 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMileageLog;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class UpdateWorkOrderAction
 {
     public function execute(WorkOrder $workOrder, User $user, array $data): WorkOrder
     {
         return DB::transaction(function () use ($workOrder, $user, $data) {
-            // Update main work order fields
+            // Update main work order fields (status transitions are owned exclusively by WorkOrderStatusController)
             $fields = [
-                'customer_id', 'dealer_id', 'is_paid_by_dealer', 'vehicle_id', 'status', 'notes',
+                'customer_id', 'dealer_id', 'is_paid_by_dealer', 'vehicle_id', 'notes',
                 'customer_complaint', 'initial_assessment', 'odometer', 'fuel_level',
                 'contact_name', 'contact_phone', 'entry_date', 'expected_end_date',
             ];
@@ -34,13 +36,6 @@ class UpdateWorkOrderAction
                 $workOrder->is_paid_by_dealer = false;
             }
             $workOrder->save();
-
-            // Handle status transitions
-            if (isset($data['status'])) {
-                if ($data['status'] === WorkOrder::STATUS_DONE && ! $workOrder->closed_at) {
-                    $workOrder->update(['closed_at' => now()]);
-                }
-            }
 
             // Sync departments
             if (isset($data['departments'])) {
@@ -61,20 +56,9 @@ class UpdateWorkOrderAction
                 }
             }
 
-            // Update items if provided
+            // Update items if provided (preserve identities & protected labor/parts/invoice relations)
             if (isset($data['items'])) {
-                // Delete existing items and recreate
-                $workOrder->items()->delete();
-
-                foreach ($data['items'] as $itemData) {
-                    $workOrder->items()->create([
-                        'tenant_id' => $user->tenant_id,
-                        'center_id' => $user->current_center_id,
-                        'title' => $itemData['title'],
-                        'qty' => $itemData['qty'],
-                        'unit_price' => $itemData['unit_price'],
-                    ]);
-                }
+                $this->syncItems($workOrder, $user, $data['items']);
             }
 
             // Handle photos
@@ -135,6 +119,84 @@ class UpdateWorkOrderAction
 
             return $workOrder;
         });
+    }
+
+    private function syncItems(WorkOrder $workOrder, User $user, array $items): void
+    {
+        $existingItems = $workOrder->items()
+            ->withoutGlobalScope('center_scoped')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        $keptIds = [];
+
+        foreach ($items as $itemData) {
+            $item = null;
+
+            if (! empty($itemData['id'])) {
+                $itemId = (int) $itemData['id'];
+                $item = $existingItems->get($itemId);
+
+                if (! $item) {
+                    throw ValidationException::withMessages([
+                        'items' => [__('validation.exists', ['attribute' => 'items'])],
+                    ]);
+                }
+            } else {
+                // Legacy callers that omit item IDs: match an un-kept item on the same work order by title
+                // so in-place updates do not destroy existing labor, parts, or technician assignments.
+                $item = $existingItems->first(
+                    fn (WorkOrderItem $candidate) => ! in_array($candidate->id, $keptIds, true)
+                        && $candidate->title === $itemData['title']
+                );
+            }
+
+            if ($item) {
+                $updates = ['title' => $itemData['title']];
+
+                if (! $item->price_locked && $item->status !== WorkOrderItem::STATUS_COMPLETED) {
+                    $updates['qty'] = $itemData['qty'];
+                    $updates['unit_price'] = $itemData['unit_price'];
+                }
+
+                $item->update($updates);
+                $keptIds[] = $item->id;
+            } else {
+                $created = $workOrder->items()->create([
+                    'tenant_id' => $workOrder->tenant_id ?? $user->tenant_id,
+                    'center_id' => $workOrder->center_id ?? $user->current_center_id,
+                    'title' => $itemData['title'],
+                    'qty' => $itemData['qty'],
+                    'unit_price' => $itemData['unit_price'],
+                ]);
+                $keptIds[] = $created->id;
+            }
+        }
+
+        foreach ($existingItems as $existingItem) {
+            if (in_array($existingItem->id, $keptIds, true)) {
+                continue;
+            }
+
+            if ($this->isProtectedItem($existingItem)) {
+                throw ValidationException::withMessages([
+                    'items' => [__('messages.cannot_cancel_has_relations')],
+                ]);
+            }
+
+            $existingItem->delete();
+        }
+    }
+
+    private function isProtectedItem(WorkOrderItem $item): bool
+    {
+        return $item->status !== WorkOrderItem::STATUS_PENDING
+            || $item->laborEntries()->exists()
+            || $item->parts()->exists()
+            || $item->technicians()->exists()
+            || $item->qualityChecks()->exists()
+            || $item->supplierServiceAllocation()->exists();
     }
 
     private function syncPhotos(WorkOrder $workOrder, array $photos): void

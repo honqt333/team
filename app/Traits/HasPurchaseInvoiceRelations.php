@@ -6,6 +6,7 @@ namespace App\Traits;
 
 use App\Models\Center;
 use App\Models\CompanyTransaction;
+use App\Models\GoodsReceivedNote;
 use App\Models\Payment;
 use App\Models\PurchaseInvoiceLine;
 use App\Models\PurchaseOrder;
@@ -64,8 +65,15 @@ trait HasPurchaseInvoiceRelations
         return $this->hasMany(PurchaseReturnInvoice::class);
     }
 
+    /** @return HasOne<CompanyTransaction, $this> */
     public function companyTransaction(): HasOne
     {
         return $this->hasOne(CompanyTransaction::class, 'purchase_invoice_id');
+    }
+
+    /** @return HasOne<GoodsReceivedNote, $this> */
+    public function goodsReceivedNote(): HasOne
+    {
+        return $this->hasOne(GoodsReceivedNote::class, 'purchase_invoice_id');
     }
 }

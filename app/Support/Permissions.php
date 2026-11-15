@@ -403,6 +403,9 @@ class Permissions
     /** Billing — retrying a failed payment */
     public const SYSTEM_PAYMENT_RETRY = 'system.payment.retry';
 
+    /** Billing — overriding bank transfer receipt amount mismatches */
+    public const SYSTEM_RECEIPTS_OVERRIDE = 'system.receipts.override';
+
     /** Settings — the platform settings pages (general, company, help, website, dunning) */
     public const SYSTEM_SETTINGS_MANAGE = 'system.settings.manage';
 

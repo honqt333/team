@@ -134,6 +134,10 @@ class Attendance extends Model
             // التعامل مع الورديات الليلية (تمتد لليوم التالي)
             if ($shift && $shift->is_overnight && $shiftEnd->lt($shiftStart)) {
                 $shiftEnd->addDay();
+
+                if ($checkOut->lt($shiftStart)) {
+                    $checkOut->addDay();
+                }
             }
 
             if ($checkOut->lt($shiftEnd)) {

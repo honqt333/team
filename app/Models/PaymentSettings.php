@@ -98,6 +98,90 @@ class PaymentSettings extends Model
     }
 
     /**
+     * Default visibility flags for payment badges in the public landing footer.
+     *
+     * @var array<string, bool>
+     */
+    public const DEFAULT_FOOTER_BADGES = [
+        'mada' => true,
+        'visa' => true,
+        'mastercard' => true,
+        'applepay' => true,
+        'tabby' => true,
+        'tamara' => true,
+        'bank_transfer' => false,
+    ];
+
+    /**
+     * Resolve footer badge visibility flags from global settings.
+     *
+     * @return array<string, bool>
+     */
+    public static function getFooterBadgesConfig(): array
+    {
+        $raw = Setting::get('payment.footer_badges');
+        $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+        if (! is_array($decoded)) {
+            $decoded = [];
+        }
+
+        $result = [];
+        foreach (self::DEFAULT_FOOTER_BADGES as $key => $default) {
+            $result[$key] = array_key_exists($key, $decoded) ? (bool) $decoded[$key] : $default;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Default icon style and custom logo overrides for payment methods.
+     *
+     * @var array{style: string, logos: array<string, ?string>}
+     */
+    public const DEFAULT_PAYMENT_ICONS = [
+        'style' => 'colored',
+        'logos' => [
+            'mada' => null,
+            'visa' => null,
+            'mastercard' => null,
+            'applepay' => null,
+            'tabby' => null,
+            'tamara' => null,
+            'bank_transfer' => null,
+        ],
+    ];
+
+    /**
+     * Resolve payment method icon style and custom logo overrides.
+     *
+     * @return array{style: string, logos: array<string, ?string>}
+     */
+    public static function getPaymentIconsConfig(): array
+    {
+        $raw = Setting::get('payment.icons_config');
+        $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+        if (! is_array($decoded)) {
+            $decoded = [];
+        }
+
+        $style = in_array($decoded['style'] ?? '', ['colored', 'monochrome'], true)
+            ? (string) $decoded['style']
+            : self::DEFAULT_PAYMENT_ICONS['style'];
+
+        $logos = [];
+        $rawLogos = is_array($decoded['logos'] ?? null) ? $decoded['logos'] : [];
+        foreach (array_keys(self::DEFAULT_PAYMENT_ICONS['logos']) as $key) {
+            $val = $rawLogos[$key] ?? null;
+            $logos[$key] = is_string($val) && $val !== '' ? $val : null;
+        }
+
+        return [
+            'style' => $style,
+            'logos' => $logos,
+        ];
+    }
+
+    /**
      * Get settings (cached).
      */
     public static function getSettings(): self

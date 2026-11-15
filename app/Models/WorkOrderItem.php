@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property numeric-string|null $tax_amount
  * @property bool $is_taxable
  * @property numeric-string|null $tax_rate_snapshot
+ * @property numeric-string|null $line_total_excl_tax
+ * @property numeric-string|null $line_total_incl_tax
  */
 class WorkOrderItem extends Model
 {

@@ -133,6 +133,7 @@ class HandleInertiaRequests extends Middleware
             'vehicle' => fn () => $request->session()->get('vehicle'),
             'tenant' => $tenant ? [
                 'id' => $tenant->id,
+                'tenant_number' => $tenant->tenant_number,
                 'name' => $tenant->trade_name ?: $tenant->legal_name ?: $tenant->name,
                 'legal_name' => $tenant->legal_name,
                 'trade_name' => $tenant->trade_name,

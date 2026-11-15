@@ -76,13 +76,20 @@ class HandleAutoInvoiceOnDoneWorkOrder
                 ->update(['invoice_id' => $invoice->id]);
             $invoice->updatePaymentStatus();
 
-            $this->notifications->notifyOwner(
+            $workOrder->loadMissing('customer');
+            $woCode = (string) ($workOrder->code ?? $workOrder->id);
+            $customerName = $workOrder->customer?->name;
+
+            $this->notifications->notifyTenantUsers(
                 tenantId: $workOrder->tenant_id,
                 type: 'invoice.created',
-                title: 'فاتورة جديدة #'.$invoice->invoice_number,
-                body: 'تم إنشاء فاتورة تلقائياً من أمر العمل #'.($workOrder->code ?? $workOrder->id).' بعد اكتمال الدفع',
+                title: __('notifications.invoice_created_title', ['number' => $invoice->invoice_number]),
+                body: $customerName
+                    ? __('notifications.invoice_auto_created_body_customer', ['code' => $woCode, 'customer' => $customerName])
+                    : __('notifications.invoice_auto_created_body', ['code' => $woCode]),
                 actionUrl: '/app/invoices/'.$invoice->id,
                 actorId: $payment->received_by,
+                centerId: $workOrder->center_id,
             );
         } catch (Throwable $e) {
             Log::warning('Auto-create invoice on done WO failed', [

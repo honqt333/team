@@ -21,6 +21,7 @@ class Tenant extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'tenant_number',
         'name',
         'slug',
         'status',
@@ -402,10 +403,28 @@ class Tenant extends Model
     }
 
     /**
+     * Generate a unique 6-digit non-sequential display number for a tenant.
+     */
+    public static function generateUniqueTenantNumber(): string
+    {
+        do {
+            $candidate = (string) random_int(100000, 999999);
+        } while (static::withTrashed()->where('tenant_number', $candidate)->exists());
+
+        return $candidate;
+    }
+
+    /**
      * The "booted" method of the model.
      */
     protected static function booted(): void
     {
+        static::creating(function (Tenant $tenant) {
+            if (empty($tenant->tenant_number)) {
+                $tenant->tenant_number = static::generateUniqueTenantNumber();
+            }
+        });
+
         static::created(function (Tenant $tenant) {
             $service = new TenantSetupService;
 

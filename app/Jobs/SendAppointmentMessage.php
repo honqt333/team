@@ -172,9 +172,18 @@ class SendAppointmentMessage implements ShouldQueue
             return;
         }
 
-        TenancyContext::set((int) $delivery->tenant_id, $delivery->center_id ? (int) $delivery->center_id : null);
+        TenancyContext::set((int) $delivery->tenant_id, null);
 
         try {
+            $appointmentCenterId = Appointment::query()
+                ->where('tenant_id', $delivery->tenant_id)
+                ->whereKey($delivery->appointment_id)
+                ->value('center_id');
+
+            if ($appointmentCenterId !== null) {
+                TenancyContext::set((int) $delivery->tenant_id, (int) $appointmentCenterId);
+            }
+
             $this->processDelivery($delivery, $template, $sms);
         } finally {
             TenancyContext::clear();

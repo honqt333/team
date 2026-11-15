@@ -19,6 +19,7 @@ class OtherPayment extends Model
 
     protected $fillable = [
         'tenant_id',
+        'center_id',
         'employee_id',
         'type',
         'title',
