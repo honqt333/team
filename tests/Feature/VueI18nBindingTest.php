@@ -92,7 +92,7 @@ class VueI18nBindingTest extends TestCase
     {
         preg_match_all('/<script\b[^>]*>(.*?)<\/script>/s', $source, $matches);
 
-        return $matches[1] ?? [];
+        return $matches[1];
     }
 
     /**
@@ -104,19 +104,19 @@ class VueI18nBindingTest extends TestCase
      */
     private function hasBinding(string $block): bool
     {
-        // `const { t } = useI18n()` or `const { t: $t } = useI18n()`
-        if (preg_match('/const\s*\{[^}]*\bt\b[^}]*\}\s*=\s*useI18n\(\)/', $block) === 1) {
+        // `const { t } = useI18n()` or `const { t: $t } = useI18n()` or `usePortalFormat(...)`
+        if (preg_match('/const\s*\{[^}]*\bt\b[^}]*\}\s*=\s*(?:useI18n|usePortalFormat)\s*\([^)]*\)/', $block) === 1) {
             return true;
         }
 
         // `const { t: $t } = useI18n()` — the alias is `$t`, so the
         // call has to be `$t(`.
-        if (preg_match('/const\s*\{\s*t\s*:\s*(\$?\w+)\s*\}\s*=\s*useI18n\(\)/', $block, $m) === 1) {
+        if (preg_match('/const\s*\{\s*t\s*:\s*(\$?\w+)\s*\}\s*=\s*(?:useI18n|usePortalFormat)\s*\([^)]*\)/', $block, $m) === 1) {
             return str_contains($block, $m[1].'(');
         }
 
         // `const i18n = useI18n()` — the instance is bound, so a call
         // through it is fine.
-        return preg_match('/const\s+\{?\s*\w+\s*\}?\s*=\s*useI18n\(\)/', $block) === 1;
+        return preg_match('/const\s+\{?\s*\w+\s*\}?\s*=\s*(?:useI18n|usePortalFormat)\s*\([^)]*\)/', $block) === 1;
     }
 }

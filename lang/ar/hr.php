@@ -384,6 +384,8 @@ return [
     'offboarding_finalized_success' => 'تم اعتماد المخالصة النهائية وإيقاف حساب الموظف بنجاح',
     'offboarding_already_finalized' => 'تم اعتماد المخالصة النهائية لهذا الموظف مسبقاً',
     'offboarding_unreturned_custody_error' => 'لا يمكن إغلاق إخلاء الطرف لوجود عُهد غير مسترجعة على الموظف دون احتساب قيمتها في الخصومات',
+    'payment_must_be_approved_before_paid' => 'يجب اعتماد الدفعة قبل تسجيلها كمدفوعة.',
+    'payment_must_be_pending_to_approve' => 'يجب أن تكون الدفعة معلقة لتتمكن من اعتمادها.',
     'subtitle' => 'إدارة شاملة للموظفين والرواتب والحضور',
     'title' => 'الموارد البشرية',
     'expiry_alerts' => [

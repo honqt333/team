@@ -129,9 +129,9 @@ class AppointmentsIndexCrudTest extends TestCase
         $response->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Appointments/Index')
-                ->has('appointments', 1)
-                ->where('appointments.0.notes', 'فحص دوري')
-                ->where('appointments.0.customer.name', 'خالد الشمري')
+                ->has('appointments.data', 1)
+                ->where('appointments.data.0.notes', 'فحص دوري')
+                ->where('appointments.data.0.customer.name', 'خالد الشمري')
                 ->has('bays', 1)
                 ->has('statuses')
             );

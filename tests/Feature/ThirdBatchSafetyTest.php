@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Quote;
+use App\Models\QuoteLine;
 use App\Models\TaxPeriod;
 use App\Models\Tenant;
 use App\Models\User;
@@ -35,7 +36,30 @@ class ThirdBatchSafetyTest extends TestCase
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'center_id' => $center->id]);
         $vehicle = Vehicle::factory()->create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'customer_id' => $customer->id]);
 
-        return Quote::create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'customer_id' => $customer->id, 'vehicle_id' => $vehicle->id, 'code' => 'THIRD-'.bin2hex(random_bytes(3)), 'status' => 'sent', 'valid_until' => now()->addDay()]);
+        $quote = Quote::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'THIRD-'.bin2hex(random_bytes(3)),
+            'status' => 'sent',
+            'valid_until' => now()->addDay(),
+            'subtotal' => 150,
+            'total' => 150,
+        ]);
+
+        QuoteLine::create([
+            'quote_id' => $quote->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'description' => 'فحص دوري',
+            'qty' => 1,
+            'unit_price' => 150,
+            'final_unit_price' => 150,
+            'line_total' => 150,
+        ]);
+
+        return $quote->fresh();
     }
 
     public function test_database_outage_returns_safe_503(): void
@@ -78,7 +102,9 @@ class ThirdBatchSafetyTest extends TestCase
         $this->post('/view/quote/'.$quote->uuid.'/reject', ['rejection_reason' => 'Changed mind'])->assertSessionHas('error');
         $this->post('/view/quote/'.$quote->uuid.'/approve')->assertSessionHas('error');
         $this->assertSame('approved', $quote->fresh()->status);
+        /** @phpstan-ignore-next-line */
         Log::shouldHaveReceived('notice')->once()->with('quote.approve', Mockery::on(fn ($ctx) => $ctx['quote_id'] === $quote->id && $ctx['tenant_id'] === $quote->tenant_id && $ctx['channel'] === 'public_link'));
+        /** @phpstan-ignore-next-line */
         Log::shouldNotHaveReceived('notice', ['quote.reject', Mockery::any()]);
     }
 

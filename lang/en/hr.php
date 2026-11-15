@@ -384,6 +384,8 @@ return [
     'offboarding_finalized_success' => 'Offboarding clearance finalized and employee access deactivated',
     'offboarding_already_finalized' => 'Final clearance has already been finalized for this employee',
     'offboarding_unreturned_custody_error' => 'Cannot finalize clearance while unreturned assets remain assigned without custody deduction',
+    'payment_must_be_approved_before_paid' => 'The payment must be approved before being marked as paid.',
+    'payment_must_be_pending_to_approve' => 'The payment must be pending to be approved.',
     'subtitle' => 'Subtitle',
     'title' => 'Title',
     'expiry_alerts' => [
