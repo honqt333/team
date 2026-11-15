@@ -244,6 +244,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -256,6 +258,18 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+
+      - name: Test UI Constitution Checker
+        run: npm run test:ui-constitution
+
+      - name: Run UI Constitution Check (advisory on changed lines)
+        continue-on-error: true
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.base_ref }}" ]; then
+            node scripts/check-ui-constitution.mjs --base "origin/${{ github.base_ref }}"
+          else
+            node scripts/check-ui-constitution.mjs --base HEAD~1
+          fi
 
   build-frontend:
     name: Build Frontend (Vite)
