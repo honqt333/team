@@ -14,13 +14,13 @@ use App\Services\Billing\PromoCodeValidator;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Support\CountryCurrencyRegistry;
 use App\Support\PhoneNumber;
+use App\Support\TenantSlugGenerator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -119,7 +119,7 @@ class RegisteredUserController extends Controller
             // 1. Create Tenant with full company profile
             $tenant = Tenant::create([
                 'name' => $request->company_name,
-                'slug' => Str::slug($request->company_name).'-'.Str::random(6),
+                'slug' => TenantSlugGenerator::generate((string) $request->company_name),
                 'status' => 'trial',
                 'country' => $countryCode,
                 'currency' => (string) ($countryMeta['default_currency'] ?? CountryCurrencyRegistry::DEFAULT_CURRENCY),

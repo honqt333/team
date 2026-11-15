@@ -13,6 +13,13 @@ class Plan extends Model
 {
     use HasFactory;
 
+    /**
+     * System-critical plan slugs referenced directly by billing & registration logic.
+     *
+     * @var list<string>
+     */
+    public const SYSTEM_SLUGS = ['trial'];
+
     protected $appends = ['yearly_discount', 'features_ar', 'features_en'];
 
     protected $fillable = [

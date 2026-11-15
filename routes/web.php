@@ -149,6 +149,7 @@ use App\Http\Controllers\System\WhatsappCreditsController;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\TrackAiUsage;
+use App\Support\TenantSlugGenerator;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -191,7 +192,7 @@ Route::get('/page/{slug}', [PublicLandingController::class, 'showCustomPage'])->
 // reserved words. Add a new reserved word here whenever a new
 // top-level public route is introduced.
 Route::get('/{tenant}', [TenantSiteController::class, 'show'])
-    ->where('tenant', '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')
+    ->where('tenant', TenantSlugGenerator::routeConstraintPattern())
     ->middleware('public.tenant')
     ->name('public.site.show');
 
@@ -205,7 +206,7 @@ Route::get('/{tenant}', [TenantSiteController::class, 'show'])
 // The URL ends in .jpg so that a crawler which guesses the extension from
 // the og:image tag finds the right thing.
 Route::get('/{tenant}/og-image.jpg', [TenantSiteController::class, 'ogImage'])
-    ->where('tenant', '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')
+    ->where('tenant', TenantSlugGenerator::routeConstraintPattern())
     ->middleware('public.tenant')
     ->name('public.site.og_image');
 
@@ -224,7 +225,7 @@ Route::get('/{tenant}/og-image.jpg', [TenantSiteController::class, 'ogImage'])
 // chain ensures no staff cookies ever authenticate the portal
 // and vice versa.
 Route::prefix('/{tenant}/portal')
-    ->where(['tenant' => '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$'])
+    ->where(['tenant' => TenantSlugGenerator::routeConstraintPattern()])
     ->middleware('public.tenant')
     ->name('public.portal.')
     ->group(function () {

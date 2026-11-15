@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\TenantWebsite;
 use App\Services\Media\ImageOptimizer;
+use App\Support\CustomDomainValidator;
 use App\Support\Media\ImageType;
 use App\Support\Permissions;
 use App\Support\TenantWebsite\ThemeRegistry;
@@ -20,6 +21,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 /**
  * Tenant-facing website settings. The endpoints under
@@ -116,6 +118,21 @@ class TenantWebsiteSettingsController extends Controller
             // Unpublishing clears the timestamp so the next
             // publish gets a fresh date.
             $data['published_at'] = null;
+        }
+
+        if (array_key_exists('custom_domain', $data)) {
+            $normalizedDomain = CustomDomainValidator::normalizeAndValidate(
+                is_string($data['custom_domain']) ? $data['custom_domain'] : null
+            );
+            $data['custom_domain'] = $normalizedDomain;
+
+            if ($normalizedDomain === null) {
+                $data['custom_domain_status'] = 'none';
+                $data['custom_domain_verified_at'] = null;
+            } elseif ($normalizedDomain !== $website->custom_domain) {
+                $data['custom_domain_status'] = 'pending';
+                $data['custom_domain_verified_at'] = null;
+            }
         }
 
         $website->fill($data);
@@ -265,7 +282,23 @@ class TenantWebsiteSettingsController extends Controller
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('tenant_websites', 'custom_domain')->ignore($website->id),
+                function ($attribute, $value, $fail) use ($website) {
+                    if ($value === null || trim((string) $value) === '') {
+                        return;
+                    }
+
+                    try {
+                        $normalized = CustomDomainValidator::normalizeAndValidate((string) $value);
+                    } catch (InvalidArgumentException $e) {
+                        $fail($e->getMessage());
+
+                        return;
+                    }
+
+                    if ($normalized !== null && TenantWebsite::where('custom_domain', $normalized)->whereKeyNot($website->id)->exists()) {
+                        $fail(__('validation.unique', ['attribute' => $attribute]));
+                    }
+                },
             ],
 
             'banners' => ['nullable', 'array'],

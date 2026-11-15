@@ -1275,7 +1275,7 @@
                             >
                                 {{
                                     form.custom_domain ||
-                                    `https://khidmh.pro/site/${w.tenant_slug || 'workshop'}`
+                                    `https://khidmh.pro/${w.tenant_slug || 'workshop'}`
                                 }}
                             </div>
                             <div

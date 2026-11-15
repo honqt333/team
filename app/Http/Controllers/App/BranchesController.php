@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class BranchesController extends Controller
 {
@@ -61,7 +62,7 @@ class BranchesController extends Controller
 
         // Generate unique slug from English name (fallback to Arabic)
         $slugSource = $validated['name_en'] ?? $validated['name_ar'] ?? $localizedName;
-        $validated['slug'] = Str::slug($slugSource).'-'.Str::lower(Str::random(6));
+        $validated['slug'] = $this->generateUniqueSlug((string) $slugSource);
 
         // Normalize is_active (checkbox may send 'true'/'false' or true/false)
         $validated['is_active'] = $request->boolean('is_active', true);
@@ -112,5 +113,33 @@ class BranchesController extends Controller
         return redirect()
             ->route('settings.branches')
             ->with('success', __('company_profile.branches.created_successfully'));
+    }
+
+    private function generateUniqueSlug(string $source): string
+    {
+        $base = Str::lower(Str::slug($source));
+        $base = (string) preg_replace('/[^a-z0-9-]+/', '-', $base);
+        $base = (string) preg_replace('/-+/', '-', $base);
+        $base = trim($base, '-');
+
+        if ($base === '') {
+            $base = 'branch';
+        }
+
+        $base = rtrim(substr($base, 0, 100), '-');
+
+        if ($base === '') {
+            $base = 'branch';
+        }
+
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $candidate = $base.'-'.Str::lower(Str::random(6));
+
+            if (! Center::withTrashed()->where('slug', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+
+        throw new RuntimeException('Unable to generate a unique branch slug.');
     }
 }

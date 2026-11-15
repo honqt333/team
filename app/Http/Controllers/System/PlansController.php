@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
 use App\Services\System\SystemAuditService;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -61,7 +62,13 @@ class PlansController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:plans',
+            'slug' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/',
+                'unique:plans',
+            ],
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'price_yearly' => 'required|numeric|min:0',
@@ -113,7 +120,18 @@ class PlansController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:plans,slug,'.$plan->id,
+            'slug' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/',
+                'unique:plans,slug,'.$plan->id,
+                function (string $attribute, mixed $value, Closure $fail) use ($plan): void {
+                    if (in_array($plan->slug, Plan::SYSTEM_SLUGS, true) && $value !== $plan->slug) {
+                        $fail("System plan slug '{$plan->slug}' cannot be changed.");
+                    }
+                },
+            ],
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'price_yearly' => 'required|numeric|min:0',
@@ -151,6 +169,10 @@ class PlansController extends Controller
      */
     public function destroy(Plan $plan)
     {
+        if (in_array($plan->slug, Plan::SYSTEM_SLUGS, true)) {
+            return back()->with('error', __('messages.system.plans.cannot_delete_active'));
+        }
+
         // Check if plan has active subscriptions
         if ($plan->subscriptions()->whereIn('status', ['active', 'trialing'])->exists()) {
             return back()->with('error', __('messages.system.plans.cannot_delete_active'));
