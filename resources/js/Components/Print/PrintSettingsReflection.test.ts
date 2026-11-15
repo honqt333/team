@@ -272,12 +272,14 @@ describe('Print settings reflection across unified print engine', () => {
     });
 
     it('passes credit_note print settings and omits QR when tax is disabled in Invoices/Print.vue', () => {
+        const localSvgQr = 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=';
         const wrapper = shallowMount(InvoicePrint, {
             global: {
                 plugins: [i18nPlugin],
                 mocks: { route: () => '/app/invoices/55' },
             },
             props: {
+                zatca_qr_svg: localSvgQr,
                 invoice: {
                     id: 55,
                     type: 'credit_note',
@@ -299,9 +301,11 @@ describe('Print settings reflection across unified print engine', () => {
         expect((layout.props('centerData') as Record<string, unknown> | undefined)?.logo).toBe(
             '/storage/center-invoice-logo.png'
         );
-        expect(
-            String((layout.props('data') as Record<string, unknown> | undefined)?.qr_code_url ?? '')
-        ).toContain('AQI%3D');
+        const creditNoteQr = String(
+            (layout.props('data') as Record<string, unknown> | undefined)?.qr_code_url ?? ''
+        );
+        expect(creditNoteQr).toBe(localSvgQr);
+        expect(creditNoteQr).not.toContain('qrserver.com');
         expect(layout.props('documentSettings')).toMatchObject({
             template: 'TemplateThermal80',
             title_ar: 'إشعار دائن مخصص',
@@ -319,6 +323,7 @@ describe('Print settings reflection across unified print engine', () => {
                 mocks: { route: () => '/app/invoices/56' },
             },
             props: {
+                zatca_qr_svg: localSvgQr,
                 invoice: {
                     id: 56,
                     type: 'invoice',

@@ -40,6 +40,7 @@ class R2cPrintLocalizationAndPdfTest extends TestCase
         ]);
 
         $plan = Plan::create([
+            'name' => 'Pro Plan',
             'name_ar' => 'الباقة الاحترافية',
             'name_en' => 'Pro Plan',
             'slug' => 'pro-'.Str::lower(Str::random(5)),
