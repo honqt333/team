@@ -17,7 +17,6 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use App\Support\TenancyContext;
-use BackedEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -43,15 +42,7 @@ class DealerController extends Controller
             ->select('dealers.*')
             ->withCount(['vehicles', 'workOrders'])
             ->selectSub(
-                Invoice::query()
-                    ->withoutGlobalScope('center_scoped')
-                    ->whereColumn('invoices.dealer_id', 'dealers.id')
-                    ->whereNotIn('status', ['cancelled'])
-                    ->selectRaw("COALESCE(SUM(CASE
-                        WHEN type = 'credit_note' THEN -(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END)
-                        WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0))
-                        ELSE 0
-                    END), 0)"),
+                Invoice::outstandingSubqueryForColumn('dealer_id', 'dealers.id', 'dealers.tenant_id'),
                 'outstanding_balance'
             );
 
@@ -79,7 +70,7 @@ class DealerController extends Controller
                 ->whereNotIn('status', ['cancelled'])
                 ->whereDoesntHave('invoice', function ($q) {
                     $q->withoutGlobalScope('center_scoped')
-                        ->whereNotIn('status', ['cancelled']);
+                        ->whereNotIn('status', ['draft', 'cancelled']);
                 })
                 ->with(['payments', 'creditNotes'])
                 ->get()
@@ -228,9 +219,20 @@ class DealerController extends Controller
             ->get();
         $workOrders->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
 
-        // Load invoices withoutGlobalScope('center_scoped')
-        $invoices = $dealer->invoices()
+        // Load invoices & credit notes withoutGlobalScope('center_scoped')
+        // Include credit notes linked via workOrder or originalInvoice when dealer_id is null on the CN row.
+        $invoices = Invoice::query()
             ->withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $dealer->tenant_id)
+            ->where(function ($query) use ($dealer) {
+                $query->where('dealer_id', $dealer->id)
+                    ->orWhereHas('workOrder', function ($q) use ($dealer) {
+                        $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
+                    })
+                    ->orWhereHas('originalInvoice', function ($q) use ($dealer) {
+                        $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
+                    });
+            })
             ->with([
                 'workOrder.vehicle.make:id,name_ar,name_en',
                 'workOrder.vehicle.model:id,name_ar,name_en',
@@ -240,15 +242,20 @@ class DealerController extends Controller
             ->get();
         $invoices->each->append(['balance']);
 
-        // Load payments associated with this dealer's work orders or invoices
-        $payments = Payment::where(function ($query) use ($dealer) {
-            $query->whereHas('workOrder', function ($q) use ($dealer) {
-                $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
-            })
-                ->orWhereHas('invoice', function ($q) use ($dealer) {
+        // Load payments associated with this dealer's work orders, invoices, or credit notes
+        $payments = Payment::query()
+            ->where('tenant_id', $dealer->tenant_id)
+            ->where(function ($query) use ($dealer) {
+                $query->whereHas('workOrder', function ($q) use ($dealer) {
                     $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
-                });
-        })
+                })
+                    ->orWhereHas('invoice', function ($q) use ($dealer) {
+                        $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
+                    })
+                    ->orWhereHas('invoice.originalInvoice', function ($q) use ($dealer) {
+                        $q->withoutGlobalScope('center_scoped')->where('dealer_id', $dealer->id);
+                    });
+            })
             ->with(['receivedBy', 'workOrder.vehicle', 'invoice.workOrder.vehicle'])
             ->latest('payment_date')
             ->get();
@@ -287,9 +294,10 @@ class DealerController extends Controller
             ->orderBy('name')
             ->get();
 
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        $makes = VehicleMake::active()->ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
         $modelsByMake = VehicleModel::query()
+            ->active()
             ->select('id', 'make_id', 'name_ar', 'name_en')
             ->ordered()
             ->get()
@@ -345,7 +353,7 @@ class DealerController extends Controller
             ->count();
 
         $invoicedWorkOrderIds = $invoices
-            ->whereNotIn('status', ['cancelled'])
+            ->whereNotIn('status', ['cancelled', 'draft'])
             ->pluck('work_order_id')
             ->filter()
             ->map(fn ($id) => (int) $id)
@@ -363,47 +371,73 @@ class DealerController extends Controller
             return max(0.0, (float) ($wo->total ?? $wo->total_incl_tax ?? 0) - (float) ($wo->total_paid ?? 0));
         });
 
-        $totalInvoiced = (float) $invoices->whereNotIn('status', ['cancelled', 'draft'])->sum('total_incl_tax');
-        $totalPaid = (float) $payments->reduce(function ($carry, $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+        $issuedDocuments = $invoices->filter(fn ($inv) => ! in_array($inv->status, ['cancelled', 'draft'], true));
+        $salesInvoices = $issuedDocuments->filter(fn ($inv) => ! $inv->isCreditNote());
+        $creditNotes = $issuedDocuments->filter(fn ($inv) => $inv->isCreditNote());
 
-            return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
-        }, 0.0);
-        $invoicedDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(function ($inv) {
-            $rem = max(0.0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
-            $typeVal = $inv->type instanceof BackedEnum ? $inv->type->value : (string) $inv->type;
+        $totalInvoiced = round((float) $salesInvoices->sum('total_incl_tax'), 2);
+        $totalCreditNotes = round((float) $creditNotes->sum('total_incl_tax'), 2);
 
-            return $typeVal === 'credit_note' ? -$rem : $rem;
-        });
+        $totalPaid = 0.0;
+        $totalRefunded = 0.0;
+        $totalBadDebt = 0.0;
+
+        foreach ($payments as $pay) {
+            $typeVal = $pay->type instanceof PaymentType ? $pay->type->value : (string) $pay->type;
+            $amount = (float) $pay->amount;
+
+            if ($typeVal === PaymentType::BAD_DEBT->value) {
+                $totalBadDebt += $amount;
+            } elseif ($typeVal === PaymentType::REFUND->value) {
+                $totalRefunded += $amount;
+                $totalPaid -= $amount;
+            } else {
+                $totalPaid += $amount;
+            }
+        }
+
+        $invoicedDue = Invoice::outstandingSumForOwner(
+            'dealer_id',
+            (int) $dealer->id,
+            (int) $dealer->tenant_id,
+        );
+        $totalRefundDue = round((float) $creditNotes->sum(fn ($cn) => max(0.0, (float) $cn->balance)), 2);
         $totalDue = max(0.0, round($invoicedDue + $openUninvoicedDue, 2));
 
         $financialSummary = [
             'total_invoiced' => $totalInvoiced,
+            'total_credit_notes' => $totalCreditNotes,
             'open_work_orders_total' => round($openUninvoicedTotal, 2),
             'open_work_orders_due' => round($openUninvoicedDue, 2),
-            'total_paid' => $totalPaid,
+            'total_paid' => round($totalPaid, 2),
+            'total_refunded' => round($totalRefunded, 2),
+            'total_bad_debt' => round($totalBadDebt, 2),
             'total_due' => $totalDue,
+            'total_refund_due' => $totalRefundDue,
             'open_work_orders_count' => $openWorkOrdersCount,
         ];
 
         $ledgerEntries = collect();
 
         foreach ($invoices as $inv) {
-            if ($inv->status === 'cancelled') {
+            if (in_array($inv->status, ['cancelled', 'draft'], true)) {
                 continue;
             }
+
+            $isCreditNote = $inv->isCreditNote();
             $ledgerEntries->push([
-                'id' => 'inv-'.$inv->id,
+                'id' => ($isCreditNote ? 'cn-' : 'inv-').$inv->id,
                 'date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->format('Y-m-d H:i') : $inv->created_at->format('Y-m-d H:i'),
                 'sort_date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->timestamp : $inv->created_at->timestamp,
-                'type' => 'invoice',
-                'type_label' => __('invoices.invoice'),
+                'sort_priority' => $isCreditNote ? 2 : 1,
+                'type' => $isCreditNote ? 'credit_note' : 'invoice',
+                'type_label' => $isCreditNote ? __('invoices.types.credit_note') : __('invoices.invoice'),
                 'reference' => $inv->invoice_number,
                 'work_order_number' => $inv->workOrder?->code ?? $inv->workOrder?->work_order_number,
                 'vehicle_plate' => $inv->workOrder?->vehicle?->plate_number,
                 'customer_name' => $inv->customer?->name,
-                'debit' => (float) $inv->total_incl_tax,
-                'credit' => 0.0,
+                'debit' => $isCreditNote ? 0.0 : (float) $inv->total_incl_tax,
+                'credit' => $isCreditNote ? (float) $inv->total_incl_tax : 0.0,
             ]);
         }
 
@@ -417,6 +451,7 @@ class DealerController extends Controller
                 'id' => 'wo-'.$wo->id,
                 'date' => $wo->opened_at ? Carbon::parse($wo->opened_at)->format('Y-m-d H:i') : $wo->created_at->format('Y-m-d H:i'),
                 'sort_date' => $wo->opened_at ? Carbon::parse($wo->opened_at)->timestamp : $wo->created_at->timestamp,
+                'sort_priority' => 1,
                 'type' => 'work_order',
                 'type_label' => __('work_orders.work_order'),
                 'reference' => $wo->code ?? $wo->work_order_number,
@@ -429,14 +464,17 @@ class DealerController extends Controller
         }
 
         foreach ($payments as $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+            $typeVal = $pay->type instanceof PaymentType ? $pay->type->value : (string) $pay->type;
+            $isRefund = $typeVal === PaymentType::REFUND->value;
+            $isBadDebt = $typeVal === PaymentType::BAD_DEBT->value;
             $workOrder = $pay->workOrder ?? $pay->invoice?->workOrder;
             $ledgerEntries->push([
                 'id' => 'pay-'.$pay->id,
                 'date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->format('Y-m-d H:i') : $pay->created_at->format('Y-m-d H:i'),
                 'sort_date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->timestamp : $pay->created_at->timestamp,
-                'type' => $isRefund ? 'refund' : 'payment',
-                'type_label' => $isRefund ? __('payments.types.refund') : __('payments.types.payment'),
+                'sort_priority' => 3,
+                'type' => $isBadDebt ? 'bad_debt' : ($isRefund ? 'refund' : 'payment'),
+                'type_label' => $isBadDebt ? __('payments.types.bad_debt') : ($isRefund ? __('payments.types.refund') : __('payments.types.payment')),
                 'reference' => $pay->reference ?: ('REC-'.$pay->id),
                 'work_order_number' => $workOrder?->code ?? $workOrder?->work_order_number,
                 'vehicle_plate' => $workOrder?->vehicle?->plate_number,
@@ -447,10 +485,19 @@ class DealerController extends Controller
             ]);
         }
 
-        $sortedLedger = $ledgerEntries->unique('id')->sortBy('sort_date')->values();
+        $sortedLedger = $ledgerEntries
+            ->unique('id')
+            ->sortBy([
+                ['sort_date', 'asc'],
+                ['sort_priority', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+
         $runningBalance = 0.0;
         $ledger = $sortedLedger->map(function ($entry) use (&$runningBalance) {
-            $runningBalance += ($entry['debit'] - $entry['credit']);
+            unset($entry['sort_priority']);
+            $runningBalance = round($runningBalance + ($entry['debit'] - $entry['credit']), 2);
             $entry['balance'] = $runningBalance;
 
             return $entry;

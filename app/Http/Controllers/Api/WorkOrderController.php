@@ -134,11 +134,7 @@ class WorkOrderController extends Controller
             // per vehicle inside the loop below (N+1).
             ->select('vehicles.*')
             ->selectSub(
-                Invoice::query()
-                    ->withoutGlobalScope('center_scoped')
-                    ->whereColumn('invoices.customer_id', 'vehicles.customer_id')
-                    ->whereNotIn('status', ['cancelled'])
-                    ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0)'),
+                Invoice::outstandingSubqueryForColumn('customer_id', 'vehicles.customer_id', 'vehicles.tenant_id'),
                 'customer_balance'
             )
             ->where(function ($q) use ($query, $normalizedQuery, $phoneSuffix, $plateTerms) {

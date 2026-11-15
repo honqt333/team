@@ -217,13 +217,20 @@ class WorkOrderStatusController
 
                 $invoiceService->issueInvoice($invoice);
 
-                NotificationService::notifyOwner(
+                $work_order->loadMissing('customer');
+                $woCode = (string) ($work_order->code ?? $work_order->id);
+                $customerName = $work_order->customer?->name;
+
+                NotificationService::notifyTenantUsers(
                     tenantId: auth()->user()->tenant_id,
                     type: 'invoice.created',
-                    title: 'فاتورة جديدة #'.$invoice->invoice_number,
-                    body: 'تم إنشاء فاتورة من أمر العمل #'.($work_order->code ?? $work_order->id),
+                    title: __('notifications.invoice_created_title', ['number' => $invoice->invoice_number]),
+                    body: $customerName
+                        ? __('notifications.invoice_created_body_customer', ['code' => $woCode, 'customer' => $customerName])
+                        : __('notifications.invoice_created_body', ['code' => $woCode]),
                     actionUrl: '/app/invoices/'.$invoice->id,
                     actorId: auth()->id(),
+                    centerId: $work_order->center_id,
                 );
 
                 return redirect()->route('app.invoices.show', $invoice->id)

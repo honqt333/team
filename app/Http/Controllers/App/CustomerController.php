@@ -41,11 +41,7 @@ class CustomerController
         $query = Customer::query()
             ->select('customers.*')
             ->selectSub(
-                Invoice::query()
-                    ->withoutGlobalScope('center_scoped')
-                    ->whereColumn('customer_id', 'customers.id')
-                    ->whereNotIn('status', ['cancelled'])
-                    ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0)'),
+                Invoice::outstandingSubqueryForColumn('customer_id', 'customers.id', 'customers.tenant_id'),
                 'balance'
             );
 
@@ -145,6 +141,13 @@ class CustomerController
         return response()->json($customers);
     }
 
+    public function create(): RedirectResponse
+    {
+        $this->authorize('create', Customer::class);
+
+        return redirect()->route('customers.index', ['create' => 1]);
+    }
+
     public function store(CustomerStoreRequest $request): RedirectResponse
     {
         $this->authorize('create', Customer::class);
@@ -207,9 +210,9 @@ class CustomerController
         $canDelete = $counts['vehicles'] === 0 && $counts['quotes'] === 0 && $counts['workOrders'] === 0;
 
         // Get form data for modals - optimize queries
-        $makes = VehicleMake::orderBy('name_ar')->get();
-        $colors = VehicleColor::orderBy('name_ar')->get();
-        $modelsByMake = VehicleModel::all()->groupBy('make_id');
+        $makes = VehicleMake::active()->orderBy('name_ar')->get();
+        $colors = VehicleColor::active()->orderBy('name_ar')->get();
+        $modelsByMake = VehicleModel::active()->get()->groupBy('make_id');
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
         $services = Service::where('is_active', true)->with('department')->orderBy('sort_order')->get();
 
@@ -236,6 +239,16 @@ class CustomerController
             'modelsByMake' => $modelsByMake,
             'departments' => $departments,
             'services' => $services,
+        ]);
+    }
+
+    public function edit(Customer $customer): RedirectResponse
+    {
+        $this->authorize('update', $customer);
+
+        return redirect()->route('customers.show', [
+            'customer' => $customer,
+            'edit' => 1,
         ]);
     }
 
@@ -352,14 +365,15 @@ class CustomerController
      */
     protected function buildCustomerStatementData(Customer $customer): array
     {
-        $payments = Payment::where(function ($query) use ($customer) {
-            $query->whereHas('workOrder', function ($q) use ($customer) {
-                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
-            })
-                ->orWhereHas('invoice', function ($q) use ($customer) {
+        $payments = Payment::where('tenant_id', $customer->tenant_id)
+            ->where(function ($query) use ($customer) {
+                $query->whereHas('workOrder', function ($q) use ($customer) {
                     $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
-                });
-        })
+                })
+                    ->orWhereHas('invoice', function ($q) use ($customer) {
+                        $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+                    });
+            })
             ->with(['receivedBy', 'workOrder', 'invoice'])
             ->latest('payment_date')
             ->get();
@@ -375,49 +389,84 @@ class CustomerController
             ->whereNotIn('status', ['completed', 'cancelled', 'delivered'])
             ->count();
 
-        $totalInvoiced = (float) $invoices->whereNotIn('status', ['cancelled', 'draft'])->sum('total_incl_tax');
-        $totalPaid = (float) $payments->reduce(function ($carry, $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+        $issuedDocuments = $invoices->filter(fn ($inv) => ! in_array($inv->status, ['cancelled', 'draft'], true));
+        $salesInvoices = $issuedDocuments->filter(fn ($inv) => ! $inv->isCreditNote());
+        $creditNotes = $issuedDocuments->filter(fn ($inv) => $inv->isCreditNote());
 
-            return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
-        }, 0.0);
-        $totalDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(fn ($inv) => max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid));
+        $totalInvoiced = round((float) $salesInvoices->sum('total_incl_tax'), 2);
+        $totalCreditNotes = round((float) $creditNotes->sum('total_incl_tax'), 2);
+
+        $totalPaid = 0.0;
+        $totalRefunded = 0.0;
+        $totalBadDebt = 0.0;
+
+        foreach ($payments as $pay) {
+            $typeVal = $pay->type instanceof PaymentType ? $pay->type->value : (string) $pay->type;
+            $amount = (float) $pay->amount;
+
+            if ($typeVal === PaymentType::BAD_DEBT->value) {
+                $totalBadDebt += $amount;
+            } elseif ($typeVal === PaymentType::REFUND->value) {
+                $totalRefunded += $amount;
+                $totalPaid -= $amount;
+            } else {
+                $totalPaid += $amount;
+            }
+        }
+
+        $totalDue = Invoice::outstandingSumForOwner(
+            'customer_id',
+            (int) $customer->id,
+            (int) $customer->tenant_id,
+        );
+        $totalRefundDue = round((float) $creditNotes->sum(fn ($cn) => max(0.0, (float) $cn->balance)), 2);
 
         $financialSummary = [
             'total_invoiced' => $totalInvoiced,
-            'total_paid' => $totalPaid,
+            'total_credit_notes' => $totalCreditNotes,
+            'total_paid' => round($totalPaid, 2),
+            'total_refunded' => round($totalRefunded, 2),
+            'total_bad_debt' => round($totalBadDebt, 2),
             'total_due' => $totalDue,
+            'total_refund_due' => $totalRefundDue,
             'open_work_orders_count' => $openWorkOrdersCount,
         ];
 
         $ledgerEntries = collect();
 
         foreach ($invoices as $inv) {
-            if ($inv->status === 'cancelled') {
+            if (in_array($inv->status, ['cancelled', 'draft'], true)) {
                 continue;
             }
+
+            $isCreditNote = $inv->isCreditNote();
             $ledgerEntries->push([
-                'id' => 'inv-'.$inv->id,
+                'id' => ($isCreditNote ? 'cn-' : 'inv-').$inv->id,
                 'date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->format('Y-m-d H:i') : $inv->created_at->format('Y-m-d H:i'),
                 'sort_date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->timestamp : $inv->created_at->timestamp,
-                'type' => 'invoice',
-                'type_label' => 'فاتورة مبيعات',
+                'sort_priority' => $isCreditNote ? 2 : 1,
+                'type' => $isCreditNote ? 'credit_note' : 'invoice',
+                'type_label' => $isCreditNote ? __('invoices.types.credit_note') : 'فاتورة مبيعات',
                 'reference' => $inv->invoice_number,
                 'work_order_number' => $inv->workOrder?->work_order_number,
                 'vehicle_plate' => $inv->workOrder?->vehicle?->plate_number,
-                'debit' => (float) $inv->total_incl_tax,
-                'credit' => 0.0,
+                'debit' => $isCreditNote ? 0.0 : (float) $inv->total_incl_tax,
+                'credit' => $isCreditNote ? (float) $inv->total_incl_tax : 0.0,
             ]);
         }
 
         foreach ($payments as $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+            $typeVal = $pay->type instanceof PaymentType ? $pay->type->value : (string) $pay->type;
+            $isRefund = $typeVal === PaymentType::REFUND->value;
+            $isBadDebt = $typeVal === PaymentType::BAD_DEBT->value;
+
             $ledgerEntries->push([
                 'id' => 'pay-'.$pay->id,
                 'date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->format('Y-m-d H:i') : $pay->created_at->format('Y-m-d H:i'),
                 'sort_date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->timestamp : $pay->created_at->timestamp,
-                'type' => $isRefund ? 'refund' : 'payment',
-                'type_label' => $isRefund ? 'سند استرجاع' : 'سند قبض',
+                'sort_priority' => 3,
+                'type' => $isBadDebt ? 'bad_debt' : ($isRefund ? 'refund' : 'payment'),
+                'type_label' => $isBadDebt ? __('payments.types.bad_debt') : ($isRefund ? 'سند استرجاع' : 'سند قبض'),
                 'reference' => $pay->reference ?: ('REC-'.$pay->id),
                 'work_order_number' => $pay->workOrder?->work_order_number,
                 'vehicle_plate' => $pay->workOrder?->vehicle?->plate_number,
@@ -427,10 +476,19 @@ class CustomerController
             ]);
         }
 
-        $sortedLedger = $ledgerEntries->unique('id')->sortBy('sort_date')->values();
+        $sortedLedger = $ledgerEntries
+            ->unique('id')
+            ->sortBy([
+                ['sort_date', 'asc'],
+                ['sort_priority', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+
         $runningBalance = 0.0;
         $ledger = $sortedLedger->map(function ($entry) use (&$runningBalance) {
-            $runningBalance += ($entry['debit'] - $entry['credit']);
+            unset($entry['sort_priority']);
+            $runningBalance = round($runningBalance + ($entry['debit'] - $entry['credit']), 2);
             $entry['balance'] = $runningBalance;
 
             return $entry;

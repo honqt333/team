@@ -19,6 +19,8 @@ use App\Models\WorkOrder;
 use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
+use App\Services\Print\PrintDocumentDataBuilder;
+use App\Services\Print\ZatcaQrRenderer;
 use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
@@ -36,10 +38,20 @@ class InvoicesController extends Controller
 
     protected CreditNoteService $creditNoteService;
 
-    public function __construct(InvoiceService $invoiceService, CreditNoteService $creditNoteService)
-    {
+    protected PrintDocumentDataBuilder $printDataBuilder;
+
+    protected ZatcaQrRenderer $qrRenderer;
+
+    public function __construct(
+        InvoiceService $invoiceService,
+        CreditNoteService $creditNoteService,
+        ?PrintDocumentDataBuilder $printDataBuilder = null,
+        ?ZatcaQrRenderer $qrRenderer = null,
+    ) {
         $this->invoiceService = $invoiceService;
         $this->creditNoteService = $creditNoteService;
+        $this->printDataBuilder = $printDataBuilder ?? app(PrintDocumentDataBuilder::class);
+        $this->qrRenderer = $qrRenderer ?? app(ZatcaQrRenderer::class);
     }
 
     /**
@@ -57,7 +69,7 @@ class InvoicesController extends Controller
             'workOrder.vehicle.model',
             'workOrder.items',
             'workOrder.parts',
-            'lines',
+            'lines' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
             'payments.receivedBy',
             'center',
             'tenant.taxSettings',
@@ -70,8 +82,14 @@ class InvoicesController extends Controller
             ]);
         }
 
+        $isVatEnabled = (bool) ($invoice->tenant?->taxSettings?->vat_enabled ?? true);
+        $zatcaQrSvg = ($invoice->tax_enabled_snapshot && $isVatEnabled && ! empty($invoice->zatca_qr_tlv))
+            ? $this->qrRenderer->toDataUri($invoice->zatca_qr_tlv)
+            : null;
+
         return Inertia::render('Invoices/Show', [
             'invoice' => $invoice,
+            'zatca_qr_svg' => $zatcaQrSvg,
             'colors' => VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']),
         ]);
     }
@@ -102,14 +120,21 @@ class InvoicesController extends Controller
             $invoice = $this->invoiceService->createFromWorkOrder($workOrder, auth()->user(), $data);
             $this->invoiceService->issueInvoice($invoice);
 
-            // Notify owner about new invoice
-            NotificationService::notifyOwner(
+            $workOrder->loadMissing('customer');
+            $woCode = (string) ($workOrder->code ?? $workOrder->id);
+            $customerName = $workOrder->customer?->name;
+
+            // Notify relevant tenant users about new invoice
+            NotificationService::notifyTenantUsers(
                 tenantId: auth()->user()->tenant_id,
                 type: 'invoice.created',
-                title: 'فاتورة جديدة #'.$invoice->invoice_number,
-                body: 'تم إنشاء فاتورة من أمر العمل #'.($workOrder->code ?? $workOrder->id),
+                title: __('notifications.invoice_created_title', ['number' => $invoice->invoice_number]),
+                body: $customerName
+                    ? __('notifications.invoice_created_body_customer', ['code' => $woCode, 'customer' => $customerName])
+                    : __('notifications.invoice_created_body', ['code' => $woCode]),
                 actionUrl: '/app/invoices/'.$invoice->id,
                 actorId: auth()->id(),
+                centerId: $workOrder->center_id,
             );
 
             return redirect()->route('app.invoices.show', $invoice->id)
@@ -347,7 +372,7 @@ class InvoicesController extends Controller
             'originalInvoice:id,invoice_number,issue_date,total_incl_tax',
             'workOrder.vehicle.make',
             'workOrder.vehicle.model',
-            'lines',
+            'lines' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
             'payments',
             'center.address',
             'tenant.address',
@@ -370,9 +395,12 @@ class InvoicesController extends Controller
         }
 
         $invoice->append(['balance', 'is_paid', 'payment_status_label']);
+        $printDocument = $this->printDataBuilder->buildFromInvoice($invoice);
 
         return Inertia::render('Invoices/Print', [
             'invoice' => $invoice,
+            'printDocument' => $printDocument->toArray(),
+            'zatca_qr_svg' => $printDocument->qrDataUri,
             'template' => $template,
             'labels' => $labels,
         ]);

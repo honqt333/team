@@ -586,8 +586,17 @@ class ReportsController extends Controller
         $totalSubtotal = (float) (clone $kpiQuery)->sum('total_excl_tax');
         $totalVat = (float) (clone $kpiQuery)->sum('total_tax');
         $totalInvoiceAmount = (float) (clone $kpiQuery)->sum('total_incl_tax');
-        $totalPaid = (float) (clone $kpiQuery)->sum('total_paid');
-        $totalPaymentRemaining = (float) ((clone $kpiQuery)->selectRaw('SUM(CASE WHEN (total_incl_tax - total_paid) > 0 THEN (total_incl_tax - total_paid) ELSE 0 END) as rem')->value('rem') ?? 0);
+        $totalBadDebt = (float) DB::table('payments')
+            ->whereIn('invoice_id', (clone $kpiQuery)->where('invoices.type', InvoiceType::INVOICE->value)->select('invoices.id'))
+            ->whereNull('deleted_at')
+            ->where('type', 'bad_debt')
+            ->sum('amount');
+        $totalPaid = max(0.0, round((float) (clone $kpiQuery)->where('invoices.type', '!=', InvoiceType::CREDIT_NOTE->value)->sum('total_paid') - $totalBadDebt, 2));
+        $totalPaymentRemaining = (float) ((clone $kpiQuery)
+            ->where('invoices.type', InvoiceType::INVOICE->value)
+            ->whereNotIn('invoices.status', ['draft', 'cancelled'])
+            ->selectRaw(Invoice::outstandingExpressionSql('invoices').' as rem')
+            ->value('rem') ?? 0);
 
         $totalDiscount = (float) DB::table('invoice_lines')
             ->whereIn('invoice_id', (clone $kpiQuery)->select('id'))
@@ -604,7 +613,9 @@ class ReportsController extends Controller
 
         $mapInvoice = function (Invoice $inv) {
             $discount = (float) ($inv->total_discount ?? 0);
-            $remaining = max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
+            $remaining = ($inv->isCreditNote() || in_array($inv->status, ['draft', 'cancelled'], true))
+                ? 0.0
+                : max(0.0, round((float) $inv->total_incl_tax - (float) ($inv->valid_credit_notes_total ?? 0.0) - (float) $inv->total_paid, 2));
             $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
 
             return [
@@ -659,7 +670,7 @@ class ReportsController extends Controller
         $groupedInvoices = null;
 
         if ($groupBy !== 'none') {
-            $allInvoices = (clone $query)
+            $allInvoices = $this->withValidCreditNotesTotalSelect(clone $query)
                 ->with($relations)
                 ->withSum('lines as total_discount', 'discount_amount')
                 ->orderBy('issue_date', 'desc')
@@ -703,7 +714,7 @@ class ReportsController extends Controller
                 ];
             })->values();
         } elseif ($request->boolean('print')) {
-            $invoices = (clone $query)
+            $invoices = $this->withValidCreditNotesTotalSelect(clone $query)
                 ->with($relations)
                 ->withSum('lines as total_discount', 'discount_amount')
                 ->orderBy('issue_date', 'desc')
@@ -712,7 +723,7 @@ class ReportsController extends Controller
                 ->map($mapInvoice)
                 ->values();
         } else {
-            $paginated = (clone $query)
+            $paginated = $this->withValidCreditNotesTotalSelect(clone $query)
                 ->with($relations)
                 ->withSum('lines as total_discount', 'discount_amount')
                 ->orderBy('issue_date', 'desc')
@@ -823,12 +834,18 @@ class ReportsController extends Controller
             $centerFilter,
             $isOverdue,
             $search
-        )->with([
-            'center:id,name',
-            'customer:id,name,phone,type,tax_number',
-            'workOrder:id,code,vehicle_id',
-            'workOrder.vehicle:id,plate_number',
-        ])
+        )
+            ->select('invoices.*')
+            ->selectRaw(
+                '(SELECT COALESCE(SUM(cn.total_incl_tax), 0) FROM invoices AS cn WHERE cn.original_invoice_id = invoices.id AND cn.tenant_id = invoices.tenant_id AND cn.center_id = invoices.center_id AND cn.type = ? AND cn.status NOT IN (?, ?) AND cn.deleted_at IS NULL) as valid_credit_notes_total',
+                [InvoiceType::CREDIT_NOTE->value, 'draft', 'cancelled']
+            )
+            ->with([
+                'center:id,name',
+                'customer:id,name,phone,type,tax_number',
+                'workOrder:id,code,vehicle_id',
+                'workOrder.vehicle:id,plate_number',
+            ])
             ->withSum('lines as total_discount', 'discount_amount')
             ->orderBy('issue_date', 'desc');
 
@@ -866,7 +883,9 @@ class ReportsController extends Controller
             $query->chunk(200, function ($invoices) use ($output, &$index) {
                 foreach ($invoices as $inv) {
                     $discount = (float) ($inv->total_discount ?? 0);
-                    $remaining = max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
+                    $remaining = ($inv->isCreditNote() || in_array($inv->status, ['draft', 'cancelled'], true))
+                        ? 0.0
+                        : max(0.0, round((float) $inv->total_incl_tax - (float) ($inv->valid_credit_notes_total ?? 0.0) - (float) $inv->total_paid, 2));
                     $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
 
                     $customerName = $inv->customer->name ?? $inv->customer_name_snapshot ?? '—';
@@ -920,6 +939,22 @@ class ReportsController extends Controller
     }
 
     /**
+     * Attach correlated valid_credit_notes_total subquery to an Invoice report query.
+     *
+     * @param Builder<Invoice> $builder
+     * @return Builder<Invoice>
+     */
+    private function withValidCreditNotesTotalSelect(Builder $builder): Builder
+    {
+        return $builder
+            ->select('invoices.*')
+            ->selectRaw(
+                '(SELECT COALESCE(SUM(cn.total_incl_tax), 0) FROM invoices AS cn WHERE cn.original_invoice_id = invoices.id AND cn.tenant_id = invoices.tenant_id AND cn.center_id = invoices.center_id AND cn.type = ? AND cn.status NOT IN (?, ?) AND cn.deleted_at IS NULL) as valid_credit_notes_total',
+                [InvoiceType::CREDIT_NOTE->value, 'draft', 'cancelled']
+            );
+    }
+
+    /**
      * Build reusable invoices query with multi-tenancy, center and filters.
      */
     /** @return Builder<Invoice> */
@@ -947,7 +982,8 @@ class ReportsController extends Controller
         $centerFilter = $centerFilter ?: 'all';
         $search = trim((string) $search);
 
-        $query = Invoice::query()->where('tenant_id', $tenantId);
+        // Disable the automatic CenterScoped global scope so the report can filter any accessible center or all centers
+        $query = Invoice::withoutGlobalScope('center_scoped')->where('tenant_id', $tenantId);
 
         $accessibleCenterIds = $this->accessibleCenterIds();
 
@@ -1714,7 +1750,7 @@ class ReportsController extends Controller
                 'app.reports.suppliers',
                 $filters,
                 $kpis,
-                $allRecords->take(5000)->values(),
+                $allTransactions->take(5000)->values(),
                 $companyInfo
             );
         }
@@ -3724,7 +3760,7 @@ class ReportsController extends Controller
             ->sum('discount');
 
         $totalAmountAdjusted = $itemsDiscount + $partsDiscount;
-        $totalPaymentRemaining = max(0, $totalPaymentDue - $totalAmountPaid);
+        $totalPaymentRemaining = $this->workOrderRemainingSum(clone $kpiQuery);
 
         $relations = [
             'center:id,name',
@@ -3742,7 +3778,7 @@ class ReportsController extends Controller
         $groupedRecords = null;
 
         if ($groupBy !== 'none') {
-            $allRecords = (clone $query)->with($relations)->orderByDesc('id')->get();
+            $allRecords = $this->withValidWorkOrderCreditNotesSelect(clone $query)->with($relations)->orderByDesc('id')->get();
 
             $grouped = match ($groupBy) {
                 'customer_type' => $allRecords->groupBy(fn ($wo) => $wo->customer?->type ?: 'individual'),
@@ -3752,11 +3788,12 @@ class ReportsController extends Controller
             };
 
             $groupedRecords = $grouped->map(function ($items, $key) use ($groupBy) {
-                $groupDue = (float) $items->sum('total_incl_tax');
-                $groupPaid = (float) $items->sum(fn ($wo) => $wo->total_paid);
-                $groupAdjusted = (float) $items->sum(fn ($wo) => $wo->total_discount);
-                $groupRemaining = max(0, $groupDue - $groupPaid);
-                $groupBadDebt = (float) $items->sum(fn ($wo) => $wo->bad_debt);
+                $transformedItems = $items->map(fn ($wo) => $this->transformCustomerReportRow($wo))->values();
+                $groupDue = (float) $transformedItems->sum('payment_due');
+                $groupPaid = (float) $transformedItems->sum('amount_paid');
+                $groupAdjusted = (float) $transformedItems->sum('amount_adjusted');
+                $groupRemaining = round((float) $transformedItems->sum('payment_remaining'), 2);
+                $groupBadDebt = (float) $transformedItems->sum('bad_debt');
 
                 $label = match ($groupBy) {
                     'customer_type' => match ($key) {
@@ -3780,11 +3817,11 @@ class ReportsController extends Controller
                     'total_amount_adjusted' => $groupAdjusted,
                     'total_payment_remaining' => $groupRemaining,
                     'total_bad_debt' => $groupBadDebt,
-                    'items' => $items->map(fn ($wo) => $this->transformCustomerReportRow($wo))->values(),
+                    'items' => $transformedItems,
                 ];
             })->values();
         } elseif ($request->boolean('print')) {
-            $records = (clone $query)
+            $records = $this->withValidWorkOrderCreditNotesSelect(clone $query)
                 ->with($relations)
                 ->orderByDesc('id')
                 ->limit(5000)
@@ -3792,7 +3829,7 @@ class ReportsController extends Controller
                 ->map(fn ($wo) => $this->transformCustomerReportRow($wo))
                 ->values();
         } else {
-            $paginated = (clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
+            $paginated = $this->withValidWorkOrderCreditNotesSelect(clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
             $paginated->getCollection()->transform(fn ($wo) => $this->transformCustomerReportRow($wo));
             $records = $paginated;
         }
@@ -3941,7 +3978,7 @@ class ReportsController extends Controller
                 __('reports.runtime.s046'),
             ]);
 
-            (clone $query)
+            $this->withValidWorkOrderCreditNotesSelect(clone $query)
                 ->with($relations)
                 ->orderByDesc('id')
                 ->chunk(250, function ($records) use ($handle) {
@@ -3982,6 +4019,39 @@ class ReportsController extends Controller
         ]);
     }
 
+    private function workOrderValidCreditNotesSubquerySql(string $woAlias = 'work_orders'): string
+    {
+        return "COALESCE((SELECT SUM(cn.total_incl_tax) FROM invoices AS cn WHERE cn.tenant_id = {$woAlias}.tenant_id AND cn.center_id = {$woAlias}.center_id AND cn.type = 'credit_note' AND cn.status NOT IN ('draft', 'cancelled') AND cn.deleted_at IS NULL AND (cn.work_order_id = {$woAlias}.id OR (cn.work_order_id IS NULL AND EXISTS (SELECT 1 FROM invoices AS orig WHERE orig.id = cn.original_invoice_id AND orig.work_order_id = {$woAlias}.id AND orig.tenant_id = cn.tenant_id AND orig.center_id = cn.center_id AND orig.deleted_at IS NULL)))), 0)";
+    }
+
+    private function workOrderNetPaidSubquerySql(string $woAlias = 'work_orders'): string
+    {
+        return "COALESCE((SELECT SUM(CASE WHEN type IN (\"payment\", \"bad_debt\") THEN amount WHEN type = \"refund\" THEN -amount ELSE 0 END) FROM payments WHERE payments.work_order_id = {$woAlias}.id AND payments.deleted_at IS NULL), 0)";
+    }
+
+    /**
+     * @param Builder<WorkOrder> $query
+     */
+    private function workOrderRemainingSum(Builder $query): float
+    {
+        $netRemExpr = '(COALESCE(work_orders.total_incl_tax, 0) - '.$this->workOrderValidCreditNotesSubquerySql().' - '.$this->workOrderNetPaidSubquerySql().')';
+
+        return round((float) ($query
+            ->selectRaw("COALESCE(SUM(CASE WHEN {$netRemExpr} > 0 THEN {$netRemExpr} ELSE 0 END), 0) as rem")
+            ->value('rem') ?? 0), 2);
+    }
+
+    /**
+     * @param Builder<WorkOrder> $builder
+     * @return Builder<WorkOrder>
+     */
+    private function withValidWorkOrderCreditNotesSelect(Builder $builder): Builder
+    {
+        return $builder
+            ->select('work_orders.*')
+            ->selectRaw($this->workOrderValidCreditNotesSubquerySql().' as valid_credit_notes_total');
+    }
+
     /**
      * Build the filtered WorkOrder query for Customers Report.
      */
@@ -4002,15 +4072,14 @@ class ReportsController extends Controller
         $query = WorkOrder::withoutGlobalScope('center_scoped')
             ->where('tenant_id', $tenantId);
 
-        $user = auth()->user();
-        $userCenterIds = $user?->centers()->pluck('centers.id')->toArray() ?? [];
+        $accessibleCenterIds = $this->accessibleCenterIds();
 
-        if ($centerFilter !== 'all') {
+        if ($accessibleCenterIds !== null) {
+            $query->whereIn('center_id', $accessibleCenterIds);
+        }
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
             $query->where('center_id', (int) $centerFilter);
-        } else {
-            if (! empty($userCenterIds)) {
-                $query->whereIn('center_id', $userCenterIds);
-            }
         }
 
         $dateColumn = match ($dateType) {
@@ -4057,12 +4126,15 @@ class ReportsController extends Controller
             });
         }
 
+        $validCnSql = $this->workOrderValidCreditNotesSubquerySql();
+        $netPaidSql = $this->workOrderNetPaidSubquerySql();
+
         if ($paymentStatus === 'paid') {
-            $query->whereRaw('(COALESCE(work_orders.total_incl_tax, 0) - COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE payments.work_order_id = work_orders.id AND payments.deleted_at IS NULL), 0)) <= 0.01');
+            $query->whereRaw("(COALESCE(work_orders.total_incl_tax, 0) - {$validCnSql} - {$netPaidSql}) <= 0.01");
         } elseif ($paymentStatus === 'unpaid') {
-            $query->whereRaw('COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE payments.work_order_id = work_orders.id AND payments.deleted_at IS NULL), 0) <= 0');
+            $query->whereRaw("({$netPaidSql} <= 0.01 AND {$validCnSql} <= 0.01)");
         } elseif ($paymentStatus === 'partial') {
-            $query->whereRaw('(COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE payments.work_order_id = work_orders.id AND payments.deleted_at IS NULL), 0) > 0 AND (COALESCE(work_orders.total_incl_tax, 0) - COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE payments.work_order_id = work_orders.id AND payments.deleted_at IS NULL), 0)) > 0.01)');
+            $query->whereRaw("(({$netPaidSql} > 0.01 OR {$validCnSql} > 0.01) AND (COALESCE(work_orders.total_incl_tax, 0) - {$validCnSql} - {$netPaidSql}) > 0.01)");
         }
 
         if ($search !== '') {
@@ -4092,15 +4164,16 @@ class ReportsController extends Controller
     {
         $due = (float) $wo->total_incl_tax;
         $paid = (float) $wo->total_paid;
+        $credited = (float) ($wo->valid_credit_notes_total ?? 0.0);
         $adjusted = (float) $wo->total_discount;
-        $remaining = max(0, $due - $paid);
+        $remaining = max(0.0, round($due - $credited - $paid, 2));
         $badDebt = (float) $wo->bad_debt;
 
         $paymentStatus = 'unpaid';
 
-        if ($paid >= $due - 0.01 && $due > 0) {
+        if ($due > 0 && ($due - $credited - $paid) <= 0.01) {
             $paymentStatus = 'paid';
-        } elseif ($paid > 0) {
+        } elseif ($paid > 0.01 || $credited > 0.01) {
             $paymentStatus = 'partial';
         }
 
@@ -4230,7 +4303,7 @@ class ReportsController extends Controller
             ->sum('discount');
 
         $totalAmountAdjusted = $itemsDiscount + $partsDiscount;
-        $totalPaymentRemaining = max(0, $totalPaymentDue - $totalAmountPaid);
+        $totalPaymentRemaining = $this->workOrderRemainingSum(clone $kpiQuery);
 
         $relations = [
             'center:id,name',
@@ -4249,7 +4322,7 @@ class ReportsController extends Controller
         $groupedRecords = null;
 
         if ($groupBy !== 'none') {
-            $allRecords = (clone $query)->with($relations)->orderByDesc('id')->get();
+            $allRecords = $this->withValidWorkOrderCreditNotesSelect(clone $query)->with($relations)->orderByDesc('id')->get();
 
             $grouped = match ($groupBy) {
                 'dealer' => $allRecords->groupBy(fn ($wo) => (string) ($wo->dealer_id ?: 'unassigned')),
@@ -4260,11 +4333,12 @@ class ReportsController extends Controller
             };
 
             $groupedRecords = $grouped->map(function ($items, $key) use ($groupBy) {
-                $groupDue = (float) $items->sum('total_incl_tax');
-                $groupPaid = (float) $items->sum(fn ($wo) => $wo->total_paid);
-                $groupAdjusted = (float) $items->sum(fn ($wo) => $wo->total_discount);
-                $groupRemaining = max(0, $groupDue - $groupPaid);
-                $groupBadDebt = (float) $items->sum(fn ($wo) => $wo->bad_debt);
+                $transformedItems = $items->map(fn ($wo) => $this->transformDealerReportRow($wo))->values();
+                $groupDue = (float) $transformedItems->sum('payment_due');
+                $groupPaid = (float) $transformedItems->sum('amount_paid');
+                $groupAdjusted = (float) $transformedItems->sum('amount_adjusted');
+                $groupRemaining = round((float) $transformedItems->sum('payment_remaining'), 2);
+                $groupBadDebt = (float) $transformedItems->sum('bad_debt');
 
                 $label = match ($groupBy) {
                     'dealer_type' => __('reports.dealers_report.types.'.$key),
@@ -4285,11 +4359,11 @@ class ReportsController extends Controller
                     'total_amount_adjusted' => $groupAdjusted,
                     'total_payment_remaining' => $groupRemaining,
                     'total_bad_debt' => $groupBadDebt,
-                    'items' => $items->map(fn ($wo) => $this->transformDealerReportRow($wo))->values(),
+                    'items' => $transformedItems,
                 ];
             })->values();
         } elseif ($request->boolean('print')) {
-            $records = (clone $query)
+            $records = $this->withValidWorkOrderCreditNotesSelect(clone $query)
                 ->with($relations)
                 ->orderByDesc('id')
                 ->limit(5000)
@@ -4297,7 +4371,7 @@ class ReportsController extends Controller
                 ->map(fn ($wo) => $this->transformDealerReportRow($wo))
                 ->values();
         } else {
-            $paginated = (clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
+            $paginated = $this->withValidWorkOrderCreditNotesSelect(clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
             $paginated->getCollection()->transform(fn ($wo) => $this->transformDealerReportRow($wo));
             $records = $paginated;
         }
@@ -4452,7 +4526,7 @@ class ReportsController extends Controller
                 __('reports.dealers_report.col_status'),
             ]);
 
-            (clone $query)
+            $this->withValidWorkOrderCreditNotesSelect(clone $query)
                 ->with($relations)
                 ->orderByDesc('id')
                 ->chunk(250, function ($records) use ($handle) {
@@ -4576,9 +4650,12 @@ class ReportsController extends Controller
         if ((float) ($row['payment_due'] ?? 0) <= 0 && (float) $wo->total > 0) {
             $due = (float) $wo->total;
             $paid = (float) ($row['amount_paid'] ?? 0);
+            $credited = (float) ($wo->valid_credit_notes_total ?? 0.0);
             $row['payment_due'] = $due;
-            $row['payment_remaining'] = max(0.0, $due - $paid);
-            $row['payment_status'] = $paid >= $due - 0.01 ? 'paid' : ($paid > 0 ? 'partial' : 'unpaid');
+            $row['payment_remaining'] = max(0.0, round($due - $credited - $paid, 2));
+            $row['payment_status'] = ($due - $credited - $paid) <= 0.01
+                ? 'paid'
+                : (($paid > 0.01 || $credited > 0.01) ? 'partial' : 'unpaid');
         }
         $row['is_paid_by_dealer'] = (bool) $wo->is_paid_by_dealer;
         $row['dealer'] = [
@@ -4598,6 +4675,8 @@ class ReportsController extends Controller
      */
     public function employees(Request $request): Response
     {
+        $this->authorize('viewAny', Employee::class);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 
@@ -4790,6 +4869,8 @@ class ReportsController extends Controller
      */
     public function exportEmployees(Request $request): StreamedResponse
     {
+        $this->authorize('viewAny', Employee::class);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 

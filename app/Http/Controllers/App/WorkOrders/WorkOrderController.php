@@ -239,10 +239,11 @@ class WorkOrderController
             ->active()
             ->orderBy('name')
             ->get(['id', 'name', 'name_en', 'type']);
-        $makes = VehicleMake::ordered()->get();
+        $makes = VehicleMake::active()->ordered()->get();
         $colors = VehicleColor::active()->ordered()->get();
         $departments = Department::active()->ordered()->get();
         $modelsByMake = VehicleModel::query()
+            ->active()
             ->select('id', 'make_id', 'name_ar', 'name_en')
             ->get()
             ->groupBy('make_id');
@@ -456,6 +457,7 @@ class WorkOrderController
 
         $makes = VehicleMake::withoutGlobalScope('center_scoped')
             ->where('center_id', $workOrder->center_id)
+            ->active()
             ->ordered()
             ->get();
 
@@ -495,6 +497,7 @@ class WorkOrderController
             });
 
         $modelsByMake = VehicleModel::query()
+            ->active()
             ->select('id', 'make_id', 'name_ar', 'name_en')
             ->get()
             ->groupBy('make_id');

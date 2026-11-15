@@ -1316,7 +1316,7 @@ class WorkOrdersCrudTest extends TestCase
 
         // Now, assign user to Branch B in pivot and switch session
         $userBranchA->centers()->attach($branchB->id, ['tenant_id' => $userBranchA->tenant_id]);
-        $userBranchA->update(['current_center_id' => $branchB->id]);
+        $userBranchA->forceFill(['current_center_id' => $branchB->id])->save();
         $userBranchA->refresh();
         $this->actingAs($userBranchA);
 
@@ -1350,14 +1350,14 @@ class WorkOrdersCrudTest extends TestCase
 
         // 5. Verify user CANNOT edit/update Branch A's work order (restricted write access)
         $responseUpdate = $this->actingAs($userBranchA)->put("/app/work-orders/{$workOrderBranchA->id}", [
-            'status' => 'in_progress',
+            'notes' => 'Cross-branch edit attempt',
         ]);
         $responseUpdate->assertStatus(403);
 
         // 6. Verify the user CAN view it again once they switch BACK to
         //    Branch A — the restriction follows the current center, it
         //    is not a permanent block on the document.
-        $userBranchA->update(['current_center_id' => $workOrderBranchA->center_id]);
+        $userBranchA->forceFill(['current_center_id' => $workOrderBranchA->center_id])->save();
         $userBranchA->refresh();
 
         $responseOwnBranch = $this->actingAs($userBranchA)->get("/app/work-orders/{$workOrderBranchA->id}");

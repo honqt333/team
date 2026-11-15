@@ -53,8 +53,9 @@ class InvoicingSecurityTest extends TestCase
         // gets a 422 with an errors bag and an Inertia request gets the
         // usual validation errors in the session. The error is keyed by
         // the field that was protected.
+        // 1a. Try to tamper with a guarded non-fillable financial field (total_tax)
         try {
-            $invoice->update(['total_tax' => 999]);
+            $invoice->forceFill(['total_tax' => 999])->save();
             $this->fail('Should not allow update on valid invoice');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('total_tax', $e->errors());
@@ -63,6 +64,14 @@ class InvoicingSecurityTest extends TestCase
                 $e->errors()['total_tax'][0],
                 'The refusal must name the protected field.'
             );
+        }
+
+        // 1b. Try to tamper with a fillable field via mass-assignment update
+        try {
+            $invoice->update(['notes' => 'Tampered after issuance']);
+            $this->fail('Should not allow fillable field update on valid invoice');
+        } catch (ValidationException $e) {
+            $this->assertNotEmpty($e->errors());
         }
 
         // 2. Try to Delete

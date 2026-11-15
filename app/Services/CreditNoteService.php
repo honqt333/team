@@ -8,9 +8,11 @@ use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
 use App\Models\CenterSequence;
 use App\Models\Invoice;
+use App\Models\InvoiceLine;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
@@ -19,7 +21,10 @@ use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Throwable;
 
 class CreditNoteService
 {
@@ -50,12 +55,15 @@ class CreditNoteService
 
         // Existing credit notes for this invoice or work order
         $creditNoteIds = Invoice::withoutGlobalScopes()
+            ->where('tenant_id', $originalInvoice->tenant_id)
+            ->where('center_id', $originalInvoice->center_id)
             ->where(function ($q) use ($workOrder, $originalInvoice) {
                 $q->where('original_invoice_id', $originalInvoice->id)
                     ->orWhere('work_order_id', $workOrder->id);
             })
             ->where('type', InvoiceType::CREDIT_NOTE)
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->whereNull('deleted_at')
             ->pluck('id');
 
         $creditLines = DB::table('invoice_lines')
@@ -67,18 +75,29 @@ class CreditNoteService
             ->where('status', '!=', WorkOrderItem::STATUS_CANCELLED)
             ->get();
 
-        $returnableServices = $activeItems->map(function ($item) use ($creditLines, $taxEnabled, $taxRate) {
+        $returnableServices = $activeItems->map(function ($item) use ($creditLines, $taxEnabled, $taxRate, $pricingMode) {
+            $itemTaxEnabled = $taxEnabled && ($item->is_taxable ?? true);
+            $itemTaxRate = $itemTaxEnabled ? (float) ($item->tax_rate_snapshot ?? $taxRate) : 0.0;
+
             $itemTotal = (float) $item->total;
             $itemLineIncl = (float) $item->line_total_incl_tax;
             $itemLineExcl = (float) $item->line_total_excl_tax;
             $itemLineTotal = (float) $item->line_total;
             $itemUnitPrice = (float) $item->final_unit_price ?: (float) $item->unit_price;
 
-            if ($taxEnabled) {
-                $originalTotal = $itemLineIncl > 0 ? $itemLineIncl : ($itemTotal > 0 ? $itemTotal : $itemLineTotal);
-                $originalExcl = $itemLineExcl > 0 ? $itemLineExcl : ($itemLineTotal > 0 ? $itemLineTotal : $itemUnitPrice);
+            if ($itemTaxEnabled) {
+                if ($itemLineIncl > 0 || $itemLineExcl > 0) {
+                    $originalTotal = $itemLineIncl > 0 ? $itemLineIncl : round($itemLineExcl * (1 + ($itemTaxRate / 100)), 2);
+                    $originalExcl = $itemLineExcl > 0 ? $itemLineExcl : round($originalTotal / (1 + ($itemTaxRate / 100)), 2);
+                } elseif ($pricingMode === 'inclusive') {
+                    $originalTotal = $itemTotal > 0 ? $itemTotal : ($itemLineTotal > 0 ? $itemLineTotal : $itemUnitPrice);
+                    $originalExcl = $itemTaxRate > 0 ? round($originalTotal / (1 + ($itemTaxRate / 100)), 2) : $originalTotal;
+                } else {
+                    $originalExcl = $itemLineTotal > 0 ? $itemLineTotal : ($itemTotal > 0 ? $itemTotal : $itemUnitPrice);
+                    $originalTotal = round($originalExcl * (1 + ($itemTaxRate / 100)), 2);
+                }
             } else {
-                $originalTotal = $itemTotal > 0 ? $itemTotal : ($itemLineTotal > 0 ? $itemLineTotal : $itemUnitPrice);
+                $originalTotal = $itemLineExcl > 0 ? $itemLineExcl : ($itemTotal > 0 ? $itemTotal : ($itemLineTotal > 0 ? $itemLineTotal : $itemUnitPrice));
                 $originalExcl = $originalTotal;
             }
 
@@ -107,7 +126,7 @@ class CreditNoteService
                 'returned_subtotal' => $previouslyReturnedExcl,
                 'refundable_amount' => $refundableAmount,
                 'remaining_refundable_subtotal' => $refundableAmount,
-                'tax_rate' => $taxRate,
+                'tax_rate' => $itemTaxRate,
             ];
         })->values();
 
@@ -162,9 +181,12 @@ class CreditNoteService
 
         // Calculate remaining debt considering all previous valid credit notes
         $totalPreviousCreditNotes = (float) Invoice::withoutGlobalScopes()
+            ->where('tenant_id', $originalInvoice->tenant_id)
+            ->where('center_id', $originalInvoice->center_id)
             ->where('original_invoice_id', $originalInvoice->id)
             ->where('type', InvoiceType::CREDIT_NOTE)
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->whereNull('deleted_at')
             ->sum('total_incl_tax');
 
         $netInvoiceAmount = max(0.0, round($originalTotal - $totalPreviousCreditNotes, 2));
@@ -206,169 +228,171 @@ class CreditNoteService
      */
     public function createCreditNote(WorkOrder $workOrder, array $data, User $user): Invoice
     {
-        $originalInvoice = $workOrder->invoice;
+        return DB::transaction(function () use ($workOrder, $data, $user) {
+            $originalInvoiceRef = $workOrder->invoice;
 
-        if (! $originalInvoice) {
-            throw new Exception(__('invoices.original_invoice_not_found'));
-        }
-
-        $summary = $this->getReturnableSummary($workOrder);
-
-        $servicesInput = $data['services'] ?? [];
-        $partsInput = $data['parts'] ?? [];
-
-        $taxEnabled = (bool) ($originalInvoice->tax_enabled_snapshot ?? false);
-
-        if (! $taxEnabled && ((float) $originalInvoice->total_tax > 0.001 || (bool) ($workOrder->tax_enabled_snapshot ?? false))) {
-            $taxEnabled = true;
-        }
-        $pricingMode = $originalInvoice->pricing_mode_snapshot ?? $workOrder->pricing_mode_snapshot ?? 'exclusive';
-        $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
-        $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?? $workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
-
-        $linesToCreate = [];
-        $totalReturnIncl = 0.0;
-        $totalReturnExcl = 0.0;
-        $totalReturnTax = 0.0;
-
-        // 1. Process returned services
-        foreach ($servicesInput as $srvInput) {
-            $itemId = (int) ($srvInput['work_order_item_id'] ?? $srvInput['id'] ?? 0);
-            $amount = (float) ($srvInput['return_amount'] ?? 0);
-
-            if ($amount <= 0.001) {
-                continue;
+            if (! $originalInvoiceRef) {
+                throw new Exception(__('invoices.original_invoice_not_found'));
             }
 
-            $matchedSummary = collect($summary['services'])->firstWhere('work_order_item_id', $itemId);
+            $originalInvoice = Invoice::withoutGlobalScopes()
+                ->where('tenant_id', $workOrder->tenant_id)
+                ->where('center_id', $workOrder->center_id)
+                ->whereNull('deleted_at')
+                ->lockForUpdate()
+                ->findOrFail($originalInvoiceRef->id);
 
-            if (! $matchedSummary) {
-                throw new InvalidArgumentException("Service item #{$itemId} not found.");
+            $workOrder->setRelation('invoice', $originalInvoice);
+            $summary = $this->getReturnableSummary($workOrder);
+
+            $servicesInput = $data['services'] ?? [];
+            $partsInput = $data['parts'] ?? [];
+
+            $taxEnabled = (bool) ($originalInvoice->tax_enabled_snapshot ?? false);
+
+            if (! $taxEnabled && ((float) $originalInvoice->total_tax > 0.001 || (bool) ($workOrder->tax_enabled_snapshot ?? false))) {
+                $taxEnabled = true;
             }
+            $pricingMode = $originalInvoice->pricing_mode_snapshot ?? $workOrder->pricing_mode_snapshot ?? 'exclusive';
+            $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
+            $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?? $workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
 
-            if ($amount > ($matchedSummary['refundable_amount'] + 0.01)) {
-                throw new InvalidArgumentException("Return amount for service '{$matchedSummary['title']}' exceeds allowable refundable amount.");
-            }
+            $linesToCreate = [];
+            $totalReturnIncl = 0.0;
+            $totalReturnExcl = 0.0;
+            $totalReturnTax = 0.0;
 
-            $item = $workOrder->items()->findOrFail($itemId);
+            // 1. Process returned services
+            foreach ($servicesInput as $srvInput) {
+                $itemId = (int) ($srvInput['work_order_item_id'] ?? $srvInput['id'] ?? 0);
+                $amount = (float) ($srvInput['return_amount'] ?? 0);
 
-            if ($pricingMode === 'inclusive' && $taxEnabled) {
-                $lineIncl = round($amount, 2);
-                $lineExcl = round($lineIncl / (1 + ($taxRate / 100)), 2);
-                $lineTax = round($lineIncl - $lineExcl, 2);
-            } else {
+                if ($amount <= 0.001) {
+                    continue;
+                }
+
+                $matchedSummary = collect($summary['services'])->firstWhere('work_order_item_id', $itemId);
+
+                if (! $matchedSummary) {
+                    throw new InvalidArgumentException("Service item #{$itemId} not found.");
+                }
+
+                if ($amount > ($matchedSummary['refundable_amount'] + 0.01)) {
+                    throw new InvalidArgumentException("Return amount for service '{$matchedSummary['title']}' exceeds allowable refundable amount.");
+                }
+
+                $item = $workOrder->items()->findOrFail($itemId);
+                $itemTaxEnabled = $taxEnabled && ($item->is_taxable ?? true);
+                $itemTaxRate = $itemTaxEnabled ? (float) ($item->tax_rate_snapshot ?? $taxRate) : 0.0;
+
                 $lineExcl = round($amount, 2);
-                $lineTax = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
+                $lineTax = $itemTaxEnabled ? round($lineExcl * ($itemTaxRate / 100), 2) : 0.0;
                 $lineIncl = round($lineExcl + $lineTax, 2);
-            }
 
-            $linesToCreate[] = [
-                'is_part' => false,
-                'part_id' => null,
-                'description' => 'مرتجع خدمة: '.$item->title,
-                'qty' => 1,
-                'unit_price' => $lineExcl,
-                'discount_amount' => 0,
-                'is_taxable' => $taxEnabled,
-                'tax_category_code' => 'S',
-                'tax_rate_snapshot' => $taxRate,
-                'tax_amount' => $lineTax,
-                'line_total_excl_tax' => $lineExcl,
-                'line_total_incl_tax' => $lineIncl,
-                'work_order_item_id' => $itemId,
-            ];
-
-            $totalReturnIncl += $lineIncl;
-            $totalReturnExcl += $lineExcl;
-            $totalReturnTax += $lineTax;
-        }
-
-        // 2. Process returned parts
-        $partsToRestock = [];
-
-        foreach ($partsInput as $prtInput) {
-            $partLineId = (int) ($prtInput['work_order_item_part_id'] ?? $prtInput['id'] ?? 0);
-            $returnQty = (float) ($prtInput['return_qty'] ?? 0);
-            $returnToStock = (bool) ($prtInput['return_to_stock'] ?? true);
-
-            if ($returnQty <= 0.001) {
-                continue;
-            }
-
-            $matchedSummary = collect($summary['parts'])->firstWhere('work_order_item_part_id', $partLineId);
-
-            if (! $matchedSummary) {
-                throw new InvalidArgumentException("Part item #{$partLineId} not found.");
-            }
-
-            if ($returnQty > ($matchedSummary['refundable_qty'] + 0.001)) {
-                throw new InvalidArgumentException("Return quantity for part '{$matchedSummary['name']}' exceeds allowable refundable quantity.");
-            }
-
-            $part = $workOrder->parts()->findOrFail($partLineId);
-
-            $proportion = $part->qty > 0 ? ($returnQty / (float) $part->qty) : 1;
-            $partTotal = (float) $part->total * $proportion;
-
-            if ($pricingMode === 'inclusive' && $taxEnabled) {
-                $lineIncl = round($partTotal, 2);
-                $lineExcl = round($lineIncl / (1 + ($taxRate / 100)), 2);
-                $lineTax = round($lineIncl - $lineExcl, 2);
-            } else {
-                $lineExcl = round($partTotal, 2);
-                $lineTax = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
-                $lineIncl = round($lineExcl + $lineTax, 2);
-            }
-
-            $linesToCreate[] = [
-                'is_part' => true,
-                'part_id' => $part->part_id,
-                'description' => 'مرتجع قطعة: '.$part->name,
-                'qty' => $returnQty,
-                'unit_price' => round($lineExcl / $returnQty, 2),
-                'discount_amount' => 0,
-                'is_taxable' => $taxEnabled,
-                'tax_category_code' => 'S',
-                'tax_rate_snapshot' => $taxRate,
-                'tax_amount' => $lineTax,
-                'line_total_excl_tax' => $lineExcl,
-                'line_total_incl_tax' => $lineIncl,
-                'work_order_item_part_id' => $partLineId,
-            ];
-
-            if ($returnToStock && $part->part_id && $part->warehouse_id) {
-                $partsToRestock[] = [
-                    'warehouse_id' => $part->warehouse_id,
-                    'part_id' => $part->part_id,
-                    'qty' => $returnQty,
-                    'unit_cost' => (float) ($part->cost_snapshot ?? 0),
-                    'part_name' => $part->name,
+                $linesToCreate[] = [
+                    'is_part' => false,
+                    'part_id' => null,
+                    'description' => 'مرتجع خدمة: '.$item->title,
+                    'qty' => 1,
+                    'unit_price' => $lineExcl,
+                    'discount_amount' => 0,
+                    'is_taxable' => $itemTaxEnabled,
+                    'tax_category_code' => $itemTaxEnabled ? 'S' : 'E',
+                    'tax_rate_snapshot' => $itemTaxRate,
+                    'tax_amount' => $lineTax,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
+                    'work_order_item_id' => $itemId,
                 ];
+
+                $totalReturnIncl += $lineIncl;
+                $totalReturnExcl += $lineExcl;
+                $totalReturnTax += $lineTax;
             }
 
-            $totalReturnIncl += $lineIncl;
-            $totalReturnExcl += $lineExcl;
-            $totalReturnTax += $lineTax;
-        }
+            // 2. Process returned parts
+            $partsToRestock = [];
 
-        if (empty($linesToCreate)) {
-            throw new InvalidArgumentException('يجب تحديد خدمة واحدة على الأقل أو قطعة غيار واحدة للإرجاع.');
-        }
+            foreach ($partsInput as $prtInput) {
+                $partLineId = (int) ($prtInput['work_order_item_part_id'] ?? $prtInput['id'] ?? 0);
+                $returnQty = (float) ($prtInput['return_qty'] ?? 0);
+                $returnToStock = (bool) ($prtInput['return_to_stock'] ?? true);
 
-        return DB::transaction(function () use (
-            $workOrder,
-            $originalInvoice,
-            $summary,
-            $linesToCreate,
-            $partsToRestock,
-            $totalReturnIncl,
-            $totalReturnExcl,
-            $totalReturnTax,
-            $data,
-            $user,
-            $taxEnabled,
-            $taxRate
-        ) {
+                if ($returnQty <= 0.001) {
+                    continue;
+                }
+
+                $matchedSummary = collect($summary['parts'])->firstWhere('work_order_item_part_id', $partLineId);
+
+                if (! $matchedSummary) {
+                    throw new InvalidArgumentException("Part item #{$partLineId} not found.");
+                }
+
+                if ($returnQty > ($matchedSummary['refundable_qty'] + 0.001)) {
+                    throw new InvalidArgumentException("Return quantity for part '{$matchedSummary['name']}' exceeds allowable refundable quantity.");
+                }
+
+                $part = $workOrder->parts()->findOrFail($partLineId);
+
+                $proportion = $part->qty > 0 ? ($returnQty / (float) $part->qty) : 1;
+                $partTotal = (float) $part->total * $proportion;
+
+                if ($pricingMode === 'inclusive' && $taxEnabled) {
+                    $lineIncl = round($partTotal, 2);
+                    $lineExcl = round($lineIncl / (1 + ($taxRate / 100)), 2);
+                    $lineTax = round($lineIncl - $lineExcl, 2);
+                } else {
+                    $lineExcl = round($partTotal, 2);
+                    $lineTax = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
+                    $lineIncl = round($lineExcl + $lineTax, 2);
+                }
+
+                $linesToCreate[] = [
+                    'is_part' => true,
+                    'part_id' => $part->part_id,
+                    'description' => 'مرتجع قطعة: '.$part->name,
+                    'qty' => $returnQty,
+                    'unit_price' => round($lineExcl / $returnQty, 2),
+                    'discount_amount' => 0,
+                    'is_taxable' => $taxEnabled,
+                    'tax_category_code' => 'S',
+                    'tax_rate_snapshot' => $taxRate,
+                    'tax_amount' => $lineTax,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
+                    'work_order_item_part_id' => $partLineId,
+                ];
+
+                $isWarehousePart = $part->part_id !== null
+                    && ($part->source === null || $part->source === WorkOrderItemPart::SOURCE_WAREHOUSE);
+
+                if ($returnToStock && $isWarehousePart) {
+                    if (! $part->warehouse_id) {
+                        throw ValidationException::withMessages([
+                            'warehouse_id' => [__('validation.required', ['attribute' => 'warehouse_id'])],
+                        ]);
+                    }
+
+                    $this->assertValidReturnWarehouse((int) $part->warehouse_id, (int) $workOrder->tenant_id, (int) $workOrder->center_id);
+
+                    $partsToRestock[] = [
+                        'warehouse_id' => (int) $part->warehouse_id,
+                        'part_id' => (int) $part->part_id,
+                        'qty' => $returnQty,
+                        'unit_cost' => (float) ($part->cost_snapshot ?? 0),
+                        'part_name' => $part->name,
+                    ];
+                }
+
+                $totalReturnIncl += $lineIncl;
+                $totalReturnExcl += $lineExcl;
+                $totalReturnTax += $lineTax;
+            }
+
+            if (empty($linesToCreate)) {
+                throw new InvalidArgumentException('يجب تحديد خدمة واحدة على الأقل أو قطعة غيار واحدة للإرجاع.');
+            }
+
             $tenantId = $workOrder->tenant_id;
             $centerId = $workOrder->center_id;
             $year = Carbon::now()->year;
@@ -449,23 +473,15 @@ class CreditNoteService
                 ]);
             }
 
-            // Restock returned parts into inventory
-            foreach ($partsToRestock as $partStock) {
-                try {
-                    $this->inventoryService->receipt(
-                        warehouseId: $partStock['warehouse_id'],
-                        partId: $partStock['part_id'],
-                        qty: (float) $partStock['qty'],
-                        unitCost: (float) $partStock['unit_cost'],
-                        userId: $user->id,
-                        referenceType: 'credit_note',
-                        referenceId: $creditNote->id,
-                        notes: 'إرجاع مستودعي عبر إشعار دائن رقم #'.$creditNote->invoice_number.' لأمر العمل #'.$workOrder->code
-                    );
-                } catch (Exception $e) {
-                    // Log or handle non-fatal inventory movement warning
-                }
-            }
+            // Restock returned parts into inventory (atomic with credit note transaction)
+            $this->restockCreditNoteParts(
+                $partsToRestock,
+                (int) $tenantId,
+                (int) $centerId,
+                (int) $user->id,
+                (int) $creditNote->id,
+                'إرجاع مستودعي عبر إشعار دائن رقم #'.$creditNote->invoice_number.' لأمر العمل #'.$workOrder->code
+            );
 
             // Record Refund Payment if specified
             $refundPayment = $data['refund_payment'] ?? null;
@@ -511,10 +527,8 @@ class CreditNoteService
             }
             $creditNote->saveQuietly();
 
-            // If auto-offset debt adjustment occurred, adjust original invoice payment status
-            if ($amountAdjusted > 0) {
-                $originalInvoice->updatePaymentStatus();
-            }
+            // Always synchronize original invoice payment status before committing
+            $originalInvoice->updatePaymentStatus();
 
             $creditNote->debt_offset = $amountAdjusted;
             $creditNote->net_refund_due = $netRefundDue;
@@ -550,9 +564,12 @@ class CreditNoteService
 
         // Existing credit notes for this invoice
         $creditNoteIds = Invoice::withoutGlobalScopes()
+            ->where('tenant_id', $invoice->tenant_id)
+            ->where('center_id', $invoice->center_id)
             ->where('original_invoice_id', $invoice->id)
             ->where('type', InvoiceType::CREDIT_NOTE)
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->whereNull('deleted_at')
             ->pluck('id');
 
         $creditLines = DB::table('invoice_lines')
@@ -573,17 +590,21 @@ class CreditNoteService
             ->keyBy('part_id');
 
         $defaultWarehouseId = DB::table('warehouses')
+            ->where('tenant_id', $invoice->tenant_id)
             ->where('center_id', $invoice->center_id)
             ->where('is_active', true)
             ->where('is_default', true)
+            ->whereNull('deleted_at')
             ->value('id') ?? DB::table('warehouses')
+            ->where('tenant_id', $invoice->tenant_id)
             ->where('center_id', $invoice->center_id)
             ->where('is_active', true)
+            ->whereNull('deleted_at')
             ->value('id');
 
         // 1. Returnable services (if direct sale has any service line)
         $serviceLines = $invoiceLines->where('is_part', false);
-        $returnableServices = $serviceLines->map(function ($line) use ($creditLines, $taxRate) {
+        $returnableServices = $serviceLines->map(function ($line) use ($creditLines, $taxEnabled, $taxRate) {
             $previouslyReturnedExcl = (float) $creditLines
                 ->filter(fn ($l) => (int) ($l->original_invoice_line_id ?? 0) === (int) $line->id)
                 ->sum('line_total_excl_tax');
@@ -591,6 +612,7 @@ class CreditNoteService
             $originalExcl = (float) $line->line_total_excl_tax;
             $originalTotal = (float) $line->line_total_incl_tax;
             $refundableAmount = max(0.0, round($originalExcl - $previouslyReturnedExcl, 2));
+            $lineTaxMeta = $this->resolveInvoiceLineTax($line, $taxEnabled, $taxRate);
 
             return [
                 'id' => $line->id,
@@ -605,13 +627,15 @@ class CreditNoteService
                 'returned_subtotal' => $previouslyReturnedExcl,
                 'refundable_amount' => $refundableAmount,
                 'remaining_refundable_subtotal' => $refundableAmount,
-                'tax_rate' => $taxRate,
+                'is_taxable' => $lineTaxMeta['is_taxable'],
+                'tax_category_code' => $lineTaxMeta['tax_category_code'],
+                'tax_rate' => $lineTaxMeta['tax_rate'],
             ];
         })->values();
 
         // 2. Returnable parts
         $partLines = $invoiceLines->where('is_part', true);
-        $returnableParts = $partLines->map(function ($line) use ($creditLines, $taxRate, $saleMoves, $defaultWarehouseId) {
+        $returnableParts = $partLines->map(function ($line) use ($creditLines, $taxEnabled, $taxRate, $saleMoves, $defaultWarehouseId) {
             $previouslyReturnedQty = (float) $creditLines
                 ->filter(function ($l) use ($line) {
                     if (isset($l->original_invoice_line_id)) {
@@ -624,6 +648,7 @@ class CreditNoteService
 
             $originalQty = (float) $line->qty;
             $refundableQty = max(0.0, round($originalQty - $previouslyReturnedQty, 2));
+            $lineTaxMeta = $this->resolveInvoiceLineTax($line, $taxEnabled, $taxRate);
 
             $warehouseId = $saleMoves->get($line->part_id)->warehouse_id ?? $defaultWarehouseId;
 
@@ -640,7 +665,9 @@ class CreditNoteService
                 'returned_qty' => $previouslyReturnedQty,
                 'refundable_qty' => $refundableQty,
                 'remaining_refundable_qty' => $refundableQty,
-                'tax_rate' => $taxRate,
+                'is_taxable' => $lineTaxMeta['is_taxable'],
+                'tax_category_code' => $lineTaxMeta['tax_category_code'],
+                'tax_rate' => $lineTaxMeta['tax_rate'],
                 'total' => (float) $line->line_total_excl_tax,
                 'warehouse_id' => $warehouseId,
             ];
@@ -650,9 +677,12 @@ class CreditNoteService
         $originalPaid = (float) $invoice->total_paid;
 
         $totalPreviousCreditNotes = (float) Invoice::withoutGlobalScopes()
+            ->where('tenant_id', $invoice->tenant_id)
+            ->where('center_id', $invoice->center_id)
             ->where('original_invoice_id', $invoice->id)
             ->where('type', InvoiceType::CREDIT_NOTE)
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->whereNull('deleted_at')
             ->sum('total_incl_tax');
 
         $netInvoiceAmount = max(0.0, round($originalTotal - $totalPreviousCreditNotes, 2));
@@ -698,149 +728,209 @@ class CreditNoteService
             return $this->createCreditNote($invoice->workOrder, $data, $user);
         }
 
-        $summary = $this->getReturnableSummaryForInvoice($invoice);
+        return DB::transaction(function () use ($invoice, $data, $user) {
+            $invoice = Invoice::withoutGlobalScopes()
+                ->where('tenant_id', $invoice->tenant_id)
+                ->where('center_id', $invoice->center_id)
+                ->whereNull('deleted_at')
+                ->lockForUpdate()
+                ->findOrFail($invoice->id);
 
-        $servicesInput = $data['services'] ?? [];
-        $partsInput = $data['parts'] ?? [];
+            $summary = $this->getReturnableSummaryForInvoice($invoice);
 
-        $taxEnabled = (bool) ($invoice->tax_enabled_snapshot ?? false);
+            $servicesInput = $data['services'] ?? [];
+            $partsInput = $data['parts'] ?? [];
 
-        if (! $taxEnabled && (float) $invoice->total_tax > 0.001) {
-            $taxEnabled = true;
-        }
-        $pricingMode = $invoice->pricing_mode_snapshot ?? 'exclusive';
-        $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($invoice->tenant));
-        $taxRate = $taxEnabled ? (float) ($invoice->tax_rate_snapshot ?? $defaultVat) : 0.0;
+            $taxEnabled = (bool) ($invoice->tax_enabled_snapshot ?? false);
 
-        $linesToCreate = [];
-        $totalReturnIncl = 0.0;
-        $totalReturnExcl = 0.0;
-        $totalReturnTax = 0.0;
-
-        // 1. Services
-        foreach ($servicesInput as $srvInput) {
-            $lineId = (int) ($srvInput['work_order_item_id'] ?? $srvInput['id'] ?? 0);
-            $amount = (float) ($srvInput['return_amount'] ?? 0);
-
-            if ($amount <= 0.001) {
-                continue;
+            if (! $taxEnabled && (float) $invoice->total_tax > 0.001) {
+                $taxEnabled = true;
             }
+            $pricingMode = $invoice->pricing_mode_snapshot ?? 'exclusive';
+            $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($invoice->tenant));
+            $taxRate = $taxEnabled ? (float) ($invoice->tax_rate_snapshot ?? $defaultVat) : 0.0;
 
-            $matchedSummary = collect($summary['services'])->firstWhere('id', $lineId);
+            $linesToCreate = [];
+            $totalReturnIncl = 0.0;
+            $totalReturnExcl = 0.0;
+            $totalReturnTax = 0.0;
+            $totalTaxableExcl = 0.0;
 
-            if (! $matchedSummary) {
-                throw new InvalidArgumentException("Service line #{$lineId} not found.");
-            }
+            $activeCreditNoteIds = Invoice::withoutGlobalScopes()
+                ->where('tenant_id', $invoice->tenant_id)
+                ->where('center_id', $invoice->center_id)
+                ->where('original_invoice_id', $invoice->id)
+                ->where('type', InvoiceType::CREDIT_NOTE)
+                ->whereNotIn('status', ['draft', 'cancelled'])
+                ->whereNull('deleted_at')
+                ->pluck('id');
 
-            if ($amount > ($matchedSummary['refundable_amount'] + 0.01)) {
-                throw new InvalidArgumentException('Return amount for service exceeds allowable refundable amount.');
-            }
+            $previousCreditLines = DB::table('invoice_lines')
+                ->whereIn('invoice_id', $activeCreditNoteIds)
+                ->get();
 
-            $line = $invoice->lines()->findOrFail($lineId);
+            // 1. Services
+            foreach ($servicesInput as $srvInput) {
+                $lineId = (int) ($srvInput['work_order_item_id'] ?? $srvInput['id'] ?? 0);
+                $amount = (float) ($srvInput['return_amount'] ?? 0);
 
-            $lineExcl = round($amount, 2);
-            $lineTax = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
-            $lineIncl = round($lineExcl + $lineTax, 2);
+                if ($amount <= 0.001) {
+                    continue;
+                }
 
-            $linesToCreate[] = [
-                'is_part' => false,
-                'part_id' => null,
-                'original_invoice_line_id' => $line->id,
-                'description' => 'مرتجع: '.$line->description,
-                'qty' => 1,
-                'unit_price' => $lineExcl,
-                'discount_amount' => 0,
-                'is_taxable' => $taxEnabled,
-                'tax_category_code' => 'S',
-                'tax_rate_snapshot' => $taxRate,
-                'tax_amount' => $lineTax,
-                'line_total_excl_tax' => $lineExcl,
-                'line_total_incl_tax' => $lineIncl,
-            ];
+                $matchedSummary = collect($summary['services'])->firstWhere('id', $lineId);
 
-            $totalReturnIncl += $lineIncl;
-            $totalReturnExcl += $lineExcl;
-            $totalReturnTax += $lineTax;
-        }
+                if (! $matchedSummary) {
+                    throw new InvalidArgumentException("Service line #{$lineId} not found.");
+                }
 
-        // 2. Parts
-        $partsToRestock = [];
+                if ($amount > ($matchedSummary['refundable_amount'] + 0.01)) {
+                    throw new InvalidArgumentException('Return amount for service exceeds allowable refundable amount.');
+                }
 
-        foreach ($partsInput as $prtInput) {
-            $lineId = (int) ($prtInput['work_order_item_part_id'] ?? $prtInput['id'] ?? 0);
-            $returnQty = (float) ($prtInput['return_qty'] ?? 0);
-            $returnToStock = (bool) ($prtInput['return_to_stock'] ?? true);
+                $line = $invoice->lines()->findOrFail($lineId);
+                $lineTaxMeta = $this->resolveInvoiceLineTax($line, $taxEnabled, $taxRate);
+                $lineTaxable = $lineTaxMeta['is_taxable'];
+                $lineTaxRate = $lineTaxMeta['tax_rate'];
 
-            if ($returnQty <= 0.001) {
-                continue;
-            }
+                $lineExcl = round($amount, 2);
 
-            $matchedSummary = collect($summary['parts'])->firstWhere('id', $lineId);
+                if ($lineTaxable) {
+                    $lineTax = round($lineExcl * ($lineTaxRate / 100), 2);
 
-            if (! $matchedSummary) {
-                throw new InvalidArgumentException("Part line #{$lineId} not found.");
-            }
+                    if ((float) $line->tax_amount > 0.001 && abs($lineExcl - (float) $matchedSummary['refundable_amount']) <= 0.01) {
+                        $prevTax = (float) $previousCreditLines
+                            ->where('original_invoice_line_id', $line->id)
+                            ->sum('tax_amount');
+                        $remainingTax = max(0.0, round((float) $line->tax_amount - $prevTax, 2));
 
-            if ($returnQty > ($matchedSummary['refundable_qty'] + 0.001)) {
-                throw new InvalidArgumentException("Return quantity for part '{$matchedSummary['name']}' exceeds allowable refundable quantity.");
-            }
+                        if (abs($lineTax - $remainingTax) <= 0.02) {
+                            $lineTax = $remainingTax;
+                        }
+                    }
+                    $totalTaxableExcl += $lineExcl;
+                } else {
+                    $lineTax = 0.0;
+                }
+                $lineIncl = round($lineExcl + $lineTax, 2);
 
-            $line = $invoice->lines()->findOrFail($lineId);
-
-            $proportion = $line->qty > 0 ? ($returnQty / (float) $line->qty) : 1;
-            $lineExcl = round((float) $line->line_total_excl_tax * $proportion, 2);
-            $lineTax = round((float) $line->tax_amount * $proportion, 2);
-            $lineIncl = round((float) $line->line_total_incl_tax * $proportion, 2);
-            $unitPrice = (float) $line->unit_price;
-
-            $linesToCreate[] = [
-                'is_part' => true,
-                'part_id' => $line->part_id,
-                'original_invoice_line_id' => $line->id,
-                'description' => 'مرتجع: '.$line->description,
-                'qty' => $returnQty,
-                'unit_price' => $unitPrice,
-                'discount_amount' => round((float) ($line->discount_amount ?? 0) * $proportion, 2),
-                'is_taxable' => $taxEnabled,
-                'tax_category_code' => 'S',
-                'tax_rate_snapshot' => $taxRate,
-                'tax_amount' => $lineTax,
-                'line_total_excl_tax' => $lineExcl,
-                'line_total_incl_tax' => $lineIncl,
-            ];
-
-            if ($returnToStock && $line->part_id && ! empty($matchedSummary['warehouse_id'])) {
-                $partsToRestock[] = [
-                    'warehouse_id' => $matchedSummary['warehouse_id'],
-                    'part_id' => $line->part_id,
-                    'qty' => $returnQty,
-                    'unit_cost' => (float) ($line->part->cost_price ?? $line->unit_price),
-                    'part_name' => $line->description,
+                $linesToCreate[] = [
+                    'is_part' => false,
+                    'part_id' => null,
+                    'original_invoice_line_id' => $line->id,
+                    'description' => 'مرتجع: '.$line->description,
+                    'qty' => 1,
+                    'unit_price' => $lineExcl,
+                    'discount_amount' => 0,
+                    'is_taxable' => $lineTaxable,
+                    'tax_category_code' => $lineTaxMeta['tax_category_code'],
+                    'tax_rate_snapshot' => $lineTaxRate,
+                    'tax_amount' => $lineTax,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
                 ];
+
+                $totalReturnIncl += $lineIncl;
+                $totalReturnExcl += $lineExcl;
+                $totalReturnTax += $lineTax;
             }
 
-            $totalReturnIncl += $lineIncl;
-            $totalReturnExcl += $lineExcl;
-            $totalReturnTax += $lineTax;
-        }
+            // 2. Parts
+            $partsToRestock = [];
 
-        if (empty($linesToCreate)) {
-            throw new InvalidArgumentException('يجب تحديد خدمة واحدة على الأقل أو قطعة غيار واحدة للإرجاع.');
-        }
+            foreach ($partsInput as $prtInput) {
+                $lineId = (int) ($prtInput['work_order_item_part_id'] ?? $prtInput['id'] ?? 0);
+                $returnQty = (float) ($prtInput['return_qty'] ?? 0);
+                $returnToStock = (bool) ($prtInput['return_to_stock'] ?? true);
 
-        return DB::transaction(function () use (
-            $invoice,
-            $summary,
-            $linesToCreate,
-            $partsToRestock,
-            $totalReturnIncl,
-            $totalReturnExcl,
-            $totalReturnTax,
-            $data,
-            $user,
-            $taxEnabled,
-            $taxRate
-        ) {
+                if ($returnQty <= 0.001) {
+                    continue;
+                }
+
+                $matchedSummary = collect($summary['parts'])->firstWhere('id', $lineId);
+
+                if (! $matchedSummary) {
+                    throw new InvalidArgumentException("Part line #{$lineId} not found.");
+                }
+
+                if ($returnQty > ($matchedSummary['refundable_qty'] + 0.001)) {
+                    throw new InvalidArgumentException("Return quantity for part '{$matchedSummary['name']}' exceeds allowable refundable quantity.");
+                }
+
+                $line = $invoice->lines()->findOrFail($lineId);
+                $lineTaxMeta = $this->resolveInvoiceLineTax($line, $taxEnabled, $taxRate);
+                $lineTaxable = $lineTaxMeta['is_taxable'];
+                $lineTaxRate = $lineTaxMeta['tax_rate'];
+
+                $proportion = $line->qty > 0 ? ($returnQty / (float) $line->qty) : 1;
+                $isFullRemainingQty = $returnQty >= ($matchedSummary['refundable_qty'] - 0.001);
+
+                if ($isFullRemainingQty) {
+                    $prevLines = $previousCreditLines->where('original_invoice_line_id', $line->id);
+                    $lineExcl = max(0.0, round((float) $line->line_total_excl_tax - (float) $prevLines->sum('line_total_excl_tax'), 2));
+                    $lineTax = $lineTaxable
+                        ? max(0.0, round((float) $line->tax_amount - (float) $prevLines->sum('tax_amount'), 2))
+                        : 0.0;
+                    $lineIncl = $lineTaxable
+                        ? max(0.0, round((float) $line->line_total_incl_tax - (float) $prevLines->sum('line_total_incl_tax'), 2))
+                        : $lineExcl;
+                } else {
+                    $lineExcl = round((float) $line->line_total_excl_tax * $proportion, 2);
+                    $lineTax = $lineTaxable ? round((float) $line->tax_amount * $proportion, 2) : 0.0;
+                    $lineIncl = $lineTaxable ? round($lineExcl + $lineTax, 2) : $lineExcl;
+                }
+
+                if ($lineTaxable) {
+                    $totalTaxableExcl += $lineExcl;
+                }
+
+                $unitPrice = (float) $line->unit_price;
+
+                $linesToCreate[] = [
+                    'is_part' => true,
+                    'part_id' => $line->part_id,
+                    'original_invoice_line_id' => $line->id,
+                    'description' => 'مرتجع: '.$line->description,
+                    'qty' => $returnQty,
+                    'unit_price' => $unitPrice,
+                    'discount_amount' => round((float) ($line->discount_amount ?? 0) * $proportion, 2),
+                    'is_taxable' => $lineTaxable,
+                    'tax_category_code' => $lineTaxMeta['tax_category_code'],
+                    'tax_rate_snapshot' => $lineTaxRate,
+                    'tax_amount' => $lineTax,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
+                ];
+
+                if ($returnToStock && $line->part_id) {
+                    $warehouseId = $matchedSummary['warehouse_id'] ?? null;
+
+                    if (! $warehouseId) {
+                        throw ValidationException::withMessages([
+                            'warehouse_id' => [__('validation.required', ['attribute' => 'warehouse_id'])],
+                        ]);
+                    }
+
+                    $this->assertValidReturnWarehouse((int) $warehouseId, (int) $invoice->tenant_id, (int) $invoice->center_id);
+
+                    $partsToRestock[] = [
+                        'warehouse_id' => (int) $warehouseId,
+                        'part_id' => (int) $line->part_id,
+                        'qty' => $returnQty,
+                        'unit_cost' => (float) ($line->part->cost_price ?? $line->unit_price),
+                        'part_name' => $line->description,
+                    ];
+                }
+
+                $totalReturnIncl += $lineIncl;
+                $totalReturnExcl += $lineExcl;
+                $totalReturnTax += $lineTax;
+            }
+
+            if (empty($linesToCreate)) {
+                throw new InvalidArgumentException('يجب تحديد خدمة واحدة على الأقل أو قطعة غيار واحدة للإرجاع.');
+            }
+
             $tenantId = $invoice->tenant_id;
             $centerId = $invoice->center_id;
             $year = Carbon::now()->year;
@@ -887,7 +977,7 @@ class CreditNoteService
                 'total_excl_tax' => round($totalReturnExcl, 2),
                 'total_tax' => round($totalReturnTax, 2),
                 'total_incl_tax' => round($totalReturnIncl, 2),
-                'total_taxable_amount' => round($totalReturnExcl, 2),
+                'total_taxable_amount' => round($totalTaxableExcl, 2),
                 'total_paid' => round($totalReturnIncl, 2),
             ]);
 
@@ -920,23 +1010,15 @@ class CreditNoteService
                 ]);
             }
 
-            // Restock returned parts into inventory
-            foreach ($partsToRestock as $partStock) {
-                try {
-                    $this->inventoryService->receipt(
-                        warehouseId: $partStock['warehouse_id'],
-                        partId: $partStock['part_id'],
-                        qty: (float) $partStock['qty'],
-                        unitCost: (float) $partStock['unit_cost'],
-                        userId: $user->id,
-                        referenceType: 'credit_note',
-                        referenceId: $creditNote->id,
-                        notes: 'إرجاع مبيعات مباشرة عبر إشعار دائن رقم #'.$creditNote->invoice_number
-                    );
-                } catch (Exception $e) {
-                    // Non-fatal inventory movement warning
-                }
-            }
+            // Restock returned parts into inventory (atomic with credit note transaction)
+            $this->restockCreditNoteParts(
+                $partsToRestock,
+                (int) $tenantId,
+                (int) $centerId,
+                (int) $user->id,
+                (int) $creditNote->id,
+                'إرجاع مبيعات مباشرة عبر إشعار دائن رقم #'.$creditNote->invoice_number
+            );
 
             // Record Refund Payment if specified
             $refundPayment = $data['refund_payment'] ?? null;
@@ -981,14 +1063,126 @@ class CreditNoteService
             }
             $creditNote->saveQuietly();
 
-            if ($amountAdjusted > 0) {
-                $invoice->updatePaymentStatus();
-            }
+            $invoice->updatePaymentStatus();
 
             $creditNote->debt_offset = $amountAdjusted;
             $creditNote->net_refund_due = $netRefundDue;
 
             return $creditNote;
         });
+    }
+
+    /**
+     * Resolve per-line taxability, tax rate, and ZATCA category code for an invoice line.
+     *
+     * @return array{is_taxable: bool, tax_rate: float, tax_category_code: string}
+     */
+    private function resolveInvoiceLineTax(InvoiceLine $line, bool $invoiceTaxEnabled, float $invoiceTaxRate): array
+    {
+        if ($line->is_taxable === false) {
+            return [
+                'is_taxable' => false,
+                'tax_rate' => 0.0,
+                'tax_category_code' => $line->tax_category_code ?: 'E',
+            ];
+        }
+
+        $hasExplicitLineTax = (float) ($line->tax_amount ?? 0) > 0.001
+            || (float) ($line->tax_rate_snapshot ?? 0) > 0.001;
+
+        if (! $invoiceTaxEnabled && ! $hasExplicitLineTax) {
+            return [
+                'is_taxable' => false,
+                'tax_rate' => 0.0,
+                'tax_category_code' => $line->tax_category_code ?: 'E',
+            ];
+        }
+
+        if ($line->tax_rate_snapshot !== null) {
+            $lineTaxRate = (float) $line->tax_rate_snapshot;
+        } elseif ((float) ($line->line_total_excl_tax ?? 0) > 0.001 && (float) ($line->tax_amount ?? 0) > 0.001) {
+            $lineTaxRate = round(((float) $line->tax_amount / (float) $line->line_total_excl_tax) * 100, 2);
+        } else {
+            $lineTaxRate = $invoiceTaxRate;
+        }
+
+        return [
+            'is_taxable' => true,
+            'tax_rate' => $lineTaxRate,
+            'tax_category_code' => $line->tax_category_code ?: ($lineTaxRate > 0 ? 'S' : 'Z'),
+        ];
+    }
+
+    /**
+     * Ensure the target warehouse exists, is active, is not soft-deleted, and belongs to the invoice tenant and center.
+     *
+     * @throws ValidationException
+     */
+    private function assertValidReturnWarehouse(int $warehouseId, int $tenantId, int $centerId): void
+    {
+        if ($warehouseId <= 0) {
+            throw ValidationException::withMessages([
+                'warehouse_id' => [__('validation.required', ['attribute' => 'warehouse_id'])],
+            ]);
+        }
+
+        $isValid = Warehouse::withoutGlobalScopes()
+            ->where('id', $warehouseId)
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('is_active', true)
+            ->whereNull('deleted_at')
+            ->exists();
+
+        if (! $isValid) {
+            throw ValidationException::withMessages([
+                'warehouse_id' => [__('validation.exists', ['attribute' => 'warehouse_id'])],
+            ]);
+        }
+    }
+
+    /**
+     * Restock returned parts into inventory within the active transaction so any failure rolls back atomically.
+     *
+     * @param array<int, array<string, mixed>> $partsToRestock
+     *
+     * @throws ValidationException
+     * @throws Throwable
+     */
+    private function restockCreditNoteParts(
+        array $partsToRestock,
+        int $tenantId,
+        int $centerId,
+        int $userId,
+        int $creditNoteId,
+        string $notes
+    ): void {
+        foreach ($partsToRestock as $partStock) {
+            $warehouseId = (int) ($partStock['warehouse_id'] ?? 0);
+            $this->assertValidReturnWarehouse($warehouseId, $tenantId, $centerId);
+
+            try {
+                $this->inventoryService->receipt(
+                    warehouseId: $warehouseId,
+                    partId: (int) $partStock['part_id'],
+                    qty: (float) $partStock['qty'],
+                    unitCost: (float) $partStock['unit_cost'],
+                    userId: $userId,
+                    referenceType: 'credit_note',
+                    referenceId: $creditNoteId,
+                    notes: $notes
+                );
+            } catch (Throwable $e) {
+                Log::error('Credit note inventory restock failed; rolling back transaction.', [
+                    'credit_note_id' => $creditNoteId,
+                    'warehouse_id' => $warehouseId,
+                    'part_id' => $partStock['part_id'] ?? null,
+                    'qty' => $partStock['qty'] ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+
+                throw $e;
+            }
+        }
     }
 }

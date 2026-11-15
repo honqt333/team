@@ -242,9 +242,9 @@ class WorkOrderPrintController
         });
 
         $grandTotal = $servicesTotal + $partsTotal;
-        $badDebt = $payments->where('type', 'bad_debt')->sum('amount');
-        $totalPaid = $payments->sum('amount');
-        $balance = $grandTotal - $totalPaid;
+        $badDebt = (float) $payments->where('type', 'bad_debt')->sum('amount');
+        $totalPaid = (float) $workOrder->total_paid;
+        $balance = max(0.0, round($grandTotal - $workOrder->total_credit_notes - $totalPaid, 2));
 
         return Inertia::render('WorkOrders/Print/Payments', [
             'workOrder' => $workOrder,

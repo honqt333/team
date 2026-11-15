@@ -4,53 +4,48 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Exceptions\InvalidQuoteSignatureException;
 use App\Http\Controllers\Controller;
 use App\Models\WorkOrder;
+use App\Services\QuoteSignatureStorage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class WorkOrderSignatureController extends Controller
 {
+    public function __construct(
+        private readonly QuoteSignatureStorage $signatureStorage
+    ) {}
+
     /**
      * Store a digital signature for a work order.
      */
-    public function store(Request $request, WorkOrder $workOrder)
+    public function store(Request $request, WorkOrder $workOrder): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'type' => 'required|in:reception,delivery',
-            'signature' => 'required|string', // Base64 image
+            'signature' => 'required|string',
         ]);
 
-        $type = $request->input('type');
-        $signatureData = $request->input('signature');
+        $type = $validated['type'];
+        $this->authorize('sign', [$workOrder, $type]);
 
-        // Extract base64 content
-        if (preg_match('/^data:image\/(\w+);base64,/', $signatureData, $typeMatch)) {
-            $data = substr($signatureData, strpos($signatureData, ',') + 1);
-            $extension = strtolower($typeMatch[1]); // png, jpg, etc.
-            $data = base64_decode($data);
-
-            if ($data === false) {
-                return back()->with('error', 'Invalid signature data.');
-            }
-        } else {
-            return back()->with('error', 'Invalid signature format.');
+        try {
+            $path = $this->signatureStorage->storeWorkOrderSignature(
+                $validated['signature'],
+                $workOrder,
+                $type
+            );
+        } catch (InvalidQuoteSignatureException $e) {
+            return back()
+                ->withErrors(['signature' => __('quotes.signature_invalid')])
+                ->with('error', __('quotes.signature_invalid'));
         }
 
-        // Generate filename and path
-        $filename = "signature_{$type}_".Str::random(10).".{$extension}";
-        $path = "work_orders/{$workOrder->id}/signatures/{$filename}";
-
-        // Store file
-        Storage::disk('public')->put($path, $data);
-
-        // Update work order
         $field = "{$type}_signature";
         $dateField = "{$type}_signed_at";
 
-        // Delete old signature if exists
         if ($workOrder->$field) {
             Storage::disk('public')->delete($workOrder->$field);
         }

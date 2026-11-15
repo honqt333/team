@@ -586,4 +586,90 @@ class QuotesTest extends TestCase
         $this->assertCount(1, $quotesDate);
         $this->assertEquals('QT-REJ-3', $quotesDate[0]['code']);
     }
+
+    public function test_quotes_api_index_returns_json_and_supports_print_inertia_response_with_isolation(): void
+    {
+        $this->actingAs($this->user);
+
+        Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'code' => 'QT-API-OWN',
+            'status' => Quote::STATUS_DRAFT,
+            'created_by' => $this->user->id,
+        ]);
+
+        // Cross-tenant quote that must never appear
+        $otherTenant = Tenant::factory()->create(['status' => 'active']);
+        $otherCenter = Center::factory()->create(['tenant_id' => $otherTenant->id]);
+        $otherCustomer = Customer::factory()->create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+        ]);
+        $otherVehicle = Vehicle::factory()->create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+            'customer_id' => $otherCustomer->id,
+        ]);
+        Quote::create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+            'customer_id' => $otherCustomer->id,
+            'vehicle_id' => $otherVehicle->id,
+            'code' => 'QT-API-OTHER',
+            'status' => Quote::STATUS_DRAFT,
+        ]);
+
+        // 1. Standard JSON contract
+        $jsonResponse = $this->getJson(route('quotes.api.index'));
+        $jsonResponse->assertOk();
+        $jsonResponse->assertJsonStructure([
+            'data',
+            'current_page',
+            'per_page',
+            'total',
+        ]);
+        $codesJson = collect($jsonResponse->json('data'))->pluck('code')->all();
+        $this->assertContains('QT-API-OWN', $codesJson);
+        $this->assertNotContains('QT-API-OTHER', $codesJson);
+
+        // 2. Print mode returns Inertia Reports/Print response without TypeError
+        $printResponse = $this->get(route('quotes.api.index', ['print' => 1]));
+        $printResponse->assertOk();
+        $printResponse->assertInertia(fn ($page) => $page
+            ->component('Reports/Print')
+            ->where('reportType', 'quotes')
+            ->where('backRoute', 'app.quotes.index')
+            ->has('filters')
+            ->has('kpis')
+            ->has('rows', 1)
+            ->where('rows.0.code', 'QT-API-OWN')
+            ->has('companyInfo')
+        );
+    }
+
+    public function test_quotes_api_index_rejects_guest_and_unauthorized_user(): void
+    {
+        // Guest redirected to login
+        $guestResponse = $this->get(route('quotes.api.index'));
+        $guestResponse->assertRedirect('/login');
+
+        // Authenticated user without quotes.view gets 403
+        $unauthorizedUser = User::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'current_center_id' => $this->center->id,
+            'is_system_admin' => false,
+        ]);
+        $unauthorizedUser->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        $this->actingAs($unauthorizedUser)
+            ->get(route('quotes.api.index'))
+            ->assertForbidden();
+
+        $this->actingAs($unauthorizedUser)
+            ->get(route('quotes.api.index', ['print' => 1]))
+            ->assertForbidden();
+    }
 }

@@ -325,6 +325,7 @@ class WorkOrderCreditNoteTest extends TestCase
             'work_order_id' => $wo->id,
             'part_id' => $part->id,
             'warehouse_id' => $ctx['warehouse']->id,
+            'source' => WorkOrderItemPart::SOURCE_WAREHOUSE,
             'name' => 'Oil Filter',
             'part_number' => 'OF-100',
             'qty' => 2,

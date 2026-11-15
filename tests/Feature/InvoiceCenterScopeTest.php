@@ -188,11 +188,77 @@ class InvoiceCenterScopeTest extends TestCase
 
         // The app has a centre-switching feature; the invoice follows
         // the centre the user is working in.
-        $user->update(['current_center_id' => $this->centerB->id]);
+        $user->forceFill(['current_center_id' => $this->centerB->id])->save();
         $user->refresh();
 
         $this->actingAs($user)
             ->get('/app/invoices/'.$invoice->id)
             ->assertStatus(200);
+    }
+
+    public function test_center_switch_route_authorizes_membership_and_rejects_unauthorized_center(): void
+    {
+        $invoiceB = $this->invoiceIn($this->centerB);
+        $user = $this->userIn($this->centerA, [Permissions::INVOICES_VIEW]);
+
+        // 1. Cannot switch to centerB without membership
+        $this->actingAs($user)
+            ->post(route('profile.switch-center'), ['center_id' => $this->centerB->id])
+            ->assertStatus(403);
+
+        $this->assertSame($this->centerA->id, (int) $user->fresh()->current_center_id);
+
+        // 2. Attach membership and switch via actual route
+        $user->centers()->attach($this->centerB->id, ['tenant_id' => $this->tenant->id]);
+
+        $this->actingAs($user)
+            ->post(route('profile.switch-center'), ['center_id' => $this->centerB->id])
+            ->assertRedirect();
+
+        $this->assertSame($this->centerB->id, (int) $user->fresh()->current_center_id);
+
+        $this->actingAs($user->fresh())
+            ->get('/app/invoices/'.$invoiceB->id)
+            ->assertStatus(200);
+    }
+
+    public function test_cross_tenant_invoice_is_isolated_even_when_center_is_null(): void
+    {
+        $otherTenant = Tenant::factory()->create(['status' => 'active']);
+        $otherCenter = Center::factory()->create(['tenant_id' => $otherTenant->id]);
+        $otherCustomer = Customer::factory()->create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+        ]);
+        $otherInvoice = Invoice::factory()->create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+            'customer_id' => $otherCustomer->id,
+        ]);
+
+        $user = $this->userIn($this->centerA, [Permissions::INVOICES_VIEW]);
+
+        $this->actingAs($user)
+            ->get('/app/invoices/'.$otherInvoice->id)
+            ->assertNotFound();
+
+        $this->actingAs($user)
+            ->post(route('profile.switch-center'), ['center_id' => $otherCenter->id])
+            ->assertStatus(403);
+    }
+
+    public function test_user_fill_blocks_mass_assignment_of_tenant_id_and_current_center_id_on_existing_user(): void
+    {
+        $otherTenant = Tenant::factory()->create(['status' => 'active']);
+        $user = $this->userIn($this->centerA, [Permissions::INVOICES_VIEW]);
+
+        $user->update([
+            'tenant_id' => $otherTenant->id,
+            'current_center_id' => $this->centerB->id,
+        ]);
+
+        $fresh = $user->fresh();
+        $this->assertSame($this->tenant->id, (int) $fresh->tenant_id);
+        $this->assertSame($this->centerA->id, (int) $fresh->current_center_id);
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Concerns\HasTaxSnapshot;
 use App\Models\Concerns\TenantScoped;
 use App\Support\TenancyContext;
 use App\Traits\HasInvoiceRelations;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -165,9 +166,35 @@ class Invoice extends Model
     // Accessors
     // ─────────────────────────────────────────────────────────────
 
+    public function isCreditNote(): bool
+    {
+        return $this->type === InvoiceType::CREDIT_NOTE
+            || ($this->type instanceof InvoiceType ? $this->type->value : (string) $this->type) === 'credit_note';
+    }
+
+    public function validCreditNotesTotal(): float
+    {
+        if (! $this->exists || $this->isCreditNote()) {
+            return 0.0;
+        }
+
+        return (float) self::withoutGlobalScopes()
+            ->where('tenant_id', $this->tenant_id)
+            ->where('center_id', $this->center_id)
+            ->where('original_invoice_id', $this->id)
+            ->where('type', InvoiceType::CREDIT_NOTE)
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->whereNull('deleted_at')
+            ->sum('total_incl_tax');
+    }
+
     public function getBalanceAttribute(): float
     {
-        return (float) $this->total_incl_tax - (float) $this->total_paid;
+        if ($this->isCreditNote()) {
+            return max(0.0, round((float) $this->total_incl_tax - (float) $this->total_paid, 2));
+        }
+
+        return max(0.0, round((float) $this->total_incl_tax - $this->validCreditNotesTotal() - (float) $this->total_paid, 2));
     }
 
     public function getIsPaidAttribute(): bool
@@ -211,7 +238,7 @@ class Invoice extends Model
      */
     public function updatePaymentStatus(): void
     {
-        if ($this->type === InvoiceType::CREDIT_NOTE || ($this->type instanceof InvoiceType ? $this->type->value : (string) $this->type) === 'credit_note') {
+        if ($this->isCreditNote()) {
             $totalRefunded = (float) $this->payments()
                 ->selectRaw('SUM(CASE WHEN type IN ("refund", "payment") THEN amount WHEN type = "bad_debt" THEN -amount ELSE 0 END) as refunded')
                 ->value('refunded');
@@ -242,19 +269,24 @@ class Invoice extends Model
 
         $this->total_paid = $totalPaid;
 
+        // Valid credit notes issued against this invoice reduce its net receivable
+        // without mutating frozen invoice totals or double-counting total_paid.
+        $totalCredited = $this->validCreditNotesTotal();
+
         // Use a 1-cent tolerance so floating-point rounding (e.g. 1000 vs
         // 1000.01 after VAT line aggregation) does not strand an invoice in
         // "partial" forever even though the customer has paid every riyal.
         $totalIncl = (float) $this->total_incl_tax;
+        $netTotalIncl = max(0.0, round($totalIncl - $totalCredited, 2));
 
-        if ($totalIncl <= 0.01) {
+        if ($netTotalIncl <= 0.01) {
             $this->payment_status = 'paid';
-        } elseif ($totalPaid <= 0) {
-            $this->payment_status = 'unpaid';
-        } elseif ($totalPaid >= $totalIncl - 0.01) {
+        } elseif ($totalPaid >= $netTotalIncl - 0.01) {
             $this->payment_status = 'paid';
-        } else {
+        } elseif ($totalPaid > 0.01 || $totalCredited > 0.01) {
             $this->payment_status = 'partial';
+        } else {
+            $this->payment_status = 'unpaid';
         }
 
         $this->save();
@@ -282,6 +314,51 @@ class Invoice extends Model
     public function scopeWithBalance($query)
     {
         return $query->whereIn('payment_status', ['unpaid', 'partial']);
+    }
+
+    /**
+     * SQL expression for net outstanding balance on issued sales invoices:
+     * MAX(0, total_incl_tax - validCreditNotesTotal - total_paid), compatible with MySQL & SQLite.
+     */
+    public static function outstandingExpressionSql(string $alias = 'invoices'): string
+    {
+        $netExpr = "({$alias}.total_incl_tax - COALESCE((SELECT SUM(cn.total_incl_tax) FROM invoices cn WHERE cn.original_invoice_id = {$alias}.id AND cn.tenant_id = {$alias}.tenant_id AND cn.center_id = {$alias}.center_id AND cn.type = 'credit_note' AND cn.status NOT IN ('draft', 'cancelled') AND cn.deleted_at IS NULL), 0) - COALESCE({$alias}.total_paid, 0))";
+
+        return "COALESCE(SUM(CASE WHEN {$netExpr} > 0 THEN {$netExpr} ELSE 0 END), 0)";
+    }
+
+    /**
+     * Correlated subquery summing valid sales-invoice outstanding balances for a customer/dealer column.
+     */
+    public static function outstandingSubqueryForColumn(string $foreignKey, string $outerIdColumn, string $outerTenantColumn): Builder
+    {
+        return self::query()
+            ->withoutGlobalScopes()
+            ->whereColumn("invoices.{$foreignKey}", $outerIdColumn)
+            ->whereColumn('invoices.tenant_id', $outerTenantColumn)
+            ->where('invoices.type', InvoiceType::INVOICE->value)
+            ->whereNotIn('invoices.status', ['draft', 'cancelled'])
+            ->whereNull('invoices.deleted_at')
+            ->selectRaw(self::outstandingExpressionSql('invoices'));
+    }
+
+    /**
+     * Sum valid sales-invoice outstanding balances for a specific owner (customer/dealer) across centers.
+     */
+    public static function outstandingSumForOwner(string $foreignKey, int $ownerId, ?int $tenantId): float
+    {
+        $query = self::query()
+            ->withoutGlobalScopes()
+            ->where("invoices.{$foreignKey}", $ownerId)
+            ->where('invoices.type', InvoiceType::INVOICE->value)
+            ->whereNotIn('invoices.status', ['draft', 'cancelled'])
+            ->whereNull('invoices.deleted_at');
+
+        if ($tenantId !== null) {
+            $query->where('invoices.tenant_id', $tenantId);
+        }
+
+        return (float) ($query->selectRaw(self::outstandingExpressionSql('invoices').' as total_due')->value('total_due') ?? 0.0);
     }
 
     /**

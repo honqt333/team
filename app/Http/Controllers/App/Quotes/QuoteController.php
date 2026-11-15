@@ -37,7 +37,7 @@ class QuoteController extends Controller
     /**
      * Display a listing of quotes (API).
      */
-    public function apiIndex(Request $request): JsonResponse
+    public function apiIndex(Request $request): JsonResponse|Response
     {
         $this->authorize('viewAny', Quote::class);
 
@@ -255,13 +255,13 @@ class QuoteController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        $makes = VehicleMake::active()->ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
         $modelsByMake = [];
 
         foreach ($makes as $make) {
-            $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
+            $modelsByMake[$make->id] = $make->models()->active()->ordered()->get(['id', 'name_ar', 'name_en']);
         }
 
         return Inertia::render('Quotes/Index', [
@@ -418,13 +418,19 @@ class QuoteController extends Controller
             $vehicle->update(['odometer' => $request->odometer]);
         }
 
-        NotificationService::notifyOwner(
+        $quote->loadMissing('customer');
+        $quoteCustomerName = $quote->customer?->name;
+
+        NotificationService::notifyTenantUsers(
             tenantId: $tenantId,
             type: 'quote.created',
-            title: 'عرض سعر جديد #'.$quote->code,
-            body: 'تم إنشاء عرض سعر جديد',
+            title: __('notifications.quote_created_title', ['code' => $quote->code]),
+            body: $quoteCustomerName
+                ? __('notifications.quote_created_body_customer', ['customer' => $quoteCustomerName])
+                : __('notifications.quote_created_body'),
             actionUrl: '/app/quotes/'.$quote->id,
             actorId: auth()->id(),
+            centerId: $quote->center_id,
         );
 
         return redirect()->route('app.quotes.show', $quote)

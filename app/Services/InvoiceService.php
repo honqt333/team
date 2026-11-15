@@ -5,18 +5,27 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\CenterSequence;
+use App\Models\Customer;
+use App\Models\InventoryBalance;
+use App\Models\InventoryMove;
 use App\Models\Invoice;
 use App\Models\InvoiceTemplate;
+use App\Models\Part;
 use App\Models\Tenant;
+use App\Models\TenantTaxSetting;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
+use App\Services\Inventory\InventoryService;
 use App\Services\Optimization\TaxCalculator;
 use App\Support\CountryCurrencyRegistry;
 use DateTimeInterface;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class InvoiceService
 {
@@ -33,6 +42,28 @@ class InvoiceService
     public function createFromWorkOrder(WorkOrder $workOrder, $user, array $additionalData = []): Invoice
     {
         return DB::transaction(function () use ($workOrder, $additionalData) {
+            // Lock the WorkOrder row first to serialize concurrent invoice creation
+            // attempts (manual, status-completion, or payment-triggered auto-invoicing).
+            $workOrder = WorkOrder::withoutGlobalScopes()
+                ->where('tenant_id', $workOrder->tenant_id)
+                ->whereKey($workOrder->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Re-check inside the lock so stale WorkOrder instances or concurrent
+            // transactions cannot create duplicate work-order invoices.
+            $existingInvoiceExists = Invoice::withoutGlobalScopes()
+                ->where('tenant_id', $workOrder->tenant_id)
+                ->where('work_order_id', $workOrder->id)
+                ->where('type', 'invoice')
+                ->where('status', '!=', 'cancelled')
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($existingInvoiceExists) {
+                throw new Exception(__('invoices.already_exists'));
+            }
+
             // Re-fetch items + parts directly to avoid stale/empty relations
             // (the caller's $workOrder may not have eager-loaded them).
             $activeItems = WorkOrderItem::where('work_order_id', $workOrder->id)
@@ -96,7 +127,15 @@ class InvoiceService
                 'total_paid' => 0,
             ]);
 
-            // 2. Convert WO Items (Services) to Invoice Lines
+            $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
+            $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+            $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
+            $defaultTaxRate = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
+
+            $calculatedLines = [];
+            $lineMeta = [];
+
+            // 2. Convert WO Items (Services) to TaxCalculator lines
             foreach ($activeItems as $item) {
                 $isStandard = $item->service &&
                     trim($item->service->name_ar) !== 'أخرى' &&
@@ -137,30 +176,24 @@ class InvoiceService
                     $description .= " ({$label})";
                 }
 
-                // Compute line totals locally so we don't depend on stale
-                // WorkOrderItem.line_total_excl_tax / line_total_incl_tax columns
-                // (those have been observed as 0 on the WO side, which produced
-                // empty "amount" cells in the invoice cost box).
                 $qty = (float) $item->qty;
                 $unitPrice = (float) $item->unit_price;
                 $discountAmt = (float) ($item->discount_amount ?? 0);
-                $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
-                $taxRate = $taxEnabled ? (float) ($item->tax_rate_snapshot ?? 0) : 0.0;
-                $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+                $itemTaxable = $taxEnabled && ($item->is_taxable !== false);
+                $taxRate = $itemTaxable ? (float) ($item->tax_rate_snapshot ?? $defaultTaxRate) : 0.0;
+                $taxCategory = $item->tax_category_code ?: ($taxEnabled ? ($taxRate > 0 ? 'S' : 'Z') : 'O');
 
-                $net = max(0, ($qty * $unitPrice) - $discountAmt);
+                $lineCalc = $this->taxCalculator->calculateLine(
+                    unitPrice: $unitPrice,
+                    qty: $qty,
+                    discount: $discountAmt,
+                    taxRate: $taxRate,
+                    isInclusive: $isInclusive,
+                );
+                $lineCalc['tax_category_code'] = $taxCategory;
 
-                if ($isInclusive && $taxEnabled) {
-                    $lineIncl = round($net, 2);
-                    $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
-                    $taxAmt = round($lineIncl - $lineExcl, 2);
-                } else {
-                    $lineExcl = round($net, 2);
-                    $taxAmt = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
-                    $lineIncl = round($lineExcl + $taxAmt, 2);
-                }
-
-                $invoice->lines()->create([
+                $calculatedLines[] = $lineCalc;
+                $lineMeta[] = [
                     'is_part' => false,
                     'part_id' => null,
                     'description' => $description,
@@ -169,17 +202,14 @@ class InvoiceService
                     'discount_type' => $item->discount_type,
                     'discount_value' => $item->discount_value,
                     'discount_amount' => $discountAmt,
-                    'is_taxable' => $taxEnabled && ($item->is_taxable !== false),
-                    'tax_category_code' => $item->tax_category_code,
+                    'is_taxable' => $itemTaxable,
+                    'tax_category_code' => $taxCategory,
                     'tax_rate_snapshot' => $taxRate,
-                    'tax_amount' => $taxAmt,
-                    'line_total_excl_tax' => $lineExcl,
-                    'line_total_incl_tax' => $lineIncl,
                     'is_warranty' => (bool) $item->is_warranty,
-                ]);
+                ];
             }
 
-            // 3. Convert WO Parts to Invoice Lines
+            // 3. Convert WO Parts to TaxCalculator lines
             foreach ($activeParts as $part) {
                 if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                     continue;
@@ -189,28 +219,23 @@ class InvoiceService
                     continue;
                 }
 
-                // Same defensive recompute as services — don't trust WO part totals.
                 $qty = (float) $part->qty;
                 $unitPrice = (float) $part->unit_price;
                 $discountAmt = (float) ($part->discount ?? 0);
-                $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
-                $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
-                $taxRate = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
-                $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+                $taxRate = $defaultTaxRate;
+                $taxCategory = $taxEnabled ? ($taxRate > 0 ? 'S' : 'Z') : 'O';
 
-                $net = max(0, ($qty * $unitPrice) - $discountAmt);
+                $lineCalc = $this->taxCalculator->calculateLine(
+                    unitPrice: $unitPrice,
+                    qty: $qty,
+                    discount: $discountAmt,
+                    taxRate: $taxRate,
+                    isInclusive: $isInclusive,
+                );
+                $lineCalc['tax_category_code'] = $taxCategory;
 
-                if ($isInclusive && $taxEnabled) {
-                    $lineIncl = round($net, 2);
-                    $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
-                    $taxAmt = round($lineIncl - $lineExcl, 2);
-                } else {
-                    $lineExcl = round($net, 2);
-                    $taxAmt = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
-                    $lineIncl = round($lineExcl + $taxAmt, 2);
-                }
-
-                $invoice->lines()->create([
+                $calculatedLines[] = $lineCalc;
+                $lineMeta[] = [
                     'is_part' => true,
                     'part_id' => $part->part_id,
                     'description' => $part->name,
@@ -220,30 +245,54 @@ class InvoiceService
                     'discount_value' => null,
                     'discount_amount' => $discountAmt,
                     'is_taxable' => $taxEnabled,
-                    'tax_category_code' => 'S', // Standard — parts don't have a category code on the WO side
+                    'tax_category_code' => $taxCategory,
                     'tax_rate_snapshot' => $taxRate,
-                    'tax_amount' => $taxAmt,
-                    'line_total_excl_tax' => $lineExcl,
-                    'line_total_incl_tax' => $lineIncl,
+                    'is_warranty' => false,
+                ];
+            }
+
+            // 4. Reconcile document-level tax (penny rounding) and persist lines
+            $documentTax = ! empty($calculatedLines)
+                ? $this->taxCalculator->calculateDocument($calculatedLines)
+                : [
+                    'total_excl_tax' => 0.0,
+                    'total_tax' => 0.0,
+                    'total_incl_tax' => 0.0,
+                    'total_taxable_amount' => 0.0,
+                    'reconciled_lines' => [],
+                ];
+
+            foreach ($documentTax['reconciled_lines'] as $idx => $reconciledLine) {
+                $meta = $lineMeta[$idx];
+
+                $invoice->lines()->create([
+                    'is_part' => $meta['is_part'],
+                    'part_id' => $meta['part_id'],
+                    'description' => $meta['description'],
+                    'qty' => $meta['qty'],
+                    'unit_price' => $meta['unit_price'],
+                    'discount_type' => $meta['discount_type'],
+                    'discount_value' => $meta['discount_value'],
+                    'discount_amount' => $meta['discount_amount'],
+                    'is_taxable' => $meta['is_taxable'],
+                    'tax_category_code' => $meta['tax_category_code'],
+                    'tax_rate_snapshot' => $meta['tax_rate_snapshot'],
+                    'tax_amount' => round((float) $reconciledLine['tax_amount'], 2),
+                    'line_total_excl_tax' => round((float) $reconciledLine['line_total_excl_tax'], 2),
+                    'line_total_incl_tax' => round((float) $reconciledLine['line_total_incl_tax'], 2),
+                    'is_warranty' => $meta['is_warranty'],
                 ]);
             }
 
-            // 4. Link existing work order payments to the new invoice
+            // 5. Link existing work order payments to the new invoice
             $workOrder->payments()->update(['invoice_id' => $invoice->id]);
 
-            // 5. Recalculate invoice totals from actual line sums (not WO snapshot)
-            // This prevents stale WorkOrder totals from propagating to the invoice.
-            $invoice->refresh();
-            $lines = $invoice->lines()->get();
-            $sumExcl = $lines->sum('line_total_excl_tax');
-            $sumIncl = $lines->sum('line_total_incl_tax');
-            $sumTax = $lines->sum('tax_amount');
-
+            // 6. Stamp document totals from TaxCalculator::calculateDocument()
             $invoice->forceFill([
-                'total_excl_tax' => round($sumExcl, 2),
-                'total_tax' => round($sumTax, 2),
-                'total_incl_tax' => round($sumIncl, 2),
-                'total_taxable_amount' => round($sumExcl, 2),
+                'total_excl_tax' => $documentTax['total_excl_tax'],
+                'total_tax' => $documentTax['total_tax'],
+                'total_incl_tax' => $documentTax['total_incl_tax'],
+                'total_taxable_amount' => $documentTax['total_taxable_amount'],
             ])->save();
 
             // 6. Recalculate and sync invoice payment status
@@ -411,6 +460,308 @@ class InvoiceService
         $tlv .= $this->tlvEncode(5, number_format((float) $invoice->total_tax, 2, '.', '')); // VAT Amount
 
         return base64_encode($tlv);
+    }
+
+    /**
+     * Create and issue a direct sales invoice (without a Work Order).
+     * All prices, discounts, taxes, totals, sequential numbering, inventory
+     * deductions, and payments are computed and enforced server-side.
+     */
+    public function createDirectSalesInvoice(
+        int $tenantId,
+        int $centerId,
+        int $userId,
+        array $validated,
+        bool $allowNegative = false,
+        bool $allowCustomPricing = false
+    ): Invoice {
+        return DB::transaction(function () use ($tenantId, $centerId, $userId, $validated, $allowNegative, $allowCustomPricing) {
+            $tenant = Tenant::with('taxSettings')->findOrFail($tenantId);
+            $customer = Customer::withoutGlobalScopes()
+                ->where('tenant_id', $tenantId)
+                ->findOrFail($validated['customer_id']);
+
+            $taxSetting = TenantTaxSetting::where('tenant_id', $tenantId)->first();
+            $taxEnabled = (bool) ($taxSetting?->vat_enabled ?? true);
+            $partsInclusive = (bool) ($taxSetting?->parts_inclusive ?? false);
+            $taxRate = $taxEnabled
+                ? (float) ($taxSetting?->parts_vat_rate ?? $taxSetting?->vat_rate ?? CountryCurrencyRegistry::defaultVatRate($tenant->country))
+                : 0.0;
+            $currencyCode = $taxSetting?->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant);
+            $pricingMode = $partsInclusive ? 'inclusive' : 'exclusive';
+
+            $calculatedLines = [];
+            $lineMeta = [];
+
+            foreach ($validated['items'] as $index => $item) {
+                $source = $item['source'] ?? 'warehouse';
+                $partId = $item['part_id'] ?? null;
+                $warehouseId = $item['warehouse_id'] ?? null;
+                $qty = round((float) $item['qty'], 2);
+
+                $part = null;
+                $balance = null;
+
+                if ($partId) {
+                    $part = Part::withoutGlobalScopes()
+                        ->where('tenant_id', $tenantId)
+                        ->where('is_active', true)
+                        ->findOrFail($partId);
+
+                    if ($source === 'warehouse') {
+                        if ($warehouseId) {
+                            $warehouse = Warehouse::withoutGlobalScopes()
+                                ->where('tenant_id', $tenantId)
+                                ->where('center_id', $centerId)
+                                ->where('is_active', true)
+                                ->findOrFail($warehouseId);
+                            $warehouseId = $warehouse->id;
+                        } else {
+                            $warehouseId = Warehouse::withoutGlobalScopes()
+                                ->where('tenant_id', $tenantId)
+                                ->where('center_id', $centerId)
+                                ->where('is_active', true)
+                                ->where('is_default', true)
+                                ->value('id')
+                                ?? Warehouse::withoutGlobalScopes()
+                                    ->where('tenant_id', $tenantId)
+                                    ->where('center_id', $centerId)
+                                    ->where('is_active', true)
+                                    ->value('id');
+                        }
+
+                        if ($warehouseId) {
+                            $balance = InventoryBalance::query()
+                                ->withoutGlobalScopes()
+                                ->where('warehouse_id', $warehouseId)
+                                ->where('part_id', $part->id)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $allowNegative) {
+                                $onHand = (float) ($balance?->qty_on_hand ?? 0);
+
+                                if ($onHand < $qty) {
+                                    throw ValidationException::withMessages([
+                                        'items' => [
+                                            __('inventory.stock.insufficient_warning_with_qty', [
+                                                'available' => $onHand,
+                                                'requested' => $qty,
+                                            ]).' ('.($item['name'] ?? $part->name_ar).')',
+                                        ],
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Authoritative price & discount enforcement
+                $catalogPrice = $part
+                    ? (($balance && (float) $balance->sale_price > 0) ? (float) $balance->sale_price : (float) ($part->default_sale_price ?? 0))
+                    : max(0.0, (float) ($item['unit_price'] ?? 0));
+
+                $minSalePrice = $part
+                    ? max((float) ($balance?->min_sale_price ?? 0), (float) ($part->min_sale_price ?? 0))
+                    : 0.0;
+
+                $requestedUnitPrice = isset($item['unit_price']) ? (float) $item['unit_price'] : $catalogPrice;
+
+                if (! $part && ($source === 'external' || $requestedUnitPrice > 0) && ! $allowCustomPricing) {
+                    throw new AuthorizationException(
+                        'ليس لديك صلاحية تسعير البنود الخارجية أو غير المرتبطة بكتالوج القطع.'
+                    );
+                }
+
+                $effectiveFloor = $minSalePrice > 0 ? $minSalePrice : $catalogPrice;
+
+                if ($part && $effectiveFloor > 0 && ($requestedUnitPrice + 0.001) < $effectiveFloor) {
+                    throw ValidationException::withMessages([
+                        "items.{$index}.unit_price" => [
+                            'السعر المدخل أقل من الحد الأدنى المعتمد للقطعة ('.number_format($effectiveFloor, 2, '.', '').').',
+                        ],
+                    ]);
+                }
+
+                $unitPrice = $part ? $requestedUnitPrice : max(0.0, $requestedUnitPrice);
+                $grossTotal = round($unitPrice * $qty, 2);
+
+                $discountType = $item['discount_type'] ?? null;
+                $discountValue = (float) ($item['discount_value'] ?? 0);
+
+                if ($discountType === 'percentage') {
+                    $pct = max(0.0, min(100.0, $discountValue));
+                    $lineDiscount = round($grossTotal * ($pct / 100), 2);
+                } elseif ($discountType === 'fixed') {
+                    $lineDiscount = round(max(0.0, $discountValue) * $qty, 2);
+                } else {
+                    $lineDiscount = round(max(0.0, (float) ($item['discount'] ?? 0)), 2);
+                }
+
+                $lineDiscount = min($lineDiscount, $grossTotal);
+
+                if ($part && $effectiveFloor > 0 && $qty > 0) {
+                    $effectiveUnitAfterDiscount = ($grossTotal - $lineDiscount) / $qty;
+
+                    if (($effectiveUnitAfterDiscount + 0.001) < $effectiveFloor) {
+                        throw ValidationException::withMessages([
+                            "items.{$index}.discount" => [
+                                'الخصم يخفض صافي سعر الوحدة عن الحد الأدنى المعتمد ('.number_format($effectiveFloor, 2, '.', '').').',
+                            ],
+                        ]);
+                    }
+                }
+
+                $lineCalc = $this->taxCalculator->calculateLine(
+                    unitPrice: $unitPrice,
+                    qty: $qty,
+                    discount: $lineDiscount,
+                    taxRate: $taxRate,
+                    isInclusive: $partsInclusive,
+                );
+                $lineCalc['tax_category_code'] = $taxEnabled ? ($taxRate > 0 ? 'S' : 'Z') : 'O';
+
+                $calculatedLines[] = $lineCalc;
+                $lineMeta[] = [
+                    'part' => $part,
+                    'part_id' => $part?->id,
+                    'warehouse_id' => $warehouseId,
+                    'source' => $source,
+                    'description' => $item['name'] ?? ($part?->name_ar ?: $part?->name_en ?: ''),
+                    'qty' => $qty,
+                    'unit_price' => $unitPrice,
+                    'discount_type' => $discountType ?? 'fixed',
+                    'discount_value' => $discountType ? $discountValue : $lineDiscount,
+                    'discount_amount' => $lineDiscount,
+                ];
+            }
+
+            $documentTax = $this->taxCalculator->calculateDocument($calculatedLines);
+
+            $year = now()->year;
+            $seq = CenterSequence::getNextValue($tenantId, $centerId, 'invoice', $year);
+            $invoiceNumber = $tenant->formatDocumentCode('invoice', $centerId, $seq, $year);
+            CenterSequence::getNextValue($tenantId, $centerId, 'icv');
+
+            $addressParts = array_filter([
+                $customer->building_number ? __('common.building').' '.$customer->building_number : null,
+                $customer->address_line ?: null,
+                $customer->district ? __('common.district').' '.$customer->district : null,
+                $customer->city ?: null,
+                $customer->postal_code ? __('common.postal_code').' '.$customer->postal_code : null,
+            ]);
+            $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
+
+            $sellerNameAr = $tenant->legal_name ?: ($tenant->trade_name ?: $tenant->name);
+            $sellerNameEn = $tenant->name_en ?: $sellerNameAr;
+            $sellerVat = $taxSetting?->tax_number ?? $tenant->vat_number;
+            $sellerCr = $tenant->cr_number;
+
+            $issueDate = Carbon::parse($validated['issue_date']);
+
+            $invoice = Invoice::create([
+                'tenant_id' => $tenantId,
+                'center_id' => $centerId,
+                'customer_id' => $customer->id,
+                'work_order_id' => null,
+                'invoice_number' => $invoiceNumber,
+                'issue_date' => $issueDate,
+                'supply_date' => $issueDate,
+                'notes' => $validated['notes'] ?? null,
+                'type' => 'invoice',
+                'status' => 'valid',
+                'payment_status' => 'unpaid',
+                'customer_name_snapshot' => $customer->name,
+                'customer_vat_snapshot' => $customer->tax_number,
+                'customer_address_snapshot' => $customerAddress,
+                'seller_name_snapshot' => $sellerNameAr,
+                'seller_name_en_snapshot' => $sellerNameEn,
+                'seller_vat_snapshot' => $sellerVat,
+                'seller_cr_snapshot' => $sellerCr,
+                'tax_enabled_snapshot' => $taxEnabled,
+                'pricing_mode_snapshot' => $pricingMode,
+                'tax_rate_snapshot' => $taxRate,
+                'currency_code' => $currencyCode,
+                'total_excl_tax' => $documentTax['total_excl_tax'],
+                'total_tax' => $documentTax['total_tax'],
+                'total_incl_tax' => $documentTax['total_incl_tax'],
+                'total_taxable_amount' => $documentTax['total_taxable_amount'],
+                'total_paid' => 0,
+            ]);
+
+            if ($taxEnabled && CountryCurrencyRegistry::isZatcaApplicable($tenant->country)) {
+                $invoice->forceFill([
+                    'zatca_qr_tlv' => $this->generateZatcaQr($invoice),
+                ])->save();
+            }
+
+            $inventoryService = app(InventoryService::class);
+
+            foreach ($documentTax['reconciled_lines'] as $idx => $reconciledLine) {
+                $meta = $lineMeta[$idx];
+
+                $invoice->lines()->create([
+                    'tenant_id' => $tenantId,
+                    'center_id' => $centerId,
+                    'is_part' => true,
+                    'part_id' => $meta['part_id'],
+                    'description' => $meta['description'],
+                    'qty' => $meta['qty'],
+                    'unit_price' => $meta['unit_price'],
+                    'discount_type' => $meta['discount_type'],
+                    'discount_value' => $meta['discount_value'],
+                    'discount_amount' => $meta['discount_amount'],
+                    'is_taxable' => $taxEnabled,
+                    'tax_category_code' => $reconciledLine['tax_category_code'],
+                    'tax_rate_snapshot' => $taxRate,
+                    'tax_amount' => round((float) $reconciledLine['tax_amount'], 2),
+                    'line_total_excl_tax' => round((float) $reconciledLine['line_total_excl_tax'], 2),
+                    'line_total_incl_tax' => round((float) $reconciledLine['line_total_incl_tax'], 2),
+                ]);
+
+                if ($meta['source'] === 'warehouse' && $meta['part_id'] && $meta['warehouse_id']) {
+                    $inventoryService->issue(
+                        warehouseId: (int) $meta['warehouse_id'],
+                        partId: (int) $meta['part_id'],
+                        qty: (float) $meta['qty'],
+                        userId: $userId,
+                        referenceType: Invoice::class,
+                        referenceId: (int) $invoice->id,
+                        notes: 'بيع مباشر - فاتورة مبيعات #'.$invoiceNumber,
+                        allowNegative: $allowNegative,
+                        moveType: InventoryMove::TYPE_SALE
+                    );
+                }
+            }
+
+            if (! empty($validated['payments'])) {
+                $paymentService = app(PaymentService::class);
+
+                foreach ($validated['payments'] as $paymentData) {
+                    $type = $paymentData['type'] ?? 'payment';
+
+                    if ($type === 'refund') {
+                        throw ValidationException::withMessages([
+                            'payments' => ['لا يمكن تسجيل مبلغ مسترد عند إنشاء فاتورة مبيعات جديدة قبل التحصيل.'],
+                        ]);
+                    }
+
+                    $paymentService->recordPayment($invoice, [
+                        'amount' => $paymentData['amount'],
+                        'payment_method' => $paymentData['payment_method'],
+                        'payment_date' => $paymentData['payment_date'],
+                        'reference' => $paymentData['reference'] ?? null,
+                        'notes' => $paymentData['notes'] ?? null,
+                        'type' => 'payment',
+                    ]);
+                }
+            }
+
+            $invoice->refresh();
+            $invoice->updatePaymentStatus();
+
+            return $invoice;
+        });
     }
 
     /**

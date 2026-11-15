@@ -177,7 +177,7 @@ class InvoiceImmutabilityTest extends TestCase
         $originalIncl = (float) $invoice->total_incl_tax;
 
         try {
-            $invoice->update(['total_tax' => 999]);
+            $invoice->forceFill(['total_tax' => 999])->save();
             $this->fail('The observer should have refused the change.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey(
@@ -222,7 +222,7 @@ class InvoiceImmutabilityTest extends TestCase
             $invoice = $this->issuedInvoice();
 
             try {
-                $invoice->update([$field => $value]);
+                $invoice->forceFill([$field => $value])->save();
                 $this->fail("The observer should have refused the change to {$field}.");
             } catch (ValidationException $e) {
                 $this->assertArrayHasKey(
@@ -246,11 +246,11 @@ class InvoiceImmutabilityTest extends TestCase
     {
         $invoice = $this->draftInvoice();
 
-        $invoice->update([
+        $invoice->forceFill([
             'status' => 'valid',
             'invoice_number' => 'INV-'.uniqid(),
             'issue_date' => now(),
-        ]);
+        ])->save();
 
         $this->assertSame('valid', $invoice->fresh()->status);
     }
@@ -264,7 +264,7 @@ class InvoiceImmutabilityTest extends TestCase
         $invoice = $this->issuedInvoice();
 
         try {
-            $invoice->update(['status' => 'draft']);
+            $invoice->forceFill(['status' => 'draft'])->save();
             $this->fail('Returning an issued invoice to draft must be refused.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -281,7 +281,7 @@ class InvoiceImmutabilityTest extends TestCase
     {
         $invoice = $this->issuedInvoice();
 
-        $invoice->update(['status' => 'reported']);
+        $invoice->forceFill(['status' => 'reported'])->save();
 
         $this->assertSame('reported', $invoice->fresh()->status);
     }
@@ -294,7 +294,7 @@ class InvoiceImmutabilityTest extends TestCase
         $invoice = $this->issuedInvoice(['status' => 'reported']);
 
         try {
-            $invoice->update(['status' => 'valid']);
+            $invoice->forceFill(['status' => 'valid'])->save();
             $this->fail('A reported invoice must not change status again.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -324,10 +324,10 @@ class InvoiceImmutabilityTest extends TestCase
         $originalTax = (float) $invoice->total_tax;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'cancelled',
                 'total_tax' => 999,
-            ]);
+            ])->save();
             $this->fail('Mixing a status change with a protected field must be refused.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -350,10 +350,10 @@ class InvoiceImmutabilityTest extends TestCase
         $originalIncl = (float) $invoice->total_incl_tax;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'valid',
                 'total_incl_tax' => 1,
-            ]);
+            ])->save();
             $this->fail('Issuing while rewriting the total must be refused.');
         } catch (ValidationException $e) {
             $this->assertNotEmpty($e->errors());
@@ -390,10 +390,10 @@ class InvoiceImmutabilityTest extends TestCase
         $date = $invoice->issue_date;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'reported',
                 'invoice_number' => 'INV-REWRITTEN',
-            ]);
+            ])->save();
             $this->fail('The reporting transition was allowed to rewrite the invoice number.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -415,10 +415,10 @@ class InvoiceImmutabilityTest extends TestCase
         $date = $invoice->issue_date;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'reported',
                 'issue_date' => now()->addYear(),
-            ]);
+            ])->save();
             $this->fail('The reporting transition was allowed to rewrite the issue date.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -440,10 +440,10 @@ class InvoiceImmutabilityTest extends TestCase
         $date = $invoice->issue_date;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'cancelled',
                 'invoice_number' => 'INV-REWRITTEN',
-            ]);
+            ])->save();
             $this->fail('The cancellation transition was allowed to rewrite the invoice number.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -465,10 +465,10 @@ class InvoiceImmutabilityTest extends TestCase
         $date = $invoice->issue_date;
 
         try {
-            $invoice->update([
+            $invoice->forceFill([
                 'status' => 'cancelled',
                 'issue_date' => now()->addYear(),
-            ]);
+            ])->save();
             $this->fail('The cancellation transition was allowed to rewrite the issue date.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('status', $e->errors());
@@ -493,11 +493,11 @@ class InvoiceImmutabilityTest extends TestCase
         $number = 'INV-ISSUED-0001';
         $date = now()->startOfDay();
 
-        $invoice->update([
+        $invoice->forceFill([
             'status' => 'valid',
             'invoice_number' => $number,
             'issue_date' => $date,
-        ]);
+        ])->save();
 
         $fresh = $invoice->fresh();
 
@@ -514,11 +514,11 @@ class InvoiceImmutabilityTest extends TestCase
     {
         // Reporting — the ZATCA chain may be stamped on the way in.
         $reported = $this->issuedInvoice();
-        $reported->update([
+        $reported->forceFill([
             'status' => 'reported',
             'zatca_uuid' => 'uuid-abc',
             'zatca_hash' => 'hash-abc',
-        ]);
+        ])->save();
 
         $fresh = $reported->fresh();
         $this->assertSame('reported', $fresh->status);
@@ -527,7 +527,7 @@ class InvoiceImmutabilityTest extends TestCase
 
         // Cancellation — the state only.
         $cancelled = $this->issuedInvoice();
-        $cancelled->update(['status' => 'cancelled']);
+        $cancelled->forceFill(['status' => 'cancelled'])->save();
 
         $this->assertSame('cancelled', $cancelled->fresh()->status);
     }
@@ -788,10 +788,10 @@ class InvoiceImmutabilityTest extends TestCase
         // Try to issue-and-tamper in one operation through a transaction.
         try {
             DB::transaction(function () use ($invoice) {
-                $invoice->update([
+                $invoice->forceFill([
                     'status' => 'cancelled',
                     'total_incl_tax' => 1,
-                ]);
+                ])->save();
             });
             $this->fail('The transaction should have been rolled back.');
         } catch (ValidationException $e) {
@@ -804,6 +804,35 @@ class InvoiceImmutabilityTest extends TestCase
         $this->assertSame($before['total_incl_tax'], (float) $fresh->total_incl_tax);
         $this->assertSame($before['total_paid'], (float) $fresh->total_paid);
         $this->assertSame('valid', $fresh->status);
+    }
+
+    public function test_mass_assignment_cannot_mutate_status_or_financial_totals_on_existing_invoice(): void
+    {
+        $invoice = $this->issuedInvoice();
+
+        $originalExcl = (float) $invoice->total_excl_tax;
+        $originalTax = (float) $invoice->total_tax;
+        $originalIncl = (float) $invoice->total_incl_tax;
+        $originalPaid = (float) $invoice->total_paid;
+
+        $invoice->update([
+            'status' => 'cancelled',
+            'payment_status' => 'paid',
+            'total_excl_tax' => 1,
+            'total_tax' => 1,
+            'total_incl_tax' => 2,
+            'total_taxable_amount' => 1,
+            'total_paid' => 999,
+            'tax_breakdown' => ['tampered' => true],
+        ]);
+
+        $fresh = $invoice->fresh();
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame('unpaid', $fresh->payment_status);
+        $this->assertSame($originalExcl, (float) $fresh->total_excl_tax);
+        $this->assertSame($originalTax, (float) $fresh->total_tax);
+        $this->assertSame($originalIncl, (float) $fresh->total_incl_tax);
+        $this->assertSame($originalPaid, (float) $fresh->total_paid);
     }
 
     // ─────────────────────────────────────────────────────────────

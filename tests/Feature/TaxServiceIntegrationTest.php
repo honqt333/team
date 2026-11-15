@@ -396,25 +396,19 @@ class TaxServiceIntegrationTest extends TestCase
             ));
         }
 
-        // RECORDED: the work order applies ONE order-level tax flag to
-        // the whole aggregated net, so the exempt line is taxed too.
+        // Fixed in R1-D (F-11): WorkOrder respects per-line is_taxable=false,
+        // so only the 100.00 taxable line is taxed (15.00), while the 80.00 exempt line has 0.00 tax.
         $this->assertSame(180.0, $workOrderTotals['excl']);
-        $this->assertSame(27.0, $workOrderTotals['tax']);
-        $this->assertSame(207.0, $workOrderTotals['incl']);
+        $this->assertSame(15.0, $workOrderTotals['tax']);
+        $this->assertSame(195.0, $workOrderTotals['incl']);
 
-        // RECORDED: the invoice stores the line as EXEMPT
-        // (`is_taxable = no`) and nevertheless taxes it at 15%.
-        //
-        // `InvoiceService::createFromWorkOrder()` WRITES `is_taxable`
-        // (`:171`) but never READS it when computing the tax — the
-        // calculation only looks at the order-level `tax_enabled_snapshot`
-        // and the line's `tax_rate_snapshot`. So a line that is marked
-        // exempt is still taxed.
+        // Fixed in R1-D (F-11): InvoiceService::createFromWorkOrder() also respects
+        // is_taxable=false and matches WorkOrder totals via TaxCalculator::calculateDocument().
         $this->assertSame(180.0, $invoiceTotals['total_excl_tax']);
-        $this->assertSame(27.0, $invoiceTotals['total_tax']);
-        $this->assertSame(207.0, $invoiceTotals['total_incl_tax']);
+        $this->assertSame(15.0, $invoiceTotals['total_tax']);
+        $this->assertSame(195.0, $invoiceTotals['total_incl_tax']);
 
-        // The exempt line is marked exempt AND taxed.
+        // The exempt line is marked exempt and carries 0.00 tax.
         $exemptLine = null;
 
         foreach ($result['lines'] as $line) {
@@ -425,18 +419,16 @@ class TaxServiceIntegrationTest extends TestCase
 
         $this->assertNotNull($exemptLine, 'The exempt line must be present.');
         $this->assertSame(
-            12.0,
+            0.0,
             (float) $exemptLine['tax_amount'],
-            'RECORDED: the line stored as NOT taxable still carries 12.00 of tax.'
+            'The line stored as NOT taxable must carry 0.00 tax.'
         );
 
-        // So the two documents of the same sale AGREE — both tax the
-        // exempt line. The divergence is not between the two paths; it
-        // is between the DATA (the line says exempt) and BOTH paths.
+        // Both documents agree on the exact total (195.00).
         $this->assertSame(
             $workOrderTotals['incl'],
             $invoiceTotals['total_incl_tax'],
-            'RECORDED: the work order and its invoice agree — both tax the exempt line.'
+            'The work order and its invoice agree on mixed taxable/exempt totals.'
         );
     }
 }

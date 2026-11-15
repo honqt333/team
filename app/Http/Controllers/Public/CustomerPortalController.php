@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\InvoiceType;
 use App\Exceptions\InvalidQuoteSignatureException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\PortalLocale;
@@ -27,10 +28,7 @@ use App\Services\NotificationService;
 use App\Services\QuoteSignatureStorage;
 use App\Support\CountryCurrencyRegistry;
 use BackedEnum;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Services\Print\ZatcaQrRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -326,6 +324,7 @@ class CustomerPortalController extends Controller
             ->where('tenant_id', $tenant->id)
             ->where('customer_id', $customer->id)
             ->where('work_order_id', $workOrder->id)
+            ->where('type', '!=', InvoiceType::CREDIT_NOTE->value)
             ->whereNotIn('status', ['draft', 'cancelled'])
             ->latest('id')
             ->first();
@@ -663,9 +662,10 @@ class CustomerPortalController extends Controller
             ->limit(40)
             ->get();
 
-        $totalInvoiced = (float) $invoices->sum(fn (Invoice $inv) => (float) $inv->total_incl_tax);
-        $totalPaid = (float) $invoices->sum(fn (Invoice $inv) => (float) $inv->total_paid);
-        $totalBalance = (float) $invoices->sum(fn (Invoice $inv) => max(0.0, (float) $inv->balance));
+        $originalInvoices = $invoices->filter(fn (Invoice $inv) => ! $inv->isCreditNote());
+        $totalInvoiced = (float) $originalInvoices->sum(fn (Invoice $inv) => (float) $inv->total_incl_tax);
+        $totalPaid = (float) $originalInvoices->sum(fn (Invoice $inv) => (float) $inv->total_paid);
+        $totalBalance = Invoice::outstandingSumForOwner('customer_id', (int) $customer->id, (int) $tenant->id);
 
         $badges = $this->portalBadges($customer, $tenant, $currency);
 
@@ -676,7 +676,7 @@ class CustomerPortalController extends Controller
                 'total_invoiced' => round($totalInvoiced, 2),
                 'total_paid' => round($totalPaid, 2),
                 'total_balance' => round($totalBalance, 2),
-                'unpaid_count' => $invoices->filter(fn (Invoice $inv) => (float) $inv->balance > 0.009)->count(),
+                'unpaid_count' => $badges['unpaid_invoices_count'],
                 'currency' => $currency,
             ],
             'invoices' => $invoices->map(fn (Invoice $inv) => $this->mapInvoiceSummary($inv, $currency))->values(),
@@ -998,8 +998,9 @@ class CustomerPortalController extends Controller
             ->whereNull('deleted_at')
             ->where('customer_id', $customer->id)
             ->where('tenant_id', $tenant->id)
+            ->where('type', '!=', InvoiceType::CREDIT_NOTE->value)
             ->whereNotIn('status', ['draft', 'cancelled'])
-            ->get(['id', 'total_incl_tax', 'total_paid', 'payment_status', 'type']);
+            ->get(['id', 'tenant_id', 'center_id', 'total_incl_tax', 'total_paid', 'payment_status', 'type']);
 
         $unpaidInvoices = $validInvoices->filter(fn (Invoice $inv) => (float) $inv->balance > 0.009);
         $unpaidBalance = round((float) $unpaidInvoices->sum(fn (Invoice $inv) => (float) $inv->balance), 2);
@@ -1052,13 +1053,7 @@ class CustomerPortalController extends Controller
      */
     private function zatcaQrDataUri(?string $tlv): ?string
     {
-        if ($tlv === null || $tlv === '') {
-            return null;
-        }
-
-        $writer = new Writer(new ImageRenderer(new RendererStyle(180, 1), new SvgImageBackEnd));
-
-        return 'data:image/svg+xml;base64,'.base64_encode($writer->writeString($tlv));
+        return app(ZatcaQrRenderer::class)->toDataUri($tlv);
     }
 
     private function formatAddress(CenterAddress|TenantAddress|null $address): ?string

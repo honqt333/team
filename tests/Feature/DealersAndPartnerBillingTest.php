@@ -537,6 +537,7 @@ class DealersAndPartnerBillingTest extends TestCase
         /** @var InvoiceService $invoiceService */
         $invoiceService = app(InvoiceService::class);
         $invoice = $invoiceService->createFromWorkOrder($workOrder->fresh(), $this->user);
+        $invoice->forceFill(['status' => 'valid'])->saveQuietly();
 
         $expectedInvoiceBalance = round((float) $invoice->balance, 2);
         $this->assertSame($expectedInvoiceBalance, round($dealer->fresh()->getOutstandingBalance(), 2));

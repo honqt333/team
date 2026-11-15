@@ -5,22 +5,18 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Enums\InvoiceType;
+use App\Exceptions\PaymentExceedsBalanceException;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Department;
-use App\Models\InventoryBalance;
-use App\Models\InventoryMove;
 use App\Models\InventoryUnit;
 use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\TenantTaxSetting;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use App\Services\InvoiceService;
-use App\Support\CountryCurrencyRegistry;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -162,9 +158,9 @@ class PurchasingInvoicesController extends Controller
     {
         $this->authorize(Permissions::INVOICES_CREATE);
 
-        $tenantId = auth()->user()->tenant_id;
-        $centerId = auth()->user()->current_center_id;
-        $userId = auth()->id();
+        $tenantId = (int) auth()->user()->tenant_id;
+        $centerId = (int) auth()->user()->current_center_id;
+        $userId = (int) auth()->id();
 
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -176,11 +172,13 @@ class PurchasingInvoicesController extends Controller
             'items.*.source' => 'nullable|string|in:warehouse,external,customer',
             'items.*.name' => 'required|string',
             'items.*.qty' => 'required|numeric|min:0.01',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
-            'items.*.tax_amount' => 'required|numeric|min:0',
-            'items.*.total' => 'required|numeric|min:0',
-            'items.*.grand_total' => 'required|numeric|min:0',
+            'items.*.discount_type' => 'nullable|string|in:fixed,percentage',
+            'items.*.discount_value' => 'nullable|numeric|min:0',
+            'items.*.tax_amount' => 'nullable|numeric|min:0',
+            'items.*.total' => 'nullable|numeric|min:0',
+            'items.*.grand_total' => 'nullable|numeric|min:0',
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0.01',
             'payments.*.payment_method' => 'required|string',
@@ -191,216 +189,22 @@ class PurchasingInvoicesController extends Controller
         ]);
 
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+        $allowCustomPricing = auth()->user()->can(Permissions::INVOICES_EXTRA_DISCOUNT);
 
-        // Check stock availability for all warehouse items before proceeding
-        if (! $allowNegative) {
-            foreach ($validated['items'] as $item) {
-                $source = $item['source'] ?? 'warehouse';
-                $partId = $item['part_id'] ?? null;
-                $warehouseId = $item['warehouse_id'] ?? null;
-
-                if ($source === 'warehouse' && $partId) {
-                    if (! $warehouseId) {
-                        $warehouseId = Warehouse::where('center_id', $centerId)
-                            ->where('is_active', true)
-                            ->where('is_default', true)
-                            ->value('id') ?? Warehouse::where('center_id', $centerId)->where('is_active', true)->value('id');
-                    }
-
-                    if ($warehouseId) {
-                        $balance = InventoryBalance::query()
-                            ->withoutGlobalScopes()
-                            ->where('warehouse_id', $warehouseId)
-                            ->where('part_id', $partId)
-                            ->first();
-
-                        $onHand = (float) ($balance?->qty_on_hand ?? 0);
-
-                        if ($onHand < (float) $item['qty']) {
-                            throw ValidationException::withMessages([
-                                'items' => [
-                                    __('inventory.stock.insufficient_warning_with_qty', [
-                                        'available' => $onHand,
-                                        'requested' => $item['qty'],
-                                    ]).' ('.$item['name'].')',
-                                ],
-                            ]);
-                        }
-                    }
-                }
-            }
+        try {
+            $invoice = $this->invoiceService->createDirectSalesInvoice(
+                tenantId: $tenantId,
+                centerId: $centerId,
+                userId: $userId,
+                validated: $validated,
+                allowNegative: $allowNegative,
+                allowCustomPricing: $allowCustomPricing,
+            );
+        } catch (PaymentExceedsBalanceException $e) {
+            throw ValidationException::withMessages([
+                'payments' => [$e->getMessage()],
+            ]);
         }
-
-        $invoice = DB::transaction(function () use ($validated, $tenantId, $centerId, $userId, $allowNegative) {
-            $customer = Customer::find($validated['customer_id']);
-
-            // Get tax settings for snapshots
-            $taxSetting = TenantTaxSetting::where('tenant_id', $tenantId)->first();
-            $tenant = auth()->user()?->tenant;
-            $taxEnabled = $taxSetting?->vat_enabled ?? true;
-            $partsInclusive = $taxSetting?->parts_inclusive ?? false;
-            $taxRate = (float) ($taxSetting?->parts_vat_rate ?? $taxSetting?->vat_rate ?? CountryCurrencyRegistry::defaultVatRate($tenant?->country));
-            $currencyCode = $taxSetting?->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant);
-            $pricingMode = $partsInclusive ? 'inclusive' : 'exclusive';
-
-            // Calculate totals
-            $totalExclTax = 0;
-            $totalTax = 0;
-            $totalInclTax = 0;
-
-            foreach ($validated['items'] as $item) {
-                if ($pricingMode === 'inclusive' && $taxEnabled) {
-                    $totalExclTax += ($item['grand_total'] - $item['tax_amount']);
-                } else {
-                    $totalExclTax += $item['total'];
-                }
-                $totalTax += $item['tax_amount'];
-                $totalInclTax += $item['grand_total'];
-            }
-
-            // Generate an invoice number
-            $invoiceNumber = 'INV-'.strtoupper(uniqid());
-
-            $addressParts = array_filter([
-                $customer->building_number ? __('common.building').' '.$customer->building_number : null,
-                $customer->address_line ?: null,
-                $customer->district ? __('common.district').' '.$customer->district : null,
-                $customer->city ?: null,
-                $customer->postal_code ? __('common.postal_code').' '.$customer->postal_code : null,
-            ]);
-            $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
-
-            $invoice = Invoice::create([
-                'tenant_id' => $tenantId,
-                'center_id' => $centerId,
-                'customer_id' => $customer->id,
-                'work_order_id' => null, // Direct sale
-                'invoice_number' => $invoiceNumber,
-                'issue_date' => $validated['issue_date'],
-                'supply_date' => $validated['issue_date'],
-                'type' => 'invoice',
-                'status' => 'valid',
-                'payment_status' => 'unpaid',
-
-                // Snapshots
-                'customer_name_snapshot' => $customer->name,
-                'customer_vat_snapshot' => $customer->tax_number,
-                'customer_address_snapshot' => $customerAddress,
-
-                // Tax settings
-                'tax_enabled_snapshot' => $taxEnabled,
-                'pricing_mode_snapshot' => $pricingMode,
-                'tax_rate_snapshot' => $taxRate,
-                'currency_code' => $currencyCode,
-
-                // Totals
-                'total_excl_tax' => $totalExclTax,
-                'total_tax' => $totalTax,
-                'total_incl_tax' => $totalInclTax,
-                'total_taxable_amount' => $totalExclTax,
-                'total_paid' => 0,
-            ]);
-
-            if ($taxEnabled) {
-                $invoice->update([
-                    'zatca_qr_tlv' => $this->invoiceService->generateZatcaQr($invoice),
-                ]);
-            }
-
-            // Create Invoice Lines and Issue from Inventory
-            foreach ($validated['items'] as $item) {
-                $lineTotalInclTax = $item['grand_total'];
-                $lineTotalExclTax = ($pricingMode === 'inclusive' && $taxEnabled)
-                    ? ($item['grand_total'] - $item['tax_amount'])
-                    : $item['total'];
-
-                $invoice->lines()->create([
-                    'is_part' => true,
-                    'part_id' => $item['part_id'] ?? null,
-                    'description' => $item['name'],
-                    'qty' => $item['qty'],
-                    'unit_price' => $item['unit_price'],
-                    'discount_value' => $item['discount'] ?? 0,
-                    'discount_amount' => $item['discount'] ?? 0,
-                    'is_taxable' => $taxEnabled,
-                    'tax_rate_snapshot' => $taxRate,
-                    'tax_amount' => $item['tax_amount'],
-                    'line_total_excl_tax' => $lineTotalExclTax,
-                    'line_total_incl_tax' => $lineTotalInclTax,
-                ]);
-
-                // Auto-issue from inventory if part is from warehouse
-                $source = $item['source'] ?? 'warehouse';
-                $partId = $item['part_id'] ?? null;
-                $warehouseId = $item['warehouse_id'] ?? null;
-
-                if ($source === 'warehouse' && $partId) {
-                    if (! $warehouseId) {
-                        $warehouseId = Warehouse::where('center_id', $centerId)
-                            ->where('is_active', true)
-                            ->where('is_default', true)
-                            ->value('id') ?? Warehouse::where('center_id', $centerId)->where('is_active', true)->value('id');
-                    }
-
-                    if ($warehouseId) {
-                        $this->inventoryService->issue(
-                            warehouseId: (int) $warehouseId,
-                            partId: (int) $partId,
-                            qty: (float) $item['qty'],
-                            userId: $userId,
-                            referenceType: Invoice::class,
-                            referenceId: (int) $invoice->id,
-                            notes: 'بيع مباشر - فاتورة مبيعات #'.$invoiceNumber,
-                            allowNegative: $allowNegative,
-                            moveType: InventoryMove::TYPE_SALE
-                        );
-                    }
-                }
-            }
-
-            // Create Payments
-            $totalPaid = 0;
-
-            if (! empty($validated['payments'])) {
-                foreach ($validated['payments'] as $paymentData) {
-                    $amount = $paymentData['amount'];
-                    $isRefund = ($paymentData['type'] ?? 'payment') === 'refund';
-
-                    Payment::create([
-                        'tenant_id' => $tenantId,
-                        'center_id' => $centerId,
-                        'invoice_id' => $invoice->id,
-                        'type' => $isRefund ? 'refund' : 'payment',
-                        'amount' => $amount,
-                        'payment_method' => $paymentData['payment_method'],
-                        'payment_date' => $paymentData['payment_date'],
-                        'reference' => $paymentData['reference'] ?? null,
-                        'notes' => $paymentData['notes'] ?? null,
-                        'received_by' => $userId,
-                    ]);
-
-                    $totalPaid += $isRefund ? -$amount : $amount;
-                }
-            }
-
-            // Update payment status
-            $paymentStatus = 'unpaid';
-
-            if ($totalPaid > 0) {
-                if ($totalPaid >= $totalInclTax - 0.01) {
-                    $paymentStatus = 'paid';
-                } else {
-                    $paymentStatus = 'partial';
-                }
-            }
-
-            $invoice->forceFill([
-                'total_paid' => $totalPaid,
-                'payment_status' => $paymentStatus,
-            ])->save();
-
-            return $invoice;
-        });
 
         return redirect()->route('app.invoices.show', $invoice->id)->with('success', 'تم إنشاء الفاتورة بنجاح');
     }

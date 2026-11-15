@@ -193,10 +193,15 @@ class PurchaseReturnsController extends Controller
 
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
+            'purchaseInvoice.center.address',
+            'purchaseInvoice.tenant.taxSettings',
+            'purchaseInvoice.tenant.address',
             'purchaseInvoice.payments.receivedBy',
             'purchaseInvoice.returnInvoices',
             'lines.part',
             'center.address',
+            'tenant.taxSettings',
+            'tenant.address',
         ]);
 
         return Inertia::render('Purchasing/Invoices/ReturnShow', [
@@ -282,10 +287,15 @@ class PurchaseReturnsController extends Controller
 
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
+            'purchaseInvoice.center.address',
+            'purchaseInvoice.tenant.taxSettings',
+            'purchaseInvoice.tenant.address',
             'purchaseInvoice.payments.receivedBy',
             'purchaseInvoice.returnInvoices',
             'lines.part',
             'center.address',
+            'tenant.taxSettings',
+            'tenant.address',
         ]);
 
         return Inertia::render('Purchasing/Invoices/ReturnPrint', [

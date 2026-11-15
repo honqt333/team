@@ -6,8 +6,10 @@ namespace App\Services;
 
 use App\Exceptions\InvalidQuoteSignatureException;
 use App\Models\Quote;
+use App\Models\WorkOrder;
 use App\Support\Media\ImageType;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Stores the customer signature that arrives as a data URI.
@@ -70,6 +72,23 @@ class QuoteSignatureStorage
         Storage::disk('public')->put($filename, $binary);
 
         return $filename;
+    }
+
+    /**
+     * Store a work order reception/delivery signature and return its path on the public disk.
+     *
+     * @throws InvalidQuoteSignatureException
+     */
+    public function storeWorkOrderSignature(string $dataUri, WorkOrder $workOrder, string $type): string
+    {
+        $binary = $this->decode($dataUri);
+        $safeType = $type === 'delivery' ? 'delivery' : 'reception';
+        $filename = "signature_{$safeType}_".Str::random(10).'.'.$this->extensionFor($binary);
+        $path = "work_orders/{$workOrder->id}/signatures/{$filename}";
+
+        Storage::disk('public')->put($path, $binary);
+
+        return $path;
     }
 
     /**
