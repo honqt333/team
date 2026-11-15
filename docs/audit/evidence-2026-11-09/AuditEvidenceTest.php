@@ -136,6 +136,6 @@ class AuditEvidenceTest extends TestCase
         $paid = PayrollRun::create(array_merge($data, ['period_start' => '2026-02-01', 'period_end' => '2026-02-28', 'status' => 'paid']));
         $item = PayrollItem::create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'payroll_run_id' => $paid->id, 'employee_id' => $employee->id, 'base_salary' => 100, 'gosi_amount' => 0, 'net_salary' => 100]);
         $this->actingAs($user)->delete('/app/hr/payroll/'.$draft->id.'/items/'.$item->id)->assertRedirect();
-        $this->assertDatabaseMissing('hr_payroll_items',['id' => $item->id]);
+        $this->assertDatabaseMissing('hr_payroll_items', ['id' => $item->id]);
     }
 }

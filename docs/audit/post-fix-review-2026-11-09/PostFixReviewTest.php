@@ -69,6 +69,6 @@ class PostFixReviewTest extends TestCase
         $rows = app(TaxPeriodService::class)->collectTransactionsForPeriod($t->id, '2026-01-01', '2026-03-31');
         $row = collect($rows)->where('transaction_type', 'company_transaction')->firstWhere('transaction_id', $tx->id);
         $this->assertNotNull($row);
-        $this->assertEquals(15,$row['vat_amount']);
+        $this->assertEquals(15, $row['vat_amount']);
     }
 }
