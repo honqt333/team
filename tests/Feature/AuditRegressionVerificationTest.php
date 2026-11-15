@@ -239,6 +239,7 @@ class AuditRegressionVerificationTest extends TestCase
         $creditNote = new Invoice([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
+            'original_invoice_id' => $taxInv->id,
             'customer_id' => $customer->id,
             'dealer_id' => $dealer->id,
             'invoice_number' => 'CN-D1',

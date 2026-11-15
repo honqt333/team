@@ -227,6 +227,7 @@ class SystemActorIdentityTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->post(route('system.bank-receipts.approve', $receipt->id), [
                 'force_approve' => true,
+                'notes' => 'Approved by admin',
             ])
             ->assertRedirect();
 
