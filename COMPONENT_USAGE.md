@@ -1,3 +1,5 @@
+> **الحالة:** `Superseded` — تم استبدال هذا الدليل بالمرجعين المعتمدين [docs/COMPONENTS.md](docs/COMPONENTS.md) و[docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). يُمنع الاعتماد على أمثلة المكونات القديمة (`TextInput`, `PrimaryButton`) الواردة فيه.
+
 # دليل استخدام مكونات الواجهة ونظام التصميم (Design System & Component Usage Guide)
 ## خدمة برو / Khidmh Pro
 

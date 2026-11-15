@@ -262,13 +262,14 @@ jobs:
       - name: Test UI Constitution Checker
         run: npm run test:ui-constitution
 
-      - name: Run UI Constitution Check (advisory on changed lines)
-        continue-on-error: true
+      - name: Run UI Constitution Check
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.base_ref }}" ]; then
-            node scripts/check-ui-constitution.mjs --base "origin/${{ github.base_ref }}"
+            npm run check:ui -- --base "origin/${{ github.base_ref }}"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            npm run check:ui -- --base "${{ github.event.before }}"
           else
-            node scripts/check-ui-constitution.mjs --base HEAD~1
+            npm run check:ui -- --base HEAD~1
           fi
 
   build-frontend:

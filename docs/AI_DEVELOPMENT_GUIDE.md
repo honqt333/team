@@ -1,3 +1,5 @@
+> **الحالة:** `Superseded` — تم استبدال هذه الوثيقة بالدستور الموحد في [AGENTS.md](../AGENTS.md) و[docs/ARCHITECTURE.md](ARCHITECTURE.md) و[docs/SECURITY.md](SECURITY.md).
+
 # AI Development Guide: The Khidmah Pro ERP Constitution
 
 This document serves as the mandatory development guide and constitution for every AI assistant, agent, and engineer working on the **Khidmah Pro ERP Platform** (codebase: **Carag V2**). It outlines the design principles, architectural constraints, security rules, and development workflows that must be strictly followed to ensure stability, scalability, and quality.

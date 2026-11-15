@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Khidmah Pro">
+  <title>Khidmah Pro — The Link</title>
+  <defs>
+
+  </defs>
+
+  <mask id="bCut">
+    <rect x="0" y="0" width="512" height="512" fill="#fff"/>
+    <rect x="118" y="262" width="208" height="130" rx="65" fill="none" stroke="#000" stroke-width="38" transform="rotate(-32 222 327)"/>
+  </mask>
+  <g mask="url(#bCut)"><rect x="186" y="150" width="208" height="130" rx="65" fill="none" stroke="currentColor" stroke-width="38" transform="rotate(-32 290 215)"/></g>
+  <rect x="118" y="262" width="208" height="130" rx="65" fill="none" stroke="currentColor" stroke-width="38" transform="rotate(-32 222 327)"/>
+</svg>

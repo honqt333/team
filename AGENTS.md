@@ -1,295 +1,72 @@
-# دستور تطوير الوكلاء والذكاء الاصطناعي — خدمة برو / Khidmh Pro
-# Unified AI Agent Master Constitution & Protocol
+# دستور التطوير الهندسي الموحد — خدمة برو / Khidmah Pro
+# Unified Engineering Constitution & Agent Governance
 
-> **تنبيه إلزامي لجميع الوكلاء البرمجية والمطورين (Antigravity, Claude, Cursor, GitHub Copilot, Windsurf):**
-> هذا المستند هو **المرجع التشغيلي والمعماري الأعلى والملزم** داخل هذا المشروع.
-> يمنع منعاً باتاً لأي وكيل برمجي اتخاذ قرارات فردية، أو تجاوز القواعد الأمنية، أو إنشاء هياكل وخدمات موازية لما هو معتمد هنا.
-> يُقرأ ويُطبق هذا الدستور بالكامل قبل فحص أو كتابة أي كود.
-
----
-
-## 1. هوية المشروع والاسم الرسمي المعتمد (Brand Identity & Official Name)
-
-- **الاسم الرسمي والوحيد للمنظومة:** **خدمة برو (Khidmh Pro)**.
-- ⛔ **حظر اسم Carag نهائياً وباتاً:** يمنع منعاً باتاً على جميع الوكلاء البرمجية كتابة أو اقتراح أو استخدام الاسم القديم `Carag` في أي رد، أو واجهة، أو كود، أو بريد، أو ملف ترجمة. هذا الاسم ملغى تماماً ولا يمثل هوية المشروع.
-- ⚙️ **ديناميكية الاسم وقابلية التغيير في أي وقت (Dynamic Rebranding):**
-  - **يمنع كتابة اسم النظام كنص ثابت (Hardcoded String):**
-    - في الـ **Backend**: يُستدعى اسم المنظومة دائماً عبر `config('app.name_ar', 'خدمة برو')` بالعربية، و `config('app.name', 'Khidmh Pro')` بالإنجليزية، أو عبر `env('APP_NAME_AR')` و `env('APP_NAME')`.
-    - في الـ **Frontend**: يُستدعى دائماً عبر `$t('common.app_name')` أو عبر خصائص الصفحة المشتركة `usePage().props.app.name`.
-  - هذا يضمن قدرة مالك المنظومة على تغيير الاسم التجاري فوراً عند الإطلاق أو في أي وقت مستقبلي بمجرد تعديل متغيرات البيئة في `.env` دون الحاجة لتعديل سطر كود واحد.
-- **طبيعة المنظومة:** نظام ERP سحابي متكامل متعدد المستأجرين والفروع مخصص لإدارة مراكز صيانة المركبات، المستودعات، والمحاسبة والمالية (خدمة برو / Khidmh Pro).
-- **حزمة التقنيات (Tech Stack):**
-  - **الخلفية (Backend):** Laravel 12 (PHP 8.2+) · MySQL 8.0+.
-  - **الواجهة (Frontend):** Vue 3 (Composition API / `<script setup>`) · Inertia.js · Vite · Tailwind CSS.
-- **فلسفة النظام:** هذا نظام مؤسسي حقيقي يعمل لدى عملاء ومراكز صيانة فعلية، ويمس معاملات مالية وفوترة إلكترونية حية:
-  - ❌ **ليس تطبيقاً تجريبياً (Prototype)**
-  - ❌ **ليس نسخة تجريبية (MVP)**
-  - ❌ **ليس مشروع تدريب أو حقل تجارب**
-- **مبدأ الأمان والاستقرار:** التوافق العكسي الكامل (Backward Compatibility) إلزامي؛ أي تغيير يجب ألا يكسر بيانات قديمة أو استعلامات سابقة.
+> **المرجع الأعلى والوحيد (Status: Active):**
+> هذا الملف هو نقطة الدخول الرئيسية والمرجع التشغيلي الأعلى لجميع الوكلاء البرمجيين والمطورين.
+> تُفصَّل القواعد التخصصية في وثائق `docs/` المرتبطة أدناه دون تكرارها هنا.
+> يُمنع تجاوز القواعد الأمنية أو إنشاء خدمات أو مكونات موازية أو تعديل الملفات خارج النطاق المعتمد.
 
 ---
 
-## 2. بروتوكول العمل الإلزامي من 5 خطوات (Mandatory 5-Step Workflow)
+## 1. الهوية الرسمية والتعريف المعماري
 
-على كل وكيل اتباع الخطوات الخمس التالية بالترتيب الدقيق في **كل مهمة برمجية بدون استثناء**:
-
-```mermaid
-flowchart LR
-    A["1. الفحص والاستكشاف<br/>(Discovery First)"] --> B["2. عزل المستأجر والتفويض<br/>(Tenancy & Security)"]
-    B --> C["3. التنفيذ الآمن وإعادة الاستخدام<br/>(Implementation & Reuse)"]
-    C --> D["4. التدويل وسجل الأنشطة<br/>(i18n & Activity Log)"]
-    D --> E["5. التحقق الإلزامي والجودة<br/>(Test & Build)"]
-```
-
-### الخطوة 1: الفحص والاستكشاف قبل أي كود (Discovery First)
-- **ممنوع كتابة أو تعديل أي سطر قبل التحقق من الموجود:**
-  1. قراءة الموديل المعني في `app/Models/` وفحص العلاقات و `$fillable` و `$casts`.
-  2. قراءة ملفات المهاجرة السابقة في `database/migrations/` لمعرفة أنواع الحقول الفعلية في MySQL والقيود (`foreign keys`, `unsigned`, `nullable`).
-  3. فحص الخدمات في `app/Services/` والإجراءات في `app/Actions/` للتأكد من عدم وجود خدمة قائمة تؤدي الغرض.
-  4. فحص مكونات الواجهة المتاحة في `resources/js/Components/` (مثل القوائم واللوحات والطباعة) قبل التفكير في بناء مكون.
-  5. فحص نصوص الترجمة الحالية في `resources/js/i18n/lang/ar.json` و `lang/ar/`.
-
-### الخطوة 2: عزل المستأجر والفرع والتفويض الصارم (Tenancy & Security)
-- **العزل التلقائي (Tenancy Isolation):**
-  - يجب استخدام Traits المعتمدة: `TenantScoped` للمستأجر، و `CenterScoped` للفروع.
-  - لا تستنتج المستأجر أو الفرع يدوياً من الثوابت؛ اعتمد دائماً على سياق المستخدم المصادق عليه: `$request->user()->tenant_id` و `current_center_id`.
-  - إذا كان الموديل يملأ المعرفات تلقائياً عبر Trait، **لا تعد تعيينها يدوياً**.
-- **التفويض الصارم في الخادم (Server-Side Authorization):**
-  - كل عملية حساسة (إنشاء، تعديل، حذف، تغيير حالة) تتطلب فحصاً صريحاً عبر Policy أو Gate (`$this->authorize(...)`).
-  - **إخفاء الأزرار في واجهة المستخدم ليس حماية ولا تفويضاً.**
-  - دور `super_admin` داخل المستأجر لا يعني مدير المنصة العام؛ مدير المنصة يُفحص عبر Guard وميدلوير مخصص (`EnsureSystemAdmin`).
-
-### الخطوة 3: التنفيذ ومنع الازدواجية (No Reinventing the Wheel)
-- **الاعتماد على المحركات المركزية المعتمدة:**
-  - **العمليات المالية والفواتير:** تمر حصراً عبر `InvoiceService`, `PaymentManager`, `TaxCalculator`. يمنع احتساب الضريبة أو سداد الفواتير خارج هذه الخدمات.
-  - **ساعات العمل واحتساب وقت الفنيين:** تدار حصراً عبر `WorkOrderLaborService` و `WorkOrderLaborEntry`.
-  - **المخزون وحركات القطع:** تدار حصراً عبر `InventoryService` و `InventoryMove`.
-  - **محرك الطباعة:** تُستخدم مكونات الطباعة المركزية ومحرك الطباعة الموحد (`usePrint` و `PrintEngine.vue`).
-- **قواعد المهاجرات وقواعد البيانات:**
-  - **ممنوع تعديل ملفات Migration سابقة جرى تشغيلها.** أنشئ دائماً Migration جديدة ملحقة تحتوي على `up()` و `down()`.
-  - انتبه لقيود MySQL (مثل `unsignedInteger` التي لا تقبل قيماً سالبة).
-
-### الخطوة 4: التدويل الكامل وسجل الأنشطة (i18n & Activity Logging)
-- **منع النصوص الثابتة منعاً باتاً (Zero Hardcoded Strings):**
-  - يمنع كتابة أي نص عربي أو إنجليزي ثابت داخل مكونات Vue أو استجابات Controller.
-  - الواجهة: استخدام دالة `t('key')` والربط بـ `resources/js/i18n/lang/ar.json` و `en.json`.
-  - الخادم: استخدام `__('messages.key')` والربط بـ `lang/ar/` و `lang/en/`.
-- **تسجيل الأنشطة (Audit Trail):**
-  - كل تعديل على كروت العمل، الفواتير، الحالات، أو الإعدادات الحساسة يجب توثيقه عبر `logActivity()` على الموديل المعني.
-
-### الخطوة 5: التحقق الإلزامي قبل إنهاء المهمة (Mandatory Verification)
-- **لا يُعلن أي وكيل عن انتهاء مهمته دون تنفيذ والتأكد من نجاح الآتي:**
-  1. تشغيل اختبارات الميزة المتأثرة:
-     ```bash
-     php artisan test tests/Feature/YourTargetTest.php
-     ```
-  2. بناء الأصول والتأكد من خلو واجهة Vue من أي أخطاء تجميع:
-     ```bash
-     npm run build
-     ```
-  3. تنظيف الكاش عند إضافة أو تعديل مسارات أو ترجمات:
-     ```bash
-     php artisan optimize:clear
-     ```
+- **الاسم الرسمي والوحيد للمنظومة:** **خدمة برو (Khidmah Pro)** — يُمنع استخدام الاسم التاريخي `Carag` في أي كود أو واجهة أو وثيقة جديدة.
+- **طبيعة النظام:** منصة ERP سحابية مؤسسية متعددة المستأجرين والفروع لإدارة مراكز صيانة المركبات، المستودعات، الموارد البشرية، الاشتراكات، والمحاسبة والفوترة الإلكترونية.
+- **الحزمة التقنية:** Laravel 12 (PHP 8.2+) · MySQL 8.0+ · Vue 3 (`<script setup>`) · Inertia.js 2 · Tailwind CSS · Vite.
+- **التوافق العكسي (Backward Compatibility):** نظام إنتاجي حي؛ أي تغيير يجب ألا يكسر البيانات السابقة أو مسارات التشغيل القائمة.
 
 ---
 
-## 3. دستور الواجهات والهوية البصرية الموحدة (UI / UX Visual Identity)
+## 2. بروتوكول العمل الإلزامي للوكلاء
 
-### 1. الخط المعتمد الموحد (Typography)
-- **الخط الوحيد المعتمد للنظام:** **`IBM Plex Sans Arabic`** لجميع الواجهات والتقارير وشاشات الطباعة.
-- يمنع استخدام أو استدعاء خطوط موازية (`Cairo`, `Figtree`, `Tajawal`).
+1. **بوابة التخطيط والاكتشاف قبل التنفيذ (`DEVELOPMENT_WORKFLOW.md`):** افحص الموديل (`$fillable`, `$casts`, العلاقات)، المهاجرات، الخدمات، السياسات، سجل المكونات ([docs/COMPONENT_REGISTRY.md](docs/COMPONENT_REGISTRY.md))، سجل التكرارات، والترجمات وأعدّ خطة واضحة قبل كتابة أي سطر.
+2. **نطاق المهمة و Git:** التزم بنطاق المهمة فقط، ولا تتراجع عن تعديلات المستخدم أو الوكلاء الآخرين.
+3. **منع التكرار وإعادة الاستخدام:** **لا يجوز إنشاء مكون جديد قبل البحث عن مكون معتمد يؤدي الوظيفة نفسها** في [docs/COMPONENT_REGISTRY.md](docs/COMPONENT_REGISTRY.md)، ولا إنشاء خدمة أو مكون موازٍ عند وجود بديل قائم.
+4. **بوابة الجودة والتحقق قبل الإغلاق:** **لا يجوز إعلان اكتمال صفحة جديدة قبل التحقق من التزامها بالقواعد المنطبقة وتوثيق الاختبارات المنفذة فعلياً** (`PASS` / `FAIL` / `NOT VERIFIED` / `NOT APPLICABLE`) عبر [docs/TASK_DELIVERY_TEMPLATE.md](docs/TASK_DELIVERY_TEMPLATE.md) ومراجعة `git diff`، مع توثيق أي فشل قائم (Baseline Failure) بصدق دون إخفائه.
 
-### 2. ترتيب وهندسة الهيدر المعياري (`PageHeader.vue`)
-- **هندسة الهيدر:** استخدام `rounded-2xl`، مع إطار زجاجي ناعم وإضاءة خافتة (`p-4 sm:p-5`).
-- **الترتيب المعياري لما بداخل الهيدر (من اليمين إلى اليسار في العربية RTL):**
-  ```
-  [ عنوان الصفحة + الأيقونة + شارة العدد ]  ---------------->  [ شريط الأدوات الزجاجي ]   [ زر الإجراء الأساسي ]
-  (أقصى اليمين)                                                 (تصدير | استيراد | طباعة | فاصل | مبدل العرض)     (+ إضافة / إنشاء - في أقصى اليسار)
-  ```
-  - شريط الأدوات الزجاجي (`Actions Group`) يأتي أولاً باتجاه المنتصف.
-  - زر الإجراء الرئيسي (`CTA Button` مثل "+ كرت عمل جديد" أو "+ إضافة عميل") يرسخ دائماً في أقصى الزاوية الخارجية لليسار لثبات الموضع البصري عبر كافة الشاشات.
+---
 
-### 3. سجل مكونات الواجهة المعتمدة (Approved Component Registry)
-يمنع استخدام عناصر HTML الخام أو بناء بدائل للمكونات التالية المعتمدة:
+## 3. القواعد الجوهرية (ملخص تنفيذي)
 
-| المكون | الموقع البرمجي | الغرض وقواعد الاستخدام |
+- **مصدر الحقيقة الواحد:**
+  - اسم النظام في الخادم من `config('app.name_ar')` / `config('app.name')`، ويُشارك للواجهة عبر `page.props.app_name` (وليس `page.props.app.name`) مع fallback `$t('common.app_name')`.
+  - الإعدادات العالمية عبر `Setting::get()`، وإعدادات المستأجر عبر `Setting::forTenant()` أو جداول `tenants` / `tenant_tax_settings` / `tenant_zatca_settings`، وإعدادات الفرع عبر `centers`. التفاصيل الكاملة في [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- **الأمان وعزل المستأجرين:**
+  - التزم بـ `TenantScoped` و`CenterScoped` ولا تفرض `tenant_id` على الجداول العالمية.
+  - التفويض الحقيقي عبر Policies/Gates (`$this->authorize(...)`) في الخادم؛ إخفاء الأزرار ليس حماية.
+  - العمليات المالية والمخزنية والبنود المحمية تتم داخل `DB::transaction()` مع `lockForUpdate()`، وتسجَّل عبر `logActivity()`. التفاصيل في [docs/SECURITY.md](docs/SECURITY.md).
+- **المكونات ونظام التصميم:**
+  - الخط الوحيد المعتمد هو **`IBM Plex Sans Arabic`**، ومصدر الألوان والمسافات الفعلي هو `resources/js/Design/tokens.css`.
+  - اعتمد مكونات `App*` (`AppButton`, `AppInput`, `AppTextarea`, `AppSelect`, `AppCheckbox`) و`SearchableSelect` و`AppToggle` و`AppFileUpload` و`BaseModal` و`DataTable` و`Toast`. المكونات القديمة (`PrimaryButton`, `TextInput`, `Checkbox`, `Toggle`, `Modal`, ...) **Deprecated** ويُمنع استخدامها في الكود الجديد. التفاصيل في [docs/COMPONENTS.md](docs/COMPONENTS.md) و[docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+  - **حوكمة مهارات التصميم الخارجية:** تخضع مهارات الواجهات الخارجية (`impeccable`, `ui-ux-pro-max`, `design`, `design-system`, `ui-styling`) لقواعد التقييد في [.agents/rules/ui-skills-governance.md](.agents/rules/ui-skills-governance.md)، ولا تتجاوز `AGENTS.md` أو `docs/DESIGN_SYSTEM.md` أو `docs/COMPONENTS.md` أو `docs/COMPONENT_REGISTRY.md` أو `resources/js/Design/tokens.css`.
+- **الترجمات:**
+  - صفر نصوص ثابتة جديدة؛ استخدم `$t('...')` في الواجهة و`__('...')` في الخلفية، وحافظ على تطابق `ar.json` و`en.json`. التفاصيل في [docs/I18N_RULES.md](docs/I18N_RULES.md).
+- **الاختبارات وبوابات الجودة:**
+  - لا تعدل ملفات Migration تم تشغيلها.
+  - طبّق مصفوفة الفحوصات (`php artisan test`, `composer lint`, `composer stan`, `npm run lint`, `npm run type-check`, `npm run test`, `npm run check:ui`, `npm run build`) بحسب نوع التغيير. التفاصيل في [docs/TESTING.md](docs/TESTING.md).
+- **الاستثناءات والقرارات الهندسية (ADR):**
+  - أي قرار معماري مؤثر أو استثناء دستوري يُوثّق في `docs/ADR/` وفق النموذج المعتمد في [docs/TESTING.md](docs/TESTING.md).
+
+---
+
+## 4. فهرس الوثائق التخصصية المعتمدة
+
+| الوثيقة | الحالة | النطاق |
 | :--- | :--- | :--- |
-| **SearchableSelect** | `@/Components/SearchableSelect.vue` | **إلزامي:** يمنع استخدام `<select>` التقليدي للبيانات الديناميكية. |
-| **AppPrintButton** | `@/Components/Common/AppPrintButton.vue` | **إلزامي:** زر الطباعة الموحد (يدعم نمط أيقونة `icon` ونمط نصي `button` مع مؤشر تحميل). |
-| **AppViewModeToggle** | `@/Components/Common/AppViewModeToggle.vue` | **إلزامي:** مبدل العرض الشبكي/السطري الموحد مع حفظ تلقائي في `localStorage`. |
-| **AppTabs** | `@/Components/Common/AppTabs.vue` | **إلزامي:** التبويبات الموحدة بنمطي `pills` أو `underline` مع دعم الشارات ومزامنة معلمات الرابط `?tab=...`. |
-| **SaudiPlateDisplay** | `@/Components/Vehicles/SaudiPlateDisplay.vue` | **إلزامي:** عرض لوحة المركبة السعودية بالتنسيق الرسمي. |
-| **SaudiPlateInput** | `@/Components/Vehicles/SaudiPlateInput.vue` | **إلزامي:** حقل إدخال واختيار حروف وأرقام اللوحة السعودية. |
-| **SignaturePad** | `@/Components/Common/SignaturePad.vue` | **إلزامي:** التوقيع الرقمي للعملاء واستلام المركبات. |
-| **CustomDatePicker** | `@/Components/CustomDatePicker.vue` | **إلزامي:** منتقي التواريخ الموحد الداعم للوضعين الداكن والفاتح. |
-| **ConfirmModal** | `@/Components/ConfirmModal.vue` | **إلزامي:** نوافذ التأكيد للإجراءات الحرجة (الحذف، الإلغاء، الاسترجاع). |
-| **PrintEngine** | `@/Components/Print/PrintEngine.vue` | **إلزامي:** محرك الطباعة الموحد عبر `usePrint`. |
-| **AppToggle** | `@/Components/Common/AppToggle.vue` | **إلزامي:** مفتاح التبديل الموحد (Toggle Switch) لجميع حالات التبديل المنطقي (On/Off). يمنع استخدام وسوم Checkbox الخام. |
-| **FormField** | `@/Components/Common/FormField.vue` | **إلزامي:** غلاف الحقول الموحد (Label + Asterisk + Control + Hint + Error). |
-| **FormSection** | `@/Components/Common/FormSection.vue` | **إلزامي:** بطاقة تجميع الحقول الموحدة مع Header ووصف وأزرار فرعية. |
-| **SelectableCard** | `@/Components/Common/SelectableCard.vue` | **إلزامي:** بطاقة التحديد المرئية كبديل حديث لـ Checkbox/Radio في القوائم. |
-| **RadioGroup** | `@/Components/Common/RadioGroup.vue` | **إلزامي:** مجموعة أزرار الراديو الموحدة المتوافقة مع إمكانية الوصول. |
-| **DataTable** | `@/Components/Common/DataTable.vue` | **إلزامي:** محرك عرض الجداول وقوائم البيانات الموحد (يدعم الترتيب والتحميل والتفريغ). |
-| **AppPagination** | `@/Components/Common/AppPagination.vue` | **إلزامي:** شريط التنقل بين الصفحات الموحد بالاعتماد على Design Tokens. |
-| **Toast & useToast** | `@/Components/Toast.vue`<br/>`@/Composables/useToast.js` | **إلزامي:** نظام الإشعارات الموحد لرسائل النجاح والأخطاء والتنبيهات. يمنع بناء نوافذ أو أشرطة إشعارات موازية. |
-| **BaseModal** | `@/Components/BaseModal.vue` | **إلزامي:** الغلاف الموحد لجميع النوافذ المنبثقة للنماذج، يدعم التمرير الكامل افتراضياً (`scrollEntire: true`). |
-| **AppInput / AppTextarea / AppSelect / AppButton / AppCheckbox** | `@/Components/App/` | **إلزامي:** مكونات الإدخال والأزرار الموحدة؛ يمنع استخدام عناصر HTML الخام للنماذج. |
-| **AppFileUpload** | `@/Components/Common/AppFileUpload.vue` | **إلزامي:** مكون رفع الملفات والمرفقات والصور الموحد (يدعم السحب والإفلات `dropzone` ومعاينة الصور `image`). يمنع استخدام `<input type="file">` الخام. |
-
-#### معايير مفتاح التبديل الموحد (`AppToggle.vue`)
-- **إلزامي لجميع حالات التبديل المنطقي (On/Off Switches):**
-  - يمنع منعاً باتاً إنشاء أو كتابة أزرار تبديل عبر وسوم HTML الخام مثل `<input type="checkbox" class="sr-only peer">` أو محاكاة الـ Switches عبر وسوم الـ `after:` يدويًا.
-  - المكون المعتمد الوحيد هو `@/Components/Common/AppToggle.vue`.
-- **الخصائص المدعومة (Props):**
-  - `v-model`: يدعم القيم المنطقية (`Boolean`)، أو القيم المخصصة (`true-value` / `false-value` مثل `"1"` و `"0"`):، أو المصفوفات (`Array` لقوائم الصلاحيات عند تمرير `:value="item"`).
-  - `size`: المقاسات المعتمدة (`sm`, `md`, `lg`)، مع محاذاة وتوسيط رأسي هندسي دقيق (`p-0.5 items-center`).
-  - `color`: الألوان المعتمدة (`primary`, `success`, `danger`, `warning`, `violet`, `blue`).
-  - `label` و `description`: دعم النصوص والعناوين والأوصاف مع محاذاة رأسية ذكية تلقائياً (`items-start pt-0.5` عند وجود سطرين).
-  - `disabled`: إيقاف التفاعل تلقائياً مع خفض الشفافية ومنع النقر.
-- **نماذج الاستخدام القياسية:**
-  ```vue
-  <!-- 1. استخدام مجرد داخل بطاقة أو سطر جدول -->
-  <AppToggle v-model="form.is_active" />
-
-  <!-- 2. استخدام مع نص وصفي فرعي ولون مخصص -->
-  <AppToggle
-      v-model="form.is_active"
-      :label="$t('common.active')"
-      :description="$t('services.active_hint')"
-      color="success"
-  />
-
-  <!-- 3. استخدام مع مصفوفة صلاحيات (Array Binding) -->
-  <AppToggle
-      v-model="form.permissions"
-      :value="permission.name"
-      :label="permission.label"
-  />
-  ```
-
-#### معايير مكون رفع الملفات والمرفقات الموحد (`AppFileUpload.vue`)
-- **إلزامي لجميع عمليات رفع الملفات والمرفقات والصور:**
-  - يمنع منعاً باتاً كتابة `<input type="file">` خام أو بناء مناطق سحب وإفلات (Dropzones) أو معاينات صور مخصصة داخل الصفحات والنوافذ.
-  - المكون المعتمد الوحيد هو `@/Components/Common/AppFileUpload.vue`.
-- **الأنماط والخصائص المدعومة (Variants & Props):**
-  - `variant`: يدعم نمطين:
-    - `dropzone` (الافتراضي): منطقة سحب وإفلات للمرفقات والملفات العامة مع قائمة الملفات المختارة وإمكانية الحذف.
-    - `image`: بطاقة معاينة بصرية للصور والشعارات والأيقونات (`existingUrl`, `fallbackUrl`, `defaultBadge`, `compactPreview`) مع أزرار الرفع والإزالة.
-  - `v-model`: يرتبط مباشرة بالملف (`File`) أو مصفوفة الملفات عند تفعيل `multiple`.
-  - التحقق المدمج: `accept` (الصيغ المسموحة)، `maxSizeMb` (الحد الأقصى للحجم بالميجابايت)، و `disabled` / `loading` / `error` / `hint` / `label`.
-  - الأحداث (`Emits`): `select`، `invalid` (عند رفض ملف بسبب الحجم أو النوع)، و `remove-existing` (لإزالة الصورة الحالية من الخادم).
-- **نماذج الاستخدام القياسية:**
-  ```vue
-  <!-- 1. رفع مرفقات/ملفات عبر السحب والإفلات -->
-  <AppFileUpload
-      v-model="form.attachments"
-      :label="$t('common.attachments')"
-      accept=".pdf,.jpg,.png"
-      :max-size-mb="5"
-      multiple
-      @invalid="(msg) => toast.error(msg)"
-  />
-
-  <!-- 2. رفع ومعاينة صورة أو شعار (Variant: image) -->
-  <AppFileUpload
-      v-model="form.logo"
-      variant="image"
-      :label="$t('system.settings.brand_logo_title')"
-      :existing-url="currentLogoUrl"
-      accept="image/png,image/jpeg,image/webp,image/svg+xml"
-      :max-size-mb="2"
-      @remove-existing="handleRemoveLogo"
-  />
-  ```
-
-#### معايير نظام الإشعارات الموحد ورسائل الفلاش (`Toast` & Flash)
-- **المصدر الوحيد للإشعارات:** يُدار عرض رسائل النجاح والأخطاء والتنبيهات حصراً عبر `@/Components/Toast.vue` و `@/Composables/useToast.js`.
-- **السلوك التفاعلي القياسي للبطاقة:**
-  - الإغلاق الفوري عند النقر في أي مكان على البطاقة (`dismissOnClick: true` افتراضياً).
-  - الإيقاف المؤقت للمؤقت التلقائي عند تمرير المؤشر (`Pause on Hover`) واستئنافه عند المغادرة.
-  - دعم السحب للإغلاق (`Swipe to Dismiss`) على شاشات اللمس، مع زوايا `rounded-2xl`.
-- **تغطية كافة التخطيطات (Layouts):** يجب أن يتضمن كل تخطيط في المنظومة (`AppLayout`, `SystemLayout`, `CustomerPortalLayout`, `EmployeePortalLayout`, `AuthLayout`) مكون `<Toast />` مع مراقب نشط (`watch`) لـ `page.props.flash` يدعم المفاتيح: `success`, `error`, `warning`, `info`, `status`, `message`.
-- **منع التكرار الذكي (Content-Based Deduplication):** يُمنع تكرار الإشعار بناءً على تطابق نص الرسالة ونوعها في نفس السياق الزمني للعملية، ويُمنع الحجب الزمني الأعمى الذي يُسقط رسائل عمليات متتالية مختلفة.
-- **إلزامية فلاش الخادم في المتحكمات (Backend Mutations):**
-  - كل دالة تغيير بيانات (`store`, `update`, `destroy`, `toggleActive`, أو ما يماثلها) تُرجع `RedirectResponse` **يجب** أن تُرفق رسالة نجاح مترجمة عبر `->with('success', __('messages.xxx'))` (أو رسالة خطأ مترجمة عند الفشل).
-  - يُمنع إرجاع `back()` أو `redirect()->route(...)` صامتة دون رسالة، كما يُمنع استخدام نصوص ثابتة (Hardcoded) في رسائل الفلاش.
-
-#### معايير النماذج الموحدة والتمرير والأرقام
-- **توحيد النوافذ والحقول:** يجب بناء جميع نماذج الإدخال والتعديل داخل `@/Components/BaseModal.vue` (للنوافذ المنبثقة) وباستخدام مكونات `@/Components/App/` (`AppInput`, `AppTextarea`, `AppSelect`, `AppButton`, `AppCheckbox`) مع `@/Components/Common/FormField.vue` و `FormSection.vue`.
-- **سلوك التمرير في النماذج (`scrollEntire`):**
-  - الإعداد الافتراضي في `BaseModal.vue` هو `scrollEntire: true` بحيث يتمرر النموذج كاملاً مع الصفحة لإلزام المستخدم بالنزول إلى آخر النموذج والوصول لأزرار الحفظ والإلغاء بوضوح، بدلاً من تقسيم التمرير الداخلي أو إبقاء أزرار التثبيت فوق حقول مقطوعة.
-  - يُمنع تعطيل `scrollEntire` أو إضافة `max-h-[...]` مع `overflow-y-auto` داخل جسم النموذج إلا لحالات خاصة مبررة.
-- **التمرير التلقائي عند أخطاء التحقق:** يُستخدم `@/Composables/useFormScrollToError.js` للتمرير التلقائي والتركيز على أول حقل يحمل خطأ تحقق عند فشل الإرسال.
-- **توحيد الأرقام وتحويل الأرقام العربية (`ArabicNumeralsPlugin`):**
-  - يتم التحويل التلقائي للأرقام العربية والفارسية (`٠-٩`, `۰-۹`, `٫`) إلى أرقام إنجليزية قياسية (`0-9`, `.`) عالمياً عبر `@/Plugins/arabicNumerals.js` (بما يشمل حقول `type="number"` عبر اعتراض حدث `beforeinput`).
-  - يُمنع إضافة منطق تحويل يدوي مكرر داخل المكونات أو ترك حقول رقمية ترفض أو تمسح الأرقام العربية عند الإدخال أو التعديل.
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | `Active` | طبقات Backend، المحركات المركزية، Transactions، وخريطة مصدر الحقيقة الواحد |
+| [docs/COMPONENTS.md](docs/COMPONENTS.md) | `Active` | حوكمة المكونات المختصرة والمكونات المتوقفة (`Deprecated`) |
+| [docs/COMPONENT_REGISTRY.md](docs/COMPONENT_REGISTRY.md) | `Active` | السجل الرسمي التفصيلي للمكونات المعتمدة والمتخصصة والموازية (Props/Events/Slots/أمثلة) |
+| [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md) | `Active` | بروتوكول التطوير الإلزامي (قبل / أثناء / بعد التنفيذ ومعايير التحقق) |
+| [docs/TASK_DELIVERY_TEMPLATE.md](docs/TASK_DELIVERY_TEMPLATE.md) | `Active` | القالب الموحد لتسليم تقارير الصفحات والميزات |
+| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | `Active` | `tokens.css`، الألوان الدلالية، الخطوط، Dark/Light، RTL/LTR، والوصول |
+| [docs/brand/README.md](docs/brand/README.md) | `Active` | الشعار المعتمد «الترس والسهم»، المولّد `scripts/build-brandmark.mjs`، الملفات المولّدة، القيود الهندسية، وقواعد الاستخدام |
+| [.agents/rules/ui-skills-governance.md](.agents/rules/ui-skills-governance.md) | `Active` | قاعدة Antigravity لتقييد مهارات التصميم الخارجية وتثبيت مصادر الحقيقة |
+| [docs/I18N_RULES.md](docs/I18N_RULES.md) | `Active` | قواعد التسمية، المفاتيح الديناميكية، الأرقام/العملات، وفحص تطابق اللغتين |
+| [docs/SECURITY.md](docs/SECURITY.md) | `Active` | التفويض، العزل، رفع الملفات الآمن، الاستثناءات، والسلامة المالية |
+| [docs/TESTING.md](docs/TESTING.md) | `Active` | بوابات الجودة، الفحص الآلي، Baseline Failures، وحوكمة ADR |
+| [docs/ADR/](docs/ADR/) | `Active` | سجل القرارات المعمارية الموثقة |
 
 ---
-
-## 4. خريطة المعالم البرمجية (Source of Truth Map)
-
-| المجال / الوظيفة | المصدر المعتمد في المشروع | القواعد والملاحظات |
-| :--- | :--- | :--- |
-| **المستأجرين والفروع** | `app/Models/Concerns/TenantScoped.php`<br/>`app/Models/Concerns/CenterScoped.php`<br/>`app/Support/TenancyContext.php` | تطبيق العزل التلقائي والتحقق من السياق |
-| **الصلاحيات والتفويض** | `app/Support/Permissions.php`<br/>`app/Policies/` | المصدر الوحيد لأسماء الصلاحيات والسياسات |
-| **كروت العمل والعمالة** | `app/Models/WorkOrder.php`<br/>`app/Models/WorkOrderItem.php`<br/>`app/Services/WorkOrderLaborService.php` | احتساب الوقت وحالات كروت العمل |
-| **الفواتير والمدفوعات والضريبة** | `app/Services/InvoiceService.php`<br/>`app/Services/Payment/PaymentManager.php`<br/>`app/Services/Optimization/TaxCalculator.php` | العمليات المالية ذرية (Atomic) ومقفلة |
-| **المخزون وحركات القطع** | `app/Services/Inventory/InventoryService.php`<br/>`app/Models/InventoryMove.php` | حركات المستودعات والكميات المتوفرة |
-| **محرك الطباعة** | `resources/js/Composables/usePrint.js`<br/>`resources/js/Components/Print/PrintEngine.vue` | يمنع إنشاء شاشات أو نوافذ طباعة مستقلة |
-| **الإشعارات ورسائل الفلاش** | `resources/js/Components/Toast.vue`<br/>`resources/js/Composables/useToast.js`<br/>`app/Http/Middleware/HandleInertiaRequests.php` | إشعارات تفاعلية موحدة ومشاركة جميع مفاتيح الفلاش |
-| **النماذج والتمرير والأرقام** | `resources/js/Components/BaseModal.vue`<br/>`resources/js/Components/App/`<br/>`resources/js/Composables/useFormScrollToError.js`<br/>`resources/js/Plugins/arabicNumerals.js` | توحيد النوافذ والحقول، التمرير الكامل، التمرير للخطأ، وتحويل الأرقام العربية تلقائياً |
-| **ملفات الترجمة واللغة** | `resources/js/i18n/lang/ar.json` & `en.json`<br/>`lang/ar/` & `lang/en/` | التدويل إلزامي للواجهة والخلفية |
-
----
-
-## 5. قائمة الممنوعات القطعية العشر (The 10 Strict Prohibitions)
-
-1. ❌ **ممنوع العمل دون فحص الكود القائم:** لا تفترض أسماء الحقول أو العلاقات أو الخدمات؛ افحص الملف الفعلي أولاً.
-2. ❌ **ممنوع كسر عزل المستأجر أو المركز:** لا تسمح بوصول مركز لبيانات مركز آخر أو تسريب بيانات المستأجرين تحت أي ظرف.
-3. ❌ **ممنوع إنشاء مكونات أو خدمات موازية:** إذا كان هناك مكون معتمد أو خدمة قائمة، يجب استخدامها والتكامل معها.
-4. ❌ **ممنوع النصوص الثابتة (Hardcoded Strings):** كل كلمة تظهر للمستخدم مكانها ملفات الترجمة المعتمدة.
-5. ❌ **ممنوع تعديل ملفات المهاجرة السابقة:** أي تعديل على الجداول يكون عبر Migration جديدة ملحقة وقابلة للتراجع.
-6. ❌ **ممنوع استخدام عناصر HTML الخام للبيانات:** يمنع استخدام `<select>` العادي للقوائم، أو حقول عادية للوحات السعودية والتواقيع، أو كتابة وسوم `<input type="checkbox">` ومحاكاة مفاتيح التبديل يدوياً بدلاً من استخدام `AppToggle` المعتمد.
-7. ❌ **ممنوع الاعتماد على إخفاء الأزرار كأمان:** التفويض الحقيقي مكانه السياسات في الخادم (`Policies`).
-8. ❌ **ممنوع التراجع عن معايير الخطوط:** الخط المعتمد الوحيد هو `IBM Plex Sans Arabic`.
-9. ❌ **ممنوع عكس ترتيب الهيدر:** شريط الأدوات أولاً، يليه زر الإجراء الأساسي في أقصى الزاوية الخارجية.
-10. ❌ **ممنوع تسليم المهمة دون تحقق:** لا تنتهي المهمة إلا بتشغيل الاختبارات و `npm run build` و `php artisan optimize:clear`.
-11. ❌ **ممنوع استخدام الاسم القديم Carag أو تثبيت اسم النظام كنص ثابت:** الاسم المعتمد هو **خدمة برو (Khidmh Pro)**، ويُقرأ دائماً ديناميكياً من `config('app.name_ar')` / `config('app.name')` أو `$t('common.app_name')` لتمكين تغيير الاسم في أي وقت من `.env`.
-12. ❌ **ممنوع العمليات الصامتة أو حجب الإشعارات:** يمنع إرجاع `back()` أو `redirect()` في متحكمات الحفظ والتعديل والحذف والتفعيل دون إرفاق رسالة فلاش مترجمة (`with('success', __('...'))`)، كما يمنع بناء أي مكون إشعارات بديل عن `Toast.vue` و `useToast.js`.
-
----
-
-## 6. أوامر التطوير والصيانة المعتمدة
-
-```bash
-# تشغيل خادم التطوير والبناء المحلي
-composer run dev
-
-# تشغيل الاختبارات الآلية
-php artisan test
-# أو اختبار ملف محدد:
-php artisan test tests/Feature/YourTest.php
-
-# فحص المعايير والتنسيق والتحليل الساكن
-composer lint
-composer stan
-
-# بناء الواجهة وتأكيد خلوها من أخطاء التجميع
-npm run build
-
-# تنظيف الكاش المؤقت للنظام بالكامل
-php artisan optimize:clear
-```
-
----
-
-## 7. مرجعية التعليمات والأولويات
-
-1. تعليمات المستخدم في المحادثة الحالية تحظى بالأولوية ما لم تطلب عملاً يخالف أمان البيانات أو عزل المستأجرين.
-2. إذا كان هناك تعارض أو غموض في تفاصيل منطق العمل، **اطلب توضيحاً سريعاً ومباشراً** من المستخدم بدلاً من التخمين والتنفيذ العشوائي.
-3. التزم بهذا الدستور كأساس ثابت لا يتغير بتغير الوكيل البرمجي أو بيئة التطوير.
-
 
 ## الحساب والمركز المحفوظان للتطوير المحلي
 

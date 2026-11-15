@@ -1,9 +1,5 @@
-// ESLint v9 flat config for carag-v2.
-//
-// Why this file:
-//   - The previous CI step (`npm run lint`) was a no-op because no
-//     ESLint config existed. Adding one unblocks the lint-frontend
-//     CI job and lets us ban `console.log` in production code.
+// Active ESLint flat configuration for Khidmah Pro (loaded by ESLint v8.57.1
+// in `npm run lint` and CI `lint-frontend`; `.eslintrc.cjs` is legacy fallback).
 //
 // Rules worth keeping tight:
 //   - no-console: ban `console.log` / `console.info` / `console.debug`
@@ -14,6 +10,7 @@
 //     common Vue 3 `<script setup>` "import for type" pattern.
 
 import js from '@eslint/js';
+import pluginVue from 'eslint-plugin-vue';
 import vueParser from 'vue-eslint-parser';
 
 const HARDCODED_COLOR_RE =
@@ -118,7 +115,14 @@ const CORE_DESIGN_SYSTEM_COMPONENTS = [
 
 export default [
     {
-        ignores: ['public/**', 'vendor/**', 'node_modules/**', 'storage/**', 'resources/fonts/**'],
+        ignores: [
+            'public/**',
+            'vendor/**',
+            'node_modules/**',
+            'storage/**',
+            'resources/fonts/**',
+            'resources/js/ziggy.js',
+        ],
     },
     js.configs.recommended,
     {
@@ -175,6 +179,12 @@ export default [
                 alert: 'readonly',
                 confirm: 'readonly',
                 prompt: 'readonly',
+                File: 'readonly',
+                FileReader: 'readonly',
+                Blob: 'readonly',
+                AbortController: 'readonly',
+                Event: 'readonly',
+                CustomEvent: 'readonly',
             },
         },
         rules: {
@@ -245,14 +255,36 @@ export default [
         ignores: ['resources/js/Pages/WorkOrders/Show.vue'],
     },
     {
-        // Test files can use any console method.
+        // Test files can use any console method and Node test helpers.
         files: [
             'resources/js/**/__tests__/**',
             'resources/js/**/*.test.js',
             'resources/js/**/*.spec.js',
         ],
+        languageOptions: {
+            globals: {
+                __dirname: 'readonly',
+            },
+        },
         rules: {
             'no-console': 'off',
+        },
+    },
+    {
+        files: ['resources/js/Composables/useScreenRecorder.js'],
+        languageOptions: {
+            globals: {
+                MediaRecorder: 'readonly',
+                MediaStream: 'readonly',
+            },
+        },
+    },
+    {
+        files: ['resources/js/Pages/App/Profile/Index.vue'],
+        languageOptions: {
+            globals: {
+                caches: 'readonly',
+            },
         },
     },
     {
@@ -275,9 +307,11 @@ export default [
     {
         files: ['resources/js/{Components,Pages}/**/*.vue'],
         plugins: {
+            vue: pluginVue,
             'design-system': designSystemPlugin,
         },
         rules: {
+            'vue/script-setup-uses-vars': 'error',
             'design-system/no-hardcoded-colors': ['warn', { mode: 'legacy-brand' }],
         },
     },

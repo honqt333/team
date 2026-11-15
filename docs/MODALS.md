@@ -1,4 +1,6 @@
-# 📋 دليل النماذج (Modals) - نظام Carag
+> **الحالة:** `Historical / Reference` — راجع [docs/COMPONENTS.md](COMPONENTS.md) لسجل المكونات المعتمد (ملاحظة: `Modal.vue` و`DialogModal.vue` أصبحا `Deprecated` لصالح `BaseModal.vue` و`ConfirmModal.vue`).
+
+# 📋 دليل النماذج (Modals) — خدمة برو (Khidmah Pro)
 
 ## نظرة عامة
 

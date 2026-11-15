@@ -1,35 +1,15 @@
-# Cursor Rules — Carag V2 / Khidmah Pro
-# Unified AI Agent Protocol & Supreme Constitution
+# Cursor Rules — Khidmah Pro (خدمة برو)
 
-You are working on **Carag V2 / Khidmah Pro**, an enterprise multi-tenant ERP platform for automotive service centers built with Laravel 12, Vue 3, Inertia.js, and MySQL.
+All work in this workspace is strictly governed by the Master Constitution in `AGENTS.md`.
 
-## MANDATORY PROTOCOL (READ AGENTS.md FIRST)
-
-All work in this codebase is strictly governed by the Master Constitution in `AGENTS.md`.
-
-1. **Discovery First:** Always inspect existing models, migrations, services, components, and translations before writing code. Never guess columns or duplicate existing logic.
-2. **Tenant & Center Isolation:** Always respect `TenantScoped` and `CenterScoped`. Never infer tenant or center IDs from constants or bypass boundaries.
-3. **Server-Side Authorization:** Every action must be protected by a Policy or Gate (`$this->authorize(...)`). UI element hiding is NOT authorization.
-4. **Reuse Existing Domain Services & Approved UI Components:**
-   - Work order labor & timers: `WorkOrderLaborService` & `WorkOrderLaborEntry`.
-   - Invoicing and payments: `InvoiceService`, `PaymentManager`, `TaxCalculator`.
-   - Inventory movements: `InventoryService`, `InventoryMove`.
-   - Printing: Use the unified print engine (`usePrint`, `PrintEngine.vue`). Never create parallel print mechanisms.
-   - UI Components (see `docs/COMPONENTS.md` & `docs/MODALS.md`):
-     - Searchable Dropdown: ALWAYS use `SearchableSelect.vue` (forbidden to use raw `<select>` for dynamic datasets).
-     - Print Button: ALWAYS use `AppPrintButton.vue`.
-     - View Mode (Grid/List): ALWAYS use `AppViewModeToggle.vue`.
-     - Tabs: ALWAYS use `AppTabs.vue`.
-     - Vehicle Plates: ALWAYS use `SaudiPlateDisplay.vue` and `SaudiPlateInput.vue`.
-     - Signatures: ALWAYS use `SignaturePad.vue`.
-     - Dates: ALWAYS use `CustomDatePicker.vue`.
-     - Action Confirmation: ALWAYS use `ConfirmModal.vue`.
-5. **Typography & UI Consistency:**
-   - Typography is strictly unified on **`IBM Plex Sans Arabic`**.
-   - Header action layout order in RTL: `[Title/Badge]` (Right) ... `[Toolbar Glass Container]` then `[Primary CTA Button]` (Far Left).
-6. **No Hardcoded Strings:** Use `resources/js/i18n/lang/ar.json` / `en.json` on the frontend (`t('...')`) and `lang/ar/` / `lang/en/` on the backend (`__('...')`).
-7. **Migrations:** Never modify previously executed migrations. Always create new incremental migrations with proper `down()` methods.
-8. **Verification:** Never mark a task complete without running:
-   - `php artisan test` (or relevant feature test)
-   - `npm run build`
-   - `php artisan optimize:clear`
+1. **Read `AGENTS.md` first** before inspecting or changing any file.
+2. **Official Identity:** **خدمة برو / Khidmah Pro** (`page.props.app_name` on frontend, `config('app.name_ar')` / `config('app.name')` on backend). Do not use `Carag`.
+3. **Follow the Specialist Docs (no duplicate rules here):**
+   - `docs/ARCHITECTURE.md` — Backend layers, transactions, and Single Source of Truth
+   - `docs/COMPONENTS.md` — Official `App*` / `Common*` registry and deprecated components
+   - `docs/DESIGN_SYSTEM.md` — `resources/js/Design/tokens.css`, `IBM Plex Sans Arabic`, RTL/Dark rules
+   - `docs/I18N_RULES.md` — `t('...')` / `__('...')` and `scripts/check-i18n-parity.mjs`
+   - `docs/SECURITY.md` — `TenantScoped`, `CenterScoped`, Policies, secure uploads, and audit logging
+   - `docs/TESTING.md` — Quality gates, baseline failure rules, and ADR format
+4. **Scope & Git Discipline:** Only modify files required for the approved task. Never revert user or peer-agent changes.
+5. **Mandatory Verification:** Run the relevant quality gates from `docs/TESTING.md` before reporting completion.

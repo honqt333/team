@@ -1,3 +1,5 @@
+> **الحالة:** `Historical` — هذه خطة تنفيذ تاريخية لمرحلة التوحيد؛ المرجع النشط الحالي هو [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) و[docs/COMPONENTS.md](docs/COMPONENTS.md).
+
 # خطة توحيد نظام التصميم (Design System Unification Plan)
 
 > **الدور:** أنا المراجع والمصمم | **أنت:** المنفذ | **سأراجع** بعد كل مرحلة

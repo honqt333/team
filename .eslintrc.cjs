@@ -1,8 +1,8 @@
-// ESLint configuration for Carag V2
+// ESLint configuration for Khidmah Pro (active configuration for ESLint v8)
 //
-// Track D (DevX) — Phase 1 starter. Kept intentionally permissive so the
-// existing JS codebase (which predates the TS migration) can still be linted
-// without churn. Tighten during Phase 2 once resources/js .ts files land.
+// NOTE: `eslint.config.js` is an inactive ESLint v9 flat-config draft.
+// Until ESLint is upgraded to v9, `.eslintrc.cjs` is the single active config
+// used by `npm run lint` and CI (`lint-frontend`).
 module.exports = {
     root: true,
     env: {
@@ -62,6 +62,46 @@ module.exports = {
             {
                 selector: "VAttribute[key.name='html']",
                 message: 'Use v-safe-html instead of v-html. See SafeHtmlPlugin.',
+            },
+        ],
+        'no-console': ['warn', { allow: ['warn', 'error'] }],
+        'no-restricted-imports': [
+            'warn',
+            {
+                paths: [
+                    {
+                        name: '@/Components/TextInput.vue',
+                        message: 'Deprecated: use @/Components/App/AppInput.vue instead.',
+                    },
+                    {
+                        name: '@/Components/PrimaryButton.vue',
+                        message: 'Deprecated: use @/Components/App/AppButton.vue instead.',
+                    },
+                    {
+                        name: '@/Components/SecondaryButton.vue',
+                        message: 'Deprecated: use @/Components/App/AppButton.vue (variant="secondary") instead.',
+                    },
+                    {
+                        name: '@/Components/DangerButton.vue',
+                        message: 'Deprecated: use @/Components/App/AppButton.vue (variant="danger") instead.',
+                    },
+                    {
+                        name: '@/Components/Checkbox.vue',
+                        message: 'Deprecated: use @/Components/App/AppCheckbox.vue instead.',
+                    },
+                    {
+                        name: '@/Components/Toggle.vue',
+                        message: 'Deprecated: use @/Components/Common/AppToggle.vue instead.',
+                    },
+                    {
+                        name: '@/Components/Modal.vue',
+                        message: 'Deprecated: use @/Components/BaseModal.vue or ConfirmModal.vue instead.',
+                    },
+                    {
+                        name: '@/Components/DialogModal.vue',
+                        message: 'Deprecated: use @/Components/BaseModal.vue or ConfirmModal.vue instead.',
+                    },
+                ],
             },
         ],
     },

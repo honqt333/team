@@ -57,6 +57,8 @@ size ladder regenerates consistently.
 
 ## 2. Colour
 
+> **ملاحظة حوكمة (`Superseded Token Table`):** المرجع الفعلي للألوان في التطبيق هو [resources/js/Design/tokens.css](../resources/js/Design/tokens.css) و[docs/DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)؛ حيث `--color-brand-primary` و`--color-action-primary` هما الأزرق (`#2563eb`)، بينما الدرجات الذهبية أدناه (`#fbbf24` / `#f59e0b`) خاصة بالشعار (`--color-accent-gold*`).
+
 The palette is taken from the existing design tokens — **no new colours
 were introduced**. Source of truth: `resources/js/Design/tokens.css`.
 
