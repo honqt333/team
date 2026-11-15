@@ -16,10 +16,13 @@ use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
 use App\Services\Zatca\ZatcaOnboardingService;
 use App\Support\CountryCurrencyRegistry;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Testing\AssertableInertia as Assert;
 use ReflectionMethod;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class MultiCountryCurrencyTest extends TestCase
@@ -31,6 +34,8 @@ class MultiCountryCurrencyTest extends TestCase
      */
     private function createTenantUser(string $country = 'SA', string $currency = 'SAR'): array
     {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $tenant = Tenant::create([
             'name' => 'مركز متعدد الدول',
             'legal_name' => 'شركة اختبار الدول والعملات',
@@ -69,6 +74,10 @@ class MultiCountryCurrencyTest extends TestCase
             'current_center_id' => $center->id,
         ]);
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+        Permission::findOrCreate(Permissions::COMPANY_MANAGE, 'web');
+        $user->givePermissionTo(Permissions::COMPANY_MANAGE);
 
         return [$tenant, $center, $user];
     }
@@ -365,5 +374,25 @@ class MultiCountryCurrencyTest extends TestCase
                 ->where('address.country', 'المملكة العربية السعودية')
                 ->where('address.city', 'جدة')
             );
+    }
+
+    public function test_unauthorized_user_without_company_manage_cannot_update_company_settings(): void
+    {
+        [$tenant, $center] = $this->createTenantUser('SA', 'SAR');
+
+        $unauthorized = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'current_center_id' => $center->id,
+        ]);
+        $unauthorized->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
+
+        $this->actingAs($unauthorized)
+            ->put(route('settings.company.update'), [
+                'section' => 'profile',
+                'data' => [
+                    'legal_name' => 'مركز بدون صلاحية',
+                ],
+            ])
+            ->assertStatus(403);
     }
 }

@@ -6,6 +6,7 @@ namespace App\Policies\HR;
 
 use App\Models\HR\Attendance;
 use App\Models\User;
+use App\Support\Permissions;
 use App\Support\TenancyContext;
 
 class AttendancePolicy
@@ -31,7 +32,7 @@ class AttendancePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('hr.attendance.view') || $user->can('hr.attendance.manage');
+        return $user->can(Permissions::HR_ATTENDANCE_VIEW) || $user->can(Permissions::HR_ATTENDANCE_MANAGE);
     }
 
     /**
@@ -40,7 +41,7 @@ class AttendancePolicy
     public function view(User $user, Attendance $attendance): bool
     {
         return $this->canAccessRecord($user, $attendance)
-            && ($user->can('hr.attendance.view') || $user->can('hr.attendance.manage'));
+            && ($user->can(Permissions::HR_ATTENDANCE_VIEW) || $user->can(Permissions::HR_ATTENDANCE_MANAGE));
     }
 
     /**
@@ -48,7 +49,7 @@ class AttendancePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('hr.attendance.manage');
+        return $user->can(Permissions::HR_ATTENDANCE_MANAGE);
     }
 
     /**
@@ -57,7 +58,7 @@ class AttendancePolicy
     public function update(User $user, Attendance $attendance): bool
     {
         return $this->canAccessRecord($user, $attendance)
-            && $user->can('hr.attendance.manage');
+            && $user->can(Permissions::HR_ATTENDANCE_MANAGE);
     }
 
     /**
@@ -66,7 +67,7 @@ class AttendancePolicy
     public function delete(User $user, Attendance $attendance): bool
     {
         return $this->canAccessRecord($user, $attendance)
-            && $user->can('hr.attendance.manage');
+            && $user->can(Permissions::HR_ATTENDANCE_MANAGE);
     }
 
     /**
@@ -74,7 +75,7 @@ class AttendancePolicy
      */
     public function viewOwn(User $user): bool
     {
-        return $user->can('portal.attendance.view') && $user->employee !== null;
+        return $user->can(Permissions::EMPLOYEE_ATTENDANCE_VIEW) && $user->employee !== null;
     }
 
     /**
@@ -82,6 +83,6 @@ class AttendancePolicy
      */
     public function clockInOut(User $user): bool
     {
-        return $user->can('portal.attendance.clock') && $user->employee !== null;
+        return $user->can(Permissions::EMPLOYEE_ATTENDANCE_VIEW) && $user->employee !== null;
     }
 }

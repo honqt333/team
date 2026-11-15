@@ -66,6 +66,7 @@ class AgentFindingsRuntimeProbeTest extends TestCase
             Permissions::HR_EMPLOYEES_UPDATE,
             Permissions::HR_ATTENDANCE_VIEW,
             Permissions::HR_ATTENDANCE_MANAGE,
+            Permissions::HR_PAYMENTS_APPROVE,
         ] as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
@@ -99,6 +100,7 @@ class AgentFindingsRuntimeProbeTest extends TestCase
             Permissions::HR_EMPLOYEES_UPDATE,
             Permissions::HR_ATTENDANCE_VIEW,
             Permissions::HR_ATTENDANCE_MANAGE,
+            Permissions::HR_PAYMENTS_APPROVE,
         ]);
         $this->user->refresh();
     }
@@ -262,6 +264,7 @@ class AgentFindingsRuntimeProbeTest extends TestCase
 
         $payment = OtherPayment::create([
             'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
             'employee_id' => $employee->id,
             'type' => 'bonus',
             'title' => 'مكافأة',
@@ -269,6 +272,15 @@ class AgentFindingsRuntimeProbeTest extends TestCase
             'payment_date' => now()->toDateString(),
             'status' => 'pending',
         ]);
+
+        $unprivileged = User::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'current_center_id' => $this->center->id,
+        ]);
+        $unprivileged->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+        $this->actingAs($unprivileged)
+            ->put('/app/hr/payroll/other-payments/'.$payment->id.'/pay')
+            ->assertStatus(403);
 
         $response = $this->actingAs($this->user)
             ->put('/app/hr/payroll/other-payments/'.$payment->id.'/pay');

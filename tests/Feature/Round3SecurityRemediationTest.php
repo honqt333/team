@@ -69,6 +69,7 @@ class Round3SecurityRemediationTest extends TestCase
         foreach ([
             Permissions::HR_EMPLOYEES_VIEW,
             Permissions::HR_EMPLOYEES_UPDATE,
+            Permissions::HR_PAYMENTS_APPROVE,
             Permissions::VEHICLE_SETTINGS_VIEW,
             Permissions::VEHICLE_SETTINGS_MANAGE,
             Permissions::COMPANY_MANAGE,
@@ -168,9 +169,12 @@ class Round3SecurityRemediationTest extends TestCase
             'status' => OtherPayment::STATUS_PENDING,
         ]);
 
-        // Unprivileged user gets 403
+        // Unprivileged user gets 403 on both approve and pay
         $this->actingAs($this->unprivilegedUser)
             ->putJson("/app/hr/payroll/other-payments/{$payment->id}/approve")
+            ->assertStatus(403);
+        $this->actingAs($this->unprivilegedUser)
+            ->putJson("/app/hr/payroll/other-payments/{$payment->id}/pay")
             ->assertStatus(403);
 
         // Pending -> Paid directly is blocked (422 JSON and 302 web)

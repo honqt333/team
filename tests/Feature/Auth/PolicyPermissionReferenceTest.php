@@ -28,7 +28,7 @@ class PolicyPermissionReferenceTest extends TestCase
 {
     public function test_every_permissions_constant_referenced_in_policies_is_defined(): void
     {
-        $policyDir = base_path('app/Policies');
+        $policyDir = dirname(__DIR__, 3).'/app/Policies';
         $found = $this->extractPermissionConstants($policyDir);
 
         $this->assertNotEmpty(
@@ -49,7 +49,7 @@ class PolicyPermissionReferenceTest extends TestCase
 
     public function test_policies_do_not_use_hardcoded_permission_strings(): void
     {
-        $policyDir = base_path('app/Policies');
+        $policyDir = dirname(__DIR__, 3).'/app/Policies';
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($policyDir)
         );
@@ -87,7 +87,7 @@ class PolicyPermissionReferenceTest extends TestCase
         // registry is either not enforcing anything or is
         // relying on hard-coded strings (already caught by the
         // test above). Either way, it should be reviewed.
-        $policyDir = base_path('app/Policies');
+        $policyDir = dirname(__DIR__, 3).'/app/Policies';
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($policyDir)
         );

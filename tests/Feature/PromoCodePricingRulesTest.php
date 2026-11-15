@@ -9,6 +9,7 @@ use App\Models\Billing\PromoCode;
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -45,8 +46,7 @@ class PromoCodePricingRulesTest extends TestCase
         parent::setUp();
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-        Permission::findOrCreate('company.subscription.view', 'web');
-        Permission::findOrCreate('company.subscription.create', 'web');
+        Permission::findOrCreate(Permissions::COMPANY_MANAGE, 'web');
 
         $this->tenant = Tenant::factory()->create(['status' => 'active']);
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -57,7 +57,7 @@ class PromoCodePricingRulesTest extends TestCase
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
 
         app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
-        $this->user->givePermissionTo(['company.subscription.view', 'company.subscription.create']);
+        $this->user->givePermissionTo(Permissions::COMPANY_MANAGE);
 
         $this->plan = Plan::create([
             'name' => 'Pro',
@@ -154,5 +154,28 @@ class PromoCodePricingRulesTest extends TestCase
         $response->assertOk();
         $this->assertTrue($response->json('valid'));
         $this->assertSame($promo->code, $response->json('code'));
+    }
+
+    public function test_unauthorized_user_without_company_manage_cannot_access_billing_promo_endpoints(): void
+    {
+        $unauthorized = User::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'current_center_id' => $this->center->id,
+        ]);
+        $unauthorized->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        $promo = $this->promoCode();
+
+        $this->actingAsWithTeam($unauthorized)
+            ->postJson(route('app.billing.calculate'), [
+                'plan_id' => $this->plan->id,
+                'billing_cycle' => 'yearly',
+                'promo_code' => $promo->code,
+            ])
+            ->assertStatus(403);
+
+        $this->actingAsWithTeam($unauthorized)
+            ->postJson(route('app.billing.validate-promo'), ['code' => $promo->code])
+            ->assertStatus(403);
     }
 }

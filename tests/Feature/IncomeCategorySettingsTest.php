@@ -8,7 +8,10 @@ use App\Models\Center;
 use App\Models\IncomeCategory;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class IncomeCategorySettingsTest extends TestCase
@@ -25,6 +28,8 @@ class IncomeCategorySettingsTest extends TestCase
     {
         parent::setUp();
 
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         // Create tenant and center
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -37,6 +42,11 @@ class IncomeCategorySettingsTest extends TestCase
 
         // Attach user to center to satisfy EnsureCenterContext middleware
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        // Grant COMPANY_MANAGE permission to authorized test user
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        Permission::findOrCreate(Permissions::COMPANY_MANAGE, 'web');
+        $this->user->givePermissionTo(Permissions::COMPANY_MANAGE);
     }
 
     /**
@@ -213,5 +223,41 @@ class IncomeCategorySettingsTest extends TestCase
         // Try to delete other tenant's category
         $responseDelete = $this->delete(route('settings.income-categories.destroy', $otherCategory));
         $responseDelete->assertStatus(404);
+    }
+
+    /**
+     * Test 7: Unauthorized user without COMPANY_MANAGE is blocked with HTTP 403 on all actions
+     */
+    public function test_unauthorized_user_without_company_manage_cannot_access_income_categories(): void
+    {
+        $unauthorized = User::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'current_center_id' => $this->center->id,
+        ]);
+        $unauthorized->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        $category = IncomeCategory::create([
+            'tenant_id' => $this->tenant->id,
+            'name_ar' => 'خدمة مقيدة',
+            'name_en' => 'Restricted Service',
+            'transaction_type' => 'revenue',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($unauthorized)->get(route('settings.income-categories.index'))->assertStatus(403);
+        $this->actingAs($unauthorized)->post(route('settings.income-categories.store'), [
+            'name_ar' => 'فئة جديدة',
+            'name_en' => 'New Category',
+            'transaction_type' => 'revenue',
+            'is_active' => true,
+        ])->assertStatus(403);
+        $this->actingAs($unauthorized)->put(route('settings.income-categories.update', $category), [
+            'name_ar' => 'تعديل',
+            'name_en' => 'Edit',
+            'transaction_type' => 'revenue',
+            'is_active' => true,
+        ])->assertStatus(403);
+        $this->actingAs($unauthorized)->patch(route('settings.income-categories.toggle', $category))->assertStatus(403);
+        $this->actingAs($unauthorized)->delete(route('settings.income-categories.destroy', $category))->assertStatus(403);
     }
 }

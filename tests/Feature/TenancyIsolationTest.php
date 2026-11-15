@@ -101,12 +101,28 @@ class TenancyIsolationTest extends TestCase
         $tenantB = Tenant::factory()->create();
         $centerB = Center::factory()->create(['tenant_id' => $tenantB->id]);
 
-        // Attempt to make User A access Center B (cross-tenant!)
+        // 1. Verify User::fill() mass-assignment protection drops current_center_id on existing record
         $userA->update(['current_center_id' => $centerB->id]);
+        $this->assertSame($centerA->id, (int) $userA->fresh()->current_center_id);
 
-        $response = $this->actingAs($userA)->get('/__test/tenancy-ping');
+        // 2 & 3. Explicitly simulate a cross-tenant pointer using forceFill() in test fixture and verify persistence
+        $userA->forceFill(['current_center_id' => $centerB->id])->save();
+        $this->assertSame($centerB->id, (int) $userA->fresh()->current_center_id);
 
+        // 4 & 5. Dispatch request through real EnsureCenterContext middleware and assert 403
+        $response = $this->actingAs($userA->fresh())->get('/__test/tenancy-ping');
         $response->assertStatus(403);
+
+        // 6. Verify valid center restoration yields authorized 200 response
+        $userA->forceFill(['current_center_id' => $centerA->id])->save();
+        $this->actingAs($userA->fresh())->get('/__test/tenancy-ping')
+            ->assertStatus(200)
+            ->assertSeeText('ok');
+
+        // 7. Verify user without valid center pivot assignment is rejected with 403
+        $userA->centers()->detach();
+        $this->actingAs($userA->fresh())->get('/__test/tenancy-ping')
+            ->assertStatus(403);
     }
 
     public function test_readonly_mode_allows_get_blocks_post(): void
