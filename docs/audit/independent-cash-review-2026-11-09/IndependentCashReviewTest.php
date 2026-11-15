@@ -56,6 +56,6 @@ class IndependentCashReviewTest extends TestCase
         Payment::withoutEvents(fn () => Payment::create(['tenant_id' => $t->id, 'center_id' => $c->id, 'invoice_id' => $invoice->id, 'amount' => 115, 'payment_date' => '2026-01-15', 'payment_method' => 'cash', 'type' => 'payment']));
         $rows = $this->rows($t, $c);
         $this->assertCount(2, $rows);
-        $this->assertEquals(230,$rows->sum('debit'));
+        $this->assertEquals(230, $rows->sum('debit'));
     }
 }
