@@ -217,30 +217,33 @@
                             {{ $t('common.actions') }}
                         </h2>
                         <div class="space-y-3">
-                            <button
+                            <AppButton
                                 v-if="['active', 'trial', 'trialing'].includes(subscription.status)"
+                                variant="danger"
+                                class="w-full justify-center"
                                 @click="cancelSubscription"
-                                class="w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-sm font-medium"
                             >
                                 {{ $t('system.subscriptions.cancel_subscription') }}
-                            </button>
-                            <button
+                            </AppButton>
+                            <AppButton
                                 v-if="
                                     ['cancelled', 'expired', 'pending', 'pending_payment'].includes(
                                         subscription.status
                                     )
                                 "
+                                variant="success"
+                                class="w-full justify-center"
                                 @click="activateSubscription"
-                                class="w-full px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg text-sm font-medium"
                             >
                                 {{ $t('system.subscriptions.activate_subscription') }}
-                            </button>
-                            <button
+                            </AppButton>
+                            <AppButton
+                                variant="secondary"
+                                class="w-full justify-center"
                                 @click="showExtendModal = true"
-                                class="w-full px-4 py-2 bg-selection-bg text-action-primary hover:bg-selection-bg rounded-lg text-sm font-medium"
                             >
                                 {{ $t('system.subscriptions.extend_subscription') }}
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
 

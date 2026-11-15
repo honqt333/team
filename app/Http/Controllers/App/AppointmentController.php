@@ -52,6 +52,14 @@ class AppointmentController extends Controller
 
         if ($date = $request->query('date')) {
             $query->whereDate('scheduled_at', $date);
+        } else {
+            if ($dateFrom = $request->query('date_from')) {
+                $query->whereDate('scheduled_at', '>=', $dateFrom);
+            }
+
+            if ($dateTo = $request->query('date_to')) {
+                $query->whereDate('scheduled_at', '<=', $dateTo);
+            }
         }
 
         if ($status = $request->query('status')) {
@@ -66,11 +74,27 @@ class AppointmentController extends Controller
             $query->where('assigned_user_id', $techId);
         }
 
-        $appointments = $query
-            ->orderBy('scheduled_at')
-            ->limit(500)
-            ->get()
-            ->map(fn (Appointment $a) => $this->serialize($a));
+        if ($search = trim((string) $request->query('search', ''))) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('customer', function ($customerQuery) use ($search) {
+                    $customerQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('vehicle', function ($vehicleQuery) use ($search) {
+                        $vehicleQuery->where('plate_number', 'like', "%{$search}%");
+                    })
+                    ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        $orderedQuery = $query->orderBy('scheduled_at');
+
+        $appointments = $request->query('view') === 'timeline'
+            ? $orderedQuery->limit(500)->get()->map(fn (Appointment $a) => $this->serialize($a))
+            : $orderedQuery
+                ->paginate(25)
+                ->withQueryString()
+                ->through(fn (Appointment $a) => $this->serialize($a));
 
         // Supporting lists for the create / filter UI.
         $bays = ServiceBay::query()
@@ -114,7 +138,10 @@ class AppointmentController extends Controller
             'services' => $services,
             'customers' => $customers,
             'filters' => [
+                'search' => $request->query('search'),
                 'date' => $request->query('date'),
+                'date_from' => $request->query('date_from'),
+                'date_to' => $request->query('date_to'),
                 'status' => $request->query('status'),
                 'service_bay_id' => $request->query('service_bay_id'),
                 'assigned_user_id' => $request->query('assigned_user_id'),

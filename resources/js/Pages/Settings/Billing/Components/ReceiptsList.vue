@@ -4,8 +4,9 @@ import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const props = defineProps({
     receipts: { type: Array, default: () => [] },
@@ -15,8 +16,6 @@ const props = defineProps({
         default: () => ({ status: 'all', search: '', per_page: 20 }),
     },
 });
-
-const locale = computed(() => document.documentElement.lang || 'ar');
 
 // Local state mirrors props.filter so the inputs are controlled.
 // On change we re-fetch via Inertia (preserveScroll keeps the
@@ -161,12 +160,12 @@ const statusChips = computed(() => [
                         d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
                     />
                 </svg>
-                <input
+                <AppInput
                     type="search"
                     v-model="search"
                     @input="onSearchInput"
                     :placeholder="t('system.billing.page.filter.search_placeholder')"
-                    class="w-full rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white ps-9 pe-3 py-2 text-sm"
+                    input-class="ps-9 pe-3 py-2 text-sm"
                 />
             </div>
             <div class="w-24">
@@ -196,7 +195,8 @@ const statusChips = computed(() => [
             v-if="receipts.length"
             class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
         >
-            <DataTable structured class="w-full text-sm">
+            <div class="overflow-x-auto">
+                <DataTable structured class="w-full text-sm">
                 <thead class="bg-slate-50 dark:bg-slate-900/50">
                     <tr>
                         <th
@@ -286,6 +286,7 @@ const statusChips = computed(() => [
                     </tr>
                 </tbody>
             </DataTable>
+            </div>
         </div>
 
         <!-- Empty state when no rows match the filter -->

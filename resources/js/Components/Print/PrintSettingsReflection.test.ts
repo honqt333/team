@@ -296,8 +296,12 @@ describe('Print settings reflection across unified print engine', () => {
 
         const layout = wrapper.getComponent(PrintLayout);
         expect(layout.props('documentType')).toBe('credit_note');
-        expect(layout.props('centerData').logo).toBe('/storage/center-invoice-logo.png');
-        expect(layout.props('data').qr_code_url).toContain('AQI%3D');
+        expect((layout.props('centerData') as Record<string, unknown> | undefined)?.logo).toBe(
+            '/storage/center-invoice-logo.png'
+        );
+        expect(
+            String((layout.props('data') as Record<string, unknown> | undefined)?.qr_code_url ?? '')
+        ).toContain('AQI%3D');
         expect(layout.props('documentSettings')).toMatchObject({
             template: 'TemplateThermal80',
             title_ar: 'إشعار دائن مخصص',
@@ -326,7 +330,13 @@ describe('Print settings reflection across unified print engine', () => {
                 },
             },
         });
-        expect(nonTaxPrint.getComponent(PrintLayout).props('data').qr_code_url).toBe('');
+        expect(
+            (
+                nonTaxPrint.getComponent(PrintLayout).props('data') as
+                    | Record<string, unknown>
+                    | undefined
+            )?.qr_code_url
+        ).toBe('');
         nonTaxPrint.unmount();
     });
 

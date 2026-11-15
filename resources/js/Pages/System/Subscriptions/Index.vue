@@ -20,20 +20,24 @@
                 </template>
 
                 <template #actions>
-                    <button
+                    <AppButton
                         @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
+                        variant="primary"
+                        size="md"
+                        class="shadow-md hover:shadow-focus-ring-soft"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
                         {{ $t('system.subscriptions.create') }}
-                    </button>
+                    </AppButton>
                 </template>
             </PageHeader>
 

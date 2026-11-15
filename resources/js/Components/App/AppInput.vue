@@ -93,6 +93,7 @@ onMounted(() => {
                 ref="inputEl"
                 :value="modelValue"
                 :type="type"
+                :lang="type === 'number' ? 'en' : undefined"
                 :placeholder="placeholder"
                 :required="required"
                 :disabled="disabled"

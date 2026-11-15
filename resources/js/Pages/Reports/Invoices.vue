@@ -312,11 +312,11 @@
                     class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-700/60"
                 >
                     <div class="relative flex-1">
-                        <input
+                        <AppInput
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.invoices_report.search_placeholder')"
-                            class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                            input-class="pl-10 py-2 text-xs"
                             @keyup.enter="applyFilters"
                         />
                         <svg
@@ -963,6 +963,7 @@ import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -1275,8 +1276,8 @@ const getStatusLabel = (status) => {
 <style>
 @media print {
     body {
-        background: #fff !important;
-        color: #000 !important;
+        background: white !important;
+        color: black !important;
     }
     .print\:hidden {
         display: none !important;

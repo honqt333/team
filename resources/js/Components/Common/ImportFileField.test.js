@@ -1,14 +1,28 @@
 import { mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import ImportFileField from './ImportFileField.vue';
 import ImportResult from './ImportResult.vue';
 
+const i18n = createI18n({
+    legacy: false,
+    locale: 'en',
+    messages: { en: { common: {} } },
+    missingWarn: false,
+    fallbackWarn: false,
+});
+
 describe('spreadsheet import controls', () => {
     it('handles invalid extensions, removal and selecting the same file again', async () => {
         const wrapper = mount(ImportFileField, {
+            global: {
+                plugins: [i18n],
+                mocks: { $t: (key) => key },
+            },
             props: { 'onUpdate:modelValue': (file) => wrapper.setProps({ modelValue: file }) },
         });
-        const drop = (file) => wrapper.trigger('drop', { dataTransfer: { files: [file] } });
+        const drop = (file) =>
+            wrapper.get('.border-dashed').trigger('drop', { dataTransfer: { files: [file] } });
         await drop(new File(['x'], 'bad.pdf'));
         expect(wrapper.emitted('invalid')).toHaveLength(1);
         const file = new File(['rows'], 'data.CSV');

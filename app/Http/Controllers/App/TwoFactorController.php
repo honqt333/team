@@ -56,7 +56,7 @@ class TwoFactorController extends Controller
         $method = $request->method ?? 'email';
 
         if ($method === 'sms' && ! $this->twoFactor->isSmsEnabled($user)) {
-            return back()->withErrors(['method' => 'SMS 2FA is currently disabled']);
+            return back()->withErrors(['method' => __('auth.sms_2fa_disabled')]);
         }
 
         // Cache intended method

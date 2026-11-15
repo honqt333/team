@@ -34,6 +34,9 @@ return [
     'notifications' => [
         'saved_successfully' => 'Notification settings saved successfully',
         'test_sent_successfully' => 'Test notification sent successfully',
+        'whatsapp_phone_required' => 'Please enter a valid WhatsApp phone number first',
+        'whatsapp_test_message' => 'Test message from :company via Khidmh Pro at :time',
+        'whatsapp_test_sent_successfully' => 'Test WhatsApp message sent successfully',
         'test_title' => 'System Test Notification',
         'test_body' => 'Test notification received successfully at :time. Notifications are functioning correctly.',
     ],

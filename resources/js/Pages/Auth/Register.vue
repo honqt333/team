@@ -1,12 +1,12 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
-import InputError from '@/Components/InputError.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import { COUNTRIES, getCountryMeta } from '@/Utils/currency';
 
 const { locale } = useI18n();
@@ -107,6 +107,13 @@ const startCooldown = (seconds) => {
     }, 1000);
 };
 
+onUnmounted(() => {
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+    }
+});
+
 const sendOtp = () => {
     otpForm.phone = form.phone;
     otpForm.country = form.country;
@@ -161,20 +168,15 @@ const submit = () => {
                     {{ isRTL ? 'الاسم التجاري' : 'Business Name' }}
                     <span class="text-red-500">*</span>
                 </label>
-                <input
+                <AppInput
                     type="text"
                     v-model="form.company_name"
                     required
                     autofocus
                     :placeholder="isRTL ? 'اسم الشركة أو المركز' : 'Company or Center Name'"
-                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                    :class="
-                        form.errors.company_name
-                            ? 'border-red-500'
-                            : 'border-gray-300 dark:border-gray-600'
-                    "
+                    :error="form.errors.company_name"
+                    input-class="px-4 py-2.5"
                 />
-                <InputError class="mt-1" :message="form.errors.company_name" />
             </div>
 
             <!-- First & Last Name -->
@@ -186,19 +188,14 @@ const submit = () => {
                         {{ isRTL ? 'الاسم الأول' : 'First Name' }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.first_name"
                         required
                         :placeholder="isRTL ? 'الاسم الأول' : 'First Name'"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                        :class="
-                            form.errors.first_name
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600'
-                        "
+                        :error="form.errors.first_name"
+                        input-class="px-4 py-2.5"
                     />
-                    <InputError class="mt-1" :message="form.errors.first_name" />
                 </div>
                 <div>
                     <label
@@ -207,19 +204,14 @@ const submit = () => {
                         {{ isRTL ? 'اسم الأخير' : 'Last Name' }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="form.last_name"
                         required
                         :placeholder="isRTL ? 'اسم الأخير' : 'Last Name'"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                        :class="
-                            form.errors.last_name
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600'
-                        "
+                        :error="form.errors.last_name"
+                        input-class="px-4 py-2.5"
                     />
-                    <InputError class="mt-1" :message="form.errors.last_name" />
                 </div>
             </div>
 
@@ -229,20 +221,15 @@ const submit = () => {
                     {{ isRTL ? 'بريد العمل' : 'Work Email' }}
                     <span class="text-red-500">*</span>
                 </label>
-                <input
+                <AppInput
                     type="email"
                     v-model="form.email"
                     required
                     autocomplete="email"
                     placeholder="example@company.com"
-                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                    :class="
-                        form.errors.email
-                            ? 'border-red-500'
-                            : 'border-gray-300 dark:border-gray-600'
-                    "
+                    :error="form.errors.email"
+                    input-class="px-4 py-2.5"
                 />
-                <InputError class="mt-1" :message="form.errors.email" />
             </div>
 
             <!-- Country -->
@@ -255,8 +242,8 @@ const submit = () => {
                     v-model="form.country"
                     :options="countryOptions"
                     :disabled="phoneVerified"
+                    :error="form.errors.country"
                 />
-                <InputError class="mt-1" :message="form.errors.country" />
             </div>
 
             <!-- Phone with OTP Verification -->
@@ -276,18 +263,15 @@ const submit = () => {
                         <span class="text-lg">{{ activeCountryMeta.flag }}</span>
                         <span class="text-sm">{{ activeCountryMeta.dial_code }}</span>
                     </div>
-                    <input
+                    <AppInput
                         type="tel"
                         v-model="form.phone"
                         required
                         :disabled="phoneVerified"
                         :placeholder="activeCountryMeta.local_placeholder || '5xxxxxxxx'"
-                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
-                        :class="
-                            form.errors.phone
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600'
-                        "
+                        :error="form.errors.phone || otpForm.errors.phone"
+                        class="flex-1"
+                        input-class="px-4 py-2.5"
                     />
                     <!-- Send OTP Button - Only show if verification enabled and not verified -->
                     <button
@@ -300,7 +284,6 @@ const submit = () => {
                         {{ isRTL ? 'تحقق' : 'Verify' }}
                     </button>
                 </div>
-                <InputError class="mt-1" :message="form.errors.phone || otpForm.errors.phone" />
 
                 <!-- OTP Input (show after code sent) -->
                 <div
@@ -315,14 +298,15 @@ const submit = () => {
                         }}
                     </p>
                     <div class="flex gap-2">
-                        <input
+                        <AppInput
                             type="text"
                             v-model="otpForm.otp"
                             maxlength="6"
                             :placeholder="
                                 isRTL ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'
                             "
-                            class="flex-1 px-4 py-2.5 border border-action-primary/25 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center tracking-widest font-mono"
+                            class="flex-1"
+                            input-class="px-4 py-2.5 text-center tracking-widest font-mono"
                         />
                         <button
                             type="button"
@@ -355,7 +339,9 @@ const submit = () => {
                             {{ isRTL ? 'إعادة إرسال الرمز' : 'Resend code' }}
                         </span>
                     </button>
-                    <InputError class="mt-1" :message="otpForm.errors.otp" />
+                    <p v-if="otpForm.errors.otp" role="alert" class="mt-1 text-sm text-danger">
+                        {{ otpForm.errors.otp }}
+                    </p>
                 </div>
             </div>
 
@@ -369,18 +355,14 @@ const submit = () => {
                         <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             :type="showPassword ? 'text' : 'password'"
                             v-model="form.password"
                             required
                             autocomplete="new-password"
                             placeholder="••••••"
-                            class="w-full px-4 py-2.5 pe-10 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                            :class="
-                                form.errors.password
-                                    ? 'border-red-500'
-                                    : 'border-gray-300 dark:border-gray-600'
-                            "
+                            :error="form.errors.password"
+                            input-class="px-4 py-2.5 pe-10"
                         />
                         <button
                             type="button"
@@ -423,7 +405,6 @@ const submit = () => {
                             </svg>
                         </button>
                     </div>
-                    <InputError class="mt-1" :message="form.errors.password" />
                 </div>
                 <div>
                     <label
@@ -433,13 +414,13 @@ const submit = () => {
                         <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <input
+                        <AppInput
                             :type="showConfirmPassword ? 'text' : 'password'"
                             v-model="form.password_confirmation"
                             required
                             autocomplete="new-password"
                             placeholder="••••••"
-                            class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                            input-class="px-4 py-2.5 pe-10"
                         />
                         <button
                             type="button"
@@ -482,7 +463,13 @@ const submit = () => {
                             </svg>
                         </button>
                     </div>
-                    <InputError class="mt-1" :message="form.errors.password_confirmation" />
+                    <p
+                        v-if="form.errors.password_confirmation"
+                        role="alert"
+                        class="mt-1 text-sm text-danger"
+                    >
+                        {{ form.errors.password_confirmation }}
+                    </p>
                 </div>
             </div>
 
@@ -491,13 +478,13 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ isRTL ? 'الرمز الترويجي' : 'Promo Code' }}
                 </label>
-                <input
+                <AppInput
                     type="text"
                     v-model="form.promo_code"
                     :placeholder="isRTL ? 'أدخل الرمز إن وجد' : 'Enter code if you have one'"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    :error="form.errors.promo_code"
+                    input-class="px-4 py-2.5"
                 />
-                <InputError class="mt-1" :message="form.errors.promo_code" />
             </div>
 
             <!-- Terms Checkbox -->
@@ -522,7 +509,9 @@ const submit = () => {
                     </button>
                 </label>
             </div>
-            <InputError class="mt-1" :message="form.errors.terms" />
+            <p v-if="form.errors.terms" role="alert" class="mt-1 text-sm text-danger">
+                {{ form.errors.terms }}
+            </p>
 
             <!-- Submit Button -->
             <button

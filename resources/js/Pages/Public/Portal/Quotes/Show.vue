@@ -12,10 +12,10 @@
         <!-- Flash feedback -->
         <div
             v-if="flashSuccess"
-            class="mb-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 p-4 text-sm font-bold text-emerald-800 dark:text-emerald-200 flex items-center gap-3"
+            class="mb-4 rounded-2xl bg-success-soft border border-success/30 p-4 text-sm font-bold text-text-primary flex items-center gap-3"
         >
             <svg
-                class="w-5 h-5 text-emerald-600 shrink-0"
+                class="w-5 h-5 text-success shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -31,7 +31,7 @@
         </div>
         <div
             v-if="flashError"
-            class="mb-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 p-4 text-sm font-bold text-rose-800 dark:text-rose-200"
+            class="mb-4 rounded-2xl bg-danger-soft border border-danger/30 p-4 text-sm font-bold text-danger"
         >
             {{ flashError }}
         </div>
@@ -39,7 +39,7 @@
         <div class="mb-4 flex items-center justify-between gap-3 print:hidden">
             <a
                 :href="`/${tenant.slug}/portal/quotes`"
-                class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring rounded"
             >
                 <svg
                     class="w-4 h-4 rtl:rotate-180"
@@ -56,23 +56,22 @@
                 </svg>
                 {{ t('customer_portal.portal_quotes.back_to_list') }}
             </a>
-            <button
-                type="button"
+            <AppPrintButton
+                size="sm"
+                variant="icon"
+                :label="t('customer_portal.portal_quotes.print_btn')"
                 @click="printPage"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-            >
-                {{ t('customer_portal.portal_quotes.print_btn') }}
-            </button>
+            />
         </div>
 
         <!-- Decision banner -->
         <section
             v-if="quote.can_be_actioned"
-            class="mb-6 rounded-2xl p-5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200/80 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden"
+            class="mb-6 rounded-2xl p-5 bg-warning-soft border border-warning/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden"
         >
             <div class="flex items-start gap-3.5">
                 <div
-                    class="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm"
+                    class="w-11 h-11 rounded-xl bg-warning text-text-inverse flex items-center justify-center shrink-0 shadow-sm"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -85,37 +84,39 @@
                 </div>
                 <div>
                     <h2
-                        class="font-extrabold text-sm sm:text-base text-amber-950 dark:text-amber-100"
+                        class="font-extrabold text-sm sm:text-base text-text-primary"
                     >
                         {{ t('customer_portal.portal_quotes.action_banner_title') }}
                     </h2>
-                    <p class="text-xs text-amber-800/90 dark:text-amber-200/80 mt-0.5">
+                    <p class="text-xs text-text-secondary mt-0.5">
                         {{ t('customer_portal.portal_quotes.action_banner_body') }}
                     </p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                <button
-                    type="button"
+                <AppButton
                     @click="openApproveModal"
-                    class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shadow-sm"
+                    variant="primary"
+                    size="md"
+                    class="bg-success hover:opacity-90 text-xs font-extrabold shadow-sm"
                 >
                     {{ t('customer_portal.portal_quotes.approve_btn') }}
-                </button>
-                <button
-                    type="button"
+                </AppButton>
+                <AppButton
                     @click="openRejectModal"
-                    class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition"
+                    variant="secondary"
+                    size="md"
+                    class="border-danger/30 text-danger hover:bg-danger-soft text-xs"
                 >
                     {{ t('customer_portal.portal_quotes.reject_btn') }}
-                </button>
+                </AppButton>
             </div>
         </section>
 
         <!-- Rejection reason (already rejected) -->
         <div
             v-if="quote.status === 'rejected' && quote.rejection_reason"
-            class="mb-6 rounded-2xl p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-xs font-semibold text-rose-800 dark:text-rose-200"
+            class="mb-6 rounded-2xl p-4 bg-danger-soft border border-danger/30 text-xs font-semibold text-danger"
         >
             {{
                 t('customer_portal.portal_quotes.rejection_reason_box', {
@@ -126,15 +127,15 @@
 
         <!-- Header card -->
         <section
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 sm:p-6 shadow-sm mb-6"
         >
             <div
-                class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800"
+                class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-border"
             >
                 <div>
                     <div class="flex flex-wrap items-center gap-2.5">
                         <span
-                            class="text-lg font-mono font-extrabold text-slate-900 dark:text-white"
+                            class="text-lg font-mono font-extrabold text-text-primary"
                             dir="ltr"
                         >
                             {{ quote.code }}
@@ -148,12 +149,12 @@
                     </div>
                     <p
                         v-if="quote.center_name"
-                        class="text-xs text-slate-500 dark:text-slate-400 mt-1"
+                        class="text-xs text-text-secondary mt-1"
                     >
                         {{ quote.center_name }}
                         <span v-if="quote.center_phone" dir="ltr">· {{ quote.center_phone }}</span>
                     </p>
-                    <p v-if="quote.center_address" class="text-xs text-slate-400 mt-0.5">
+                    <p v-if="quote.center_address" class="text-xs text-text-secondary mt-0.5">
                         {{ quote.center_address }}
                     </p>
                 </div>
@@ -166,22 +167,22 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 text-xs">
                 <div>
-                    <p class="text-slate-400">
+                    <p class="text-text-secondary">
                         {{ t('customer_portal.portal_quotes.created_at') }}
                     </p>
-                    <p class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                    <p class="font-bold text-text-primary mt-0.5">
                         {{ formatDate(quote.created_at) || '—' }}
                     </p>
                 </div>
                 <div>
-                    <p class="text-slate-400">{{ t('customer_portal.booking.review_vehicle') }}</p>
-                    <p class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                    <p class="text-text-secondary">{{ t('customer_portal.booking.review_vehicle') }}</p>
+                    <p class="font-bold text-text-primary mt-0.5">
                         {{ quote.vehicle_label || '—' }}
                     </p>
                 </div>
                 <div>
-                    <p class="text-slate-400">{{ t('customer_portal.portal_quotes.odometer') }}</p>
-                    <p class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                    <p class="text-text-secondary">{{ t('customer_portal.portal_quotes.odometer') }}</p>
+                    <p class="font-bold text-text-primary mt-0.5">
                         <span v-if="quote.odometer" dir="ltr">
                             {{
                                 t('customer_portal.portal_work_orders.odometer_unit', {
@@ -193,12 +194,11 @@
                     </p>
                 </div>
                 <div>
-                    <p class="text-slate-400">
+                    <p class="text-text-secondary">
                         {{ t('customer_portal.portal_quotes.total_incl_tax') }}
                     </p>
                     <p
-                        class="font-extrabold mt-0.5"
-                        :style="{ color: 'var(--tenant-primary, #2563eb)' }"
+                        class="font-extrabold mt-0.5 text-brand-primary"
                         dir="ltr"
                     >
                         {{ formatMoney(quote.total_incl_tax) }} {{ quote.currency_code }}
@@ -208,7 +208,7 @@
             <p
                 v-if="quote.valid_until"
                 class="mt-4 text-xs font-semibold"
-                :class="quote.is_expired ? 'text-rose-600' : 'text-slate-500 dark:text-slate-400'"
+                :class="quote.is_expired ? 'text-danger' : 'text-text-secondary'"
             >
                 {{
                     t('customer_portal.portal_quotes.valid_until', {
@@ -221,21 +221,21 @@
         <!-- Complaint & assessment -->
         <section
             v-if="quote.customer_complaint || quote.initial_assessment"
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 shadow-sm mb-6"
         >
-            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white mb-3">
+            <h3 class="text-sm font-extrabold text-text-primary mb-3">
                 {{ t('customer_portal.portal_quotes.complaint_title') }}
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <p
                     v-if="quote.customer_complaint"
-                    class="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line"
+                    class="rounded-xl bg-surface-muted p-3.5 text-sm text-text-primary whitespace-pre-line"
                 >
                     {{ quote.customer_complaint }}
                 </p>
                 <p
                     v-if="quote.initial_assessment"
-                    class="rounded-xl bg-blue-50/60 dark:bg-blue-950/20 p-3.5 text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line"
+                    class="rounded-xl bg-brand-primary-soft p-3.5 text-sm text-text-primary whitespace-pre-line"
                 >
                     {{ quote.initial_assessment }}
                 </p>
@@ -245,28 +245,28 @@
         <!-- Services -->
         <section
             v-if="quote.lines?.length"
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 sm:p-6 shadow-sm mb-6"
         >
-            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white mb-4">
+            <h3 class="text-sm font-extrabold text-text-primary mb-4">
                 {{ t('customer_portal.portal_quotes.services_section') }}
             </h3>
-            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="divide-y divide-border">
                 <div
                     v-for="line in quote.lines"
                     :key="line.id"
                     class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
                 >
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-bold text-slate-900 dark:text-white">
+                        <p class="text-sm font-bold text-text-primary">
                             {{ line.title }}
                         </p>
                         <p
                             v-if="line.description && line.description !== line.title"
-                            class="text-xs text-slate-500 mt-0.5"
+                            class="text-xs text-text-secondary mt-0.5"
                         >
                             {{ line.description }}
                         </p>
-                        <p class="text-xs text-slate-400 mt-0.5">
+                        <p class="text-xs text-text-secondary mt-0.5">
                             {{ t('customer_portal.portal_quotes.qty') }}:
                             <span dir="ltr">{{ line.qty }}</span>
                             · {{ t('customer_portal.portal_quotes.unit_price') }}:
@@ -274,7 +274,7 @@
                         </p>
                     </div>
                     <p
-                        class="text-sm font-extrabold text-slate-900 dark:text-white shrink-0"
+                        class="text-sm font-extrabold text-text-primary shrink-0"
                         dir="ltr"
                     >
                         {{ formatMoney(line.line_total) }}
@@ -286,22 +286,22 @@
         <!-- Parts -->
         <section
             v-if="quote.parts?.length"
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 sm:p-6 shadow-sm mb-6"
         >
-            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white mb-4">
+            <h3 class="text-sm font-extrabold text-text-primary mb-4">
                 {{ t('customer_portal.portal_quotes.parts_section') }}
             </h3>
-            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="divide-y divide-border">
                 <div
                     v-for="part in quote.parts"
                     :key="part.id"
                     class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
                 >
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-bold text-slate-900 dark:text-white">
+                        <p class="text-sm font-bold text-text-primary">
                             {{ part.name }}
                         </p>
-                        <p class="text-xs text-slate-400 mt-0.5">
+                        <p class="text-xs text-text-secondary mt-0.5">
                             <span v-if="part.part_number" class="font-mono" dir="ltr">
                                 {{ part.part_number }} ·
                             </span>
@@ -312,7 +312,7 @@
                         </p>
                     </div>
                     <p
-                        class="text-sm font-extrabold text-slate-900 dark:text-white shrink-0"
+                        class="text-sm font-extrabold text-text-primary shrink-0"
                         dir="ltr"
                     >
                         {{ formatMoney(part.total) }}
@@ -323,18 +323,18 @@
 
         <!-- Totals -->
         <section
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 sm:p-6 shadow-sm mb-6"
         >
             <div class="max-w-xs ms-auto space-y-2.5 text-sm">
-                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                <div class="flex items-center justify-between text-text-secondary">
                     <span>{{ t('customer_portal.portal_quotes.subtotal') }}</span>
-                    <span class="font-semibold text-slate-900 dark:text-white" dir="ltr">
+                    <span class="font-semibold text-text-primary" dir="ltr">
                         {{ formatMoney(quote.subtotal) }}
                     </span>
                 </div>
                 <div
                     v-if="quote.total_discount > 0"
-                    class="flex items-center justify-between text-emerald-600 dark:text-emerald-400"
+                    class="flex items-center justify-between text-success"
                 >
                     <span>{{ t('customer_portal.portal_quotes.discount') }}</span>
                     <span class="font-semibold" dir="ltr">
@@ -343,19 +343,19 @@
                 </div>
                 <div
                     v-if="quote.tax_enabled_snapshot"
-                    class="flex items-center justify-between text-slate-500 dark:text-slate-400"
+                    class="flex items-center justify-between text-text-secondary"
                 >
                     <span>
                         {{ t('customer_portal.portal_quotes.tax_amount') }} (
                         <span dir="ltr">{{ quote.tax_rate_snapshot }}%</span>
                         )
                     </span>
-                    <span class="font-semibold text-slate-900 dark:text-white" dir="ltr">
+                    <span class="font-semibold text-text-primary" dir="ltr">
                         {{ formatMoney(quote.total_tax) }}
                     </span>
                 </div>
                 <div
-                    class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-base font-extrabold text-slate-900 dark:text-white"
+                    class="pt-3 border-t border-border flex items-center justify-between text-base font-extrabold text-text-primary"
                 >
                     <span>{{ t('customer_portal.portal_quotes.total_incl_tax') }}</span>
                     <span dir="ltr">
@@ -368,20 +368,20 @@
         <!-- Notes & terms -->
         <section
             v-if="quote.notes || quote.quote_terms"
-            class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm mb-6"
+            class="rounded-2xl bg-surface border border-border p-5 shadow-sm mb-6"
         >
-            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-text-secondary mb-2">
                 {{ t('customer_portal.portal_quotes.notes_title') }}
             </h3>
             <p
                 v-if="quote.notes"
-                class="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line mb-2"
+                class="text-sm text-text-primary whitespace-pre-line mb-2"
             >
                 {{ quote.notes }}
             </p>
             <p
                 v-if="quote.quote_terms"
-                class="text-xs text-slate-500 dark:text-slate-400 whitespace-pre-line leading-relaxed"
+                class="text-xs text-text-secondary whitespace-pre-line leading-relaxed"
             >
                 {{ quote.quote_terms }}
             </p>
@@ -390,15 +390,15 @@
         <!-- Signature (if signed) -->
         <section
             v-if="quote.signature_url"
-            class="rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4"
+            class="rounded-2xl bg-success-soft border border-success/30 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4"
         >
-            <p class="text-xs font-extrabold text-emerald-800 dark:text-emerald-200">
+            <p class="text-xs font-extrabold text-text-primary">
                 {{ t('customer_portal.portal_quotes.signed_badge') }}
             </p>
             <img
                 :src="quote.signature_url"
                 :alt="t('customer_portal.portal_quotes.signed_badge')"
-                class="h-16 bg-white rounded-xl border border-emerald-200 p-1.5 object-contain"
+                class="h-16 bg-surface rounded-xl border border-success/30 p-1.5 object-contain"
             />
         </section>
 
@@ -409,14 +409,14 @@
             size="md"
             @close="showApproveModal = false"
         >
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-xs text-text-secondary mb-4">
                 {{ t('customer_portal.portal_quotes.approve_modal_subtitle') }}
             </p>
             <SignaturePad
                 v-model="signatureData"
                 :label="t('customer_portal.portal_quotes.signature_label')"
             />
-            <p v-if="approveError" class="mt-2 text-xs font-semibold text-rose-600">
+            <p v-if="approveError" class="mt-2 text-xs font-semibold text-danger">
                 {{ approveError }}
             </p>
             <template #footer>
@@ -480,6 +480,7 @@ import { printDocument } from '@/Composables/usePrint';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import BaseModal from '@/Components/BaseModal.vue';

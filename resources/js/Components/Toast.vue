@@ -3,6 +3,7 @@
         <TransitionGroup
             tag="div"
             name="toast"
+            :dir="resolvedDir"
             class="fixed top-4 z-[9999] flex flex-col gap-3 pointer-events-none"
             :class="isRtl ? 'left-4' : 'right-4'"
         >
@@ -113,7 +114,7 @@
 
 <script setup>
 import { activeModalElement } from '@/Support/modalStack';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useToast } from '@/Composables/useToast';
 
 const {
@@ -127,12 +128,65 @@ const {
 } = useToast();
 
 const containerId = ref(null);
+const instance = getCurrentInstance();
+const resolvedDir = ref('rtl');
+let dirObserver = null;
+
+function resolveDirection(hostEl) {
+    if (typeof document === 'undefined') return 'rtl';
+
+    const modalDirEl = activeModalElement.value?.closest?.('[dir]');
+    if (modalDirEl) {
+        return modalDirEl.getAttribute('dir') === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    const ownerDirEl = hostEl?.closest?.('[dir]');
+    if (ownerDirEl) {
+        return ownerDirEl.getAttribute('dir') === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    if (hostEl) {
+        return getComputedStyle(hostEl).direction === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    return document.documentElement.dir === 'ltr' ? 'ltr' : 'rtl';
+}
+
+function syncDirection() {
+    const hostEl = instance?.vnode?.el?.parentElement || null;
+    resolvedDir.value = resolveDirection(hostEl);
+}
 
 onMounted(() => {
     containerId.value = registerContainer();
+    syncDirection();
+
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+        const hostEl = instance?.vnode?.el?.parentElement || null;
+        const ownerDirEl = hostEl?.closest?.('[dir]') || null;
+        dirObserver = new MutationObserver(() => syncDirection());
+        dirObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['dir'],
+        });
+        if (ownerDirEl && ownerDirEl !== document.documentElement) {
+            dirObserver.observe(ownerDirEl, {
+                attributes: true,
+                attributeFilter: ['dir'],
+            });
+        }
+    }
+});
+
+watch(activeModalElement, () => {
+    syncDirection();
 });
 
 onUnmounted(() => {
+    if (dirObserver) {
+        dirObserver.disconnect();
+        dirObserver = null;
+    }
     if (containerId.value) {
         unregisterContainer(containerId.value);
     }
@@ -142,9 +196,7 @@ const isPrimary = computed(() => {
     return activeContainers.value[activeContainers.value.length - 1] === containerId.value;
 });
 
-const isRtl = computed(() => {
-    return typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
-});
+const isRtl = computed(() => resolvedDir.value === 'rtl');
 
 // Click anywhere on card to dismiss
 function handleCardClick(toast) {

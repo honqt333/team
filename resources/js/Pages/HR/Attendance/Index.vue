@@ -119,11 +119,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 v-model="searchQuery"
                                 type="text"
                                 :placeholder="$t('common.search')"
-                                class="w-full ps-10 pe-9 py-2 bg-surface-primary dark:bg-surface-secondary/50 border border-border-subtle rounded-xl text-sm text-content-primary placeholder-content-muted focus:outline-hidden focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all shadow-2xs"
+                                input-class="ps-10 pe-9 py-2"
                                 @keyup.enter="applyFilters"
                             />
                             <button

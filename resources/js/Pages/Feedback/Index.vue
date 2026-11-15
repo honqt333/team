@@ -37,26 +37,29 @@
                             />
                         </div>
 
-                        <button
-                            type="button"
+                        <AppButton
                             @click="showCreateModal = true"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">{{ $t('feedback.add_feedback') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('feedback.add_feedback') }}
+                        </AppButton>
                     </div>
                 </template>
             </PageHeader>
@@ -121,12 +124,12 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <!-- Search Input -->
                     <div class="relative">
-                        <input
+                        <AppInput
                             type="text"
                             v-model="searchQuery"
                             @keyup.enter="applyFilters"
                             :placeholder="$t('feedback.filters.search_placeholder')"
-                            class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary text-xs pe-9 ps-3 py-2.5 focus:border-action-primary focus:ring-2 focus:ring-action-primary/20 transition-colors"
+                            input-class="pe-9 text-xs"
                         />
                         <div
                             class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none text-content-muted"
@@ -205,21 +208,24 @@
                 :description="$t('feedback.empty.desc')"
             >
                 <template #actions>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="showCreateModal = true"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('feedback.empty.action') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('feedback.empty.action') }}
+                    </AppButton>
                 </template>
             </AppEmptyState>
 
@@ -614,6 +620,8 @@ import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';

@@ -8,9 +8,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
-import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import UserFormModal from './UserFormModal.vue';
 import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
@@ -184,24 +184,25 @@ const toggleUserActive = (user) => {
                 </template>
 
                 <template #actions>
-                    <button
+                    <AppButton
                         v-if="can('users.create')"
                         @click="openCreateModal"
-                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 overflow-hidden"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs hover:shadow-lg hover:shadow-focus-ring-soft"
                     >
-                        <div
-                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
-                        ></div>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span class="relative hidden sm:inline">{{ t('users.create_new') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        <span class="hidden sm:inline">{{ t('users.create_new') }}</span>
+                    </AppButton>
                 </template>
 
                 <template #filters>

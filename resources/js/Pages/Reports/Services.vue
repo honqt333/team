@@ -367,11 +367,11 @@
                             {{ $t('reports.services_report.direct_search') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 v-model="filterForm.search"
                                 type="text"
                                 :placeholder="$t('reports.services_report.search_placeholder')"
-                                class="w-full h-10 px-3.5 pe-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
+                                input-class="pe-8 text-xs"
                                 @keyup.enter="applyFilters"
                             />
                             <button
@@ -1213,10 +1213,11 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import { reactive, computed, watch, ref } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

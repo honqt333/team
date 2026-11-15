@@ -2,6 +2,7 @@
 const { t } = useI18n();
 
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -44,11 +45,11 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('center_settings.contact.email') }}
                 </label>
-                <input
+                <AppInput
                     type="email"
                     v-model="form.email"
                     readonly
-                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 cursor-not-allowed"
+                    input-class="px-4 py-3 bg-gray-50 dark:bg-gray-700 cursor-not-allowed"
                 />
             </div>
 
@@ -57,11 +58,11 @@ const submit = () => {
                     {{ $t('company_profile.admin_user.new_password') }}
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         :type="showPassword ? 'text' : 'password'"
                         v-model="form.password"
                         required
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring bg-white dark:bg-gray-800"
+                        input-class="px-4 py-3 pe-12"
                     />
                     <button
                         type="button"
@@ -79,11 +80,11 @@ const submit = () => {
                     {{ $t('auth.confirm_password') }}
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         :type="showConfirmPassword ? 'text' : 'password'"
                         v-model="form.password_confirmation"
                         required
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring bg-white dark:bg-gray-800"
+                        input-class="px-4 py-3 pe-12"
                     />
                     <button
                         type="button"

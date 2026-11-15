@@ -253,11 +253,17 @@ class PrintService
     }
 
     /**
-     * Resolve view name for document type.
+     * Resolve view name for document type, ensuring the Blade view actually exists.
      */
     protected function resolveView(string $documentType): ?string
     {
-        return $this->documentViews[$documentType] ?? null;
+        $view = $this->documentViews[$documentType] ?? null;
+
+        if ($view === null || ! view()->exists($view)) {
+            return null;
+        }
+
+        return $view;
     }
 
     /**

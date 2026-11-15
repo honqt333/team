@@ -29,50 +29,30 @@
                 </template>
 
                 <template #actions>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="save()"
-                        :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        :loading="form.processing"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <svg
-                            v-if="form.processing"
-                            class="animate-spin h-4 w-4"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
                                 fill="none"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                        <span>
-                            {{ form.processing ? $t('common.loading') : $t('common.save') }}
-                        </span>
-                    </button>
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </template>
+                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -264,11 +244,11 @@
                                     >
                                         {{ $t('print_settings.brand_primary_color') }}
                                     </p>
-                                    <input
+                                    <AppInput
                                         v-model="form.visual.primary_color"
                                         type="text"
                                         dir="ltr"
-                                        class="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none"
+                                        input-class="px-2.5 py-1.5 rounded-lg font-mono text-xs"
                                     />
                                 </div>
                             </div>
@@ -282,12 +262,11 @@
                                 >
                                     {{ $t('print_settings.default_footer_text') }}
                                 </label>
-                                <textarea
+                                <AppTextarea
                                     v-model="form.visual.footer_text"
-                                    rows="2"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-relaxed resize-none focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none transition"
+                                    :rows="2"
                                     :placeholder="$t('print_settings.footer_placeholder')"
-                                ></textarea>
+                                />
                             </div>
 
                             <!-- Print Currency Display Options (Tied to Company Currency — Style & Visibility Only) -->
@@ -530,13 +509,13 @@
                                                 >
                                                     {{ $t('print_settings.lang_ar') }}
                                                 </label>
-                                                <input
+                                                <AppInput
                                                     v-model="
                                                         form.documents[selectedDocKey].title_ar
                                                     "
                                                     type="text"
                                                     dir="rtl"
-                                                    class="w-full px-3 py-2 rounded-xl border border-border bg-surface text-content-primary text-xs focus:ring-1 focus:ring-action-primary focus:border-action-primary outline-none transition"
+                                                    input-class="px-3 py-2 text-xs"
                                                 />
                                             </div>
                                             <div>
@@ -545,13 +524,13 @@
                                                 >
                                                     {{ $t('print_settings.lang_en') }}
                                                 </label>
-                                                <input
+                                                <AppInput
                                                     v-model="
                                                         form.documents[selectedDocKey].title_en
                                                     "
                                                     type="text"
                                                     dir="ltr"
-                                                    class="w-full px-3 py-2 rounded-xl border border-border bg-surface text-content-primary text-xs focus:ring-1 focus:ring-action-primary focus:border-action-primary outline-none transition"
+                                                    input-class="px-3 py-2 text-xs"
                                                 />
                                             </div>
                                         </div>
@@ -764,6 +743,9 @@ import { ref, computed, watch } from 'vue';
 import { Head, usePage, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';

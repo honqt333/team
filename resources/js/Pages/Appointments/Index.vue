@@ -6,7 +6,7 @@
             <PageHeader
                 :title="$t('appointments.title')"
                 :subtitle="$t('appointments.subtitle')"
-                :total-count="toEnglish(appointments.length)"
+                :total-count="toEnglish(totalAppointmentsCount)"
                 :count-label="$t('appointments.total_count')"
             >
                 <template #icon>
@@ -33,7 +33,7 @@
                         >
                             <Link
                                 v-if="can('crm.appointments.manage')"
-                                :href="route('service-bays.index', { from: 'appointments' })"
+                                :href="route('services.index', { tab: 'bays' })"
                                 class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold text-content-secondary hover:text-action-primary hover:bg-surface-primary transition-colors"
                             >
                                 <svg
@@ -52,27 +52,97 @@
                                 <span>{{ $t('service_bays.title') }}</span>
                             </Link>
 
+                            <AppPrintButton variant="icon" @click="printSchedule" />
+
                             <div class="w-px h-5 bg-border-subtle mx-1"></div>
 
                             <AppViewModeToggle
                                 v-model="viewMode"
                                 storage-key="appointments_view_mode"
                             />
+
+                            <button
+                                type="button"
+                                @click="viewMode = viewMode === 'timeline' ? 'list' : 'timeline'"
+                                :title="$t('appointments.timeline_view')"
+                                class="p-1.5 rounded-lg transition-colors cursor-pointer"
+                                :class="
+                                    viewMode === 'timeline'
+                                        ? 'bg-action-primary text-white shadow-xs'
+                                        : 'text-content-secondary hover:text-action-primary hover:bg-surface-primary'
+                                "
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 6h16M4 10h16M4 14h10M4 18h6"
+                                    />
+                                </svg>
+                            </button>
                         </div>
 
                         <!-- Outer-left CTA -->
-                        <button
+                        <AppButton
                             v-if="can('crm.appointments.manage')"
-                            type="button"
                             @click="openCreate"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('appointments.new') }}
+                        </AppButton>
+                    </div>
+                </template>
+
+                <template #filters>
+                    <AppointmentFiltersBar
+                        :filters="filters"
+                        :status-options="statusOptions"
+                        :bay-options="bayOptions"
+                        :tech-options="techOptions"
+                        @reload="reload"
+                        @clear="clearFilters"
+                    />
+                </template>
+            </PageHeader>
+
+            <!-- Empty State (List & Grid modes only; Timeline shows empty bays grid) -->
+            <AppEmptyState
+                v-if="!appointmentList.length && viewMode !== 'timeline'"
+                :title="$t('appointments.empty')"
+            >
+                <template #actions>
+                    <AppButton
+                        v-if="can('crm.appointments.manage')"
+                        @click="openCreate"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
+                    >
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
@@ -80,95 +150,9 @@
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                            <span class="text-sm">{{ $t('appointments.new') }}</span>
-                        </button>
-                    </div>
-                </template>
-            </PageHeader>
-
-            <!-- Filters -->
-            <div
-                class="rounded-2xl border border-border-subtle bg-surface-primary p-4 shadow-2xs flex flex-wrap items-end gap-3"
-            >
-                <div>
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.filter_date') }}
-                    </label>
-                    <CustomDatePicker v-model="filters.date" @change="reload" />
-                </div>
-                <div class="min-w-[150px]">
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.filter_status') }}
-                    </label>
-                    <SearchableSelect
-                        v-model="filters.status"
-                        :options="statusOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="$t('appointments.all')"
-                        :label="''"
-                        :compact="true"
-                        @change="reload"
-                    />
-                </div>
-                <div class="min-w-[160px]">
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.filter_bay') }}
-                    </label>
-                    <SearchableSelect
-                        v-model="filters.service_bay_id"
-                        :options="bayOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="$t('appointments.all')"
-                        :label="''"
-                        :compact="true"
-                        @change="reload"
-                    />
-                </div>
-                <div class="min-w-[160px]">
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.filter_tech') }}
-                    </label>
-                    <SearchableSelect
-                        v-model="filters.assigned_user_id"
-                        :options="techOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="$t('appointments.all')"
-                        :label="''"
-                        :compact="true"
-                        @change="reload"
-                    />
-                </div>
-                <button
-                    type="button"
-                    @click="clearFilters"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold text-content-secondary bg-surface-secondary hover:bg-surface-tertiary border border-border-subtle transition-colors cursor-pointer"
-                >
-                    {{ $t('appointments.clear_filters') }}
-                </button>
-            </div>
-
-            <!-- Empty State -->
-            <AppEmptyState v-if="!appointments.length" :title="$t('appointments.empty')">
-                <template #actions>
-                    <button
-                        v-if="can('crm.appointments.manage')"
-                        type="button"
-                        @click="openCreate"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('appointments.new') }}</span>
-                    </button>
+                        </template>
+                        {{ $t('appointments.new') }}
+                    </AppButton>
                 </template>
             </AppEmptyState>
 
@@ -262,396 +246,309 @@
                     <template #cell-actions="{ item }">
                         <div
                             v-if="can('crm.appointments.manage')"
-                            class="flex flex-wrap items-center justify-center gap-1.5"
+                            class="flex items-center justify-center gap-1"
                         >
+                            <!-- Primary Next-Step Action -->
+                            <AppButton
+                                v-if="item.status === 'scheduled' || item.status === 'confirmed'"
+                                type="button"
+                                size="xs"
+                                variant="success"
+                                :disabled="busy"
+                                @click="checkIn(item)"
+                            >
+                                {{ $t('appointments.check_in') }}
+                            </AppButton>
+                            <AppButton
+                                v-else-if="item.status === 'checked_in'"
+                                type="button"
+                                size="xs"
+                                variant="primary"
+                                :disabled="busy"
+                                @click="convert(item)"
+                            >
+                                {{ $t('appointments.convert') }}
+                            </AppButton>
+
+                            <!-- Secondary Icon Actions -->
                             <button
                                 v-if="item.status === 'scheduled' || item.status === 'confirmed'"
                                 type="button"
-                                @click="checkIn(item)"
+                                :title="$t('appointments.convert')"
                                 :disabled="busy"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold bg-success-soft text-success hover:bg-success hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
+                                @click="convert(item)"
+                                class="p-1.5 rounded-lg text-action-primary hover:bg-action-primary/10 transition-colors cursor-pointer disabled:opacity-50"
                             >
-                                {{ $t('appointments.check_in') }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                                    />
+                                </svg>
                             </button>
+
                             <button
                                 v-if="canMarkNoShow(item)"
                                 type="button"
+                                :title="$t('appointments.no_show')"
+                                :disabled="busy"
                                 @click="markNoShow(item)"
-                                :disabled="busy"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold bg-warning-soft text-warning hover:bg-warning hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
+                                class="p-1.5 rounded-lg text-amber-600 hover:bg-amber-500/10 transition-colors cursor-pointer disabled:opacity-50"
                             >
-                                {{ $t('appointments.no_show') }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
                             </button>
-                            <button
-                                v-if="
-                                    item.status === 'scheduled' ||
-                                    item.status === 'confirmed' ||
-                                    item.status === 'checked_in'
-                                "
-                                type="button"
-                                @click="convert(item)"
-                                :disabled="busy"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold bg-action-primary hover:bg-action-primary-hover text-white disabled:opacity-50 transition-colors cursor-pointer"
-                            >
-                                {{ $t('appointments.convert') }}
-                            </button>
+
                             <button
                                 v-if="item.status !== 'cancelled' && item.status !== 'converted'"
                                 type="button"
-                                @click="openCancel(item)"
+                                :title="$t('common.edit')"
                                 :disabled="busy"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold bg-danger-soft text-danger hover:bg-danger hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
+                                @click="openEdit(item)"
+                                class="p-1.5 rounded-lg text-content-secondary hover:text-action-primary hover:bg-surface-secondary transition-colors cursor-pointer disabled:opacity-50"
                             >
-                                {{ $t('appointments.cancel') }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <button
+                                v-if="item.status !== 'cancelled' && item.status !== 'converted'"
+                                type="button"
+                                :title="$t('appointments.cancel')"
+                                :disabled="busy"
+                                @click="openCancel(item)"
+                                class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
                             </button>
                         </div>
                     </template>
                 </DataTable>
 
-                <!-- Timeline / List View (Grid Mode) -->
-                <div
-                    v-else
-                    class="rounded-2xl border border-border-subtle bg-surface-primary shadow-2xs overflow-hidden"
-                >
-                    <ul class="divide-y divide-border-subtle">
-                        <li
-                            v-for="appt in appointments"
+                <!-- Timeline / Calendar View -->
+                <AppointmentTimelineView
+                    v-else-if="viewMode === 'timeline'"
+                    :appointments="appointmentList"
+                    :bays="bays"
+                    :status-class="statusClass"
+                    :format-time="formatTime"
+                    :selected-date="filters.date || ''"
+                    :can-create="can('crm.appointments.manage')"
+                    @edit="openEdit"
+                    @create-at="openCreateAt"
+                    @range-change="onCalendarRangeChange"
+                />
+
+                <!-- Card Grid View (Grid Mode) -->
+                <div v-else class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div
+                            v-for="appt in appointmentList"
                             :key="appt.id"
-                            class="p-4 hover:bg-surface-secondary/40 transition-colors"
-                        >
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span
-                                            :class="[
-                                                'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold',
-                                                statusClass(appt.status),
-                                            ]"
-                                        >
-                                            {{ $t(`appointments.status.${appt.status}`) }}
-                                        </span>
-                                        <span
-                                            class="text-xs text-content-muted font-medium"
-                                            dir="ltr"
-                                        >
-                                            {{ formatTime(appt.scheduled_at) }} →
-                                            {{ formatTime(appt.estimated_end_at) }}
-                                        </span>
-                                        <span
-                                            v-if="appt.service_bay"
-                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-info-soft text-info"
-                                        >
-                                            {{ appt.service_bay.name }}
-                                        </span>
-                                        <span
-                                            v-if="appt.assigned_user"
-                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-action-primary/10 text-action-primary"
-                                        >
-                                            {{ appt.assigned_user.name }}
-                                        </span>
-                                    </div>
-                                    <h4 class="mt-1.5 text-sm font-bold text-content-primary">
+                        class="flex flex-col justify-between rounded-2xl border border-border-subtle bg-surface-primary p-4 shadow-2xs hover:shadow-md hover:border-border transition-all duration-200 space-y-3"
+                    >
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <span
+                                    :class="[
+                                        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold',
+                                        statusClass(appt.status),
+                                    ]"
+                                >
+                                    {{ $t(`appointments.status.${appt.status}`) }}
+                                </span>
+                                <span
+                                    class="text-xs text-content-muted font-medium"
+                                    dir="ltr"
+                                >
+                                    {{ formatTime(appt.scheduled_at) }} →
+                                    {{ formatTime(appt.estimated_end_at) }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div>
+                                    <h4 class="text-sm font-bold text-content-primary">
                                         {{ appt.customer?.name || '—' }}
-                                        <SaudiPlateDisplay
-                                            v-if="appt.vehicle?.plate_number"
-                                            :plate-number="appt.vehicle.plate_number"
-                                            size="sm"
-                                            class="ms-2 align-middle inline-flex"
-                                        />
                                     </h4>
                                     <p
-                                        v-if="appt.services?.length"
-                                        class="text-xs text-content-muted mt-0.5"
+                                        v-if="appt.customer?.phone"
+                                        class="text-xs text-content-muted"
+                                        dir="ltr"
                                     >
-                                        {{ appt.services.map((s) => s.name).join('، ') }}
-                                    </p>
-                                    <p
-                                        v-if="appt.notes"
-                                        class="text-xs text-content-muted mt-0.5 line-clamp-1"
-                                    >
-                                        {{ appt.notes }}
+                                        {{ appt.customer.phone }}
                                     </p>
                                 </div>
-                                <div class="flex flex-wrap items-center gap-1.5">
-                                    <button
-                                        v-if="
-                                            appt.status === 'scheduled' ||
-                                            appt.status === 'confirmed'
-                                        "
-                                        type="button"
-                                        @click="checkIn(appt)"
-                                        :disabled="busy"
-                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-success-soft text-success hover:bg-success hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
-                                    >
-                                        {{ $t('appointments.check_in') }}
-                                    </button>
-                                    <button
-                                        v-if="canMarkNoShow(appt)"
-                                        type="button"
-                                        @click="markNoShow(appt)"
-                                        :disabled="busy"
-                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-warning-soft text-warning hover:bg-warning hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
-                                    >
-                                        {{ $t('appointments.no_show') }}
-                                    </button>
-                                    <button
-                                        v-if="
-                                            appt.status === 'scheduled' ||
-                                            appt.status === 'confirmed' ||
-                                            appt.status === 'checked_in'
-                                        "
-                                        type="button"
-                                        @click="convert(appt)"
-                                        :disabled="busy"
-                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-action-primary hover:bg-action-primary-hover text-white disabled:opacity-50 transition-colors cursor-pointer"
-                                    >
-                                        {{ $t('appointments.convert') }}
-                                    </button>
-                                    <button
-                                        v-if="
-                                            appt.status !== 'cancelled' &&
-                                            appt.status !== 'converted'
-                                        "
-                                        type="button"
-                                        @click="openCancel(appt)"
-                                        :disabled="busy"
-                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-danger-soft text-danger hover:bg-danger hover:text-white disabled:opacity-50 transition-colors cursor-pointer"
-                                    >
-                                        {{ $t('appointments.cancel') }}
-                                    </button>
-                                </div>
+                                <SaudiPlateDisplay
+                                    v-if="appt.vehicle?.plate_number"
+                                    :plate-number="appt.vehicle.plate_number"
+                                    size="sm"
+                                />
                             </div>
-                        </li>
-                    </ul>
+
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span
+                                    v-if="appt.service_bay"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-info-soft text-info"
+                                >
+                                    {{ appt.service_bay.name }}
+                                </span>
+                                <span
+                                    v-if="appt.assigned_user"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-action-primary/10 text-action-primary"
+                                >
+                                    {{ appt.assigned_user.name }}
+                                </span>
+                            </div>
+
+                            <p
+                                v-if="appt.services?.length"
+                                class="text-xs text-content-secondary line-clamp-2"
+                            >
+                                {{ appt.services.map((s) => s.name).join('، ') }}
+                            </p>
+                            <p
+                                v-if="appt.notes"
+                                class="text-xs text-content-muted line-clamp-1"
+                            >
+                                {{ appt.notes }}
+                            </p>
+                        </div>
+
+                        <div
+                            v-if="can('crm.appointments.manage')"
+                            class="pt-3 border-t border-border-subtle flex flex-wrap items-center justify-end gap-1.5"
+                        >
+                            <AppButton
+                                v-if="
+                                    appt.status === 'scheduled' ||
+                                    appt.status === 'confirmed'
+                                "
+                                type="button"
+                                size="xs"
+                                variant="success"
+                                :disabled="busy"
+                                @click="checkIn(appt)"
+                            >
+                                {{ $t('appointments.check_in') }}
+                            </AppButton>
+                            <AppButton
+                                v-if="canMarkNoShow(appt)"
+                                type="button"
+                                size="xs"
+                                variant="warning"
+                                :disabled="busy"
+                                @click="markNoShow(appt)"
+                            >
+                                {{ $t('appointments.no_show') }}
+                            </AppButton>
+                            <AppButton
+                                v-if="
+                                    appt.status !== 'cancelled' &&
+                                    appt.status !== 'converted'
+                                "
+                                type="button"
+                                size="xs"
+                                variant="secondary"
+                                :disabled="busy"
+                                @click="openEdit(appt)"
+                            >
+                                {{ $t('common.edit') }}
+                            </AppButton>
+                            <AppButton
+                                v-if="
+                                    appt.status === 'scheduled' ||
+                                    appt.status === 'confirmed' ||
+                                    appt.status === 'checked_in'
+                                "
+                                type="button"
+                                size="xs"
+                                variant="primary"
+                                :disabled="busy"
+                                @click="convert(appt)"
+                            >
+                                {{ $t('appointments.convert') }}
+                            </AppButton>
+                            <AppButton
+                                v-if="
+                                    appt.status !== 'cancelled' &&
+                                    appt.status !== 'converted'
+                                "
+                                type="button"
+                                size="xs"
+                                variant="danger"
+                                :disabled="busy"
+                                @click="openCancel(appt)"
+                            >
+                                {{ $t('appointments.cancel') }}
+                            </AppButton>
+                        </div>
+                    </div>
+                    </div>
+
+                    <AppPagination
+                        v-if="appointments?.links?.length >= 3"
+                        :links="appointments.links"
+                        :from="appointments.from"
+                        :to="appointments.to"
+                        :total="appointments.total"
+                    />
                 </div>
             </template>
         </div>
 
-        <!-- Create modal -->
-        <BaseModal
+        <!-- Create / Edit Modal -->
+        <AppointmentFormModal
             :show="showForm"
-            size="lg"
-            :title="$t('appointments.new')"
+            :appointment="editingAppointment"
+            :appointments="appointmentList"
+            :bays="bays"
+            :techs="techs"
+            :services="services"
+            :customers="customers"
+            :prefill="createPrefill"
             @close="showForm = false"
-        >
-            <div class="space-y-4">
-                <!-- Quick Vehicle/Customer Search -->
-                <div class="relative">
-                    <div class="relative">
-                        <AppInput
-                            v-model="quickSearchQuery"
-                            type="text"
-                            size="sm"
-                            @input="onQuickSearchInput"
-                            :placeholder="$t('appointments.search_vehicle_or_customer')"
-                        />
-                        <span
-                            v-if="searchingQuick"
-                            class="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-content-muted animate-pulse"
-                        >
-                            ...
-                        </span>
-                    </div>
+            @saved="reloadPartial"
+        />
 
-                    <!-- Quick search dropdown -->
-                    <div
-                        v-if="quickSearchResults.length > 0"
-                        class="absolute z-20 start-0 end-0 mt-1 bg-surface-primary border border-border-subtle rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-border-subtle"
-                    >
-                        <button
-                            v-for="v in quickSearchResults"
-                            :key="v.id"
-                            type="button"
-                            @click="selectQuickVehicle(v)"
-                            class="w-full text-start p-2.5 hover:bg-surface-secondary/50 flex items-center justify-between transition text-xs cursor-pointer"
-                        >
-                            <div class="flex items-center gap-2">
-                                <SaudiPlateDisplay :plate-number="v.plate_number" size="sm" />
-                                <div>
-                                    <div class="font-medium text-content-primary">
-                                        {{
-                                            [v.make?.name, v.model?.name, v.year]
-                                                .filter(Boolean)
-                                                .join(' ')
-                                        }}
-                                    </div>
-                                    <div class="text-[11px] text-content-muted">
-                                        {{ v.customer?.name }}
-                                        {{ v.customer?.phone ? '(' + v.customer.phone + ')' : '' }}
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] text-action-primary font-bold">
-                                {{ $t('common.select') }}
-                            </span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.customer') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.customer_id"
-                            :options="customerOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('appointments.customer_placeholder')"
-                            :search-placeholder="$t('common.search')"
-                            :label="''"
-                            @search="onCustomerSearch"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.vehicle') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.vehicle_id"
-                            :options="vehicleOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="
-                                form.customer_id
-                                    ? vehicleOptions.length
-                                        ? $t('appointments.vehicle_placeholder')
-                                        : $t('appointments.no_vehicles')
-                                    : $t('appointments.select_customer_first')
-                            "
-                            :search-placeholder="$t('common.search')"
-                            :disabled="!form.customer_id || vehicleOptions.length === 0"
-                            :label="''"
-                        />
-                    </div>
-
-                    <!-- Selected Vehicle Banner -->
-                    <div
-                        v-if="selectedVehicle"
-                        class="col-span-1 md:col-span-2 bg-action-primary/5 border border-action-primary/20 rounded-xl p-2.5 flex items-center justify-between"
-                    >
-                        <div class="flex items-center gap-3">
-                            <SaudiPlateDisplay
-                                :plate-number="selectedVehicle.plate_number"
-                                size="sm"
-                            />
-                            <div class="text-xs">
-                                <span class="font-bold text-content-primary">
-                                    {{
-                                        [
-                                            selectedVehicle.make?.name,
-                                            selectedVehicle.model?.name,
-                                            selectedVehicle.year,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(' ')
-                                    }}
-                                </span>
-                                <span v-if="selectedCustomer" class="text-content-muted ms-2">
-                                    ({{ selectedCustomer.name }})
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.bay') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.service_bay_id"
-                            :options="bayFormOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('appointments.no_bay')"
-                            :label="''"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-content-muted mb-1">
-                            {{ $t('appointments.tech') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.assigned_user_id"
-                            :options="techFormOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('appointments.no_tech')"
-                            :label="''"
-                        />
-                    </div>
-                    <div>
-                        <AppInput
-                            v-model="form.scheduled_at"
-                            type="datetime-local"
-                            :label="$t('appointments.scheduled_at')"
-                        />
-                    </div>
-                    <div>
-                        <AppInput
-                            v-model="form.estimated_end_at"
-                            type="datetime-local"
-                            :label="$t('appointments.estimated_end_at')"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-content-muted mb-1">
-                        {{ $t('appointments.services') }}
-                    </label>
-                    <div
-                        class="max-h-36 overflow-y-auto border border-border-subtle bg-surface-secondary/50 rounded-xl p-2.5 space-y-2"
-                    >
-                        <div
-                            v-for="s in services"
-                            :key="s.id"
-                            class="flex items-center justify-between gap-2 text-xs"
-                        >
-                            <AppToggle :value="s.id" v-model="form.service_ids" :label="s.name" />
-                            <span class="text-content-muted font-medium">
-                                {{ formatPrice(s.base_price) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <AppTextarea v-model="form.notes" :label="$t('appointments.notes')" :rows="2" />
-            </div>
-
-            <template #footer>
-                <div class="flex items-center justify-end gap-2 w-full">
-                    <AppButton type="button" variant="secondary" @click="showForm = false">
-                        {{ $t('common.cancel') }}
-                    </AppButton>
-                    <AppButton
-                        type="button"
-                        variant="primary"
-                        :loading="busy"
-                        :disabled="
-                            !form.customer_id ||
-                            !form.vehicle_id ||
-                            !form.scheduled_at ||
-                            !form.estimated_end_at
-                        "
-                        @click="create"
-                    >
-                        {{ $t('common.create') }}
-                    </AppButton>
-                </div>
-            </template>
-        </BaseModal>
-
-        <!-- Cancel modal -->
+        <!-- Cancel Modal -->
         <BaseModal
             :show="showCancel"
             size="sm"
             :title="$t('appointments.cancel_title')"
             @close="showCancel = false"
         >
-            <AppTextarea
-                v-model="cancelReason"
-                :rows="3"
-                :placeholder="$t('appointments.cancel_reason_placeholder')"
-            />
+            <form id="cancel-appointment-form" @submit.prevent="confirmCancel">
+                <FormField v-slot="field" :label="$t('appointments.cancel_title')">
+                    <AppTextarea
+                        :id="field.id"
+                        v-model="cancelReason"
+                        :rows="3"
+                        :placeholder="$t('appointments.cancel_reason_placeholder')"
+                    />
+                </FormField>
+            </form>
 
             <template #footer>
                 <div class="flex items-center justify-end gap-2 w-full">
@@ -659,10 +556,10 @@
                         {{ $t('common.cancel') }}
                     </AppButton>
                     <AppButton
-                        type="button"
+                        type="submit"
+                        form="cancel-appointment-form"
                         variant="danger"
                         :loading="busy"
-                        @click="confirmCancel"
                     >
                         {{ $t('appointments.cancel') }}
                     </AppButton>
@@ -679,28 +576,28 @@ import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
-import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import FormField from '@/Components/Common/FormField.vue';
 import BaseModal from '@/Components/BaseModal.vue';
-import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import AppointmentFiltersBar from '@/Components/Appointments/AppointmentFiltersBar.vue';
+import AppointmentFormModal from '@/Components/Appointments/AppointmentFormModal.vue';
+import AppointmentTimelineView from '@/Components/Appointments/AppointmentTimelineView.vue';
 import { usePermission } from '@/Composables/usePermission';
 import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
-
-useAutoOpenCreate(() => openCreate());
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { canMarkNoShow } from '@/Utils/appointments';
 
 const props = defineProps({
-    appointments: { type: Array, default: () => [] },
+    appointments: { type: [Array, Object], default: () => [] },
     bays: { type: Array, default: () => [] },
     techs: { type: Array, default: () => [] },
     services: { type: Array, default: () => [] },
@@ -708,6 +605,16 @@ const props = defineProps({
     filters: { type: Object, default: () => ({}) },
     statuses: { type: Array, default: () => [] },
 });
+
+const appointmentList = computed(() =>
+    Array.isArray(props.appointments) ? props.appointments : props.appointments?.data || []
+);
+
+const totalAppointmentsCount = computed(() =>
+    Array.isArray(props.appointments)
+        ? props.appointments.length
+        : (props.appointments?.total ?? appointmentList.value.length)
+);
 
 const { t } = useI18n();
 const { can } = usePermission();
@@ -718,9 +625,13 @@ const { toEnglish } = useNumberFormat();
 const viewMode = ref('list');
 const busy = ref(false);
 const showForm = ref(false);
+const editingAppointment = ref(null);
+const createPrefill = ref(null);
 const showCancel = ref(false);
 const cancelReason = ref('');
 const cancellingAppointment = ref(null);
+
+useAutoOpenCreate(() => openCreate());
 
 const columns = computed(() => [
     { key: 'status', label: t('appointments.filter_status'), class: 'w-28' },
@@ -731,156 +642,6 @@ const columns = computed(() => [
     { key: 'services', label: t('appointments.services') },
     { key: 'actions', label: t('common.actions'), class: 'text-center' },
 ]);
-
-const form = reactive({
-    customer_id: '',
-    vehicle_id: '',
-    service_bay_id: '',
-    assigned_user_id: '',
-    scheduled_at: '',
-    estimated_end_at: '',
-    service_ids: [],
-    notes: '',
-});
-
-const customerList = ref([...props.customers]);
-const searchingCustomers = ref(false);
-
-watch(
-    () => props.customers,
-    (newVal) => {
-        if (Array.isArray(newVal)) {
-            const existingIds = new Set(customerList.value.map((c) => c.id));
-            newVal.forEach((c) => {
-                if (!existingIds.has(c.id)) {
-                    customerList.value.push(c);
-                }
-            });
-        }
-    },
-    { immediate: true }
-);
-
-const customerOptions = computed(() => {
-    return customerList.value.map((c) => ({
-        value: c.id,
-        label: `${c.name}${c.phone ? ' (' + c.phone + ')' : ''}`,
-    }));
-});
-
-const selectedCustomer = computed(() => {
-    return customerList.value.find((c) => String(c.id) === String(form.customer_id)) || null;
-});
-
-const vehicleOptions = computed(() => {
-    if (!selectedCustomer.value || !Array.isArray(selectedCustomer.value.vehicles)) return [];
-    return selectedCustomer.value.vehicles.map((v) => {
-        const makeName = v.make?.name || '';
-        const modelName = v.model?.name || '';
-        const carInfo = [makeName, modelName, v.year].filter(Boolean).join(' ');
-        const plate = v.plate_number || '';
-        return {
-            value: v.id,
-            label: carInfo ? `${plate} - ${carInfo}` : plate || `#${v.id}`,
-            plate: plate,
-            makeModel: carInfo,
-            raw: v,
-        };
-    });
-});
-
-const selectedVehicle = computed(() => {
-    if (!form.vehicle_id || !selectedCustomer.value?.vehicles) return null;
-    return (
-        selectedCustomer.value.vehicles.find((v) => String(v.id) === String(form.vehicle_id)) ||
-        null
-    );
-});
-
-watch(
-    () => form.customer_id,
-    (newVal) => {
-        if (!newVal) {
-            form.vehicle_id = '';
-            return;
-        }
-        const cust = customerList.value.find((c) => String(c.id) === String(newVal));
-        if (cust?.vehicles?.length === 1) {
-            form.vehicle_id = cust.vehicles[0].id;
-        } else if (!cust?.vehicles?.some((v) => String(v.id) === String(form.vehicle_id))) {
-            form.vehicle_id = '';
-        }
-    }
-);
-
-// Quick vehicle search
-const quickSearchQuery = ref('');
-const quickSearchResults = ref([]);
-const searchingQuick = ref(false);
-let quickSearchTimer = null;
-
-function onQuickSearchInput() {
-    clearTimeout(quickSearchTimer);
-    const q = quickSearchQuery.value?.trim();
-    if (!q || q.length < 2) {
-        quickSearchResults.value = [];
-        return;
-    }
-    quickSearchTimer = setTimeout(async () => {
-        searchingQuick.value = true;
-        try {
-            const res = await axios.get('/app/api/vehicles/search', { params: { q } });
-            quickSearchResults.value = Array.isArray(res.data) ? res.data : [];
-        } catch (e) {
-            console.error('Quick vehicle search error', e);
-        } finally {
-            searchingQuick.value = false;
-        }
-    }, 300);
-}
-
-function selectQuickVehicle(v) {
-    if (v.customer) {
-        const existingCust = customerList.value.find((c) => c.id === v.customer.id);
-        if (!existingCust) {
-            customerList.value.push({
-                ...v.customer,
-                vehicles: [v],
-            });
-        } else {
-            if (!Array.isArray(existingCust.vehicles)) {
-                existingCust.vehicles = [];
-            }
-            if (!existingCust.vehicles.some((ev) => ev.id === v.id)) {
-                existingCust.vehicles.push(v);
-            }
-        }
-        form.customer_id = v.customer.id;
-    }
-    form.vehicle_id = v.id;
-    quickSearchQuery.value = '';
-    quickSearchResults.value = [];
-}
-
-async function onCustomerSearch(query) {
-    if (!query || query.length < 2) return;
-    searchingCustomers.value = true;
-    try {
-        const res = await axios.get('/app/api/customers/search', { params: { q: query } });
-        if (Array.isArray(res.data)) {
-            const existingIds = new Set(customerList.value.map((c) => c.id));
-            res.data.forEach((c) => {
-                if (!existingIds.has(c.id)) {
-                    customerList.value.push(c);
-                }
-            });
-        }
-    } catch (e) {
-        console.error('Customer search error', e);
-    } finally {
-        searchingCustomers.value = false;
-    }
-}
 
 const filters = reactive({ ...props.filters });
 
@@ -894,78 +655,75 @@ const bayOptions = computed(() => [
     ...props.bays.map((b) => ({ value: b.id, label: b.name })),
 ]);
 
-const bayFormOptions = computed(() => [
-    { value: '', label: t('appointments.no_bay') },
-    ...props.bays.map((b) => ({ value: b.id, label: b.name })),
-]);
-
 const techOptions = computed(() => [
     { value: '', label: t('appointments.all') },
-    ...props.techs.map((t) => ({ value: t.id, label: t.name })),
-]);
-
-const techFormOptions = computed(() => [
-    { value: '', label: t('appointments.no_tech') },
-    ...props.techs.map((t) => ({ value: t.id, label: t.name })),
+    ...props.techs.map((item) => ({ value: item.id, label: item.name })),
 ]);
 
 function reload() {
     const params = {};
+    if (viewMode.value === 'timeline') params.view = 'timeline';
+    if (filters.search) params.search = filters.search;
     if (filters.date) params.date = filters.date;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
     if (filters.status) params.status = filters.status;
     if (filters.service_bay_id) params.service_bay_id = filters.service_bay_id;
     if (filters.assigned_user_id) params.assigned_user_id = filters.assigned_user_id;
-    router.get(route('appointments.index'), params, { preserveState: true });
+    router.get(route('appointments.index'), params, {
+        preserveState: true,
+        only: ['appointments', 'filters'],
+    });
+}
+
+watch(viewMode, (newMode, oldMode) => {
+    if (newMode === 'timeline' || oldMode === 'timeline') {
+        reload();
+    }
+});
+
+function reloadPartial() {
+    router.reload({ only: ['appointments'] });
 }
 
 function clearFilters() {
+    filters.search = '';
     filters.date = '';
+    filters.date_from = '';
+    filters.date_to = '';
     filters.status = '';
     filters.service_bay_id = '';
     filters.assigned_user_id = '';
     reload();
 }
 
+function printSchedule() {
+    window.print();
+}
+
 function openCreate() {
-    form.customer_id = '';
-    form.vehicle_id = '';
-    form.service_bay_id = '';
-    form.assigned_user_id = '';
-    form.scheduled_at = '';
-    form.estimated_end_at = '';
-    form.service_ids = [];
-    form.notes = '';
-    quickSearchQuery.value = '';
-    quickSearchResults.value = [];
+    editingAppointment.value = null;
+    createPrefill.value = null;
     showForm.value = true;
 }
 
-async function create() {
-    busy.value = true;
-    try {
-        await axios.post(route('appointments.store'), {
-            ...form,
-            customer_id: Number(form.customer_id),
-            vehicle_id: Number(form.vehicle_id),
-            service_bay_id: form.service_bay_id ? Number(form.service_bay_id) : null,
-            assigned_user_id: form.assigned_user_id ? Number(form.assigned_user_id) : null,
-            service_ids: form.service_ids.map(Number),
-        });
-        showForm.value = false;
-        success(t('common.saved_success'));
-        router.reload();
-    } catch (e) {
-        if (e.response?.data?.code) {
-            error(
-                t(`messages.${e.response.data.code}`) +
-                    (e.response.data.error ? ': ' + e.response.data.error : '')
-            );
-        } else {
-            error(e.response?.data?.message || e.message);
-        }
-    } finally {
-        busy.value = false;
-    }
+function openCreateAt(payload) {
+    editingAppointment.value = null;
+    createPrefill.value = payload || null;
+    showForm.value = true;
+}
+
+function onCalendarRangeChange(range) {
+    filters.date = range.date || '';
+    filters.date_from = range.date_from || '';
+    filters.date_to = range.date_to || '';
+    reload();
+}
+
+function openEdit(appt) {
+    editingAppointment.value = appt;
+    createPrefill.value = null;
+    showForm.value = true;
 }
 
 async function checkIn(appt) {
@@ -973,7 +731,7 @@ async function checkIn(appt) {
     try {
         await axios.post(route('appointments.check-in', { appointment: appt.id }));
         success(t('common.updated_success'));
-        router.reload();
+        reloadPartial();
     } catch (e) {
         error(e.response?.data?.error || e.message);
     } finally {
@@ -995,7 +753,7 @@ async function markNoShow(appt) {
     try {
         await axios.post(route('appointments.no-show', { appointment: appt.id }));
         success(t('common.updated_success'));
-        router.reload();
+        reloadPartial();
     } catch (e) {
         if (e.response?.data?.code) {
             error(
@@ -1022,13 +780,11 @@ async function confirmCancel() {
     try {
         await axios.post(
             route('appointments.cancel', { appointment: cancellingAppointment.value.id }),
-            {
-                reason: cancelReason.value,
-            }
+            { reason: cancelReason.value }
         );
         showCancel.value = false;
         success(t('common.updated_success'));
-        router.reload();
+        reloadPartial();
     } catch (e) {
         error(e.response?.data?.error || e.message);
     } finally {
@@ -1053,7 +809,7 @@ async function convert(appt) {
         if (woId) {
             router.visit(route('work-orders.show', { workOrder: woId }));
         } else {
-            router.reload();
+            reloadPartial();
         }
     } catch (e) {
         const code = e.response?.data?.code;
@@ -1081,17 +837,8 @@ function formatTime(iso) {
     if (Number.isNaN(d.getTime())) return iso;
     try {
         return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(d);
-    } catch (e) {
+    } catch {
         return iso;
-    }
-}
-
-function formatPrice(value) {
-    if (value === null || value === undefined) return '';
-    try {
-        return new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 }).format(value);
-    } catch (e) {
-        return String(value);
     }
 }
 </script>

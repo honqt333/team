@@ -142,20 +142,20 @@
                                 <label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">
                                     {{ $t('common.from') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.quiet_hours_start"
                                     type="time"
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    input-class="py-2 text-sm"
                                 />
                             </div>
                             <div>
                                 <label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">
                                     {{ $t('common.to') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.quiet_hours_end"
                                     type="time"
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    input-class="py-2 text-sm"
                                 />
                             </div>
                         </div>

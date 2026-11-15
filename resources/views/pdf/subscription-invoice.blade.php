@@ -1,10 +1,23 @@
+@php
+    $pdfLocale = $locale ?? app()->getLocale();
+    $isRtl = $pdfLocale === 'ar';
+    $billingCycle = strtolower((string) ($subscription?->billing_cycle ?? ''));
+    if (!in_array($billingCycle, ['monthly', 'yearly', 'annual'], true) && $subscription?->starts_at && $subscription?->ends_at) {
+        $days = $subscription->starts_at->diffInDays($subscription->ends_at);
+        $billingCycle = $days <= 45 ? 'monthly' : 'yearly';
+    }
+    $isMonthly = $billingCycle === 'monthly';
+    $cycleLabel = $isRtl
+        ? ($isMonthly ? 'اشتراك شهري' : 'اشتراك سنوي')
+        : ($isMonthly ? 'Monthly Subscription' : 'Annual Subscription');
+@endphp
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $pdfLocale }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>فاتورة اشتراك - {{ $invoice->invoice_number }}</title>
+    <title>{{ $isRtl ? 'فاتورة اشتراك' : 'Subscription Invoice' }} - {{ $invoice->invoice_number }}</title>
     <style>
         /* Register IBM Plex Sans Arabic via @font-face so DomPDF picks it up
            when CSS references the family name. The file is
@@ -39,7 +52,7 @@
             font-size: 11.5px;
             line-height: 1.35;
             color: #1f2937;
-            direction: rtl;
+            direction: {{ $isRtl ? 'rtl' : 'ltr' }};
         }
 
         /* DomPDF renders HTML <table> columns physically left-to-right regardless of dir="rtl",
@@ -113,7 +126,7 @@
         .info-label {
             width: 130px;
             color: #6b7280;
-            text-align: right;
+            text-align: {{ $isRtl ? 'right' : 'left' }};
             font-size: 11px;
         }
 
@@ -246,178 +259,315 @@
 </head>
 
 <body>
-    <!-- Header (left column = Invoice Title, right column = Platform Identity) -->
+    <!-- Header -->
     <table class="layout-table header-table">
         <tr>
-            <td style="width: 45%; text-align: left;">
-                <div class="invoice-title">فاتورة اشتراك</div>
-                <div class="invoice-number">{{ $invoice->invoice_number }}</div>
-            </td>
-            <td style="width: 55%; text-align: right;">
-                @if (!empty($company['logo_url']))
-                    <img src="{{ $company['logo_url'] }}" class="logo" alt="logo" />
-                @endif
-                <div class="company-name">{{ $company['name'] ?? config('app.name_ar', 'خدمة برو') }}</div>
-                <div class="company-meta">
-                    @if (!empty($company['cr_number']))
-                        السجل التجاري: {{ $company['cr_number'] }}<br>
+            @if ($isRtl)
+                <td style="width: 45%; text-align: left;">
+                    <div class="invoice-title">فاتورة اشتراك</div>
+                    <div class="invoice-number">{{ $invoice->invoice_number }}</div>
+                </td>
+                <td style="width: 55%; text-align: right;">
+                    @if (!empty($company['logo_url']))
+                        <img src="{{ $company['logo_url'] }}" class="logo" alt="logo" />
                     @endif
-                    @if (!empty($company['vat_number']))
-                        الرقم الضريبي: {{ $company['vat_number'] }}<br>
+                    <div class="company-name">{{ $company['name'] ?? config('app.name_ar', 'خدمة برو') }}</div>
+                    <div class="company-meta">
+                        @if (!empty($company['cr_number']))
+                            السجل التجاري: <span style="direction: ltr; display: inline-block;">{{ $company['cr_number'] }}</span><br>
+                        @endif
+                        @if (!empty($company['vat_number']))
+                            الرقم الضريبي: <span style="direction: ltr; display: inline-block;">{{ $company['vat_number'] }}</span><br>
+                        @endif
+                        @if (!empty($company['phone']))
+                            <span style="direction: ltr; display: inline-block;">{{ $company['phone'] }}</span><br>
+                        @endif
+                        @if (!empty($company['email']))
+                            {{ $company['email'] }}<br>
+                        @endif
+                        @if (!empty($company['website']))
+                            {{ $company['website'] }}
+                        @endif
+                    </div>
+                </td>
+            @else
+                <td style="width: 55%; text-align: left;">
+                    @if (!empty($company['logo_url']))
+                        <img src="{{ $company['logo_url'] }}" class="logo" alt="logo" />
                     @endif
-                    @if (!empty($company['phone']))
-                        {{ $company['phone'] }}<br>
-                    @endif
-                    @if (!empty($company['email']))
-                        {{ $company['email'] }}<br>
-                    @endif
-                    @if (!empty($company['website']))
-                        {{ $company['website'] }}
-                    @endif
-                </div>
-            </td>
+                    <div class="company-name">{{ $company['name_en'] ?? $company['name'] ?? config('app.name', 'Khidmah Pro') }}</div>
+                    <div class="company-meta">
+                        @if (!empty($company['cr_number']))
+                            CR No: <span style="direction: ltr; display: inline-block;">{{ $company['cr_number'] }}</span><br>
+                        @endif
+                        @if (!empty($company['vat_number']))
+                            VAT No: <span style="direction: ltr; display: inline-block;">{{ $company['vat_number'] }}</span><br>
+                        @endif
+                        @if (!empty($company['phone']))
+                            <span style="direction: ltr; display: inline-block;">{{ $company['phone'] }}</span><br>
+                        @endif
+                        @if (!empty($company['email']))
+                            {{ $company['email'] }}<br>
+                        @endif
+                        @if (!empty($company['website']))
+                            {{ $company['website'] }}
+                        @endif
+                    </div>
+                </td>
+                <td style="width: 45%; text-align: right;">
+                    <div class="invoice-title">Subscription Invoice</div>
+                    <div class="invoice-number">{{ $invoice->invoice_number }}</div>
+                </td>
+            @endif
         </tr>
     </table>
 
     <!-- Invoice Meta -->
     <div class="box-card">
         <table class="info-table">
-            <tr>
-                <td class="info-value">{{ ($invoice->issued_at ?? $invoice->created_at)?->format('Y-m-d') ?? '—' }}</td>
-                <td class="info-label">تاريخ الإصدار:</td>
-            </tr>
-            <tr>
-                <td class="info-value">{{ $invoice->due_at?->format('Y-m-d') ?? '—' }}</td>
-                <td class="info-label">تاريخ الاستحقاق:</td>
-            </tr>
-            @if ($invoice->paid_at)
+            @php
+                $statusMeta = match ($invoice->status) {
+                    'paid' => ['class' => 'status-paid', 'label' => $isRtl ? 'مدفوعة' : 'Paid'],
+                    'cancelled' => ['class' => 'status-cancelled', 'label' => $isRtl ? 'ملغية' : 'Cancelled'],
+                    'failed' => ['class' => 'status-failed', 'label' => $isRtl ? 'فشلت' : 'Failed'],
+                    'refunded' => ['class' => 'status-cancelled', 'label' => $isRtl ? 'مستردة' : 'Refunded'],
+                    default => ['class' => 'status-pending', 'label' => $isRtl ? 'معلقة' : 'Pending'],
+                };
+            @endphp
+            @if ($isRtl)
                 <tr>
-                    <td class="info-value">{{ $invoice->paid_at->format('Y-m-d') }}</td>
-                    <td class="info-label">تاريخ السداد:</td>
+                    <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ ($invoice->issued_at ?? $invoice->created_at)?->format('Y-m-d') ?? '—' }}</span></td>
+                    <td class="info-label">تاريخ الإصدار:</td>
+                </tr>
+                <tr>
+                    <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $invoice->due_at?->format('Y-m-d') ?? '—' }}</span></td>
+                    <td class="info-label">تاريخ الاستحقاق:</td>
+                </tr>
+                @if ($invoice->paid_at)
+                    <tr>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $invoice->paid_at->format('Y-m-d') }}</span></td>
+                        <td class="info-label">تاريخ السداد:</td>
+                    </tr>
+                @endif
+                <tr>
+                    <td class="info-value"><span class="status-badge {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span></td>
+                    <td class="info-label">الحالة:</td>
+                </tr>
+            @else
+                <tr>
+                    <td class="info-label">Issue Date:</td>
+                    <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ ($invoice->issued_at ?? $invoice->created_at)?->format('Y-m-d') ?? '—' }}</span></td>
+                </tr>
+                <tr>
+                    <td class="info-label">Due Date:</td>
+                    <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $invoice->due_at?->format('Y-m-d') ?? '—' }}</span></td>
+                </tr>
+                @if ($invoice->paid_at)
+                    <tr>
+                        <td class="info-label">Paid Date:</td>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $invoice->paid_at->format('Y-m-d') }}</span></td>
+                    </tr>
+                @endif
+                <tr>
+                    <td class="info-label">Status:</td>
+                    <td class="info-value"><span class="status-badge {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span></td>
                 </tr>
             @endif
-            <tr>
-                <td class="info-value">
-                    @php
-                        $statusMeta = match ($invoice->status) {
-                            'paid' => ['class' => 'status-paid', 'label' => 'مدفوعة'],
-                            'cancelled' => ['class' => 'status-cancelled', 'label' => 'ملغية'],
-                            'failed' => ['class' => 'status-failed', 'label' => 'فشلت'],
-                            'refunded' => ['class' => 'status-cancelled', 'label' => 'مستردة'],
-                            default => ['class' => 'status-pending', 'label' => 'معلقة'],
-                        };
-                    @endphp
-                    <span class="status-badge {{ $statusMeta['class'] }}">
-                        {{ $statusMeta['label'] }}
-                    </span>
-                </td>
-                <td class="info-label">الحالة:</td>
-            </tr>
         </table>
     </div>
 
     <!-- Customer Info -->
     <div class="details-section">
-        <div class="section-title">بيانات العميل</div>
+        <div class="section-title">{{ $isRtl ? 'بيانات العميل' : 'Customer Information' }}</div>
         <table class="info-table">
-            <tr>
-                <td class="info-value">{{ $tenant?->trade_name ?? $tenant?->name ?? '—' }}</td>
-                <td class="info-label">الاسم التجاري:</td>
-            </tr>
-            @if ($tenant?->cr_number)
+            @if ($isRtl)
                 <tr>
-                    <td class="info-value">{{ $tenant->cr_number }}</td>
-                    <td class="info-label">السجل التجاري:</td>
+                    <td class="info-value">{{ $tenant?->trade_name ?? $tenant?->name ?? '—' }}</td>
+                    <td class="info-label">الاسم التجاري:</td>
                 </tr>
-            @endif
-            @if ($tenant?->vat_number)
+                @if ($tenant?->cr_number)
+                    <tr>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $tenant->cr_number }}</span></td>
+                        <td class="info-label">السجل التجاري:</td>
+                    </tr>
+                @endif
+                @if ($tenant?->vat_number)
+                    <tr>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $tenant->vat_number }}</span></td>
+                        <td class="info-label">الرقم الضريبي:</td>
+                    </tr>
+                @endif
+                @if ($tenant?->email)
+                    <tr>
+                        <td class="info-value">{{ $tenant->email }}</td>
+                        <td class="info-label">البريد الإلكتروني:</td>
+                    </tr>
+                @endif
+            @else
                 <tr>
-                    <td class="info-value">{{ $tenant->vat_number }}</td>
-                    <td class="info-label">الرقم الضريبي:</td>
+                    <td class="info-label">Trade Name:</td>
+                    <td class="info-value">{{ $tenant?->trade_name ?? $tenant?->name ?? '—' }}</td>
                 </tr>
-            @endif
-            @if ($tenant?->email)
-                <tr>
-                    <td class="info-value">{{ $tenant->email }}</td>
-                    <td class="info-label">البريد الإلكتروني:</td>
-                </tr>
+                @if ($tenant?->cr_number)
+                    <tr>
+                        <td class="info-label">CR No:</td>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $tenant->cr_number }}</span></td>
+                    </tr>
+                @endif
+                @if ($tenant?->vat_number)
+                    <tr>
+                        <td class="info-label">VAT No:</td>
+                        <td class="info-value"><span style="direction: ltr; display: inline-block;">{{ $tenant->vat_number }}</span></td>
+                    </tr>
+                @endif
+                @if ($tenant?->email)
+                    <tr>
+                        <td class="info-label">Email:</td>
+                        <td class="info-value">{{ $tenant->email }}</td>
+                    </tr>
+                @endif
             @endif
         </table>
     </div>
 
-    <!-- Items Table (physical L->R order so RTL reads R->L: الوصف | الفترة | السعر | المجموع) -->
+    <!-- Items Table -->
+    @php
+        $subCurrency = $invoice->currency ?? config('app.default_currency', 'SAR');
+        $subCurrencyLabel = \App\Support\CountryCurrencyRegistry::currencyLabel($subCurrency, $pdfLocale);
+        $planDisplayName = $isRtl
+            ? ($plan?->name_ar ?? $plan?->name_en ?? 'باقة الاشتراك')
+            : ($plan?->name_en ?? $plan?->name_ar ?? 'Subscription Plan');
+    @endphp
     <table class="items">
         <thead>
-            <tr>
-                <th style="width: 18%; text-align: left;">المجموع</th>
-                <th style="width: 18%; text-align: left;">السعر</th>
-                <th style="width: 24%; text-align: center;">الفترة</th>
-                <th style="width: 40%; text-align: right;">الوصف</th>
-            </tr>
+            @if ($isRtl)
+                <tr>
+                    <th style="width: 18%; text-align: left;">المجموع</th>
+                    <th style="width: 18%; text-align: left;">السعر</th>
+                    <th style="width: 24%; text-align: center;">الفترة</th>
+                    <th style="width: 40%; text-align: right;">الوصف</th>
+                </tr>
+            @else
+                <tr>
+                    <th style="width: 40%; text-align: left;">Description</th>
+                    <th style="width: 24%; text-align: center;">Period</th>
+                    <th style="width: 18%; text-align: right;">Price</th>
+                    <th style="width: 18%; text-align: right;">Total</th>
+                </tr>
+            @endif
         </thead>
-        @php
-            $subCurrency = $invoice->currency ?? config('app.default_currency', 'SAR');
-            $subCurrencyLabel = \App\Support\CountryCurrencyRegistry::currencyLabel($subCurrency, 'ar');
-        @endphp
         <tbody>
-            <tr>
-                <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
-                </td>
-                <td style="text-align: left; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
-                </td>
-                <td style="text-align: center; font-size: 11px;">
-                    <span style="direction: ltr; display: inline-block;">{{ $subscription?->starts_at?->format('Y-m-d') ?? '-' }}</span><br>
-                    إلى <span style="direction: ltr; display: inline-block; margin-right: 4px;">{{ $subscription?->ends_at?->format('Y-m-d') ?? '-' }}</span>
-                </td>
-                <td style="text-align: right;">
-                    <strong>{{ $plan?->name_ar ?? $plan?->name_en ?? 'باقة الاشتراك' }}</strong><br>
-                    <span style="color: #6b7280; font-size: 10px;">اشتراك سنوي</span>
-                </td>
-            </tr>
+            @if ($isRtl)
+                <tr>
+                    <td style="text-align: left; font-weight: bold; white-space: nowrap;">
+                        <span style="direction: ltr; display: inline-block;">{{ number_format($invoice->subtotal, 2) }}</span> {{ $subCurrencyLabel }}
+                    </td>
+                    <td style="text-align: left; white-space: nowrap;">
+                        <span style="direction: ltr; display: inline-block;">{{ number_format($invoice->subtotal, 2) }}</span> {{ $subCurrencyLabel }}
+                    </td>
+                    <td style="text-align: center; font-size: 11px;">
+                        <span style="direction: ltr; display: inline-block;">{{ $subscription?->starts_at?->format('Y-m-d') ?? '-' }}</span><br>
+                        إلى <span style="direction: ltr; display: inline-block; margin-right: 4px;">{{ $subscription?->ends_at?->format('Y-m-d') ?? '-' }}</span>
+                    </td>
+                    <td style="text-align: right;">
+                        <strong>{{ $planDisplayName }}</strong><br>
+                        <span style="color: #6b7280; font-size: 10px;">{{ $cycleLabel }}</span>
+                    </td>
+                </tr>
+            @else
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>{{ $planDisplayName }}</strong><br>
+                        <span style="color: #6b7280; font-size: 10px;">{{ $cycleLabel }}</span>
+                    </td>
+                    <td style="text-align: center; font-size: 11px;">
+                        <span style="direction: ltr; display: inline-block;">{{ $subscription?->starts_at?->format('Y-m-d') ?? '-' }}</span><br>
+                        to <span style="direction: ltr; display: inline-block;">{{ $subscription?->ends_at?->format('Y-m-d') ?? '-' }}</span>
+                    </td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                    <td style="text-align: right; font-weight: bold; white-space: nowrap;">
+                        {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                </tr>
+            @endif
         </tbody>
     </table>
 
-    <!-- Totals (left-aligned under المجموع column) -->
+    <!-- Totals -->
     <div class="totals-wrap">
         <table class="totals-table">
-            <tr>
-                <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
-                </td>
-                <td style="text-align: right; color: #6b7280;">المجموع الفرعي</td>
-            </tr>
-            @if ($invoice->discount > 0)
+            @if ($isRtl)
                 <tr>
-                    <td style="text-align: left; font-weight: bold; color: #16a34a; white-space: nowrap;">
-                        - {{ number_format($invoice->discount, 2) }} {{ $subCurrencyLabel }}
+                    <td style="text-align: left; font-weight: bold; white-space: nowrap;">
+                        {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
                     </td>
-                    <td style="text-align: right; color: #6b7280;">الخصم</td>
+                    <td style="text-align: right; color: #6b7280;">المجموع الفرعي</td>
+                </tr>
+                @if ($invoice->discount > 0)
+                    <tr>
+                        <td style="text-align: left; font-weight: bold; color: #16a34a; white-space: nowrap;">
+                            - {{ number_format($invoice->discount, 2) }} {{ $subCurrencyLabel }}
+                        </td>
+                        <td style="text-align: right; color: #6b7280;">الخصم</td>
+                    </tr>
+                @endif
+                <tr>
+                    <td style="text-align: left; font-weight: bold; white-space: nowrap;">
+                        {{ number_format($invoice->vat, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                    <td style="text-align: right; color: #6b7280;">ضريبة القيمة المضافة ({{ $vat_rate }}%)</td>
+                </tr>
+                <tr class="total-row">
+                    <td style="text-align: left; white-space: nowrap;">
+                        {{ number_format($invoice->total, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                    <td style="text-align: right;">الإجمالي</td>
+                </tr>
+            @else
+                <tr>
+                    <td style="text-align: left; color: #6b7280;">Subtotal</td>
+                    <td style="text-align: right; font-weight: bold; white-space: nowrap;">
+                        {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                </tr>
+                @if ($invoice->discount > 0)
+                    <tr>
+                        <td style="text-align: left; color: #6b7280;">Discount</td>
+                        <td style="text-align: right; font-weight: bold; color: #16a34a; white-space: nowrap;">
+                            - {{ number_format($invoice->discount, 2) }} {{ $subCurrencyLabel }}
+                        </td>
+                    </tr>
+                @endif
+                <tr>
+                    <td style="text-align: left; color: #6b7280;">VAT ({{ $vat_rate }}%)</td>
+                    <td style="text-align: right; font-weight: bold; white-space: nowrap;">
+                        {{ number_format($invoice->vat, 2) }} {{ $subCurrencyLabel }}
+                    </td>
+                </tr>
+                <tr class="total-row">
+                    <td style="text-align: left;">Total</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        {{ number_format($invoice->total, 2) }} {{ $subCurrencyLabel }}
+                    </td>
                 </tr>
             @endif
-            <tr>
-                <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->vat, 2) }} {{ $subCurrencyLabel }}
-                </td>
-                <td style="text-align: right; color: #6b7280;">ضريبة القيمة المضافة ({{ $vat_rate }}%)</td>
-            </tr>
-            <tr class="total-row">
-                <td style="text-align: left; white-space: nowrap;">
-                    {{ number_format($invoice->total, 2) }} {{ $subCurrencyLabel }}
-                </td>
-                <td style="text-align: right;">الإجمالي</td>
-            </tr>
         </table>
     </div>
 
     @if ($invoice->status === 'pending')
         <!-- Bank Info -->
         <div class="bank-info">
-            <div class="bank-info-title">معلومات الدفع</div>
+            <div class="bank-info-title">{{ $isRtl ? 'معلومات الدفع' : 'Payment Information' }}</div>
             <p style="margin: 0; font-size: 11px;">
-                يمكنك الدفع عبر البوابة الإلكترونية أو التحويل البنكي.<br>
-                يرجى ذكر رقم الفاتورة ({{ $invoice->invoice_number }}) في وصف التحويل.
+                @if ($isRtl)
+                    يمكنك الدفع عبر البوابة الإلكترونية أو التحويل البنكي.<br>
+                    يرجى ذكر رقم الفاتورة (<span style="direction: ltr; display: inline-block;">{{ $invoice->invoice_number }}</span>) في وصف التحويل.
+                @else
+                    You may pay via the online portal or bank transfer.<br>
+                    Please reference invoice number (<strong>{{ $invoice->invoice_number }}</strong>) in the transfer description.
+                @endif
             </p>
         </div>
     @endif
@@ -431,11 +581,16 @@
 
     <!-- Footer -->
     <div class="footer">
-        <p style="margin: 2px 0;">شكراً لاختياركم {{ $company['name'] ?? config('app.name_ar', 'خدمة برو') }}</p>
-        @if (!empty($company['name_en']))
-            <p style="margin: 2px 0; font-size: 9px; color: #9ca3af;">{{ $company['name_en'] }}</p>
+        @if ($isRtl)
+            <p style="margin: 2px 0;">شكراً لاختياركم {{ $company['name'] ?? config('app.name_ar', 'خدمة برو') }}</p>
+            @if (!empty($company['name_en']))
+                <p style="margin: 2px 0; font-size: 9px; color: #9ca3af;">{{ $company['name_en'] }}</p>
+            @endif
+            <p style="margin: 2px 0;">هذه فاتورة إلكترونية صادرة آلياً ولا تحتاج إلى توقيع</p>
+        @else
+            <p style="margin: 2px 0;">Thank you for choosing {{ $company['name_en'] ?? $company['name'] ?? config('app.name', 'Khidmah Pro') }}</p>
+            <p style="margin: 2px 0;">This is an electronically generated invoice and does not require a signature.</p>
         @endif
-        <p style="margin: 2px 0;">هذه فاتورة إلكترونية صادرة آلياً ولا تحتاج إلى توقيع</p>
     </div>
 </body>
 

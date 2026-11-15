@@ -178,7 +178,6 @@ import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

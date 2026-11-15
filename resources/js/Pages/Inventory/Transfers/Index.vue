@@ -88,11 +88,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 v-model="tableFilters.search"
                                 type="text"
                                 :placeholder="$t('inventory.transfers.search_placeholder')"
-                                class="input-base ps-10 pe-4 py-2.5 text-sm w-full rounded-2xl"
+                                input-class="ps-10 rounded-2xl"
                             />
                         </div>
 
@@ -398,11 +398,11 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';

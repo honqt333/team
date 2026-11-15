@@ -6,12 +6,12 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleConditionItem;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleConditionItemController extends Controller
 {
     /**
@@ -23,7 +23,12 @@ class VehicleConditionItemController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = VehicleConditionItem::with('updatedBy')->orderedBySource()->ordered();
+        $this->authorize(Permissions::VEHICLE_SETTINGS_VIEW);
+        // Only show standalone vehicle condition items; systematic inspection items belong to a category_id.
+        $query = VehicleConditionItem::with('updatedBy')
+            ->whereNull('category_id')
+            ->orderedBySource()
+            ->ordered();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -47,6 +52,8 @@ class VehicleConditionItemController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -67,6 +74,8 @@ class VehicleConditionItemController extends Controller
      */
     public function update(Request $request, VehicleConditionItem $conditionItem): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionItem->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
         }
@@ -89,6 +98,8 @@ class VehicleConditionItemController extends Controller
      */
     public function destroy(VehicleConditionItem $conditionItem): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionItem->source === 'system') {
             abort(403, __('common.cannot_delete_system_data'));
         }
@@ -103,6 +114,8 @@ class VehicleConditionItemController extends Controller
      */
     public function toggleActive(VehicleConditionItem $conditionItem): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionItem->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
         }

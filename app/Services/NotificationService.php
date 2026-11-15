@@ -25,40 +25,21 @@ class NotificationService
         ?array $data = null,
     ): ?InternalNotification {
         // Respect tenant in-app notification preference if configured (bypass for test notifications)
-        if ($type !== 'system_test') {
-            $tenant = Tenant::find($tenantId);
-
-            if ($tenant) {
-                $settings = $tenant->getEffectiveNotificationSettings();
-
-                if (isset($settings['channels']['in_app']) && ! $settings['channels']['in_app']) {
-                    return null;
-                }
-
-                // The notification TYPE (`work_order.created`) and the settings
-                // EVENT KEY (`work_order_created`) live in two different
-                // namespaces. Tenant::notificationEventKeysFor() maps between
-                // them, so a per-event toggle on the settings page actually
-                // applies to the notifications this service writes.
-                foreach (Tenant::notificationEventKeysFor($type) as $eventKey) {
-                    if (isset($settings['events'][$eventKey]['in_app']) && ! $settings['events'][$eventKey]['in_app']) {
-                        return null;
-                    }
-                }
-            }
+        if (! self::isInAppAllowed($tenantId, $type)) {
+            return null;
         }
 
-        return InternalNotification::create([
-            'tenant_id' => $tenantId,
-            'user_id' => $userId,
-            'actor_id' => $actorId,
-            'type' => $type,
-            'title' => $title,
-            'body' => $body,
-            'icon' => $icon ?? self::getIconForType($type),
-            'action_url' => $actionUrl,
-            'data' => $data,
-        ]);
+        return self::createNotification(
+            tenantId: $tenantId,
+            userId: $userId,
+            type: $type,
+            title: $title,
+            body: $body,
+            actionUrl: $actionUrl,
+            actorId: $actorId,
+            icon: $icon,
+            data: $data,
+        );
     }
 
     /**
@@ -75,8 +56,14 @@ class NotificationService
         ?string $icon = null,
         ?array $data = null,
     ): void {
-        foreach ($userIds as $userId) {
-            self::notify(
+        $uniqueUserIds = array_values(array_unique(array_filter(array_map('intval', $userIds))));
+
+        if ($uniqueUserIds === [] || ! self::isInAppAllowed($tenantId, $type)) {
+            return;
+        }
+
+        foreach ($uniqueUserIds as $userId) {
+            self::createNotification(
                 tenantId: $tenantId,
                 userId: $userId,
                 type: $type,
@@ -88,6 +75,105 @@ class NotificationService
                 data: $data,
             );
         }
+    }
+
+    /**
+     * Notify all active users in a tenant (optionally scoped to a center plus super_admins).
+     */
+    public static function notifyTenantUsers(
+        int $tenantId,
+        string $type,
+        string $title,
+        ?string $body = null,
+        ?string $actionUrl = null,
+        ?int $actorId = null,
+        ?string $icon = null,
+        ?array $data = null,
+        ?int $centerId = null,
+    ): void {
+        if (! self::isInAppAllowed($tenantId, $type)) {
+            return;
+        }
+
+        $query = User::where('tenant_id', $tenantId)
+            ->where('is_active', true);
+
+        if ($centerId !== null) {
+            $query->where(function ($q) use ($centerId) {
+                $q->whereHas('roles', fn ($r) => $r->where('name', 'super_admin')->where('guard_name', 'web'))
+                    ->orWhere('current_center_id', $centerId)
+                    ->orWhereHas('centers', fn ($c) => $c->where('centers.id', $centerId))
+                    ->orWhere(function ($unassigned) {
+                        $unassigned->whereNull('current_center_id')
+                            ->whereDoesntHave('centers');
+                    });
+            });
+        }
+
+        $userIds = $query->pluck('id')->all();
+
+        self::notifyMany(
+            tenantId: $tenantId,
+            userIds: $userIds,
+            type: $type,
+            title: $title,
+            body: $body,
+            actionUrl: $actionUrl,
+            actorId: $actorId,
+            icon: $icon,
+            data: $data,
+        );
+    }
+
+    private static function isInAppAllowed(int $tenantId, string $type): bool
+    {
+        if ($type === 'system_test') {
+            return true;
+        }
+
+        $tenant = Tenant::find($tenantId);
+
+        if (! $tenant) {
+            return true;
+        }
+
+        $settings = $tenant->getEffectiveNotificationSettings();
+
+        if (isset($settings['channels']['in_app']) && ! $settings['channels']['in_app']) {
+            return false;
+        }
+
+        foreach (Tenant::notificationEventKeysFor($type) as $eventKey) {
+            if (isset($settings['events'][$eventKey]['in_app']) && ! $settings['events'][$eventKey]['in_app']) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static function createNotification(
+        int $tenantId,
+        int $userId,
+        string $type,
+        string $title,
+        ?string $body = null,
+        ?string $actionUrl = null,
+        ?int $actorId = null,
+        ?string $icon = null,
+        ?array $data = null,
+    ): InternalNotification {
+        return InternalNotification::create([
+            'tenant_id' => $tenantId,
+            'user_id' => $userId,
+            'actor_id' => $actorId,
+            'type' => $type,
+            'title' => $title,
+            'body' => $body,
+            'icon' => $icon ?? self::getIconForType($type),
+            'action_url' => $actionUrl,
+            'data' => $data,
+        ]);
     }
 
     /**

@@ -12,7 +12,7 @@
         <!-- Flash (e.g. after cancel / reschedule redirects) -->
         <div
             v-if="flashSuccess"
-            class="mb-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 p-4 text-sm font-bold text-emerald-800 dark:text-emerald-200"
+            class="mb-4 rounded-2xl bg-success-soft border border-success/30 p-4 text-sm font-bold text-text-primary"
         >
             {{ flashSuccess }}
         </div>
@@ -64,17 +64,18 @@
             <article
                 v-for="appt in currentList"
                 :key="appt.id"
-                class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden"
+                class="rounded-2xl bg-surface border border-border shadow-sm overflow-hidden"
             >
                 <div class="flex items-stretch">
                     <!-- Date tile -->
                     <div
-                        class="w-20 shrink-0 flex flex-col items-center justify-center text-white py-4"
+                        class="w-20 shrink-0 flex flex-col items-center justify-center py-4"
+                        :class="activeTab === 'upcoming' ? 'text-action-on' : 'text-text-primary'"
                         :style="{
                             backgroundColor:
                                 activeTab === 'upcoming'
-                                    ? 'var(--tenant-primary, #2563eb)'
-                                    : '#94a3b8',
+                                    ? 'var(--tenant-primary, var(--color-brand-primary))'
+                                    : 'var(--color-surface-tertiary)',
                         }"
                     >
                         <span class="text-2xl font-extrabold leading-none" dir="ltr">
@@ -90,7 +91,7 @@
                             <div class="min-w-0 space-y-1">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span
-                                        class="text-sm font-extrabold text-slate-900 dark:text-white"
+                                        class="text-sm font-extrabold text-text-primary"
                                     >
                                         {{ formatDateTime(appt.scheduled_at) }}
                                     </span>
@@ -102,17 +103,17 @@
                                         show-dot
                                     />
                                 </div>
-                                <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                <p class="text-sm font-bold text-text-primary">
                                     {{ appt.center_name }}
                                 </p>
-                                <p v-if="appt.service_bay_name" class="text-xs text-slate-500">
+                                <p v-if="appt.service_bay_name" class="text-xs text-text-secondary">
                                     {{
                                         t('customer_portal.portal_appointments.bay_label', {
                                             name: appt.service_bay_name,
                                         })
                                     }}
                                 </p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                <p class="text-xs text-text-secondary">
                                     {{ appt.vehicle_label }}
                                 </p>
                             </div>
@@ -127,7 +128,7 @@
                             <span
                                 v-for="s in appt.services"
                                 :key="s.id"
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-surface-muted text-[11px] font-semibold text-text-primary"
                             >
                                 {{ s.name }}
                             </span>
@@ -135,7 +136,7 @@
 
                         <p
                             v-if="appt.notes"
-                            class="mt-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line"
+                            class="mt-3 rounded-xl bg-surface-muted px-3 py-2 text-xs text-text-secondary whitespace-pre-line"
                         >
                             {{ appt.notes }}
                         </p>
@@ -143,14 +144,14 @@
                         <div class="mt-4 flex flex-wrap items-center gap-2">
                             <a
                                 :href="`/${tenant.slug}/portal/appointment/${appt.id}`"
-                                class="inline-flex items-center px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                                class="inline-flex items-center px-3 py-1.5 rounded-xl bg-surface-muted text-xs font-bold text-text-primary hover:bg-surface-tertiary transition"
                             >
                                 {{ t('customer_portal.portal_appointments.view_details') }}
                             </a>
                             <a
                                 v-if="appt.can_manage"
                                 :href="`/${tenant.slug}/portal/appointment/${appt.id}/edit`"
-                                class="inline-flex items-center px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                                class="inline-flex items-center px-3 py-1.5 rounded-xl border border-border text-xs font-bold text-text-primary hover:bg-surface-muted transition"
                             >
                                 {{ t('customer_portal.portal_appointments.reschedule_cta') }}
                             </a>

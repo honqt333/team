@@ -29,7 +29,7 @@
                     :options="languageOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="اختر اللغة..."
+                    :placeholder="$t('system.dunning.language_placeholder')"
                 />
             </div>
 
@@ -50,7 +50,7 @@
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
@@ -59,10 +59,10 @@ const props = defineProps({
     tenant: { type: Object, required: true },
 });
 
-const languageOptions = [
+const languageOptions = computed(() => [
     { value: 'ar', label: t('common.lang.ar') },
     { value: 'en', label: 'English' },
-];
+]);
 
 const form = ref({
     dunning_opted_out: !props.tenant.dunning_opted_out,

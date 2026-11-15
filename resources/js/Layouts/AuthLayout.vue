@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
+import { setLocale } from '@/i18n';
 import { useLocaleSync } from '@/Composables/useLocaleSync';
 import Toast from '@/Components/Toast.vue';
 import { useFlashToasts } from '@/Composables/useFlashToasts';
@@ -12,6 +13,10 @@ const { init: initLocaleSync } = useLocaleSync();
 const page = usePage();
 
 const isRTL = computed(() => locale.value === 'ar');
+
+const toggleLocale = () => {
+    setLocale(locale.value === 'ar' ? 'en' : 'ar');
+};
 
 useFlashToasts(page, { immediate: true });
 
@@ -53,7 +58,8 @@ onMounted(() => {
                     <!-- Language Toggle -->
                     <div class="absolute -top-8 left-0">
                         <button
-                            @click="locale = locale === 'ar' ? 'en' : 'ar'"
+                            type="button"
+                            @click="toggleLocale"
                             class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                         >
                             {{ locale === 'ar' ? 'English' : 'العربية' }}

@@ -56,11 +56,9 @@
                     >
                         {{ $t('reports.payments') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.payments') }}
+                    </p>
                 </Link>
 
                 <!-- Orders (Work Orders / Tickets) -->
@@ -90,11 +88,9 @@
                     >
                         {{ $t('reports.orders') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.tickets') }}
+                    </p>
                 </Link>
 
                 <!-- Services -->
@@ -130,11 +126,9 @@
                     >
                         {{ $t('reports.services') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.services') }}
+                    </p>
                 </Link>
 
                 <!-- Invoices -->
@@ -164,11 +158,9 @@
                     >
                         {{ $t('reports.invoices') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.invoices') }}
+                    </p>
                 </Link>
 
                 <!-- Purchase Invoices -->
@@ -198,11 +190,9 @@
                     >
                         {{ $t('reports.purchase_invoices') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.purchase_invoices') }}
+                    </p>
                 </Link>
 
                 <!-- Inventory Activities -->
@@ -232,11 +222,9 @@
                     >
                         {{ $t('reports.inventory_activities') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300"
-                    >
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.stock_activities') }}
+                    </p>
                 </Link>
 
                 <!-- Customers -->
@@ -266,11 +254,9 @@
                     >
                         {{ $t('reports.customers') }}
                     </h3>
-                    <span
-                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300"
-                    >
-                        {{ $t('common.available_now') }}
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.customers') }}
+                    </p>
                 </Link>
 
                 <!-- Dealers / Partners -->
@@ -362,12 +348,9 @@
                     >
                         {{ $t('reports.suppliers') }}
                     </h3>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.suppliers') }}
+                    </p>
                 </a>
 
                 <!-- Employees / Workers -->
@@ -397,12 +380,9 @@
                     >
                         {{ $t('reports.employees') }}
                     </h3>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.employees') }}
+                    </p>
                 </a>
 
                 <!-- Vehicles -->
@@ -438,12 +418,9 @@
                     >
                         {{ $t('reports.vehicles') }}
                     </h3>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.vehicles') }}
+                    </p>
                 </Link>
 
                 <!-- Financial Summary -->
@@ -473,12 +450,9 @@
                     >
                         {{ $t('reports.financial_summary') }}
                     </h3>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.financial_summary') }}
+                    </p>
                 </Link>
 
                 <!-- Cash Register / Cash Flow -->
@@ -514,12 +488,9 @@
                     >
                         Beta
                     </div>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.cash_register') }}
+                    </p>
                 </Link>
 
                 <!-- Tax Periods & VAT Declaration -->
@@ -554,12 +525,9 @@
                     >
                         ZATCA
                     </div>
-                    <span
-                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        متاح الآن
-                    </span>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.hub_cards.tax_periods') }}
+                    </p>
                 </Link>
             </div>
         </div>

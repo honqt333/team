@@ -132,13 +132,16 @@
                     </SelectableCard>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button
+                    <AppButton
                         type="submit"
-                        :disabled="!form.provider || form.processing"
-                        class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                        :loading="form.processing"
+                        :disabled="!form.provider"
+                        variant="primary"
+                        size="md"
+                        class="flex-1"
                     >
                         {{ $t('system.integrations.add_and_enable') }}
-                    </button>
+                    </AppButton>
                     <button
                         type="button"
                         @click="showAddModal = false"
@@ -158,6 +161,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 

@@ -8,11 +8,12 @@
         :dir="isRtl ? 'rtl' : 'ltr'"
         :data-theme="isDark ? 'dark' : 'light'"
         :style="cssVars"
-        class="relative min-h-screen overflow-x-hidden bg-[#f4f7fb] pb-24 text-slate-950 md:pb-10"
+        class="relative min-h-screen overflow-x-hidden bg-[var(--color-background)] pb-24 text-text-primary md:pb-10 print:min-h-0 print:bg-white print:pb-0"
     >
         <Toast />
+        <ConfirmModal />
         <!-- Ambient brand glow -->
-        <div class="pointer-events-none fixed inset-0" aria-hidden="true">
+        <div class="pointer-events-none fixed inset-0 print:hidden" aria-hidden="true">
             <div
                 class="absolute -end-28 -top-36 h-[28rem] w-[28rem] rounded-full opacity-[0.09] blur-3xl"
                 :style="{ backgroundColor: 'var(--tenant-primary)' }"
@@ -25,7 +26,7 @@
 
         <!-- Sticky Top Header -->
         <header
-            class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 shadow-[0_4px_24px_-12px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+            class="sticky top-0 z-30 border-b border-border/80 bg-surface/90 shadow-xs backdrop-blur-xl print:hidden"
         >
             <div
                 class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8"
@@ -36,10 +37,10 @@
                 >
                     <BrandMark :tenant="tenant" />
                     <div class="min-w-0">
-                        <h1 class="truncate text-base font-extrabold leading-tight text-slate-900">
+                        <h1 class="truncate text-base font-extrabold leading-tight text-text-primary">
                             {{ title || tenant.site_name }}
                         </h1>
-                        <p v-if="subtitle" class="truncate text-xs text-slate-500">
+                        <p v-if="subtitle" class="truncate text-xs text-text-secondary">
                             {{ subtitle }}
                         </p>
                     </div>
@@ -48,7 +49,7 @@
                 <!-- Desktop Navigation Pills -->
                 <nav
                     v-if="showBottomNav"
-                    class="hidden items-center gap-1 rounded-2xl border border-slate-200/70 bg-slate-100/90 p-1 lg:flex"
+                    class="hidden items-center gap-1 rounded-2xl border border-border/70 bg-surface-muted/90 p-1 lg:flex"
                 >
                     <a
                         v-for="item in bottomNav"
@@ -57,23 +58,24 @@
                         class="relative inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
                         :class="
                             item.active
-                                ? 'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/60'
-                                : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                                ? 'bg-surface text-text-primary shadow-sm ring-1 ring-border/60'
+                                : 'text-text-secondary hover:bg-surface/60 hover:text-text-primary'
                         "
                     >
                         <span
                             class="shrink-0"
-                            :style="item.active ? { color: 'var(--tenant-primary)' } : {}"
-                            v-html="item.icon"
+                            :class="item.active ? 'text-brand-primary' : ''"
+                            v-safe-html="item.icon"
                         />
                         <span>{{ item.label }}</span>
                         <span
                             v-if="item.badge > 0"
-                            class="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-extrabold text-white"
+                            class="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-extrabold"
                             :style="{
                                 backgroundColor: item.badgeAlert
-                                    ? '#ef4444'
-                                    : 'var(--tenant-primary, #2563eb)',
+                                    ? '#dc2626'
+                                    : 'var(--tenant-primary, var(--color-brand-primary))',
+                                color: item.badgeAlert ? '#ffffff' : badgeTextColor,
                             }"
                         >
                             {{ item.badge }}
@@ -82,7 +84,7 @@
                 </nav>
 
                 <!-- Right Actions -->
-                <div class="flex items-center gap-2">
+                <div class="flex shrink-0 items-center gap-2">
                     <LanguageToggle
                         v-if="showLanguageToggle"
                         :tenant="tenant"
@@ -90,10 +92,49 @@
                         :base-path="languageBasePath"
                     />
 
+                    <!-- Theme Toggle -->
+                    <button
+                        type="button"
+                        data-testid="portal-theme-toggle"
+                        @click="toggleThemeHandler"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-surface text-text-secondary transition hover:bg-surface-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                        :aria-label="t('common.toggle_theme')"
+                        :title="t('common.toggle_theme')"
+                    >
+                        <svg
+                            v-if="isDark"
+                            class="h-4 w-4 text-accent-gold"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                            />
+                        </svg>
+                        <svg
+                            v-else
+                            class="h-4 w-4 text-text-secondary"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                            />
+                        </svg>
+                    </button>
+
                     <a
                         v-if="showBackToSite"
                         :href="`/${tenant.slug}`"
-                        class="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
+                        class="hidden items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-2 text-xs font-bold text-text-secondary transition hover:bg-surface-muted hover:text-text-primary sm:inline-flex"
                     >
                         <svg
                             class="h-3.5 w-3.5"
@@ -120,7 +161,7 @@
                         <input type="hidden" name="_token" :value="csrf" />
                         <button
                             type="submit"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 sm:w-auto sm:px-3"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-xs font-bold text-text-secondary transition hover:bg-danger-soft hover:border-danger/30 hover:text-danger sm:w-auto sm:px-3"
                             :aria-label="t('customer_portal.dashboard.logout')"
                         >
                             <svg
@@ -145,14 +186,14 @@
             </div>
         </header>
 
-        <main class="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <main class="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:p-0">
             <slot />
         </main>
 
         <!-- Mobile / Tablet Floating Bottom Navigation -->
         <nav
             v-if="showBottomNav"
-            class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/90 bg-white/95 shadow-[0_-10px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl lg:hidden"
+            class="fixed inset-x-0 bottom-0 z-30 border-t border-border/90 bg-surface/95 shadow-[0_-10px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl lg:hidden print:hidden"
             :aria-label="t('customer_portal.nav.bottom_label')"
         >
             <ul class="mx-auto grid max-w-xl grid-cols-5">
@@ -162,19 +203,20 @@
                         class="relative flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold tracking-tight transition"
                         :class="
                             item.active
-                                ? 'text-[color:var(--tenant-primary,#2563eb)]'
-                                : 'text-slate-500 hover:text-slate-800'
+                                ? 'text-brand-primary dark:text-blue-300'
+                                : 'text-text-secondary hover:text-text-primary'
                         "
                     >
                         <div class="relative">
-                            <span v-html="item.icon" />
+                            <span v-safe-html="item.icon" />
                             <span
                                 v-if="item.badge > 0"
-                                class="absolute -top-1.5 -end-2.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[9px] font-extrabold text-white shadow-sm"
+                                class="absolute -top-1.5 -end-2.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[9px] font-extrabold shadow-sm"
                                 :style="{
                                     backgroundColor: item.badgeAlert
-                                        ? '#ef4444'
-                                        : 'var(--tenant-primary, #2563eb)',
+                                        ? '#dc2626'
+                                        : 'var(--tenant-primary, var(--color-brand-primary))',
+                                    color: item.badgeAlert ? '#ffffff' : badgeTextColor,
                                 }"
                             >
                                 {{ item.badge }}
@@ -190,12 +232,15 @@
 
 <script setup>
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, ref } from 'vue';
+import { computed, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BrandMark from '@/Components/CustomerPortal/BrandMark.vue';
 import LanguageToggle from '@/Components/CustomerPortal/LanguageToggle.vue';
 import Toast from '@/Components/Toast.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useFlashToasts } from '@/Composables/useFlashToasts';
+import { useTheme } from '@/Composables/useTheme';
+import { accessibleTextOn } from '@/Utils/colorContrast';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -222,7 +267,18 @@ const isRtl = computed(
     () => props.locale?.is_rtl ?? (page.props.locale || i18nLocale.value || 'ar') === 'ar'
 );
 
-const isDark = ref(false);
+watchEffect(() => {
+    if (typeof document === 'undefined') return;
+    const lang = props.locale?.current || page.props.locale || (isRtl.value ? 'ar' : 'en');
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isRtl.value ? 'rtl' : 'ltr';
+});
+
+const { isDark, toggle: toggleThemeHandler } = useTheme();
+
+const badgeTextColor = computed(() =>
+    accessibleTextOn(props.tenant?.primary_color || '#2563eb')
+);
 
 const cssVars = computed(() => ({
     '--tenant-primary': props.tenant?.primary_color || '#2563eb',
@@ -297,10 +353,4 @@ const bottomNav = computed(() => [
 ]);
 
 useFlashToasts(page, { immediate: true });
-
-onMounted(() => {
-    if (typeof window !== 'undefined') {
-        document.documentElement.classList.remove('dark');
-    }
-});
 </script>

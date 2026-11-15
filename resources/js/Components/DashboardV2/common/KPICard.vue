@@ -193,7 +193,7 @@ const sparklinePoints = computed(() => {
                     'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl shadow-2xs transition-transform duration-200 group-hover:scale-105',
                     iconColorClasses[iconColor] || iconColorClasses.slate,
                 ]"
-                v-html="icon"
+                v-safe-html="icon"
             />
         </div>
         <div

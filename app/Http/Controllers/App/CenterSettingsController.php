@@ -77,6 +77,7 @@ class CenterSettingsController extends Controller
                 'district' => $center->address->district,
                 'building_number' => $center->address->building_number,
                 'postal_code' => $center->address->postal_code,
+                'country' => $center->address->country,
                 'latitude' => $center->address->latitude,
                 'longitude' => $center->address->longitude,
             ] : null,
@@ -204,6 +205,7 @@ class CenterSettingsController extends Controller
             'district' => 'nullable|string|max:100',
             'building_number' => 'nullable|string|max:50',
             'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -322,9 +324,9 @@ class CenterSettingsController extends Controller
             'stamp' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
         ]);
 
-        // Delete old stamp if exists
+        // Delete old stamp if exists (stored on public disk)
         if ($center->stamp_path) {
-            Storage::delete($center->stamp_path);
+            Storage::disk('public')->delete($center->stamp_path);
         }
 
         $path = $request->file('stamp')->store("centers/{$center->id}/stamp", 'public');
@@ -341,7 +343,7 @@ class CenterSettingsController extends Controller
         $this->authorize('update', $center);
 
         if ($center->stamp_path) {
-            Storage::delete($center->stamp_path);
+            Storage::disk('public')->delete($center->stamp_path);
             $center->update(['stamp_path' => null]);
         }
 

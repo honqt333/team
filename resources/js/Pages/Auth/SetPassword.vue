@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const { t, locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
@@ -50,11 +50,11 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('center_settings.contact.email') }}
                 </label>
-                <input
+                <AppInput
                     type="email"
-                    :value="user.email"
+                    :model-value="user.email"
                     disabled
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 cursor-not-allowed text-sm"
+                    input-class="px-4 py-3 bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                 />
             </div>
 
@@ -63,7 +63,7 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('auth.password') }}
                 </label>
-                <input
+                <AppInput
                     id="password"
                     type="password"
                     v-model="form.password"
@@ -71,9 +71,9 @@ const submit = () => {
                     autofocus
                     autocomplete="new-password"
                     :placeholder="isRTL ? 'أدخل كلمة المرور الجديدة' : 'Enter new password'"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm"
+                    :error="form.errors.password"
+                    input-class="px-4 py-3"
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <!-- Password Confirmation -->
@@ -81,16 +81,16 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('auth.confirm_password') }}
                 </label>
-                <input
+                <AppInput
                     id="password_confirmation"
                     type="password"
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
                     :placeholder="isRTL ? 'أعد إدخال كلمة المرور' : 'Confirm new password'"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm"
+                    :error="form.errors.password_confirmation"
+                    input-class="px-4 py-3"
                 />
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
             </div>
 
             <!-- Submit Button -->

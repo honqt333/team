@@ -13,17 +13,17 @@
         <!-- Top Greeting & Quick Booking CTA -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl font-black text-slate-900 sm:text-2xl">
+                <h2 class="text-xl font-black text-text-primary sm:text-2xl">
                     {{ t('customer_portal.dashboard.greeting', { name: customer.name }) }}
                 </h2>
-                <p class="mt-0.5 text-sm text-slate-500">
+                <p class="mt-0.5 text-sm text-text-secondary">
                     {{ t('customer_portal.dashboard.greeting_subtitle') }}
                 </p>
             </div>
             <a
                 v-if="canBook"
                 :href="bookUrl"
-                class="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:opacity-95 sm:text-sm"
+                class="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring sm:text-sm"
                 :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,11 +45,11 @@
         >
             <div
                 v-if="summary.pending_quotes_count > 0"
-                class="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 shadow-sm"
+                class="flex items-center justify-between gap-3 rounded-2xl border border-warning/30 bg-warning-soft p-4 shadow-sm"
             >
                 <div class="flex items-center gap-3 min-w-0">
                     <span
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -60,7 +60,7 @@
                             />
                         </svg>
                     </span>
-                    <p class="text-xs font-bold text-amber-950 sm:text-sm">
+                    <p class="text-xs font-bold text-text-primary sm:text-sm">
                         {{
                             t('customer_portal.dashboard.alert_pending_quotes', {
                                 count: summary.pending_quotes_count,
@@ -70,7 +70,7 @@
                 </div>
                 <a
                     :href="`/${tenant.slug}/portal/quotes`"
-                    class="shrink-0 rounded-xl bg-amber-600 px-3.5 py-2 text-xs font-extrabold text-white transition hover:bg-amber-700"
+                    class="shrink-0 rounded-xl bg-warning px-3.5 py-2 text-xs font-extrabold text-text-inverse transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                 >
                     {{ t('customer_portal.dashboard.alert_pending_quotes_cta') }}
                 </a>
@@ -78,11 +78,11 @@
 
             <div
                 v-if="summary.unpaid_balance > 0"
-                class="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 shadow-sm"
+                class="flex items-center justify-between gap-3 rounded-2xl border border-danger/30 bg-danger-soft p-4 shadow-sm"
             >
                 <div class="flex items-center gap-3 min-w-0">
                     <span
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-700"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-danger/15 text-danger"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -93,7 +93,7 @@
                             />
                         </svg>
                     </span>
-                    <p class="text-xs font-bold text-rose-950 sm:text-sm">
+                    <p class="text-xs font-bold text-text-primary sm:text-sm">
                         {{
                             t('customer_portal.dashboard.alert_unpaid_invoices', {
                                 amount: formatMoney(summary.unpaid_balance),
@@ -104,7 +104,7 @@
                 </div>
                 <a
                     :href="`/${tenant.slug}/portal/invoices`"
-                    class="shrink-0 rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-extrabold text-white transition hover:bg-rose-700"
+                    class="shrink-0 rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-extrabold text-white transition hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                 >
                     {{ t('customer_portal.dashboard.alert_unpaid_invoices_cta') }}
                 </a>
@@ -181,11 +181,11 @@
         <section class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <a
                 :href="`/${tenant.slug}/portal/work-orders`"
-                class="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                class="group rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
                 <div class="flex items-center justify-between">
                     <span
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-info-soft text-info"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -202,22 +202,22 @@
                             />
                         </svg>
                     </span>
-                    <span class="text-2xl font-black text-slate-900">
+                    <span class="text-2xl font-black text-text-primary">
                         {{ summary.active_work_orders_count || 0 }}
                     </span>
                 </div>
-                <p class="mt-2.5 text-xs font-bold text-slate-600 group-hover:text-slate-900">
+                <p class="mt-2.5 text-xs font-bold text-text-secondary group-hover:text-text-primary">
                     {{ t('customer_portal.dashboard.stat_active_jobs') }}
                 </p>
             </a>
 
             <a
                 :href="`/${tenant.slug}/portal/quotes`"
-                class="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                class="group rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
                 <div class="flex items-center justify-between">
                     <span
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-warning-soft text-warning"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -228,22 +228,22 @@
                             />
                         </svg>
                     </span>
-                    <span class="text-2xl font-black text-slate-900">
+                    <span class="text-2xl font-black text-text-primary">
                         {{ summary.pending_quotes_count || 0 }}
                     </span>
                 </div>
-                <p class="mt-2.5 text-xs font-bold text-slate-600 group-hover:text-slate-900">
+                <p class="mt-2.5 text-xs font-bold text-text-secondary group-hover:text-text-primary">
                     {{ t('customer_portal.dashboard.stat_pending_quotes') }}
                 </p>
             </a>
 
             <a
                 :href="`/${tenant.slug}/portal/appointments`"
-                class="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                class="group rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
                 <div class="flex items-center justify-between">
                     <span
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-success-soft text-success"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -254,24 +254,24 @@
                             />
                         </svg>
                     </span>
-                    <span class="text-2xl font-black text-slate-900">
+                    <span class="text-2xl font-black text-text-primary">
                         {{
                             summary.upcoming_appointments_count ?? upcomingAppointments?.length ?? 0
                         }}
                     </span>
                 </div>
-                <p class="mt-2.5 text-xs font-bold text-slate-600 group-hover:text-slate-900">
+                <p class="mt-2.5 text-xs font-bold text-text-secondary group-hover:text-text-primary">
                     {{ t('customer_portal.dashboard.stat_upcoming_appointments') }}
                 </p>
             </a>
 
             <a
                 :href="`/${tenant.slug}/portal/invoices`"
-                class="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                class="group rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
                 <div class="flex items-center justify-between">
                     <span
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-action-primary-soft text-action-primary"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -282,11 +282,11 @@
                             />
                         </svg>
                     </span>
-                    <span class="text-2xl font-black text-slate-900">
+                    <span class="text-2xl font-black text-text-primary">
                         {{ summary.unpaid_invoices_count || 0 }}
                     </span>
                 </div>
-                <p class="mt-2.5 text-xs font-bold text-slate-600 group-hover:text-slate-900">
+                <p class="mt-2.5 text-xs font-bold text-text-secondary group-hover:text-text-primary">
                     {{ t('customer_portal.dashboard.stat_unpaid_invoices') }}
                 </p>
             </a>
@@ -295,12 +295,12 @@
         <!-- Vehicles Fleet Showcase with SaudiPlateDisplay -->
         <section class="mt-8">
             <div class="mb-3 flex items-center justify-between">
-                <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+                <h2 class="text-sm font-extrabold uppercase tracking-wider text-text-secondary">
                     {{ t('customer_portal.dashboard.section_vehicles') }}
                 </h2>
                 <a
                     :href="`/${tenant.slug}/portal/work-orders`"
-                    class="text-xs font-bold text-[color:var(--tenant-primary,#2563eb)] hover:underline"
+                    class="text-xs font-bold text-brand-primary hover:underline"
                 >
                     {{ t('customer_portal.dashboard.view_all') }}
                 </a>
@@ -308,7 +308,7 @@
 
             <div
                 v-if="!vehicles || vehicles.length === 0"
-                class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500"
+                class="rounded-2xl border border-border bg-surface p-5 text-sm text-text-secondary"
             >
                 {{ t('customer_portal.dashboard.no_vehicles') }}
             </div>
@@ -318,13 +318,13 @@
                     v-for="v in vehicles"
                     :key="v.id"
                     :href="`/${tenant.slug}/portal/work-orders?vehicle=${v.id}`"
-                    class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                    class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                 >
                     <div class="min-w-0 flex-1">
-                        <div class="truncate text-sm font-extrabold text-slate-900">
+                        <div class="truncate text-sm font-extrabold text-text-primary">
                             {{ [v.make, v.model].filter(Boolean).join(' ') || v.plate_number }}
                         </div>
-                        <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
                             <span v-if="v.year">{{ v.year }}</span>
                             <span v-if="v.color">· {{ v.color }}</span>
                             <span v-if="v.odometer" dir="ltr">
@@ -345,12 +345,12 @@
         <!-- Pending Quotes Section (if any) -->
         <section v-if="pendingQuotes && pendingQuotes.length > 0" class="mt-8">
             <div class="mb-3 flex items-center justify-between">
-                <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+                <h2 class="text-sm font-extrabold uppercase tracking-wider text-text-secondary">
                     {{ t('customer_portal.dashboard.section_pending_quotes') }}
                 </h2>
                 <a
                     :href="`/${tenant.slug}/portal/quotes`"
-                    class="text-xs font-bold text-[color:var(--tenant-primary,#2563eb)] hover:underline"
+                    class="text-xs font-bold text-brand-primary hover:underline"
                 >
                     {{ t('customer_portal.dashboard.view_all') }}
                 </a>
@@ -360,25 +360,25 @@
                     v-for="q in pendingQuotes"
                     :key="q.id"
                     :href="`/${tenant.slug}/portal/quote/${q.id}`"
-                    class="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-white p-4 shadow-sm transition hover:border-amber-300 hover:shadow-md"
+                    class="flex items-center justify-between gap-4 rounded-2xl border border-warning/40 bg-surface p-4 shadow-sm transition hover:border-warning/70 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                 >
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-extrabold text-slate-900">
+                            <span class="text-sm font-extrabold text-text-primary">
                                 {{
                                     t('customer_portal.portal_quotes.quote_code', { code: q.code })
                                 }}
                             </span>
                             <span
-                                class="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800"
+                                class="rounded-full bg-warning-soft px-2.5 py-0.5 text-[11px] font-bold text-text-primary"
                             >
                                 {{ t('customer_portal.portal_quotes.status_sent') }}
                             </span>
                         </div>
-                        <p v-if="q.vehicle_label" class="mt-1 truncate text-xs text-slate-500">
+                        <p v-if="q.vehicle_label" class="mt-1 truncate text-xs text-text-secondary">
                             {{ q.vehicle_label }}
                         </p>
-                        <p v-if="q.valid_until" class="mt-0.5 text-xs text-slate-400">
+                        <p v-if="q.valid_until" class="mt-0.5 text-xs text-text-secondary">
                             {{
                                 t('customer_portal.portal_quotes.valid_until', {
                                     date: formatDateOnly(q.valid_until),
@@ -387,14 +387,14 @@
                         </p>
                     </div>
                     <div class="text-end shrink-0">
-                        <div class="text-base font-black text-slate-900" dir="ltr">
+                        <div class="text-base font-black text-text-primary" dir="ltr">
                             {{ formatMoney(q.total_incl_tax) }}
-                            <span class="text-xs font-semibold text-slate-500">
+                            <span class="text-xs font-semibold text-text-secondary">
                                 {{ q.currency_code }}
                             </span>
                         </div>
                         <span
-                            class="mt-1 inline-block text-xs font-extrabold text-[color:var(--tenant-primary,#2563eb)]"
+                            class="mt-1 inline-block text-xs font-extrabold text-brand-primary"
                         >
                             {{ t('customer_portal.dashboard.review_quote') }} ←
                         </span>
@@ -408,12 +408,12 @@
             <!-- Recent Work Orders -->
             <section>
                 <div class="mb-3 flex items-center justify-between">
-                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-text-secondary">
                         {{ t('customer_portal.dashboard.section_recent') }}
                     </h2>
                     <a
                         :href="`/${tenant.slug}/portal/work-orders`"
-                        class="text-xs font-bold text-[color:var(--tenant-primary,#2563eb)] hover:underline"
+                        class="text-xs font-bold text-brand-primary hover:underline"
                     >
                         {{ t('customer_portal.dashboard.view_all') }}
                     </a>
@@ -421,7 +421,7 @@
 
                 <div
                     v-if="!recentWorkOrders || recentWorkOrders.length === 0"
-                    class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500"
+                    class="rounded-2xl border border-border bg-surface p-5 text-sm text-text-secondary"
                 >
                     {{ t('customer_portal.dashboard.no_recent') }}
                 </div>
@@ -431,11 +431,11 @@
                         v-for="w in recentWorkOrders"
                         :key="w.id"
                         :href="`/${tenant.slug}/portal/work-order/${w.id}`"
-                        class="block rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                        class="block rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                     >
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0 flex-1">
-                                <div class="text-sm font-extrabold text-slate-900">
+                                <div class="text-sm font-extrabold text-text-primary">
                                     {{
                                         t('customer_portal.dashboard.work_order_code', {
                                             code: w.code,
@@ -444,13 +444,16 @@
                                 </div>
                                 <div
                                     v-if="w.vehicle_label || w.center_name"
-                                    class="mt-0.5 truncate text-xs text-slate-500"
+                                    class="mt-0.5 truncate text-xs text-text-secondary"
                                 >
                                     {{
                                         [w.vehicle_label, w.center_name].filter(Boolean).join(' · ')
                                     }}
                                 </div>
-                                <div v-if="w.expected_end_date" class="mt-1 text-xs text-slate-500">
+                                <div
+                                    v-if="w.expected_end_date"
+                                    class="mt-1 text-xs text-text-secondary"
+                                >
                                     {{
                                         t('customer_portal.dashboard.expected_on', {
                                             date: formatDateOnly(w.expected_end_date),
@@ -465,7 +468,7 @@
                         </div>
 
                         <div v-if="w.progress" class="mt-3">
-                            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                            <div class="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
                                 <div
                                     class="h-full rounded-full transition-all"
                                     :style="{
@@ -482,12 +485,12 @@
             <!-- Recent Invoices -->
             <section>
                 <div class="mb-3 flex items-center justify-between">
-                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-text-secondary">
                         {{ t('customer_portal.dashboard.section_recent_invoices') }}
                     </h2>
                     <a
                         :href="`/${tenant.slug}/portal/invoices`"
-                        class="text-xs font-bold text-[color:var(--tenant-primary,#2563eb)] hover:underline"
+                        class="text-xs font-bold text-brand-primary hover:underline"
                     >
                         {{ t('customer_portal.dashboard.view_all') }}
                     </a>
@@ -495,7 +498,7 @@
 
                 <div
                     v-if="!recentInvoices || recentInvoices.length === 0"
-                    class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500"
+                    class="rounded-2xl border border-border bg-surface p-5 text-sm text-text-secondary"
                 >
                     {{ t('customer_portal.portal_invoices.empty') }}
                 </div>
@@ -505,11 +508,11 @@
                         v-for="inv in recentInvoices"
                         :key="inv.id"
                         :href="`/${tenant.slug}/portal/invoice/${inv.id}`"
-                        class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                        class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                     >
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-extrabold text-slate-900">
+                                <span class="text-sm font-extrabold text-text-primary">
                                     {{
                                         t('customer_portal.portal_invoices.invoice_number', {
                                             number: inv.invoice_number,
@@ -523,7 +526,7 @@
                                     {{ invoiceStatusLabel(inv.payment_status) }}
                                 </span>
                             </div>
-                            <div class="mt-1 text-xs text-slate-500">
+                            <div class="mt-1 text-xs text-text-secondary">
                                 {{
                                     [inv.center_name, formatDateOnly(inv.issue_date)]
                                         .filter(Boolean)
@@ -533,15 +536,15 @@
                         </div>
 
                         <div class="text-end shrink-0" dir="ltr">
-                            <div class="text-sm font-black text-slate-900">
+                            <div class="text-sm font-black text-text-primary">
                                 {{ formatMoney(inv.total_incl_tax) }}
-                                <span class="text-xs font-semibold text-slate-500">
+                                <span class="text-xs font-semibold text-text-secondary">
                                     {{ inv.currency_code }}
                                 </span>
                             </div>
                             <div
                                 v-if="inv.balance > 0"
-                                class="mt-0.5 text-[11px] font-bold text-rose-600"
+                                class="mt-0.5 text-[11px] font-bold text-danger"
                             >
                                 {{ t('customer_portal.portal_invoices.balance_label') }}:
                                 {{ formatMoney(inv.balance) }}
@@ -626,9 +629,13 @@ function invoiceStatusLabel(paymentStatus) {
 }
 
 function invoiceStatusClass(paymentStatus) {
-    if (paymentStatus === 'paid') return 'bg-emerald-100 text-emerald-800';
-    if (paymentStatus === 'partial') return 'bg-amber-100 text-amber-800';
-    return 'bg-rose-100 text-rose-800';
+    if (paymentStatus === 'paid') {
+        return 'bg-success-soft text-text-primary';
+    }
+    if (paymentStatus === 'partial') {
+        return 'bg-warning-soft text-text-primary';
+    }
+    return 'bg-danger-soft text-text-primary';
 }
 
 function workOrderProgress(status) {

@@ -15,10 +15,12 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintLayout from '@/Components/Print/PrintLayout.vue';
-import { resolveDocumentSettings, resolveVisualSettings } from '@/Composables/usePrint';
+import { resolveDocumentSettings, resolveVisualSettings, usePrint } from '@/Composables/usePrint';
 
 const props = defineProps({
     invoice: Object,
+    printDocument: { type: Object, default: null },
+    zatca_qr_svg: { type: String, default: null },
     template: Object,
     labels: Object,
 });
@@ -26,8 +28,12 @@ const props = defineProps({
 const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
+const { getDocTypeTitle } = usePrint();
 
 const resolvedDocType = computed(() => {
+    if (props.printDocument?.document_type) {
+        return props.printDocument.document_type;
+    }
     return props.invoice?.type === 'credit_note'
         ? 'credit_note'
         : props.invoice?.work_order_id || props.invoice?.company_transaction
@@ -62,7 +68,49 @@ const formatNumber = (num) =>
     new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const mappedData = computed(() => {
-    // Map vehicle details
+    const dto = props.printDocument;
+    if (dto) {
+        const dtoVehicle = dto.vehicle || {};
+        return {
+            code: dto.code,
+            created_at: dto.issue_date,
+            original_invoice_number: dto.original_invoice_number || null,
+            return_reason: dto.return_reason || null,
+            entry_date: dto.supply_date || dto.issue_date,
+            mileage: dtoVehicle.mileage ?? null,
+            odometer: dtoVehicle.mileage ? formatNumber(dtoVehicle.mileage) : '-',
+            fuel_level: dtoVehicle.fuel_level ?? null,
+            customer_complaint: dtoVehicle.customer_complaint ?? null,
+            qr_code_url: dto.qr_data_uri || props.zatca_qr_svg || '',
+            qr_mandatory: Boolean(dto.qr_mandatory),
+            customer: {
+                name: dto.party?.name || '',
+                phone: dto.party?.phone || '',
+                address: dto.party?.address || '',
+                tax_number: dto.party?.tax_number || '',
+            },
+            vehicle: {
+                make: dtoVehicle.make || '-',
+                plate: dtoVehicle.plate || null,
+                color: dtoVehicle.color || null,
+            },
+            tax_enabled_snapshot: Boolean(dto.totals?.tax_enabled),
+            currency_code: dto.currency_code || 'SAR',
+            pricing_mode_snapshot: dto.totals?.pricing_mode || 'exclusive',
+            total_excl_tax: Number(dto.totals?.subtotal_excl_tax || 0),
+            total_tax: Number(dto.totals?.total_tax || 0),
+            total_incl_tax: Number(dto.totals?.grand_total_incl_tax || 0),
+            bad_debt: Number(dto.totals?.bad_debt || 0),
+            total_paid: Number(dto.totals?.total_paid || 0),
+            balance: Number(dto.totals?.balance ?? 0),
+            is_company: Boolean(dto.seller?.is_company),
+            status: dto.status || 'valid',
+            missing_snapshots: Array.isArray(dto.missing_snapshots) ? dto.missing_snapshots : [],
+            items: dto.items || [],
+        };
+    }
+
+    // Fallback for legacy callers/tests passing only `invoice` without `printDocument`
     let vehicleStr = '-';
     if (props.invoice.work_order?.vehicle) {
         const make =
@@ -80,6 +128,7 @@ const mappedData = computed(() => {
 
     // Map line items
     const lines = (props.invoice.lines || []).map((line) => ({
+        id: line.id,
         service_name: line.description || '',
         description: line.notes || '',
         qty: Number(line.qty || 1),
@@ -98,10 +147,9 @@ const mappedData = computed(() => {
         tenant.tax_settings?.vat_enabled ?? tenant.taxSettings?.vat_enabled ?? true;
     const taxActive = Boolean(props.invoice.tax_enabled_snapshot && isVatEnabled);
 
-    const qrUrl =
-        taxActive && props.invoice.zatca_qr_tlv
-            ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}`
-            : '';
+    const qrUrl = taxActive
+        ? props.zatca_qr_svg || props.invoice.zatca_qr_svg || ''
+        : '';
 
     return {
         code: props.invoice.invoice_number,
@@ -183,6 +231,20 @@ const formatAddress = (addr) => {
 };
 
 const mappedCenterData = computed(() => {
+    if (props.printDocument?.seller) {
+        const seller = props.printDocument.seller;
+        return {
+            name: isRtl.value ? seller.name_ar || seller.name : seller.name_en || seller.name,
+            tax_number: seller.vat_number,
+            cr_number: seller.cr_number,
+            phone: seller.phone || '',
+            logo: seller.logo_url || '',
+            iban: seller.iban || '',
+            address: seller.address || '',
+            stamp_url: seller.stamp_url || '',
+        };
+    }
+
     const isCompany = !props.invoice.center_id;
     const center = isCompany ? {} : props.invoice.center || {};
     const tenant = props.invoice.tenant || page.props.tenant || {};
@@ -226,32 +288,16 @@ const mappedCenterData = computed(() => {
 const documentSettings = computed(() => {
     const tenantSettings =
         props.invoice.tenant?.print_settings || page?.props?.tenant?.print_settings;
-    const isCreditNote = resolvedDocType.value === 'credit_note';
-    const isPartsInvoice = resolvedDocType.value === 'parts_invoice';
 
-    const defaultTitleAr = isCreditNote
-        ? isTaxEnabled.value
-            ? 'إشعار دائن (فاتورة إرجاع)'
-            : 'إشعار دائن'
-        : isPartsInvoice
-          ? isTaxEnabled.value
-              ? 'فاتورة قطع غيار ضريبية'
-              : 'فاتورة قطع غيار'
-          : isTaxEnabled.value
-            ? props.labels?.document_title || 'فاتورة ضريبية مبسطة'
-            : 'فاتورة';
+    const defaultTitleAr =
+        resolvedDocType.value === 'invoice' && isTaxEnabled.value && props.labels?.document_title
+            ? props.labels.document_title
+            : getDocTypeTitle(resolvedDocType.value, isTaxEnabled.value, 'ar');
 
-    const defaultTitleEn = isCreditNote
-        ? isTaxEnabled.value
-            ? 'Credit Note (Return Invoice)'
-            : 'Credit Note'
-        : isPartsInvoice
-          ? isTaxEnabled.value
-              ? 'Tax Parts Invoice'
-              : 'Parts Invoice'
-          : isTaxEnabled.value
-            ? props.labels?.document_title || 'Simplified Tax Invoice'
-            : 'Invoice';
+    const defaultTitleEn =
+        resolvedDocType.value === 'invoice' && isTaxEnabled.value && props.labels?.document_title
+            ? props.labels.document_title
+            : getDocTypeTitle(resolvedDocType.value, isTaxEnabled.value, 'en');
 
     const resolved = resolveDocumentSettings({
         tenantSettings,

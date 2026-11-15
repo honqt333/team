@@ -58,9 +58,72 @@
                 </div>
             </div>
 
-            <!-- Top Notice Banner for Pending Online Payment -->
+            <!-- Top Notice Banner for Receipt Rejected -->
             <div
-                v-else-if="currentSubscription?.status === 'pending'"
+                v-else-if="isReceiptRejected"
+                class="bg-rose-50/90 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-800 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+            >
+                <div class="space-y-1">
+                    <h4 class="font-black text-sm text-rose-900 dark:text-rose-100">
+                        {{ t('system.billing.page.state.receipt_rejected_title') }}
+                    </h4>
+                    <p class="text-xs text-rose-700 dark:text-rose-300">
+                        {{ t('system.billing.page.state.receipt_rejected_desc') }}
+                    </p>
+                    <p
+                        v-if="billingState?.latest_rejected_receipt?.review_notes"
+                        class="text-xs font-semibold text-rose-800 dark:text-rose-200"
+                    >
+                        {{ t('system.billing.page.state.receipt_rejected_reason') }}:
+                        {{ billingState.latest_rejected_receipt.review_notes }}
+                    </p>
+                </div>
+                <button
+                    v-if="canUploadReceipt"
+                    @click="openSubscribeModal(openInvoicePlan || availablePlans?.[0])"
+                    type="button"
+                    class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl shadow-md transition-colors shrink-0 cursor-pointer"
+                >
+                    {{ t('system.billing.page.state.reupload_receipt') }}
+                </button>
+            </div>
+
+            <!-- Top Notice Banner for Partially Paid Invoice -->
+            <div
+                v-else-if="isPartiallyPaid"
+                class="bg-amber-50/90 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-800 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+            >
+                <div class="space-y-1">
+                    <h4 class="font-black text-sm text-amber-900 dark:text-amber-100">
+                        {{ t('system.billing.page.state.partially_paid_title') }}
+                    </h4>
+                    <p class="text-xs text-amber-700 dark:text-amber-300">
+                        {{ t('system.billing.page.state.partially_paid_desc') }}
+                    </p>
+                    <p v-if="billingState?.open_invoice" class="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                        {{ t('system.billing.page.state.paid_amount') }}:
+                        {{ formatCurrency(billingState.open_invoice.paid_amount) }}
+                        ·
+                        {{ t('system.billing.page.state.remaining_amount') }}:
+                        {{ formatCurrency(billingState.open_invoice.remaining_amount) }}
+                    </p>
+                </div>
+                <button
+                    v-if="canUploadReceipt"
+                    @click="openSubscribeModal(openInvoicePlan || availablePlans?.[0])"
+                    type="button"
+                    class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl shadow-md transition-colors shrink-0 cursor-pointer"
+                >
+                    {{ t('system.billing.page.state.complete_remaining') }}
+                </button>
+            </div>
+
+            <!-- Top Notice Banner for Awaiting Payment -->
+            <div
+                v-else-if="
+                    isAwaitingPayment ||
+                    ['pending', 'pending_payment'].includes(currentSubscription?.status)
+                "
                 class="bg-amber-50/90 dark:bg-amber-950/50 border-2 border-amber-200 dark:border-amber-800 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
             >
                 <div class="flex items-center gap-3.5">
@@ -81,6 +144,7 @@
                     </div>
                 </div>
                 <button
+                    v-if="canManageBilling && (canUploadReceipt || canChangePlanOrGateway)"
                     @click="openSubscribeModal(currentSubscription?.plan || availablePlans[0])"
                     type="button"
                     class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl shadow-md transition-colors shrink-0 cursor-pointer"
@@ -332,7 +396,13 @@
 
                             <!-- Enabled Subscribe / Upgrade button -->
                             <button
-                                v-else
+                                v-else-if="
+                                    canManageBilling &&
+                                    (canChangePlanOrGateway ||
+                                        (isPartiallyPaid &&
+                                            canUploadReceipt &&
+                                            billingState?.open_invoice?.plan_id === plan.id))
+                                "
                                 @click="openSubscribeModal(plan)"
                                 type="button"
                                 class="block w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300 bg-action-primary hover:bg-action-primary-hover text-white shadow-md hover:shadow-lg cursor-pointer"
@@ -499,19 +569,19 @@
                                             {{ $t('dashboard.active') }}
                                         </span>
                                         <span
-                                            v-else-if="
-                                                sub.status === 'pending_payment' ||
-                                                (sub.status === 'pending' && sub.receipts?.length)
-                                            "
+                                            v-else-if="sub.has_pending_receipt === true"
                                             class="px-2.5 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-full font-bold"
                                         >
                                             {{ $t('subscription.receipt_review_badge') }}
                                         </span>
                                         <span
-                                            v-else-if="sub.status === 'pending'"
+                                            v-else-if="
+                                                sub.status === 'pending' ||
+                                                sub.status === 'pending_payment'
+                                            "
                                             class="px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full font-bold"
                                         >
-                                            {{ $t('subscription.pending_request_badge') }}
+                                            {{ $t('system.company_subscription.status.pending_payment') }}
                                         </span>
                                         <span
                                             v-else-if="
@@ -602,6 +672,7 @@
             :enabled-gateways="enabledGateways"
             :payment-settings="paymentSettings"
             :bank-accounts="bankAccounts"
+            :billing-state="billingState"
             @close="showSubscribeModal = false"
             @success="showSubscribeModal = false"
         />
@@ -613,11 +684,23 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import SubscribeModal from '@/Components/Subscription/SubscribeModal.vue';
+
+const page = usePage();
+const canManageBilling = computed(() => {
+    const auth = page.props?.auth ?? page.props?.value?.auth;
+    if (auth?.is_super_admin) {
+        return true;
+    }
+    const perms = auth?.permissions;
+    return Array.isArray(perms) && perms.includes('settings.company.manage');
+});
 
 const props = defineProps({
     activeTab: String,
     currentSubscription: Object,
+    billingState: { type: Object, default: null },
     availablePlans: Array,
     subscriptions: Array,
     contact: Object,
@@ -631,22 +714,50 @@ const props = defineProps({
 const showSubscribeModal = ref(false);
 const selectedPlan = ref(null);
 
+const isReceiptUnderReview = computed(
+    () => props.billingState?.display_status === 'under_review'
+);
+const isReceiptRejected = computed(
+    () => props.billingState?.display_status === 'receipt_rejected'
+);
+const isPartiallyPaid = computed(
+    () => props.billingState?.display_status === 'partially_paid'
+);
+const isAwaitingPayment = computed(
+    () => props.billingState?.display_status === 'awaiting_payment'
+);
+const canUploadReceipt = computed(
+    () => canManageBilling.value && Boolean(props.billingState?.allowed_actions?.can_upload_receipt)
+);
+const canChangePlanOrGateway = computed(
+    () =>
+        canManageBilling.value &&
+        Boolean(props.billingState?.allowed_actions?.can_change_plan_or_gateway)
+);
+const openInvoicePlan = computed(() => {
+    const planId = props.billingState?.open_invoice?.plan_id;
+    if (planId && props.availablePlans?.length) {
+        return (
+            props.availablePlans.find((p) => p.id === planId) ||
+            props.currentSubscription?.plan ||
+            null
+        );
+    }
+    return props.currentSubscription?.plan || null;
+});
+
 const openSubscribeModal = (plan) => {
+    if (!canManageBilling.value) return;
     if (isReceiptUnderReview.value) return;
+    if (
+        !canChangePlanOrGateway.value &&
+        !(isPartiallyPaid.value && canUploadReceipt.value && props.billingState?.open_invoice?.plan_id === plan?.id)
+    ) {
+        return;
+    }
     selectedPlan.value = plan;
     showSubscribeModal.value = true;
 };
-
-const isReceiptUnderReview = computed(() => {
-    if (!props.currentSubscription) return false;
-    if (props.currentSubscription.status === 'pending_payment') return true;
-    if (
-        props.currentSubscription.status === 'pending' &&
-        props.currentSubscription.receipts?.length > 0
-    )
-        return true;
-    return false;
-});
 
 const formatCurrency = (value) => {
     const num = parseFloat(value);

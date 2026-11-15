@@ -29,7 +29,7 @@
 
         <p
             v-if="status"
-            class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-medium text-emerald-800"
+            class="mb-5 rounded-2xl border border-success/30 bg-success-soft px-4 py-3 text-center text-sm font-medium text-text-primary"
             data-testid="portal-verify-status"
         >
             {{ status }}
@@ -37,7 +37,7 @@
 
         <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <label class="mb-3 block text-center text-sm font-bold text-slate-800">
+                <label class="mb-3 block text-center text-sm font-bold text-text-primary">
                     {{ t('customer_portal.verify.code_label') }}
                 </label>
                 <div class="flex justify-center gap-2 sm:gap-3" dir="ltr" @paste="onPaste">
@@ -50,8 +50,12 @@
                         inputmode="numeric"
                         :autocomplete="index === 0 ? 'one-time-code' : 'off'"
                         maxlength="1"
-                        class="h-14 w-11 rounded-2xl border bg-white text-center text-2xl font-black text-slate-950 outline-none transition focus:border-transparent focus:ring-4 sm:h-16 sm:w-12"
-                        :class="form.errors.code ? 'border-rose-400' : 'border-slate-200'"
+                        class="h-14 w-11 rounded-2xl border bg-surface text-center text-2xl font-black text-text-primary outline-none transition focus:border-transparent focus:ring-4 sm:h-16 sm:w-12"
+                        :class="
+                            form.errors.code
+                                ? 'border-danger'
+                                : 'border-border'
+                        "
                         :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
                         :aria-label="`${t('customer_portal.verify.code_label')} ${index + 1}`"
                         @input="onDigitInput(index, $event)"
@@ -60,7 +64,7 @@
                 </div>
                 <p
                     v-if="form.errors.code"
-                    class="mt-2 text-center text-sm font-medium text-rose-600"
+                    class="mt-2 text-center text-sm font-medium text-danger"
                 >
                     {{ form.errors.code }}
                 </p>
@@ -69,7 +73,7 @@
             <button
                 type="submit"
                 :disabled="form.processing || code.length !== 6"
-                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
                 :style="{
                     backgroundColor: 'var(--portal-primary)',
                     boxShadow: '0 16px 35px -18px var(--portal-primary)',
@@ -99,7 +103,7 @@
                 v-if="resendCooldown > 0"
                 type="button"
                 disabled
-                class="font-semibold text-slate-400"
+                class="font-semibold text-text-secondary"
             >
                 {{ t('customer_portal.verify.resend_in', { seconds: resendCooldown }) }}
             </button>
@@ -107,15 +111,14 @@
                 v-else
                 type="button"
                 :disabled="resending"
-                class="font-bold hover:underline disabled:opacity-50"
-                :style="{ color: 'var(--portal-primary)' }"
+                class="rounded px-2 py-0.5 font-bold text-[color:var(--portal-primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-50"
                 @click="resend"
             >
                 {{ t('customer_portal.verify.resend_now') }}
             </button>
             <a
                 :href="`/${tenant.slug}/portal/login`"
-                class="font-medium text-slate-500 hover:text-slate-800"
+                class="rounded px-2 py-0.5 font-medium text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
                 {{ t('customer_portal.verify.change_link') }}
             </a>

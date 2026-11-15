@@ -58,6 +58,20 @@
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                         />
                     </svg>
+                    <svg
+                        v-else-if="activeTab === 'bays'"
+                        class="w-8 h-8 text-action-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                    </svg>
                 </template>
 
                 <template #actions>
@@ -86,27 +100,30 @@
                                 <span class="text-sm">{{ $t('departments.add') }}</span>
                             </button>
 
-                            <button
+                            <AppButton
                                 v-if="can('services.create') || isAnyAdmin()"
                                 @click="openCreateModal"
-                                type="button"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                                variant="primary"
+                                size="md"
+                                class="shadow-xs"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                                <span class="text-sm">{{ $t('services_management.add') }}</span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('services_management.add') }}
+                            </AppButton>
                         </template>
 
                         <!-- Actions when activeTab === 'packages' -->
@@ -120,54 +137,86 @@
                                 />
                             </div>
 
-                            <button
+                            <AppButton
                                 v-if="can('services.create') || isAnyAdmin()"
                                 @click="openCreatePackageModal"
-                                type="button"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                                variant="primary"
+                                size="md"
+                                class="shadow-xs"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                                <span class="text-sm">{{ $t('packages.add') }}</span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('packages.add') }}
+                            </AppButton>
                         </template>
 
                         <!-- Actions when activeTab === 'inspections' -->
                         <template v-else-if="activeTab === 'inspections'">
-                            <button
+                            <AppButton
                                 v-if="can('services.create') || isAnyAdmin()"
                                 @click="openCategoryModal()"
-                                type="button"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                                variant="primary"
+                                size="md"
+                                class="shadow-xs"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                                <span class="text-sm">
-                                    {{ $t('services_management.add_inspection_category') }}
-                                </span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('services_management.add_inspection_category') }}
+                            </AppButton>
+                        </template>
+
+                        <!-- Actions when activeTab === 'bays' -->
+                        <template v-else-if="activeTab === 'bays'">
+                            <AppButton
+                                v-if="canManageBays"
+                                @click="openCreateBayModal"
+                                variant="primary"
+                                size="md"
+                                class="shadow-xs"
+                            >
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('service_bays.add_bay') }}
+                            </AppButton>
                         </template>
                     </div>
                 </template>
@@ -191,11 +240,11 @@
                                 />
                             </svg>
                         </div>
-                        <input
+                        <AppInput
                             v-model="searchQuery"
                             type="text"
                             :placeholder="$t('services_management.search')"
-                            class="w-full ps-11 pe-10 py-2.5 bg-surface-primary dark:bg-surface-secondary/50 border border-border-subtle rounded-xl text-sm text-content-primary placeholder-content-muted focus:outline-hidden focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all shadow-2xs"
+                            input-class="ps-11 pe-10"
                         />
                         <button
                             v-if="searchQuery"
@@ -235,27 +284,30 @@
                     :description="$t('services_management.add_department_first')"
                 >
                     <template #actions>
-                        <button
+                        <AppButton
                             v-if="can('services.departments.manage') || isAnyAdmin()"
                             @click="openCreateDepartmentModal"
-                            type="button"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('departments.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('departments.add') }}
+                        </AppButton>
                     </template>
                 </AppEmptyState>
 
@@ -965,27 +1017,30 @@
                 <!-- Empty State -->
                 <AppEmptyState v-if="filteredPackages.length === 0" :title="$t('packages.empty')">
                     <template #actions>
-                        <button
+                        <AppButton
                             v-if="can('services.create')"
                             @click="openCreatePackageModal"
-                            type="button"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('packages.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('packages.add') }}
+                        </AppButton>
                     </template>
                 </AppEmptyState>
 
@@ -1193,26 +1248,29 @@
                     :title="$t('services_management.inspections_empty')"
                 >
                     <template #actions>
-                        <button
+                        <AppButton
                             @click="openCategoryModal()"
-                            type="button"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('services_management.add_inspection_category') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('services_management.add_inspection_category') }}
+                        </AppButton>
                     </template>
                 </AppEmptyState>
 
@@ -1482,6 +1540,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Service Bays Tab Content -->
+            <ServiceBaysTab
+                v-if="activeTab === 'bays' && canManageBays"
+                ref="serviceBaysTabRef"
+                :bays="serviceBays"
+                :search-query="searchQuery"
+            />
         </div>
 
         <!-- Service Form Modal (Catalog link or Edit) -->
@@ -1568,6 +1634,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
@@ -1582,6 +1650,7 @@ import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
 import ConditionItemFormModal from '@/Components/ConditionItemFormModal.vue';
 import ConditionCategoryFormModal from '@/Components/ConditionCategoryFormModal.vue';
+import ServiceBaysTab from '@/Components/Services/ServiceBaysTab.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -1624,7 +1693,17 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    serviceBays: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const canManageBays = computed(() => can('crm.appointments.manage') || isAnyAdmin());
+const serviceBaysTabRef = ref(null);
+const openCreateBayModal = () => {
+    serviceBaysTabRef.value?.openCreateModal();
+};
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'services');
 const packagesViewMode = ref('list');
@@ -1635,24 +1714,37 @@ watch(activeTab, (newTab) => {
     window.history.replaceState({}, '', url);
 });
 
-const mainTabs = computed(() => [
-    {
-        id: 'services',
-        label: t('services_management.title'),
-        count: totalServices.value,
-    },
-    {
-        id: 'packages',
-        label: t('packages.title'),
-        count: props.packages?.length || 0,
-    },
-    {
-        id: 'inspections',
-        label: t('services_management.inspections'),
-        count:
-            props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 0,
-    },
-]);
+const mainTabs = computed(() => {
+    const list = [
+        {
+            id: 'services',
+            label: t('services_management.title'),
+            count: totalServices.value,
+        },
+        {
+            id: 'packages',
+            label: t('packages.title'),
+            count: props.packages?.length || 0,
+        },
+        {
+            id: 'inspections',
+            label: t('services_management.inspections'),
+            count:
+                props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) ||
+                0,
+        },
+    ];
+
+    if (canManageBays.value) {
+        list.push({
+            id: 'bays',
+            label: t('service_bays.title'),
+            count: props.serviceBays?.length || 0,
+        });
+    }
+
+    return list;
+});
 
 const packageColumns = computed(() => [
     { key: 'number', label: t('services_management.columns.number'), class: 'w-16 text-center' },
@@ -1817,6 +1909,19 @@ const tabs = computed(() => [
         count:
             props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 0,
     },
+    ...(canManageBays.value
+        ? [
+              {
+                  key: 'bays',
+                  label: t('service_bays.title'),
+                  iconColor: 'text-emerald-500',
+                  bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+                  gradientFrom: '#10b981', // emerald-500
+                  gradientTo: '#059669', // emerald-600
+                  count: props.serviceBays?.length || 0,
+              },
+          ]
+        : []),
 ]);
 
 const headerConfig = computed(() => {
@@ -1828,7 +1933,9 @@ const headerConfig = computed(() => {
                 ? t('services_management.services')
                 : activeTab.value === 'packages'
                   ? t('packages.items')
-                  : t('services_management.inspections'),
+                  : activeTab.value === 'bays'
+                    ? t('service_bays.title')
+                    : t('services_management.inspections'),
         glowFrom:
             activeTab.value === 'services'
                 ? 'from-teal-600'

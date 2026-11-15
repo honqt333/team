@@ -14,14 +14,14 @@
             <div
                 v-for="card in summaryCards"
                 :key="card.key"
-                class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border p-4 shadow-sm"
+                class="relative overflow-hidden rounded-2xl bg-surface border p-4 shadow-sm"
                 :class="card.border"
             >
                 <span class="absolute inset-y-0 start-0 w-1" :class="card.accent" />
-                <p class="text-xs font-bold text-slate-400">{{ card.label }}</p>
+                <p class="text-xs font-bold text-text-secondary">{{ card.label }}</p>
                 <p class="text-lg font-extrabold mt-1" :class="card.text" dir="ltr">
                     {{ formatMoney(card.value) }}
-                    <span class="text-xs font-semibold text-slate-500">{{ currency }}</span>
+                    <span class="text-xs font-semibold text-text-secondary">{{ currency }}</span>
                 </p>
             </div>
         </section>
@@ -40,20 +40,20 @@
                 v-for="inv in filteredInvoices"
                 :key="inv.id"
                 :href="`/${tenant.slug}/portal/invoice/${inv.id}`"
-                class="group block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition"
+                class="group block rounded-2xl bg-surface border border-border p-5 shadow-sm hover:shadow-md transition"
             >
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div class="min-w-0 space-y-1.5">
                         <div class="flex flex-wrap items-center gap-2">
                             <span
-                                class="text-sm font-mono font-extrabold text-slate-900 dark:text-white"
+                                class="text-sm font-mono font-extrabold text-text-primary"
                                 dir="ltr"
                             >
                                 {{ inv.invoice_number }}
                             </span>
                             <span
                                 v-if="isNote(inv)"
-                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200"
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-info-soft text-info"
                             >
                                 {{ t(`customer_portal.portal_invoices.${inv.type}`) }}
                             </span>
@@ -69,11 +69,11 @@
                                 }}
                             </span>
                         </div>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                        <p class="text-sm font-bold text-text-primary">
                             {{ inv.vehicle_label || inv.center_name || '—' }}
                         </p>
                         <div
-                            class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400"
+                            class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary"
                         >
                             <span v-if="inv.issue_date">{{ formatDate(inv.issue_date) }}</span>
                             <span v-if="inv.center_name">{{ inv.center_name }}</span>
@@ -94,17 +94,17 @@
                             size="xs"
                         />
                         <p
-                            class="text-base font-extrabold text-slate-900 dark:text-white"
+                            class="text-base font-extrabold text-text-primary"
                             dir="ltr"
                         >
                             {{ formatMoney(inv.total_incl_tax) }}
-                            <span class="text-xs font-semibold text-slate-500">
+                            <span class="text-xs font-semibold text-text-secondary">
                                 {{ inv.currency_code }}
                             </span>
                         </p>
                         <p
                             v-if="inv.balance > 0 && !isNote(inv)"
-                            class="text-xs font-bold text-rose-600 dark:text-rose-400"
+                            class="text-xs font-bold text-danger"
                         >
                             {{ t('customer_portal.portal_invoices.balance_label') }}:
                             <span dir="ltr">{{ formatMoney(inv.balance) }}</span>
@@ -144,29 +144,29 @@ const summaryCards = computed(() => {
             key: 'invoiced',
             label: t('customer_portal.portal_invoices.summary_invoiced'),
             value: props.financialSummary?.total_invoiced,
-            text: 'text-slate-900 dark:text-white',
-            border: 'border-slate-200/80 dark:border-slate-800',
-            accent: 'bg-blue-500',
+            text: 'text-text-primary',
+            border: 'border-border',
+            accent: 'bg-brand-primary',
         },
         {
             key: 'paid',
             label: t('customer_portal.portal_invoices.summary_paid'),
             value: props.financialSummary?.total_paid,
-            text: 'text-emerald-600 dark:text-emerald-400',
-            border: 'border-slate-200/80 dark:border-slate-800',
-            accent: 'bg-emerald-500',
+            text: 'text-emerald-700 dark:text-emerald-400',
+            border: 'border-border',
+            accent: 'bg-success',
         },
         {
             key: 'balance',
             label: t('customer_portal.portal_invoices.summary_balance'),
             value: balance,
             text:
-                balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white',
+                balance > 0 ? 'text-danger' : 'text-text-primary',
             border:
                 balance > 0
-                    ? 'border-rose-200/80 dark:border-rose-900/50'
-                    : 'border-slate-200/80 dark:border-slate-800',
-            accent: balance > 0 ? 'bg-rose-500' : 'bg-slate-300',
+                    ? 'border-danger/30'
+                    : 'border-border',
+            accent: balance > 0 ? 'bg-danger' : 'bg-border-strong',
         },
     ];
 });

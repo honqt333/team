@@ -165,11 +165,7 @@ class VehicleController
             // center of the tenant must be included.
             ->select('vehicles.*')
             ->selectSub(
-                Invoice::query()
-                    ->withoutGlobalScope('center_scoped')
-                    ->whereColumn('invoices.customer_id', 'vehicles.customer_id')
-                    ->whereNotIn('status', ['cancelled'])
-                    ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0)'),
+                Invoice::outstandingSubqueryForColumn('customer_id', 'vehicles.customer_id', 'vehicles.tenant_id'),
                 'customer_balance'
             )
             ->when($request->search, function ($query, $search) {
@@ -263,14 +259,16 @@ class VehicleController
             ->orderBy('name')
             ->get();
 
-        // Get all makes
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        // Get active makes (for add/edit modal) and all makes (for table filter)
+        $makes = VehicleMake::active()->ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        $filterMakes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
 
         // Get active colors
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
-        // Build modelsByMake map
+        // Build modelsByMake map (active models only)
         $modelsByMake = VehicleModel::query()
+            ->active()
             ->select('id', 'make_id', 'name_ar', 'name_en')
             ->ordered()
             ->get()
@@ -287,6 +285,7 @@ class VehicleController
             'customers' => $customers,
             'dealers' => $dealers,
             'makes' => $makes,
+            'filterMakes' => $filterMakes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
             'filters' => array_merge(
@@ -397,16 +396,16 @@ class VehicleController
         $canDelete = $counts['quotes'] === 0 && $counts['workOrders'] === 0;
 
         // Get form data for modals
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
+        $makes = VehicleMake::active()->ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
         $services = Service::where('is_active', true)->with('department')->orderBy('sort_order')->get();
 
-        // Build modelsByMake map
+        // Build modelsByMake map (active models only)
         $modelsByMake = [];
 
         foreach ($makes as $make) {
-            $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
+            $modelsByMake[$make->id] = $make->models()->active()->ordered()->get(['id', 'name_ar', 'name_en']);
         }
 
         return Inertia::render('Vehicles/Show', [

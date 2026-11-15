@@ -42,7 +42,7 @@
         </button>
 
         <!-- Activate (super_admin only — hidden if Lift Auto Suspend is already visible) -->
-        <button
+        <AppButton
             v-if="
                 tenant.status !== 'active' &&
                 !(
@@ -51,10 +51,12 @@
                 )
             "
             @click="$emit('activate')"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
+            variant="primary"
+            size="sm"
+            class="bg-emerald-600 hover:bg-emerald-700"
         >
             {{ $t('system.tenants.actions.activate') }}
-        </button>
+        </AppButton>
 
         <!-- Phase 7.6: dunning opt-out override. We expose this
              as a quick action because the toggle is a privacy-
@@ -172,6 +174,7 @@
 </template>
 
 <script setup>
+import AppButton from '@/Components/App/AppButton.vue';
 import { useI18n } from 'vue-i18n';
 
 useI18n();

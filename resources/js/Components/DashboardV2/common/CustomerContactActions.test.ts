@@ -33,8 +33,8 @@ describe('CustomerContactActions', () => {
 
         const links = wrapper.findAll('a');
         expect(links).toHaveLength(2);
-        expect(links[0].attributes('href')).toBe('tel:+966551234567');
-        expect(links[1].attributes('href')).toBe(
+        expect(links[0]?.attributes('href')).toBe('tel:+966551234567');
+        expect(links[1]?.attributes('href')).toBe(
             'https://wa.me/966551234567?text=WO-101%20-%20ABC%201234'
         );
     });

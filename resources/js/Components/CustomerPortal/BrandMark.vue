@@ -17,16 +17,15 @@
         :class="[
             size === 'sm' ? 'h-9 w-9 rounded-xl' : 'h-12 w-12 sm:h-14 sm:w-14 rounded-2xl',
             tenant?.has_logo
-                ? 'bg-white border border-slate-200 shadow-sm'
-                : 'border border-transparent',
+                ? 'bg-white border border-border shadow-sm'
+                : monogramBorderClass,
         ]"
         :style="
             tenant?.has_logo
                 ? {}
                 : {
-                      backgroundColor:
-                          'color-mix(in srgb, var(--tenant-primary, #2563eb) 12%, transparent)',
-                      color: 'var(--tenant-primary, #2563eb)',
+                      backgroundColor: 'var(--tenant-primary, #2563eb)',
+                      color: monogramTextColor,
                   }
         "
     >
@@ -48,12 +47,23 @@
 
 <script setup>
 import { computed } from 'vue';
+import { accessibleTextOn } from '@/Utils/colorContrast';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
     // 'sm' = header (h-9 w-9), 'lg' = login/verify card
     size: { type: String, default: 'sm' },
 });
+
+const monogramTextColor = computed(() =>
+    accessibleTextOn(props.tenant?.primary_color || '#2563eb')
+);
+
+const monogramBorderClass = computed(() =>
+    monogramTextColor.value === '#0f172a'
+        ? 'border border-black/15 shadow-sm'
+        : 'border border-white/20 shadow-sm'
+);
 
 const initial = computed(() => {
     const n = props.tenant?.site_name || '';

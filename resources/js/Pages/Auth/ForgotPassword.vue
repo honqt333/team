@@ -2,6 +2,7 @@
 const { t } = useI18n();
 
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -51,14 +52,14 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('center_settings.contact.email') }}
                 </label>
-                <input
+                <AppInput
                     type="email"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
                     :placeholder="isRTL ? 'البريد الإلكتروني' : 'Email'"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    input-class="px-4 py-3"
                 />
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>

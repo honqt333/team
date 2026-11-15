@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\System\WebsiteSettingsController;
 use App\Models\Billing\Plan;
 use App\Models\ContactMessage;
+use App\Models\PaymentSettings;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -88,7 +89,34 @@ class PublicLandingController extends Controller
              * markup is what can earn a rich result in search.
              */
             'jsonLd' => $this->buildJsonLd($settings, url('/')),
+            'paymentBadges' => $this->getPublicPaymentBadges(),
+            'paymentIcons' => PaymentSettings::getPaymentIconsConfig(),
         ]);
+    }
+
+    /**
+     * Expose only safe boolean flags of enabled payment methods for the public footer.
+     *
+     * @return array<string, bool>
+     */
+    private function getPublicPaymentBadges(): array
+    {
+        $ps = PaymentSettings::getSettings();
+        $visibility = PaymentSettings::getFooterBadgesConfig();
+        $onlineEnabled = $ps->isGatewayEnabled('moyasar')
+            || $ps->isGatewayEnabled('tap')
+            || $ps->isGatewayEnabled('paytabs');
+
+        return [
+            'online_enabled' => $onlineEnabled,
+            'mada' => $onlineEnabled && (bool) ($ps->mada_enabled ?? true) && $visibility['mada'],
+            'visa' => $onlineEnabled && (bool) ($ps->visa_enabled ?? true) && $visibility['visa'],
+            'mastercard' => $onlineEnabled && (bool) ($ps->mastercard_enabled ?? true) && $visibility['mastercard'],
+            'applepay' => $onlineEnabled && (bool) ($ps->applepay_enabled ?? true) && $visibility['applepay'],
+            'tabby' => $ps->isGatewayEnabled('tabby') && $visibility['tabby'],
+            'tamara' => $ps->isGatewayEnabled('tamara') && $visibility['tamara'],
+            'bank_transfer' => (bool) $ps->bank_transfer_enabled && $visibility['bank_transfer'],
+        ];
     }
 
     /**

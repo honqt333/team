@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 import { computed } from 'vue';
 
@@ -8,13 +8,13 @@ const props = defineProps({
     plan: { type: Object, required: true },
     isCurrent: { type: Boolean, default: false },
     hasPendingSubscription: { type: Boolean, default: false },
+    isPartialOpenPlan: { type: Boolean, default: false },
+    lockReason: { type: String, default: '' },
     canRenew: { type: Boolean, default: false },
     isExpired: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['subscribe']);
-
-const locale = computed(() => document.documentElement.lang || 'ar');
 
 const name = computed(() => (locale.value === 'ar' ? props.plan.name_ar : props.plan.name_en));
 const description = computed(() =>
@@ -31,6 +31,7 @@ const features = computed(() => {
 // 3. Pending in-flight subscription             → "Pending request", disabled
 // 4. Other plan                                 → "Subscribe now", ENABLED
 const isDisabled = computed(() => {
+    if (props.isPartialOpenPlan) return false;
     if (props.hasPendingSubscription) return true;
     if (props.isCurrent && !props.canRenew && !props.isExpired) {
         return true;
@@ -39,6 +40,9 @@ const isDisabled = computed(() => {
 });
 
 const buttonLabel = computed(() => {
+    if (props.isPartialOpenPlan) {
+        return t('system.billing.page.state.complete_remaining');
+    }
     if (props.hasPendingSubscription) {
         return t('subscription.pending_request');
     }
@@ -162,10 +166,8 @@ const formatCurrency = (amount) => {
             @click="emit('subscribe', plan)"
             :disabled="isDisabled"
             :title="
-                hasPendingSubscription && !isCurrent
-                    ? locale === 'ar'
-                        ? 'لديك اشتراك قيد المراجعة، انتظر الموافقة قبل طلب جديد'
-                        : 'You already have a pending request. Wait for admin approval.'
+                hasPendingSubscription && !isPartialOpenPlan && !isCurrent
+                    ? lockReason || t('system.billing.page.state.under_review_locked_hint')
                     : ''
             "
             :class="[

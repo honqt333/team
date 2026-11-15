@@ -14,7 +14,7 @@
         order, not absolute coordinates.
     -->
     <nav
-        class="mb-6 rounded-2xl border border-slate-200 bg-white p-2 text-xs shadow-sm sm:text-sm"
+        class="mb-6 rounded-2xl border border-border bg-surface p-2 text-xs shadow-sm sm:text-sm"
         :aria-label="ariaLabel"
     >
         <ol class="grid grid-cols-3 gap-1.5">
@@ -24,10 +24,10 @@
                 class="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 font-bold"
                 :class="
                     i < currentStep
-                        ? 'bg-emerald-50 text-emerald-700'
+                        ? 'bg-success-soft text-text-primary ring-1 ring-success/30'
                         : i === currentStep
-                          ? 'text-white'
-                          : 'bg-slate-50 text-slate-400'
+                          ? 'text-action-on'
+                          : 'bg-surface-muted text-text-secondary'
                 "
                 :style="
                     i === currentStep ? { backgroundColor: 'var(--tenant-primary, #2563eb)' } : {}

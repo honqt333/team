@@ -55,29 +55,7 @@
                 <template #actions>
                     <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                         <!-- Print Button -->
-                        <Tooltip :content="$t('common.print')">
-                            <a
-                                :href="route('app.invoices.print', invoice.id)"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                </svg>
-                                <span>{{ $t('common.print') }}</span>
-                            </a>
-                        </Tooltip>
+                        <AppPrintButton :href="route('app.invoices.print', invoice.id)" />
 
                         <!-- Return Invoice / Credit Note Button -->
                         <Tooltip
@@ -116,31 +94,33 @@
                                     : $t('payments.add_payment')
                             "
                         >
-                            <button
+                            <AppButton
                                 @click="showPaymentModal = true"
-                                class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                                variant="primary"
+                                size="sm"
+                                class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm hover:shadow"
                             >
-                                <svg
-                                    class="w-4 h-4 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                                <span>
-                                    {{
-                                        isCreditNote
-                                            ? $t('payments.types.refund')
-                                            : $t('payments.add_payment')
-                                    }}
-                                </span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </template>
+                                {{
+                                    isCreditNote
+                                        ? $t('payments.types.refund')
+                                        : $t('payments.add_payment')
+                                }}
+                            </AppButton>
                         </Tooltip>
 
                         <div
@@ -303,12 +283,12 @@
                                     v-if="
                                         invoice.tax_enabled_snapshot &&
                                         isVatEnabled &&
-                                        invoice.zatca_qr_tlv
+                                        localQrSrc
                                     "
                                     class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm"
                                 >
                                     <img
-                                        :src="generateQRCode(invoice.zatca_qr_tlv)"
+                                        :src="localQrSrc"
                                         alt="ZATCA QR"
                                         class="w-12 h-12 object-contain"
                                     />
@@ -827,32 +807,34 @@
                         {{ $t('invoices.payments_history') }}
                     </h3>
                     <div class="flex items-center gap-2">
-                        <button
+                        <AppButton
                             v-if="balance > 0.01 && canRecordPayment"
                             @click="showPaymentModal = true"
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-500/10 active:scale-95 shrink-0"
+                            variant="primary"
+                            size="sm"
+                            class="bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-500/10 shrink-0"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>
-                                {{
-                                    isCreditNote
-                                        ? $t('payments.types.refund')
-                                        : $t('payments.add_payment')
-                                }}
-                            </span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{
+                                isCreditNote
+                                    ? $t('payments.types.refund')
+                                    : $t('payments.add_payment')
+                            }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -1076,32 +1058,34 @@
                                         <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">
                                             {{ $t('payments.no_payments_desc') }}
                                         </p>
-                                        <button
+                                        <AppButton
                                             v-if="balance > 0.01 && canRecordPayment"
                                             @click="showPaymentModal = true"
-                                            class="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M12 4v16m8-8H4"
-                                                />
-                                            </svg>
-                                            <span>
-                                                {{
-                                                    isCreditNote
-                                                        ? $t('payments.types.refund')
-                                                        : $t('payments.add_payment')
-                                                }}
-                                            </span>
-                                        </button>
+                                            <template #iconLeft>
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 4v16m8-8H4"
+                                                    />
+                                                </svg>
+                                            </template>
+                                            {{
+                                                isCreditNote
+                                                    ? $t('payments.types.refund')
+                                                    : $t('payments.add_payment')
+                                            }}
+                                        </AppButton>
                                     </div>
                                 </td>
                             </tr>
@@ -1144,9 +1128,11 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
@@ -1161,11 +1147,11 @@ import AppTabs from '@/Components/Common/AppTabs.vue';
 
 const props = defineProps({
     invoice: Object,
+    zatca_qr_svg: { type: String, default: null },
     colors: { type: Array, default: () => [] },
 });
 
 const { t } = useI18n();
-const { confirm } = useConfirm();
 const { toEnglish, formatCurrency, formatMoney } = useNumberFormat();
 
 const page = usePage();
@@ -1251,6 +1237,10 @@ const invoiceActualPaid = computed(() => {
 });
 
 const balance = computed(() => {
+    if (props.invoice.balance !== undefined && props.invoice.balance !== null) {
+        return Math.max(0, Number(props.invoice.balance));
+    }
+
     return Math.max(
         0,
         Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0)
@@ -1370,14 +1360,14 @@ const servicesTotal = computed(() => {
 
 // ── Spare Parts breakdown ───────────────────────────────────
 const partsDiscountAmt = computed(() => {
-    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : (l) => true;
+    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : () => true;
     return (props.invoice.lines || [])
         .filter(filterFn)
         .reduce((sum, l) => sum + getLineDiscount(l, showExclusive.value), 0);
 });
 
 const partsSubtotal = computed(() => {
-    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : (l) => true;
+    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : () => true;
     const excl = (props.invoice.lines || [])
         .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.line_total_excl_tax || 0), 0);
@@ -1390,7 +1380,7 @@ const partsSubtotal = computed(() => {
 const partsGross = computed(() => {
     const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
     if (isInclusive) {
-        const filterFn = props.invoice.work_order_id ? (l) => l.is_part : (l) => true;
+        const filterFn = props.invoice.work_order_id ? (l) => l.is_part : () => true;
         const discountIncl = (props.invoice.lines || [])
             .filter(filterFn)
             .reduce((sum, l) => sum + getLineDiscount(l, false), 0);
@@ -1401,14 +1391,14 @@ const partsGross = computed(() => {
 });
 
 const partsTax = computed(() => {
-    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : (l) => true;
+    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : () => true;
     return (props.invoice.lines || [])
         .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.tax_amount || 0), 0);
 });
 
 const partsTotal = computed(() => {
-    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : (l) => true;
+    const filterFn = props.invoice.work_order_id ? (l) => l.is_part : () => true;
     return (props.invoice.lines || [])
         .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
@@ -1452,9 +1442,7 @@ const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
-const generateQRCode = (base64Data) => {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(base64Data)}`;
-};
+const localQrSrc = computed(() => props.zatca_qr_svg || props.invoice?.zatca_qr_svg || null);
 
 const getLineDiscount = (line, exclusive = true) => {
     const qty = Number(line.qty || 0);

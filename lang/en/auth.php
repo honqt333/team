@@ -24,4 +24,5 @@ return [
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
     'verification_unavailable' => 'Verification service is currently unavailable',
     'verify_phone_first' => 'Please verify your phone number first',
+    'sms_2fa_disabled' => 'SMS 2FA is currently disabled',
 ];

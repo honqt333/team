@@ -51,6 +51,46 @@ const HARDCODED_COLOR_RE =
 const DIRECTIONAL_CLASS_RE =
     /\b(?:ml|mr|pl|pr|left|right)-(?:\d+|px|auto|full|1\/2)\b|\btext-(?:left|right)\b/g;
 
+const TAILWIND_ARBITRARY_HEX_RE = /\[#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\]/g;
+const CSS_HEX_VALUE_RE =
+    /(?:^|[\s:,(])(#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}))(?![0-9a-fA-F_-])/g;
+const TOKEN_DEFINITION_RE =
+    /^\s*(--(?:color|space|radius|font-size|font-weight|font-family|line-height|shadow|motion|z)-[a-z0-9-]+)\s*:/i;
+
+const UNAUTHORIZED_UI_PACKAGES = new Set([
+    'react',
+    'react-dom',
+    'shadcn',
+    'shadcn-ui',
+    'lucide-react',
+    '@headlessui/react',
+    'antd',
+]);
+const UNAUTHORIZED_UI_PREFIXES = ['@radix-ui/', '@mui/', '@chakra-ui/', 'react/', 'react-dom/'];
+
+function isUnauthorizedUiPackage(pkgName) {
+    if (!pkgName || typeof pkgName !== 'string') return false;
+    return (
+        UNAUTHORIZED_UI_PACKAGES.has(pkgName) ||
+        UNAUTHORIZED_UI_PREFIXES.some((prefix) => pkgName.startsWith(prefix))
+    );
+}
+
+function isParallelDesignSource(relPath) {
+    const normalized = relPath.replace(/\\/g, '/');
+    if (normalized === 'resources/js/Design/tokens.css' || normalized === 'resources/js/Design/tokens.json') {
+        return false;
+    }
+    if (/^\.(agents?|claude|codex|github|opencode)\//.test(normalized)) {
+        return false;
+    }
+    if (normalized === 'DESIGN.md' || normalized === 'PRODUCT.md') return true;
+    if (/(^|\/)MASTER\.md$/i.test(normalized)) return true;
+    if (/^design-system\/.*\.md$/i.test(normalized)) return true;
+    if (/(^|\/)tokens\.(css|json)$/i.test(normalized)) return true;
+    return false;
+}
+
 // NC-001: Deprecated component definitions & internal modal wrappers
 const NC001_EXEMPT_FILES = new Set([
     'resources/js/Components/PrimaryButton.vue',
@@ -130,6 +170,9 @@ export function loadLocaleKeys(rootDir = ROOT_DIR) {
 
 function isUiSourceFile(relPath) {
     const normalized = relPath.replace(/\\/g, '/');
+    if (normalized === 'package.json' || isParallelDesignSource(normalized)) {
+        return true;
+    }
     if (!normalized.startsWith('resources/js/')) return false;
     if (normalized.endsWith('.test.js') || normalized.endsWith('.test.ts') || normalized.endsWith('.spec.ts')) {
         return false;
@@ -158,12 +201,28 @@ function walkDir(dir, rootDir, out = []) {
     return out;
 }
 
-function gitLines(args, rootDir) {
+function gitLines(args, rootDir, throwOnError = false) {
     try {
         const out = execFileSync('git', args, { cwd: rootDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
         return out.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    } catch {
+    } catch (err) {
+        if (throwOnError) throw err;
         return [];
+    }
+}
+
+export function verifyGitBaseRef(baseRef, rootDir = ROOT_DIR) {
+    if (!baseRef) {
+        throw new Error('Git --base reference is required in base mode.');
+    }
+    try {
+        execFileSync('git', ['rev-parse', '--verify', '--quiet', `${baseRef}^{commit}`], {
+            cwd: rootDir,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+    } catch {
+        throw new Error(`Git base reference "${baseRef}" is unavailable or cannot be resolved.`);
     }
 }
 
@@ -203,15 +262,25 @@ export function getAddedLinesForFile(relPath, baseRef, rootDir = ROOT_DIR) {
 
 function resolveTargetFiles(opts, rootDir) {
     if (opts.mode === 'all') {
-        return walkDir(path.join(rootDir, 'resources/js'), rootDir).sort();
+        const files = walkDir(path.join(rootDir, 'resources/js'), rootDir);
+        if (fs.existsSync(path.join(rootDir, 'package.json'))) {
+            files.push('package.json');
+        }
+        for (const rootDoc of ['DESIGN.md', 'PRODUCT.md', 'MASTER.md']) {
+            if (fs.existsSync(path.join(rootDir, rootDoc))) {
+                files.push(rootDoc);
+            }
+        }
+        return [...new Set(files)].sort();
     }
     if (opts.mode === 'files') {
         return [...new Set(opts.files.map((f) => f.replace(/\\/g, '/')))]
             .filter((f) => fs.existsSync(path.join(rootDir, f)) && isUiSourceFile(f))
             .sort();
     }
-    if (opts.mode === 'base' && opts.base) {
-        const changed = gitLines(['diff', '--name-only', '--diff-filter=ACMR', `${opts.base}...HEAD`], rootDir);
+    if (opts.mode === 'base') {
+        verifyGitBaseRef(opts.base, rootDir);
+        const changed = gitLines(['diff', '--name-only', '--diff-filter=ACMR', `${opts.base}...HEAD`], rootDir, true);
         return [...new Set(changed)].filter((f) => fs.existsSync(path.join(rootDir, f)) && isUiSourceFile(f)).sort();
     }
     // Default: --changed (staged + unstaged + untracked)
@@ -249,7 +318,7 @@ function analyzeScriptAst(code, filePath, lineOffset, localeKeys, findings) {
     };
 
     const visit = (node) => {
-        // 1. UI-006 & UI-021-DUP: ImportDeclaration AST
+        // 1. UI-006, UI-021-DUP & UI-UNAUTHORIZED-LIB: ImportDeclaration AST
         if (ts.isImportDeclaration(node) && isTestOnlyString(node.moduleSpecifier)) {
             const spec = node.moduleSpecifier.text;
             if (!NC001_EXEMPT_FILES.has(filePath) && DEPRECATED_IMPORTS.has(spec)) {
@@ -257,6 +326,9 @@ function analyzeScriptAst(code, filePath, lineOffset, localeKeys, findings) {
             }
             if (!filePath.startsWith('resources/js/Components/DashboardV2/') && PARALLEL_DASHBOARD_IMPORTS.includes(spec)) {
                 addFinding('ERROR', 'UI-021-DUP', node, `Parallel DashboardV2 component "${spec}" must not be imported in new/other modules.`);
+            }
+            if (isUnauthorizedUiPackage(spec)) {
+                addFinding('ERROR', 'UI-UNAUTHORIZED-LIB', node, `Unauthorized React/UI library import "${spec}". Khidmah Pro uses Vue 3 + App* components.`);
             }
         }
 
@@ -344,6 +416,10 @@ function analyzeVueTemplateAst(astNode, filePath, localeKeys, findings, inLtr = 
                         if (colors) {
                             addFinding('WARNING', 'UI-003', prop.loc, `Hardcoded Tailwind color(s): ${[...new Set(colors)].join(', ')}. Prefer tokens.css semantic classes.`);
                         }
+                        const arbitraryHex = cls.match(TAILWIND_ARBITRARY_HEX_RE);
+                        if (arbitraryHex) {
+                            addFinding('ERROR', 'UI-003-HEX', prop.loc, `Hardcoded arbitrary hex color(s): ${[...new Set(arbitraryHex)].join(', ')}. Use tokens.css semantic variables.`);
+                        }
                     }
                     if (!currentLtr) {
                         const tokens = cls.split(/\s+/);
@@ -351,6 +427,12 @@ function analyzeVueTemplateAst(astNode, filePath, localeKeys, findings, inLtr = 
                         if (badDir.length > 0) {
                             addFinding('WARNING', 'UI-005', prop.loc, `Directional class(es) [${[...new Set(badDir)].join(', ')}]; prefer logical properties (ms-/me-/ps-/pe-/start-/end-/text-start).`);
                         }
+                    }
+                }
+                if (prop.name === 'style' && prop.value?.content && !isMarketingLanding) {
+                    const hexMatches = extractCssHexColors(prop.value.content);
+                    if (hexMatches.length > 0) {
+                        addFinding('ERROR', 'UI-003-HEX', prop.loc, `Hardcoded hex color(s) in inline style: ${hexMatches.join(', ')}. Use tokens.css CSS variables.`);
                     }
                 }
             }
@@ -396,10 +478,124 @@ function analyzeVueTemplateAst(astNode, filePath, localeKeys, findings, inLtr = 
     }
 }
 
+function extractCssHexColors(text) {
+    const cleaned = text.replace(/url\([^)]*\)/gi, ' ');
+    const found = new Set();
+    for (const m of cleaned.matchAll(CSS_HEX_VALUE_RE)) {
+        found.add(m[1]);
+    }
+    for (const m of cleaned.matchAll(TAILWIND_ARBITRARY_HEX_RE)) {
+        found.add(m[0]);
+    }
+    return [...found];
+}
+
+function scanCssLines(cssContent, relPath, startLineOffset, findings) {
+    const isTokenSource = relPath === 'resources/js/Design/tokens.css';
+    const isMarketingLanding = relPath.startsWith('resources/js/Pages/Public/landing/');
+    const lines = stripCssComments(cssContent).split(/\r?\n/);
+
+    lines.forEach((ln, idx) => {
+        const lineNo = startLineOffset + idx;
+        const fontMatch = ln.match(FORBIDDEN_FONTS_RE);
+        if (fontMatch) {
+            findings.push({
+                severity: 'ERROR',
+                rule: 'UI-002',
+                file: relPath,
+                line: lineNo,
+                endLine: lineNo,
+                message: `Forbidden font "${fontMatch[1]}" in ${relPath.endsWith('.css') ? 'CSS' : '<style>'}; use IBM Plex Sans Arabic.`,
+                engine: 'style-scan',
+            });
+        }
+
+        if (!isTokenSource) {
+            const tokenDef = ln.match(TOKEN_DEFINITION_RE);
+            if (tokenDef) {
+                findings.push({
+                    severity: 'ERROR',
+                    rule: 'UI-TOKEN-OUTSIDE',
+                    file: relPath,
+                    line: lineNo,
+                    endLine: lineNo,
+                    message: `Design token "${tokenDef[1]}" defined outside resources/js/Design/tokens.css.`,
+                    engine: 'style-scan',
+                });
+            }
+
+            if (!isMarketingLanding) {
+                // Only scan declaration values (lines with ':' or '@apply'), skipping pure selector lines like '#app {'
+                const declPart = ln.includes(':') ? ln.slice(ln.indexOf(':') + 1) : ln.includes('@apply') ? ln : '';
+                if (declPart) {
+                    const hexes = extractCssHexColors(declPart);
+                    if (hexes.length > 0) {
+                        findings.push({
+                            severity: 'ERROR',
+                            rule: 'UI-003-HEX',
+                            file: relPath,
+                            line: lineNo,
+                            endLine: lineNo,
+                            message: `Hardcoded hex color(s) [${hexes.join(', ')}] outside tokens.css; use var(--color-*).`,
+                            engine: 'style-scan',
+                        });
+                    }
+                }
+            }
+        }
+    });
+}
+
+function inspectPackageJson(source, relPath, findings) {
+    const lines = source.split(/\r?\n/);
+    let parsed;
+    try {
+        parsed = JSON.parse(source);
+    } catch {
+        return;
+    }
+    for (const section of ['dependencies', 'devDependencies']) {
+        const deps = parsed?.[section];
+        if (!deps || typeof deps !== 'object') continue;
+        for (const pkgName of Object.keys(deps)) {
+            if (!isUnauthorizedUiPackage(pkgName)) continue;
+            const idx = lines.findIndex((l) => l.includes(`"${pkgName}"`));
+            const lineNo = idx >= 0 ? idx + 1 : 1;
+            findings.push({
+                severity: 'ERROR',
+                rule: 'UI-UNAUTHORIZED-LIB',
+                file: relPath,
+                line: lineNo,
+                endLine: lineNo,
+                message: `Unauthorized React/UI dependency "${pkgName}" in ${section}.`,
+                engine: 'package-json',
+            });
+        }
+    }
+}
+
 export function inspectFile(relPath, localeKeys, rootDir = ROOT_DIR) {
     const absPath = path.join(rootDir, relPath);
     const source = fs.readFileSync(absPath, 'utf8');
     const findings = [];
+
+    if (isParallelDesignSource(relPath)) {
+        findings.push({
+            severity: 'ERROR',
+            rule: 'UI-PARALLEL-DESIGN-SOURCE',
+            file: relPath,
+            line: 1,
+            endLine: 1,
+            message: `Parallel design source "${relPath}" is prohibited; use docs/DESIGN_SYSTEM.md and resources/js/Design/tokens.css.`,
+            engine: 'governance-scan',
+        });
+        return findings;
+    }
+
+    if (relPath === 'package.json') {
+        inspectPackageJson(source, relPath, findings);
+        return findings;
+    }
 
     if (relPath.endsWith('.vue')) {
         const { descriptor, errors } = parseSfc(source, { filename: absPath });
@@ -425,40 +621,12 @@ export function inspectFile(relPath, localeKeys, rootDir = ROOT_DIR) {
             analyzeScriptAst(descriptor.scriptSetup.content, relPath, (descriptor.scriptSetup.loc?.start?.line || 1) - 1, localeKeys, findings);
         }
         for (const style of descriptor.styles || []) {
-            const lines = stripCssComments(style.content).split(/\r?\n/);
-            lines.forEach((ln, idx) => {
-                const m = ln.match(FORBIDDEN_FONTS_RE);
-                if (m) {
-                    const lineNo = (style.loc?.start?.line || 1) + idx;
-                    findings.push({
-                        severity: 'ERROR',
-                        rule: 'UI-002',
-                        file: relPath,
-                        line: lineNo,
-                        endLine: lineNo,
-                        message: `Forbidden font "${m[1]}" in <style>; use IBM Plex Sans Arabic.`,
-                        engine: 'style-scan',
-                    });
-                }
-            });
+            scanCssLines(style.content, relPath, style.loc?.start?.line || 1, findings);
         }
     } else if (relPath.endsWith('.js') || relPath.endsWith('.ts')) {
         analyzeScriptAst(source, relPath, 0, localeKeys, findings);
     } else if (relPath.endsWith('.css')) {
-        stripCssComments(source).split(/\r?\n/).forEach((ln, idx) => {
-            const m = ln.match(FORBIDDEN_FONTS_RE);
-            if (m) {
-                findings.push({
-                    severity: 'ERROR',
-                    rule: 'UI-002',
-                    file: relPath,
-                    line: idx + 1,
-                    endLine: idx + 1,
-                    message: `Forbidden font "${m[1]}" in CSS; use IBM Plex Sans Arabic.`,
-                    engine: 'style-scan',
-                });
-            }
-        });
+        scanCssLines(source, relPath, 1, findings);
     }
 
     return findings;

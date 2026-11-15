@@ -712,12 +712,12 @@
                             {{ $t('reports.vehicles_report.ticket_no') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="ticketNoInput"
                                 @keyup.enter="applyFilters"
                                 placeholder="WO-..."
-                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-action-primary focus:ring-focus-ring font-mono"
+                                input-class="py-2 text-xs font-mono"
                             />
                         </div>
                     </div>
@@ -730,12 +730,12 @@
                             {{ $t('reports.vehicles_report.plate_no') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="plateNoInput"
                                 @keyup.enter="applyFilters"
                                 placeholder="1234 ABC"
-                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-action-primary focus:ring-focus-ring"
+                                input-class="py-2 text-xs"
                             />
                         </div>
                     </div>
@@ -781,12 +781,12 @@
                             />
                         </svg>
                     </div>
-                    <input
+                    <AppInput
                         type="text"
                         v-model="searchInput"
                         @keyup.enter="applyFilters"
                         :placeholder="$t('reports.vehicles_report.search_placeholder')"
-                        class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white ps-10 pe-20 py-2.5 shadow-sm focus:border-action-primary focus:ring-focus-ring"
+                        input-class="ps-10 pe-20 py-2.5 text-xs"
                     />
                     <button
                         type="button"
@@ -1339,6 +1339,7 @@ import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

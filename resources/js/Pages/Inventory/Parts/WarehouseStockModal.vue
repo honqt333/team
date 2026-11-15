@@ -32,9 +32,6 @@
                     :error="form.errors.warehouse_id"
                     :disabled="!!editRowData"
                 />
-                <p v-if="form.errors.warehouse_id" class="mt-1 text-xs text-red-500">
-                    {{ form.errors.warehouse_id }}
-                </p>
             </div>
 
             <!-- Cost & Sale Price -->
@@ -166,7 +163,7 @@ import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { computed, watch } from 'vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

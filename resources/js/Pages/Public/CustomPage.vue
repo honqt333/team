@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     page: {
@@ -108,7 +111,7 @@ const siteTitle = computed(() => {
                             :href="route('home')"
                             class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-action-primary transition-colors"
                         >
-                            الرئيسية
+                            {{ t('common.home') }}
                         </Link>
                         <a
                             v-for="(link, i) in props.settings.header_menu || []"
@@ -127,7 +130,7 @@ const siteTitle = computed(() => {
                         :href="route('login')"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-focus-ring focus:outline-none"
                     >
-                        {{ props.settings.login_button_text_ar || 'دخول النظام' }}
+                        {{ props.settings.login_button_text_ar || t('auth.login') }}
                     </Link>
                 </div>
             </div>
@@ -141,7 +144,7 @@ const siteTitle = computed(() => {
                 aria-label="Breadcrumb"
             >
                 <Link :href="route('home')" class="hover:text-action-primary transition-colors">
-                    الرئيسية
+                    {{ t('common.home') }}
                 </Link>
                 <span>/</span>
                 <span class="text-gray-800 dark:text-gray-200 font-semibold">{{ pageTitle }}</span>
@@ -174,7 +177,10 @@ const siteTitle = computed(() => {
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="text-center md:text-right">
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ props.settings.copyright_text_ar || '© جميع الحقوق محفوظة.' }}
+                            {{
+                                props.settings.copyright_text_ar ||
+                                t('tenant_site.public.all_rights_reserved')
+                            }}
                         </p>
                     </div>
 
@@ -184,7 +190,7 @@ const siteTitle = computed(() => {
                             :href="route('home')"
                             class="text-xs text-gray-500 hover:text-action-primary transition-colors"
                         >
-                            الرئيسية
+                            {{ t('common.home') }}
                         </Link>
                         <a
                             v-for="(link, i) in props.settings.footer_menu || []"

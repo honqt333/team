@@ -36,6 +36,12 @@ const statusColors = {
     rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
 };
 
+const statusLabels = computed(() => ({
+    pending: { ar: t('system.bank_transfer_receipts.pending_2'), en: 'Pending' },
+    approved: { ar: t('system.bank_transfer_receipts.approved_3'), en: 'Approved' },
+    rejected: { ar: t('system.bank_transfer_receipts.rejected_3'), en: 'Rejected' },
+}));
+
 const statusOptions = computed(() => [
     {
         value: 'all',

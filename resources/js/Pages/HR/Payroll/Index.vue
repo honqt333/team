@@ -34,29 +34,30 @@
                         </div>
 
                         <!-- CTA Button (Anchored Outer Left in RTL) -->
-                        <button
+                        <AppButton
                             v-if="can('hr.payroll.create') || isAnyAdmin()"
                             @click="showGenerateModal = true"
-                            type="button"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">
-                                {{ $t('hr.payroll.generate') }}
-                            </span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('hr.payroll.generate') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -107,11 +108,11 @@
                                 />
                             </svg>
                         </div>
-                        <input
+                        <AppInput
                             v-model="tableFilters.search"
                             type="text"
                             :placeholder="$t('common.search')"
-                            class="w-full ps-11 pe-10 py-2.5 bg-surface-primary dark:bg-surface-secondary/50 border border-border-subtle rounded-xl text-sm text-content-primary placeholder-content-muted focus:outline-hidden focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all shadow-2xs"
+                            input-class="ps-11 pe-10"
                             @keyup.enter="applyFilters"
                         />
                         <button
@@ -273,27 +274,10 @@
                                             />
                                         </svg>
                                     </Link>
-                                    <a
+                                    <AppPrintButton
+                                        size="sm"
                                         :href="route('app.hr.payroll.print', run.id)"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="p-2 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
-                                        :title="$t('common.print')"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                    </a>
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -410,27 +394,10 @@
                                         />
                                     </svg>
                                 </Link>
-                                <a
+                                <AppPrintButton
+                                    size="sm"
                                     :href="route('app.hr.payroll.print', item.id)"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="p-2 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
-                                    :title="$t('common.print')"
-                                >
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                        />
-                                    </svg>
-                                </a>
+                                />
                             </div>
                         </template>
                     </DataTable>
@@ -487,13 +454,15 @@
                     >
                         {{ $t('common.cancel') }}
                     </button>
-                    <button
+                    <AppButton
                         type="submit"
-                        :disabled="generating"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                        :loading="generating"
+                        variant="primary"
+                        size="md"
+                        class="text-xs shadow-xs"
                     >
                         {{ generating ? $t('common.processing') : $t('hr.payroll.generate') }}
-                    </button>
+                    </AppButton>
                 </div>
             </form>
         </BaseModal>
@@ -501,12 +470,15 @@
 </template>
 
 <script setup>
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import DataTable from '@/Components/Common/DataTable.vue';

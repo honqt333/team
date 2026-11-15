@@ -58,11 +58,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800"
-                            >
-                                {{ $t('settings.integrations.badges.available') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors"
@@ -118,11 +113,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-selection-text border border-action-primary/25"
-                            >
-                                {{ $t('settings.integrations.badges.direct_support') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-action-primary transition-colors"
@@ -178,11 +168,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                            >
-                                {{ $t('settings.integrations.badges.approved') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
@@ -238,11 +223,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-selection-text border border-action-primary/25"
-                            >
-                                {{ $t('settings.integrations.badges.active') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-action-primary transition-colors"
@@ -298,11 +278,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                            >
-                                {{ $t('settings.integrations.badges.active') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
@@ -358,11 +333,6 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                            >
-                                {{ $t('settings.integrations.badges.active') }}
-                            </span>
                         </div>
                         <h3
                             class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
@@ -394,14 +364,15 @@
                     </div>
                 </Link>
 
-                <!-- 7. إشعارات الواتساب والرسائل (قريباً) -->
-                <div
-                    class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
+                <!-- 7. إشعارات الواتساب والرسائل -->
+                <Link
+                    :href="route('app.addons.whatsapp.index')"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                 >
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <div
-                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md shadow-green-500/20"
+                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/25 group-hover:scale-110 transition-transform duration-300"
                             >
                                 <svg
                                     class="w-7 h-7 text-white"
@@ -417,13 +388,10 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                            >
-                                {{ $t('settings.integrations.badges.coming_soon') }}
-                            </span>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        <h3
+                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                        >
                             {{ $t('settings.integrations.whatsapp_title') }}
                         </h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
@@ -432,12 +400,24 @@
                     </div>
 
                     <div
-                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-gray-400"
+                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400"
                     >
-                        <span>{{ $t('settings.integrations.in_development') }}</span>
-                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span>{{ $t('settings.integrations.manage_whatsapp') }}</span>
+                        <svg
+                            class="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
                     </div>
-                </div>
+                </Link>
 
                 <!-- 7. الدفع الإلكتروني والتقسيط (قريباً) -->
                 <div

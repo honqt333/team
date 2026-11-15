@@ -29,7 +29,7 @@
 
         <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <label for="phone" class="mb-2 block text-sm font-bold text-slate-800">
+                <label for="phone" class="mb-2 block text-sm font-bold text-text-primary">
                     {{ t('customer_portal.login.phone_label') }}
                 </label>
                 <div class="flex items-stretch gap-2">
@@ -41,8 +41,8 @@
                         />
                     </div>
                     <div
-                        class="flex h-14 min-w-0 flex-1 overflow-hidden rounded-2xl border bg-white transition focus-within:border-transparent focus-within:ring-4"
-                        :class="form.errors.phone ? 'border-rose-400' : 'border-slate-200'"
+                        class="flex h-14 min-w-0 flex-1 overflow-hidden rounded-2xl border bg-surface transition focus-within:border-transparent focus-within:ring-4"
+                        :class="form.errors.phone ? 'border-danger' : 'border-border'"
                         :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
                     >
                         <input
@@ -56,15 +56,18 @@
                                 activeCountryMeta.local_placeholder ||
                                 t('customer_portal.login.local_phone_placeholder')
                             "
-                            class="min-w-0 flex-1 border-0 bg-white px-4 text-lg font-semibold tracking-wide text-slate-950 outline-none ring-0 placeholder:text-slate-300 focus:ring-0"
+                            class="min-w-0 flex-1 border-0 bg-transparent px-4 text-lg font-semibold tracking-wide text-text-primary outline-none ring-0 placeholder:text-text-muted focus:ring-0"
                             @input="onPhoneInput"
                         />
                     </div>
                 </div>
-                <p v-if="form.errors.phone" class="mt-2 text-sm font-medium text-rose-600">
+                <p
+                    v-if="form.errors.phone"
+                    class="mt-2 text-sm font-medium text-danger"
+                >
                     {{ form.errors.phone }}
                 </p>
-                <p v-else class="mt-2 text-xs leading-6 text-slate-500">
+                <p v-else class="mt-2 text-xs leading-6 text-text-secondary">
                     {{ t('customer_portal.login.phone_hint') }}
                 </p>
             </div>
@@ -72,7 +75,7 @@
             <button
                 type="submit"
                 :disabled="form.processing || !form.phone"
-                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
                 :style="{
                     backgroundColor: 'var(--portal-primary)',
                     boxShadow: '0 16px 35px -18px var(--portal-primary)',
@@ -113,7 +116,7 @@
 
         <p
             v-if="status"
-            class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-medium text-emerald-800"
+            class="mt-4 rounded-2xl border border-success/30 bg-success-soft px-4 py-3 text-center text-sm font-medium text-text-primary"
             data-testid="portal-login-status"
         >
             {{ status }}

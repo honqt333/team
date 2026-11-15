@@ -32,13 +32,12 @@ export const pageManifest = {
     'Auth/ResetPassword': () => import('./Auth/ResetPassword.vue'),
     'Auth/SetPassword': () => import('./Auth/SetPassword.vue'),
     'Auth/VerifyEmail': () => import('./Auth/VerifyEmail.vue'),
-    'Communications/AppointmentMessages/Index': () =>
-        import('./Communications/AppointmentMessages/Index.vue'),
+    'Communications/AppointmentMessages/Index': () => import('./Communications/AppointmentMessages/Index.vue'),
     'Customers/Index': () => import('./Customers/Index.vue'),
     'Customers/Print': () => import('./Customers/Print.vue'),
     'Customers/PrintStatement': () => import('./Customers/PrintStatement.vue'),
     'Customers/Show': () => import('./Customers/Show.vue'),
-    Dashboard: () => import('./Dashboard.vue'),
+    'Dashboard': () => import('./Dashboard.vue'),
     'Dealers/Index': () => import('./Dealers/Index.vue'),
     'Dealers/Print': () => import('./Dealers/Print.vue'),
     'Dealers/Show': () => import('./Dealers/Show.vue'),
@@ -52,8 +51,7 @@ export const pageManifest = {
     'EmployeePortal/Profile': () => import('./EmployeePortal/Profile.vue'),
     'Errors/403': () => import('./Errors/403.vue'),
     'Feedback/Index': () => import('./Feedback/Index.vue'),
-    'Feedback/Partials/FeedbackFormModal': () =>
-        import('./Feedback/Partials/FeedbackFormModal.vue'),
+    'Feedback/Partials/FeedbackFormModal': () => import('./Feedback/Partials/FeedbackFormModal.vue'),
     'Feedback/Partials/VideoPlayerModal': () => import('./Feedback/Partials/VideoPlayerModal.vue'),
     'HR/Attendance/Index': () => import('./HR/Attendance/Index.vue'),
     'HR/Attendance/Print': () => import('./HR/Attendance/Print.vue'),
@@ -76,8 +74,7 @@ export const pageManifest = {
     'Inventory/Parts/Index': () => import('./Inventory/Parts/Index.vue'),
     'Inventory/Parts/Show': () => import('./Inventory/Parts/Show.vue'),
     'Inventory/Parts/StockModal': () => import('./Inventory/Parts/StockModal.vue'),
-    'Inventory/Parts/WarehouseStockModal': () =>
-        import('./Inventory/Parts/WarehouseStockModal.vue'),
+    'Inventory/Parts/WarehouseStockModal': () => import('./Inventory/Parts/WarehouseStockModal.vue'),
     'Inventory/Settings': () => import('./Inventory/Settings.vue'),
     'Inventory/Stock/Index': () => import('./Inventory/Stock/Index.vue'),
     'Inventory/Transfers/CreateModal': () => import('./Inventory/Transfers/CreateModal.vue'),
@@ -93,12 +90,10 @@ export const pageManifest = {
     'Notifications/Index': () => import('./Notifications/Index.vue'),
     'Public/CustomPage': () => import('./Public/CustomPage.vue'),
     'Public/LandingPreview': () => import('./Public/LandingPreview.vue'),
-    'Public/Portal/Appointments/Confirmation': () =>
-        import('./Public/Portal/Appointments/Confirmation.vue'),
+    'Public/Portal/Appointments/Confirmation': () => import('./Public/Portal/Appointments/Confirmation.vue'),
     'Public/Portal/Appointments/Index': () => import('./Public/Portal/Appointments/Index.vue'),
     'Public/Portal/Appointments/New': () => import('./Public/Portal/Appointments/New.vue'),
-    'Public/Portal/Appointments/Reschedule': () =>
-        import('./Public/Portal/Appointments/Reschedule.vue'),
+    'Public/Portal/Appointments/Reschedule': () => import('./Public/Portal/Appointments/Reschedule.vue'),
     'Public/Portal/Dashboard': () => import('./Public/Portal/Dashboard.vue'),
     'Public/Portal/Invoices/Index': () => import('./Public/Portal/Invoices/Index.vue'),
     'Public/Portal/Invoices/Show': () => import('./Public/Portal/Invoices/Show.vue'),
@@ -159,52 +154,37 @@ export const pageManifest = {
     'Reports/Tickets': () => import('./Reports/Tickets.vue'),
     'Reports/Vehicles': () => import('./Reports/Vehicles.vue'),
     'Services/Index': () => import('./Services/Index.vue'),
-    'Settings/Billing/Components/PaymentMethodsList': () =>
-        import('./Settings/Billing/Components/PaymentMethodsList.vue'),
-    'Settings/Billing/Components/ReceiptsList': () =>
-        import('./Settings/Billing/Components/ReceiptsList.vue'),
+    'Settings/Billing/Components/PaymentMethodsList': () => import('./Settings/Billing/Components/PaymentMethodsList.vue'),
+    'Settings/Billing/Components/ReceiptsList': () => import('./Settings/Billing/Components/ReceiptsList.vue'),
     'Settings/Billing/Index': () => import('./Settings/Billing/Index.vue'),
     'Settings/Branches/BranchFormModal': () => import('./Settings/Branches/BranchFormModal.vue'),
     'Settings/Branches/Index': () => import('./Settings/Branches/Index.vue'),
     'Settings/Centers/ServiceBays': () => import('./Settings/Centers/ServiceBays.vue'),
     'Settings/Centers/Show': () => import('./Settings/Centers/Show.vue'),
     'Settings/Company/Index': () => import('./Settings/Company/Index.vue'),
-    'Settings/Company/Modals/CompanyTransactionModal': () =>
-        import('./Settings/Company/Modals/CompanyTransactionModal.vue'),
-    'Settings/Company/SubscriptionFailed': () =>
-        import('./Settings/Company/SubscriptionFailed.vue'),
-    'Settings/Company/SubscriptionSuccess': () =>
-        import('./Settings/Company/SubscriptionSuccess.vue'),
+    'Settings/Company/Modals/CompanyTransactionModal': () => import('./Settings/Company/Modals/CompanyTransactionModal.vue'),
+    'Settings/Company/SubscriptionFailed': () => import('./Settings/Company/SubscriptionFailed.vue'),
+    'Settings/Company/SubscriptionSuccess': () => import('./Settings/Company/SubscriptionSuccess.vue'),
     'Settings/Index': () => import('./Settings/Index.vue'),
     'Settings/Integrations': () => import('./Settings/Integrations.vue'),
     'Settings/Notifications/Index': () => import('./Settings/Notifications/Index.vue'),
-    'Settings/Partials/UserManagementTabs': () =>
-        import('./Settings/Partials/UserManagementTabs.vue'),
+    'Settings/Partials/UserManagementTabs': () => import('./Settings/Partials/UserManagementTabs.vue'),
     'Settings/Print/Index': () => import('./Settings/Print/Index.vue'),
-    'Settings/Print/Modals/SignatureModal': () =>
-        import('./Settings/Print/Modals/SignatureModal.vue'),
-    'Settings/Print/Modals/TermEditModal': () =>
-        import('./Settings/Print/Modals/TermEditModal.vue'),
-    'Settings/Print/Modals/TermsListModal': () =>
-        import('./Settings/Print/Modals/TermsListModal.vue'),
+    'Settings/Print/Modals/SignatureModal': () => import('./Settings/Print/Modals/SignatureModal.vue'),
+    'Settings/Print/Modals/TermEditModal': () => import('./Settings/Print/Modals/TermEditModal.vue'),
+    'Settings/Print/Modals/TermsListModal': () => import('./Settings/Print/Modals/TermsListModal.vue'),
     'Settings/Print/Modals/TermsModal': () => import('./Settings/Print/Modals/TermsModal.vue'),
     'Settings/Print/Signatures/Index': () => import('./Settings/Print/Signatures/Index.vue'),
     'Settings/Roles/Index': () => import('./Settings/Roles/Index.vue'),
     'Settings/Roles/RoleFormModal': () => import('./Settings/Roles/RoleFormModal.vue'),
     'Settings/System/Attachments': () => import('./Settings/System/Attachments.vue'),
     'Settings/System/Index': () => import('./Settings/System/Index.vue'),
-    'Settings/System/Modals/ColorFormModal': () =>
-        import('./Settings/System/Modals/ColorFormModal.vue'),
-    'Settings/System/Modals/IncomeCategoryFormModal': () =>
-        import('./Settings/System/Modals/IncomeCategoryFormModal.vue'),
-    'Settings/System/Modals/MakeFormModal': () =>
-        import('./Settings/System/Modals/MakeFormModal.vue'),
-    'Settings/System/Modals/ModelFormModal': () =>
-        import('./Settings/System/Modals/ModelFormModal.vue'),
-    'Settings/System/Sections/AttachmentsManagerSection': () =>
-        import('./Settings/System/Sections/AttachmentsManagerSection.vue'),
-    'Settings/System/Sections/StorageUsageSection': () =>
-        import('./Settings/System/Sections/StorageUsageSection.vue'),
+    'Settings/System/Modals/ColorFormModal': () => import('./Settings/System/Modals/ColorFormModal.vue'),
+    'Settings/System/Modals/IncomeCategoryFormModal': () => import('./Settings/System/Modals/IncomeCategoryFormModal.vue'),
+    'Settings/System/Modals/MakeFormModal': () => import('./Settings/System/Modals/MakeFormModal.vue'),
+    'Settings/System/Modals/ModelFormModal': () => import('./Settings/System/Modals/ModelFormModal.vue'),
+    'Settings/System/Sections/AttachmentsManagerSection': () => import('./Settings/System/Sections/AttachmentsManagerSection.vue'),
+    'Settings/System/Sections/StorageUsageSection': () => import('./Settings/System/Sections/StorageUsageSection.vue'),
     'Settings/Users/Index': () => import('./Settings/Users/Index.vue'),
     'Settings/Users/UserFormModal': () => import('./Settings/Users/UserFormModal.vue'),
     'Settings/Website': () => import('./Settings/Website.vue'),
@@ -221,10 +201,8 @@ export const pageManifest = {
     'System/Backups/Index': () => import('./System/Backups/Index.vue'),
     'System/BankTransferReceipts/Index': () => import('./System/BankTransferReceipts/Index.vue'),
     'System/BankTransferReceipts/Show': () => import('./System/BankTransferReceipts/Show.vue'),
-    'System/Communication/Templates/Edit': () =>
-        import('./System/Communication/Templates/Edit.vue'),
-    'System/Communication/Templates/Index': () =>
-        import('./System/Communication/Templates/Index.vue'),
+    'System/Communication/Templates/Edit': () => import('./System/Communication/Templates/Edit.vue'),
+    'System/Communication/Templates/Index': () => import('./System/Communication/Templates/Index.vue'),
     'System/Credits/CreditsHub': () => import('./System/Credits/CreditsHub.vue'),
     'System/Credits/SmsHub': () => import('./System/Credits/SmsHub.vue'),
     'System/Credits/Tabs/BalancesTab': () => import('./System/Credits/Tabs/BalancesTab.vue'),
@@ -250,42 +228,30 @@ export const pageManifest = {
     'System/Security/TwoFactorChallenge': () => import('./System/Security/TwoFactorChallenge.vue'),
     'System/Security/TwoFactorSetup': () => import('./System/Security/TwoFactorSetup.vue'),
     'System/Settings/SettingsHub': () => import('./System/Settings/SettingsHub.vue'),
-    'System/Settings/Tabs/CompanySettingsTab': () =>
-        import('./System/Settings/Tabs/CompanySettingsTab.vue'),
-    'System/Settings/Tabs/DunningSettingsTab': () =>
-        import('./System/Settings/Tabs/DunningSettingsTab.vue'),
-    'System/Settings/Tabs/GeneralSettingsTab': () =>
-        import('./System/Settings/Tabs/GeneralSettingsTab.vue'),
-    'System/Settings/Tabs/PaymentSettingsTab': () =>
-        import('./System/Settings/Tabs/PaymentSettingsTab.vue'),
+    'System/Settings/Tabs/CompanySettingsTab': () => import('./System/Settings/Tabs/CompanySettingsTab.vue'),
+    'System/Settings/Tabs/DunningSettingsTab': () => import('./System/Settings/Tabs/DunningSettingsTab.vue'),
+    'System/Settings/Tabs/GeneralSettingsTab': () => import('./System/Settings/Tabs/GeneralSettingsTab.vue'),
+    'System/Settings/Tabs/PaymentSettingsTab': () => import('./System/Settings/Tabs/PaymentSettingsTab.vue'),
     'System/Settings/TenantDunning': () => import('./System/Settings/TenantDunning.vue'),
     'System/Subscriptions/Create': () => import('./System/Subscriptions/Create.vue'),
     'System/Subscriptions/Index': () => import('./System/Subscriptions/Index.vue'),
     'System/Subscriptions/Show': () => import('./System/Subscriptions/Show.vue'),
     'System/Support/SupportHub': () => import('./System/Support/SupportHub.vue'),
-    'System/Support/Tabs/ContactMessagesTab': () =>
-        import('./System/Support/Tabs/ContactMessagesTab.vue'),
+    'System/Support/Tabs/ContactMessagesTab': () => import('./System/Support/Tabs/ContactMessagesTab.vue'),
     'System/Support/Tabs/FeedbacksTab': () => import('./System/Support/Tabs/FeedbacksTab.vue'),
     'System/Support/Tabs/HelpCenterTab': () => import('./System/Support/Tabs/HelpCenterTab.vue'),
     'System/Tenants/Index': () => import('./System/Tenants/Index.vue'),
     'System/Tenants/Show': () => import('./System/Tenants/Show.vue'),
-    'System/Tenants/ShowComponents/TenantAnalyticsCards': () =>
-        import('./System/Tenants/ShowComponents/TenantAnalyticsCards.vue'),
-    'System/Tenants/ShowComponents/TenantHeader': () =>
-        import('./System/Tenants/ShowComponents/TenantHeader.vue'),
-    'System/Tenants/ShowComponents/TenantHealthScore': () =>
-        import('./System/Tenants/ShowComponents/TenantHealthScore.vue'),
-    'System/Tenants/ShowComponents/TenantModals': () =>
-        import('./System/Tenants/ShowComponents/TenantModals.vue'),
-    'System/Tenants/ShowComponents/TenantQuickActions': () =>
-        import('./System/Tenants/ShowComponents/TenantQuickActions.vue'),
-    'System/Tenants/ShowComponents/TenantTabs': () =>
-        import('./System/Tenants/ShowComponents/TenantTabs.vue'),
+    'System/Tenants/ShowComponents/TenantAnalyticsCards': () => import('./System/Tenants/ShowComponents/TenantAnalyticsCards.vue'),
+    'System/Tenants/ShowComponents/TenantHeader': () => import('./System/Tenants/ShowComponents/TenantHeader.vue'),
+    'System/Tenants/ShowComponents/TenantHealthScore': () => import('./System/Tenants/ShowComponents/TenantHealthScore.vue'),
+    'System/Tenants/ShowComponents/TenantModals': () => import('./System/Tenants/ShowComponents/TenantModals.vue'),
+    'System/Tenants/ShowComponents/TenantQuickActions': () => import('./System/Tenants/ShowComponents/TenantQuickActions.vue'),
+    'System/Tenants/ShowComponents/TenantTabs': () => import('./System/Tenants/ShowComponents/TenantTabs.vue'),
     'System/Website/Index': () => import('./System/Website/Index.vue'),
     'System/Website/Tabs/AdvancedTab': () => import('./System/Website/Tabs/AdvancedTab.vue'),
     'System/Website/Tabs/GeneralTab': () => import('./System/Website/Tabs/GeneralTab.vue'),
-    'System/Website/Tabs/IntegrationsTab': () =>
-        import('./System/Website/Tabs/IntegrationsTab.vue'),
+    'System/Website/Tabs/IntegrationsTab': () => import('./System/Website/Tabs/IntegrationsTab.vue'),
     'System/Website/Tabs/LandingTab': () => import('./System/Website/Tabs/LandingTab.vue'),
     'System/Website/Tabs/ListsTab': () => import('./System/Website/Tabs/ListsTab.vue'),
     'System/Website/Tabs/PagesTab': () => import('./System/Website/Tabs/PagesTab.vue'),

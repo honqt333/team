@@ -109,7 +109,7 @@
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';

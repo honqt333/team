@@ -192,26 +192,11 @@
                         </button>
 
                         <!-- Print Button (if services are assigned) -->
-                        <button
+                        <AppPrintButton
                             v-else-if="tech.items.length > 0"
+                            :tooltip="labels.printWorkCard"
                             @click="printTechnicianCard(tech.id)"
-                            class="p-2 text-gray-400 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
-                            :title="labels.printWorkCard"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                        </button>
+                        />
                     </div>
 
                     <!-- Divider -->
@@ -499,6 +484,7 @@ import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import WorkOrderItemTimer from '@/Components/WorkOrders/WorkOrderItemTimer.vue';
 import WorkOrderItemStatusControls from '@/Components/WorkOrders/WorkOrderItemStatusControls.vue';

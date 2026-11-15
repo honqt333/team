@@ -443,7 +443,7 @@
                                         v-if="service.is_featured"
                                         class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-700"
                                     >
-                                        ⭐ خدمة مميزة
+                                        {{ t('tenant_site.public.featured_service') }}
                                     </span>
                                 </div>
 
@@ -474,7 +474,7 @@
 
                                 <a
                                     v-if="site.whatsapp_link"
-                                    :href="`${site.whatsapp_link}?text=${encodeURIComponent('مرحباً، أود الاستفسار عن خدمة: ' + service.name)}`"
+                                    :href="`${site.whatsapp_link}?text=${encodeURIComponent(t('tenant_site.public.whatsapp_service_inquiry', { name: service.name }))}`"
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
@@ -484,7 +484,7 @@
                                             d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.668-.699c.966.541 1.782.814 2.791.814 3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.767-5.766zm0 10.457c-.896 0-1.688-.266-2.434-.732l-.174-.108-1.78.467.475-1.734-.114-.182c-.521-.832-.8-1.597-.8-2.399 0-2.571 2.091-4.662 4.663-4.662 2.571 0 4.662 2.091 4.662 4.662 0 2.571-2.091 4.662-4.662 4.662z"
                                         />
                                     </svg>
-                                    <span>استفسار</span>
+                                    <span>{{ t('tenant_site.public.inquire') }}</span>
                                 </a>
                             </div>
                         </article>
@@ -617,7 +617,7 @@
                                                 center.address.city,
                                             ]
                                                 .filter(Boolean)
-                                                .join('، ')
+                                                .join(isRtl ? '، ' : ', ')
                                         }}
                                     </span>
                                 </li>

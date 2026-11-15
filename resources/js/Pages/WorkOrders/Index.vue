@@ -105,16 +105,13 @@
                         </div>
 
                         <!-- Create Button -->
-                        <button
+                        <AppButton
                             v-if="can('crm.work_orders.create') || isAnyAdmin()"
                             @click="showCreateModal = true"
-                            class="flex items-center justify-center gap-3 px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-action-on rounded-2xl font-black shadow-md hover:-translate-y-0.5 transition-all group/add cursor-pointer"
                         >
-                            <div
-                                class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                            >
+                            <template #iconLeft>
                                 <svg
-                                    class="w-5 h-5 text-action-on"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -122,13 +119,13 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="3"
+                                        stroke-width="2.5"
                                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                     />
                                 </svg>
-                            </div>
-                            <span class="tracking-tight">{{ $t('work_orders.hub.new_card') }}</span>
-                        </button>
+                            </template>
+                            {{ $t('work_orders.hub.new_card') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -157,11 +154,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="tableFilters.search"
                                         :placeholder="$t('work_orders.search')"
-                                        class="block w-full ps-11 pe-4 py-3 text-sm text-text-primary bg-surface border border-border rounded-2xl focus:ring-4 focus:ring-focus-ring/10 focus:border-action-primary transition-all outline-none shadow-xs"
+                                        input-class="ps-11 py-3 rounded-2xl"
                                     />
                                 </div>
                             </div>
@@ -976,12 +973,13 @@
 
 <script setup>
 import AppTabs from '@/Components/Common/AppTabs.vue';
-import { printDocument } from '@/Composables/usePrint';
 import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed, watch, h } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';

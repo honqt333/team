@@ -445,12 +445,12 @@
                             >
                                 {{ $t('common.search') }}
                             </label>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="searchInput"
                                 @keydown.enter="applyFilters"
                                 :placeholder="$t('reports.cash_register_report.search')"
-                                class="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
+                                input-class="py-2 text-xs"
                             />
                         </div>
 
@@ -653,6 +653,7 @@ import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

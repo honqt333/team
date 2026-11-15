@@ -61,6 +61,7 @@ describe('AppAttachmentManager', () => {
                 acceptedTypes: 'application/pdf,image/png',
             },
             global: {
+                mocks: { $t: (key: string) => key },
                 stubs: { BaseModal: { template: '<div><slot/><slot name="footer"/></div>' } },
             },
         });
@@ -144,5 +145,66 @@ describe('AppAttachmentManager', () => {
         });
 
         expect(wrapper.find('button[class*="from-blue-600"]').exists()).toBe(false);
+    });
+
+    it('handles multiple files, clearing selection, and oversized files without TypeError', async () => {
+        const post = vi.spyOn(router, 'post').mockImplementation(() => {});
+        const wrapper = mount(AppAttachmentManager, {
+            props: {
+                uploadUrl: '/upload',
+                maxSizeMb: 1,
+                allowMultiple: true,
+                acceptedTypes: 'application/pdf,image/png',
+            },
+            global: {
+                mocks: { $t: (key: string) => key },
+                stubs: { BaseModal: { template: '<div><slot/><slot name="footer"/></div>' } },
+            },
+        });
+
+        const drop = async (files: File[]) => {
+            await wrapper
+                .get('input[type=file]')
+                .element.parentElement?.dispatchEvent(
+                    Object.assign(new Event('drop', { bubbles: true }), {
+                        dataTransfer: { files },
+                    })
+                );
+            await wrapper.vm.$nextTick();
+        };
+
+        const submit = wrapper.findAll('button').at(-1)!;
+        expect(submit.element.disabled).toBe(true);
+
+        // Oversized file should be rejected and keep submit disabled
+        const oversized = new File([new Uint8Array(2 * 1024 * 1024)], 'huge.pdf', {
+            type: 'application/pdf',
+        });
+        await drop([oversized]);
+        expect(submit.element.disabled).toBe(true);
+
+        // Multiple valid files should enable submit
+        await drop([
+            new File(['one'], 'one.pdf', { type: 'application/pdf' }),
+            new File(['two'], 'two.png', { type: 'image/png' }),
+        ]);
+        expect(submit.element.disabled).toBe(false);
+
+        // Clearing selection via cancel / remove keeps submit disabled without TypeError
+        const cancelBtn = wrapper.findAll('button').find((b) => b.text() === 'common.cancel');
+        await cancelBtn?.trigger('click');
+        expect(submit.element.disabled).toBe(true);
+
+        // Re-select multiple files and submit
+        await drop([
+            new File(['one'], 'one.pdf', { type: 'application/pdf' }),
+            new File(['two'], 'two.png', { type: 'image/png' }),
+        ]);
+        await submit.trigger('click');
+        const body = post.mock.calls[0]?.[1] as FormData;
+        expect(body.getAll('files[]')).toHaveLength(2);
+
+        post.mockRestore();
+        wrapper.unmount();
     });
 });

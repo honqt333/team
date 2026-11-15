@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Public;
 use App\Exceptions\InvalidQuoteSignatureException;
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\NotificationService;
 use App\Services\QuoteSignatureStorage;
 use Illuminate\Http\RedirectResponse;
@@ -35,6 +36,10 @@ class PublicQuoteController extends Controller
                 'parts',
             ])
             ->firstOrFail();
+
+        if (! $this->isTenantActive($quote)) {
+            abort(403, __('messages.subscription.account_suspended'));
+        }
 
         return Inertia::render('Quotes/PublicShow', [
             'quote' => [
@@ -143,7 +148,12 @@ class PublicQuoteController extends Controller
             $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
                 ->whereHas('tenant')
                 ->where('uuid', $uuid)
+                ->with('tenant')
                 ->firstOrFail();
+
+            if (! $this->isTenantActive($quote)) {
+                return back()->with('error', __('messages.subscription.account_suspended'));
+            }
 
             if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
                 return back()->with('error', __('quotes.public_cannot_approve'));
@@ -214,7 +224,12 @@ class PublicQuoteController extends Controller
             $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
                 ->whereHas('tenant')
                 ->where('uuid', $uuid)
+                ->with('tenant')
                 ->firstOrFail();
+
+            if (! $this->isTenantActive($quote)) {
+                return back()->with('error', __('messages.subscription.account_suspended'));
+            }
 
             if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
                 return back()->with('error', __('quotes.public_cannot_reject'));
@@ -253,6 +268,20 @@ class PublicQuoteController extends Controller
             return redirect()->route('public.quotes.show', $quote->uuid)
                 ->with('success', __('quotes.public_rejected'));
         });
+    }
+
+    private function isTenantActive(Quote $quote): bool
+    {
+        $tenant = $quote->tenant;
+
+        if (! $tenant || $tenant->trashed()) {
+            return false;
+        }
+
+        $lifecycle = $tenant->getSubscriptionLifecycle();
+
+        return $lifecycle['state'] !== SubscriptionLifecycleService::STATE_SUSPENDED
+            && $lifecycle['can_operate'];
     }
 
     private function isQuoteEmpty(Quote $quote): bool

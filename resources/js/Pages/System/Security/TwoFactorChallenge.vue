@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 
@@ -115,31 +116,16 @@ const toggleRecovery = () => {
                     />
                 </div>
 
-                <button
+                <AppButton
                     type="submit"
-                    :disabled="form.processing || (!showRecovery && form.code.length !== 6)"
-                    class="w-full py-3 px-4 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg shadow-focus-ring-soft transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :loading="form.processing"
+                    :disabled="!showRecovery && form.code.length !== 6"
+                    variant="primary"
+                    size="lg"
+                    class="w-full shadow-lg shadow-focus-ring-soft"
                 >
-                    <span v-if="form.processing" class="flex items-center justify-center gap-2">
-                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <span>{{ $t('security.verifying') }}</span>
-                    </span>
-                    <span v-else>{{ $t('common.confirm') }}</span>
-                </button>
+                    {{ form.processing ? $t('security.verifying') : $t('common.confirm') }}
+                </AppButton>
             </form>
 
             <div class="mt-6 text-center">

@@ -30,21 +30,24 @@
                     </svg>
                 </template>
                 <template #actions>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="showPeriodModal = true"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/25 transition-all duration-200"
+                        variant="primary"
+                        size="md"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/25"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.select_period_to_create') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('reports.tax_periods_report.select_period_to_create') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 

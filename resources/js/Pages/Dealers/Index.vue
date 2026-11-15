@@ -65,38 +65,39 @@
                             <AppViewModeToggle v-model="viewMode" storage-key="dealersViewMode" />
                         </div>
 
-                        <button
+                        <AppButton
                             v-if="can('crm.customers.create') || isAnyAdmin()"
                             type="button"
                             @click="openCreateModal"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-action-on text-xs font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('dealers.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('dealers.add') }}
+                        </AppButton>
                     </div>
                 </template>
 
                 <template #filters>
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                         <div class="md:col-span-7 relative group">
-                            <input
+                            <AppInput
                                 v-model="filterForm.search"
                                 type="text"
                                 :placeholder="$t('dealers.search_placeholder')"
-                                class="w-full ps-10 pe-4 py-2.5 text-sm rounded-xl border border-border bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none"
+                                input-class="ps-10"
                                 @input="debouncedFilter"
                             />
                             <div
@@ -594,6 +595,8 @@ import { ref, reactive, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';

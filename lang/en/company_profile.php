@@ -239,6 +239,8 @@ return [
         'promo_trial_days_applied' => 'Promo code applied: :days extra days on the trial period.',
         'promo_valid_for_plan' => 'Promo code verified. The discount is applied when you subscribe to a paid plan.',
         'receipt_under_review' => 'A bank transfer receipt for ":plan" is awaiting admin review. Please wait for approval or cancel the current request before uploading a new one.',
+        'cannot_cancel_receipt_under_review' => 'Cannot cancel or change this request while a bank transfer receipt is pending admin review.',
+        'cannot_cancel_partially_paid_invoice' => 'Cannot cancel this invoice or change plan because it already has approved partial payments. Please settle the remaining balance or contact support.',
         'receipt_upload_failed' => 'Failed to upload transfer receipt. Please try again.',
         'receipt_uploaded' => 'Receipt uploaded successfully. Your subscription will be activated after admin review.',
         'resume_invalid' => 'This subscription cannot be resumed',

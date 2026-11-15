@@ -3,6 +3,7 @@ import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import OverviewTab from '@/Components/DashboardV2/tabs/OverviewTab.vue';
@@ -394,22 +395,14 @@ onBeforeUnmount(() => {
                                 class="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
                             >
                                 <span>{{ $t(`dashboard.widget_${key}`) }}</span>
-                                <input
-                                    type="checkbox"
-                                    v-model="widgetPrefs[key]"
-                                    class="rounded border-slate-300 text-action-primary focus:ring-action-primary"
-                                />
+                                <AppToggle v-model="widgetPrefs[key]" size="sm" />
                             </label>
                             <div class="border-t border-slate-100 dark:border-slate-700 pt-2">
                                 <label
                                     class="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
                                 >
                                     <span>{{ $t('dashboard.auto_refresh') }} (60s)</span>
-                                    <input
-                                        type="checkbox"
-                                        v-model="autoRefresh"
-                                        class="rounded border-slate-300 text-action-primary focus:ring-action-primary"
-                                    />
+                                    <AppToggle v-model="autoRefresh" size="sm" />
                                 </label>
                             </div>
                         </div>

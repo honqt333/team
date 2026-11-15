@@ -1,6 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
 
 const props = defineProps({
     modelValue: {
@@ -94,7 +93,7 @@ const selectTab = (tab) => {
                     :class="[
                         'ms-2 py-0.5 px-2 rounded-full text-xs font-semibold transition-colors',
                         modelValue === tab.id
-                            ? 'bg-selection-bg text-action-primary'
+                            ? 'bg-selection-bg text-selection-text'
                             : 'bg-surface-muted text-text-secondary group-hover:bg-surface-raised',
                     ]"
                 >
@@ -139,7 +138,7 @@ const selectTab = (tab) => {
                 class="ms-1.5 py-0.5 px-2 rounded-full text-xs font-semibold"
                 :class="
                     modelValue === tab.id
-                        ? 'bg-selection-bg text-action-primary'
+                        ? 'bg-selection-bg text-selection-text'
                         : 'bg-surface-muted text-text-secondary'
                 "
             >

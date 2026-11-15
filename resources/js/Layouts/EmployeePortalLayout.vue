@@ -4,6 +4,7 @@
     >
         <!-- Global Toast Notifications -->
         <Toast />
+        <ConfirmModal />
 
         <div class="flex h-screen overflow-hidden">
             <!-- Desktop Sidebar -->
@@ -52,7 +53,7 @@
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white',
                         ]"
                     >
-                        <span class="flex-shrink-0" v-html="item.icon" />
+                        <span class="flex-shrink-0" v-safe-html="item.icon" />
                         <span class="truncate">{{ $t(item.label) }}</span>
                     </Link>
 
@@ -322,7 +323,7 @@
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white',
                         ]"
                     >
-                        <span class="flex-shrink-0" v-html="item.icon" />
+                        <span class="flex-shrink-0" v-safe-html="item.icon" />
                         <span class="truncate">{{ $t(item.label) }}</span>
                     </Link>
 
@@ -365,6 +366,7 @@ import { usePage, router, Link } from '@inertiajs/vue3';
 import { useTheme } from '@/Composables/useTheme';
 import { setLocale, getCurrentLocale } from '@/i18n/index.js';
 import Toast from '@/Components/Toast.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useFlashToasts } from '@/Composables/useFlashToasts';
 
 const { locale } = useI18n();

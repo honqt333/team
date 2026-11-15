@@ -34,6 +34,9 @@ return [
     'notifications' => [
         'saved_successfully' => 'تم حفظ إعدادات الإشعارات بنجاح',
         'test_sent_successfully' => 'تم إرسال إشعار تجريبي بنجاح إلى شريط الإشعارات',
+        'whatsapp_phone_required' => 'يرجى إدخال رقم واتساب الإدارة المعتمد أولاً',
+        'whatsapp_test_message' => 'رسالة تجريبية من نظام :company عبر خدمة برو الساعة :time',
+        'whatsapp_test_sent_successfully' => 'تم إرسال رسالة الواتساب التجريبية بنجاح',
         'test_title' => 'إشعار تجريبي من المنظومة',
         'test_body' => 'تم استلام الإشعار التجريبي بنجاح في الوقت :time. إعدادات التنبيهات تعمل بشكل سليم.',
     ],

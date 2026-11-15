@@ -662,6 +662,7 @@ const errorMessage = ref('');
 const backendMessage = ref('');
 
 const invoice = ref(null);
+const taxSettings = ref(null);
 const services = ref([]);
 const parts = ref([]);
 const isPossible = ref(false);
@@ -731,6 +732,7 @@ const fetchSummary = async () => {
         const response = await axios.get(summaryUrl.value);
         const data = response.data;
         invoice.value = data.invoice;
+        taxSettings.value = data.tax_settings || null;
         services.value = Array.isArray(data.services)
             ? data.services
             : Object.values(data.services || {});
@@ -786,8 +788,40 @@ watch(
 
 // Financial calculations
 const isTaxEnabled = computed(() => {
-    return Boolean(invoice.value?.tax_enabled_snapshot);
+    return Boolean(taxSettings.value?.tax_enabled ?? invoice.value?.tax_enabled_snapshot);
 });
+
+const pricingMode = computed(() => {
+    return taxSettings.value?.pricing_mode || 'exclusive';
+});
+
+const isDirectInvoice = computed(() => {
+    return !effectiveWorkOrder.value;
+});
+
+const calculatePartRefundLine = (part, qty) => {
+    if (qty <= 0) {
+        return { subtotal: 0, vat: 0 };
+    }
+    const rate = Number(part.tax_rate ?? invoice.value?.tax_rate ?? 0);
+    const taxActive = isTaxEnabled.value && part.is_taxable !== false && rate > 0;
+    const originalQty = Number(part.original_qty || 0);
+    const rawLineTotal =
+        originalQty > 0 && Number(part.total || 0) > 0
+            ? Number(part.total) * (qty / originalQty)
+            : qty * Number(part.unit_price || 0);
+
+    if (!isDirectInvoice.value && pricingMode.value === 'inclusive' && taxActive) {
+        const lineIncl = Number(rawLineTotal.toFixed(2));
+        const lineExcl = Number((lineIncl / (1 + rate / 100)).toFixed(2));
+        const lineVat = Number((lineIncl - lineExcl).toFixed(2));
+        return { subtotal: lineExcl, vat: lineVat };
+    }
+
+    const lineExcl = Number(rawLineTotal.toFixed(2));
+    const lineVat = taxActive ? Number(((lineExcl * rate) / 100).toFixed(2)) : 0;
+    return { subtotal: lineExcl, vat: lineVat };
+};
 
 const totalRefundSubtotal = computed(() => {
     let sum = 0;
@@ -799,7 +833,7 @@ const totalRefundSubtotal = computed(() => {
     // Parts subtotal
     parts.value.forEach((p) => {
         const qty = Number(returnParts.value[p.id] || 0);
-        if (qty > 0) sum += qty * Number(p.unit_price || 0);
+        if (qty > 0) sum += calculatePartRefundLine(p, qty).subtotal;
     });
     return Number(sum.toFixed(2));
 });
@@ -812,7 +846,7 @@ const totalRefundVat = computed(() => {
     // Services vat
     services.value.forEach((s) => {
         const val = Number(returnServices.value[s.id] || 0);
-        if (val > 0) {
+        if (val > 0 && s.is_taxable !== false) {
             const rate = Number(s.tax_rate ?? invoice.value?.tax_rate ?? 0);
             sum += (val * rate) / 100;
         }
@@ -821,9 +855,7 @@ const totalRefundVat = computed(() => {
     parts.value.forEach((p) => {
         const qty = Number(returnParts.value[p.id] || 0);
         if (qty > 0) {
-            const rate = Number(p.tax_rate ?? invoice.value?.tax_rate ?? 0);
-            const lineSubtotal = qty * Number(p.unit_price || 0);
-            sum += (lineSubtotal * rate) / 100;
+            sum += calculatePartRefundLine(p, qty).vat;
         }
     });
     return Number(sum.toFixed(2));

@@ -105,18 +105,18 @@
                         {{ $t('system.settings.skip_outbound_messages_during_these_hours_') }}
                     </p>
                     <div class="mt-3 flex items-center gap-2">
-                        <input
+                        <AppInput
                             v-model="form.quiet_hours_start"
                             type="time"
-                            class="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            input-class="w-auto py-2 text-sm"
                         />
                         <span class="text-gray-500 dark:text-gray-400">
                             {{ $t('system.settings.to') }}
                         </span>
-                        <input
+                        <AppInput
                             v-model="form.quiet_hours_end"
                             type="time"
-                            class="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            input-class="w-auto py-2 text-sm"
                         />
                     </div>
                 </div>

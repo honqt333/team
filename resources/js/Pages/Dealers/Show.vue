@@ -601,11 +601,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="workOrderSearch"
                                         :placeholder="$t('dealers.show.search_work_orders')"
-                                        class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                        input-class="sm:w-64 ps-10 bg-gray-50 dark:bg-gray-900"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -941,11 +941,11 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="invoiceSearch"
                                     :placeholder="$t('dealers.show.search_invoices')"
-                                    class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                    input-class="sm:w-64 ps-10 bg-gray-50 dark:bg-gray-900"
                                 />
                             </div>
                         </div>
@@ -1165,11 +1165,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="vehicleSearch"
                                         :placeholder="$t('dealers.show.search_vehicles')"
-                                        class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                        input-class="sm:w-64 ps-10 bg-gray-50 dark:bg-gray-900"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -1179,27 +1179,30 @@
                                     size="sm"
                                 />
                             </div>
-                            <button
+                            <AppButton
                                 v-if="can('crm.vehicles.create') || isAnyAdmin()"
-                                type="button"
                                 @click="openAddVehicleModal"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-sm transition-all cursor-pointer"
+                                variant="primary"
+                                size="md"
+                                class="shadow-sm"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('dealers.show.add_vehicle') }}
-                            </button>
+                            </AppButton>
                         </div>
 
                         <!-- Grid View -->
@@ -1477,11 +1480,11 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="paymentSearch"
                                     :placeholder="$t('dealers.show.search_payments')"
-                                    class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                    input-class="sm:w-64 ps-10 bg-gray-50 dark:bg-gray-900"
                                 />
                             </div>
                         </div>
@@ -1685,34 +1688,37 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="paymentTermSearch"
                                     :placeholder="$t('dealers.show.search_payment_terms')"
-                                    class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                    input-class="sm:w-64 ps-10 bg-gray-50 dark:bg-gray-900"
                                 />
                             </div>
-                            <button
+                            <AppButton
                                 v-if="can('crm.customers.update') || isAnyAdmin()"
-                                type="button"
                                 @click="openCreatePaymentTermModal"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-sm transition-all cursor-pointer"
+                                variant="primary"
+                                size="md"
+                                class="shadow-sm"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('dealers.show.add_payment_term') }}
-                            </button>
+                            </AppButton>
                         </div>
 
                         <!-- Payment Terms Table -->
@@ -2191,7 +2197,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, h } from 'vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';

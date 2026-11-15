@@ -418,11 +418,12 @@ import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import { ref, watch, nextTick, onUnmounted, computed } from 'vue';
+import { ref, watch, nextTick, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 
 const props = defineProps({
@@ -438,6 +439,7 @@ const emit = defineEmits(['close', 'saved']);
 const { locale, t } = useI18n();
 const { confirm } = useConfirm();
 const { scrollToError } = useFormScrollToError();
+const { toEnglish } = useNumberFormat();
 
 const supplierTypeOptions = computed(() => [
     { id: 'parts', name: t('purchasing.suppliers.type_parts') },
@@ -552,7 +554,7 @@ watch(
     () => form.tax_number,
     (newVal) => {
         if (newVal) {
-            const converted = convertArabicToEnglish(newVal).replace(/[^\d]/g, '').slice(0, 15);
+            const converted = toEnglish(newVal).replace(/[^\d]/g, '').slice(0, 15);
             if (converted !== newVal) {
                 form.tax_number = converted;
             }
@@ -592,8 +594,6 @@ watch(
     { deep: true }
 );
 
-import { onMounted } from 'vue';
-
 onMounted(async () => {
     if (props.show) {
         await nextTick();
@@ -601,21 +601,14 @@ onMounted(async () => {
     }
 });
 
-function initMap() {
-    if (!mapContainer.value || map) return;
-    if (!value) return value;
-    const arabic = '٠١٢٣٤٥٦٧٨٩';
-    return value.replace(/[٠-٩]/g, (d) => arabic.indexOf(d));
-}
-
 // Quick actions
 function normalizePhone(p) {
-    return convertArabicToEnglish(p || '').replace(/[^\d+]/g, '');
+    return toEnglish(p || '').replace(/[^\d+]/g, '');
 }
 
 // Handle phone input to convert numerals real-time and remove spaces
 function onPhoneInput(type, value) {
-    const converted = convertArabicToEnglish(value);
+    const converted = toEnglish(value);
     const normalized = converted.replace(/\s/g, '');
 
     if (value !== normalized) {

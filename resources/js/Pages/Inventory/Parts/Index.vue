@@ -47,27 +47,28 @@
                         </div>
 
                         <!-- Add Part Button (Anchored Left) -->
-                        <button
+                        <AppButton
                             v-if="can('inventory.moves.create') || isAnyAdmin()"
                             type="button"
                             @click="createPart"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">{{ $t('inventory.parts.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('inventory.parts.add') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -92,11 +93,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 v-model="tableFilters.search"
                                 type="text"
                                 :placeholder="$t('inventory.parts.search_placeholder')"
-                                class="block w-full ps-10 pe-4 py-2.5 text-sm text-text-primary bg-surface border border-border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none"
+                                input-class="ps-10"
                             />
                         </div>
 
@@ -172,15 +173,15 @@
                             <label class="block text-[11px] font-bold text-text-secondary mb-1">
                                 {{ $t('inventory.parts.compatibility.manufacture_year') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="tableFilters.manufacture_year"
                                 type="number"
-                                min="1950"
-                                max="2100"
+                                :min="1950"
+                                :max="2100"
                                 dir="ltr"
                                 lang="en"
                                 :placeholder="$t('inventory.parts.compatibility.manufacture_year')"
-                                class="block w-full px-3 py-2 text-xs text-text-primary bg-surface border border-border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none font-mono"
+                                input-class="py-2 text-xs font-mono"
                             />
                         </div>
 
@@ -758,12 +759,13 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
 import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';

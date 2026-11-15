@@ -791,6 +791,7 @@ watch(
 
 function resetForm() {
     form.reset();
+    pendingCustomerPhone.value = null;
     isDirty.value = false;
     initialFormData.value = null;
 }
@@ -847,7 +848,7 @@ function handleCustomerReloaded(event) {
 
         if (customerExists) {
             form.customer_id = customerId;
-            pendingCustomerId.value = null;
+            pendingCustomerPhone.value = null;
         }
     }
 }

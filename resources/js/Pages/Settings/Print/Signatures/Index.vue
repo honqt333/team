@@ -122,7 +122,6 @@
 
 <script setup>
 import { computed } from 'vue';
-import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';

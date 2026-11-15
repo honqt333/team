@@ -27,6 +27,7 @@
 
         <!-- Print Button -->
         <AppPrintButton
+            variant="primary"
             @click="handlePrint"
             :style="{ backgroundColor: primaryColor || '#3b82f6' }"
             :label="printLabel || $t('common.print')"

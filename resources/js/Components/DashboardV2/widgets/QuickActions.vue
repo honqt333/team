@@ -117,7 +117,7 @@ const colorClasses = {
                 colorClasses[action.color] || colorClasses.slate,
             ]"
         >
-            <div class="flex-shrink-0" v-html="action.icon"></div>
+            <div class="flex-shrink-0" v-safe-html="action.icon"></div>
             <span class="truncate">{{ $t(action.label) }}</span>
         </Link>
     </div>

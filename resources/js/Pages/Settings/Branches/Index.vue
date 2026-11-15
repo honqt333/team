@@ -49,27 +49,30 @@
                         </div>
 
                         <!-- Outer-left CTA -->
-                        <button
+                        <AppButton
                             v-if="can('settings.centers.manage') || isAnyAdmin()"
-                            type="button"
                             @click="showCreateModal = true"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">{{ $t('company_profile.branches.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('company_profile.branches.add') }}
+                        </AppButton>
                     </div>
                 </template>
             </PageHeader>
@@ -81,22 +84,25 @@
                 :description="$t('company_profile.branches.empty_hint')"
             >
                 <template #actions>
-                    <button
+                    <AppButton
                         v-if="can('settings.centers.manage') || isAnyAdmin()"
-                        type="button"
                         @click="showCreateModal = true"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('company_profile.branches.add') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('company_profile.branches.add') }}
+                    </AppButton>
                 </template>
             </AppEmptyState>
 
@@ -144,9 +150,6 @@
                             <div>
                                 <div class="font-bold text-content-primary">
                                     {{ item.name }}
-                                </div>
-                                <div class="text-xs text-content-muted font-mono">
-                                    #{{ toEnglish(item.id) }}
                                 </div>
                             </div>
                         </div>
@@ -363,13 +366,10 @@
                             </div>
                         </div>
 
-                        <!-- System ID & Action -->
+                        <!-- Action -->
                         <div
-                            class="flex items-center justify-between border-t border-border-subtle pt-3 mt-auto"
+                            class="flex items-center justify-end border-t border-border-subtle pt-3 mt-auto"
                         >
-                            <span class="text-xs text-content-muted font-mono">
-                                #{{ toEnglish(branch.id) }}
-                            </span>
                             <span
                                 class="text-sm font-bold text-action-primary group-hover:underline transition-colors"
                             >
@@ -391,6 +391,7 @@ import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';

@@ -3965,7 +3965,18 @@
         "vehicle_report": "Vehicle condition report",
         "vehicle_report_desc": "A comprehensive report on the vehicle’s condition upon receipt",
         "work_order": "Work order",
-        "work_order_desc": "List of required services"
+        "work_order_desc": "List of required services",
+        "parts": "Parts",
+        "items": "Items",
+        "price": "Price",
+        "bad_debt": "Bad Debt",
+        "return_reason": "Return Reason",
+        "total_payments": "Total Payments",
+        "total_parts": "Total Parts",
+        "report_info": "Report Info",
+        "employee": "Employee",
+        "missing_snapshots_warning": "Notice: Some historical issuer snapshot fields are missing on this document",
+        "credit_note_reference_missing": "Original invoice reference unavailable"
     },
     "print_settings": {
         "a4_description": "A4 printing for offices, official documents and sales",
@@ -5093,6 +5104,9 @@
             "expand_all": "Expand All",
             "export_excel": "Export CSV / Excel",
             "group_by": "Group By",
+            "part": "Part (SKU)",
+            "qty": "Quantity",
+            "unit_cost": "Unit Cost",
             "group_center": "Group by Branch",
             "group_employee": "Group by Employee",
             "group_job_title": "Group by Job Title",
@@ -6314,6 +6328,10 @@
                 "description": "Company data, taxes, invoice",
                 "title": "Company profile"
             },
+            "notifications": {
+                "description": "Control notification channels, event triggers, and message templates",
+                "title": "Notification Settings"
+            },
             "departments": {
                 "description": "Managing work departments",
                 "title": "Sections"
@@ -6325,10 +6343,6 @@
             "inventory": {
                 "description": "Spare parts categories and inventory units",
                 "title": "Inventory Settings"
-            },
-            "notifications": {
-                "description": "Control notification channels, event triggers, and message templates",
-                "title": "Notification Settings"
             },
             "print": {
                 "description": "Document titles, terms and conditions, and printing preferences",
@@ -6376,6 +6390,7 @@
             "in_development": "In Development",
             "manage_notifications": "Manage Notifications",
             "manage_print": "Manage the print settings",
+            "manage_whatsapp": "Manage WhatsApp Alerts",
             "manage_zatca": "Manage Integration",
             "maps_desc": "Integrate interactive branch locations on Google Maps for easy navigation and roadside assistance.",
             "maps_title": "Google Maps & Branch Locations",
@@ -6401,6 +6416,7 @@
                 "save": "Save Changes",
                 "saving": "Saving...",
                 "send_test": "Send Test Notification",
+                "send_test_whatsapp": "Test WhatsApp",
                 "sending_test": "Sending..."
             },
             "channels": {
@@ -6444,9 +6460,31 @@
             "tabs": {
                 "channels": "Delivery Channels",
                 "events": "Notification Events",
+                "logs": "WhatsApp Logs",
                 "templates": "Message Templates"
             },
+            "whatsapp_card": {
+                "available_balance": "Available WhatsApp Credits",
+                "connected": "WhatsApp Provider Connected",
+                "credits_unit": "credits",
+                "disconnected": "WhatsApp Provider Inactive",
+                "messages_unit": "messages sent",
+                "provider_status": "WhatsApp Gateway Status",
+                "total_sent": "Total Messages Used"
+            },
+            "logs": {
+                "credits": "Credits",
+                "date": "Date",
+                "description": "Recent WhatsApp messages sent by this workspace and their delivery status",
+                "empty": "No WhatsApp messages logged yet",
+                "phone": "Phone Number",
+                "status": "Status",
+                "template": "Template",
+                "title": "WhatsApp Message Logs",
+                "type": "Type"
+            },
             "templates": {
+                "variable_inserted": "Inserted {var} into template",
                 "appointment_booked": "Appointment Confirmation Notice",
                 "appointment_reminder": "Appointment Reminder Notice",
                 "description": "Customize automated notification text with dynamic placeholders",
@@ -6495,6 +6533,8 @@
         "contact_support": "Contact support",
         "contact_us": "Contact us",
         "continue_to_payment": "Continue to payment",
+        "copied": "Copied",
+        "copy_iban": "Copy",
         "create_failed": "Failed to create subscription. Please try again.",
         "days_suffix": "days).",
         "discount": "Discount",
@@ -6576,7 +6616,16 @@
             "upload_help": "Please upload your bank transfer receipt (image or PDF, up to 5 MB).",
             "upload_instructions": "Receipt upload instructions",
             "upload_receipt": "Upload receipt",
-            "upload_required": "Please upload the receipt"
+            "upload_required": "Please upload the receipt",
+            "min_amount_notice": "Minimum transfer amount: {amount} SAR",
+            "min_amount_error": "Transfer amount must be at least {amount} SAR",
+            "grace_period_notice": "Bank transfer grace period: {days} days",
+            "receipt_optional_notice": "Receipt attachment is optional",
+            "due_balance_label": "Due balance",
+            "submitting_status": "Submitting bank transfer request...",
+            "idempotent_replay_notice": "Returned the previous identical request result without duplication.",
+            "bank_min_amount": "Min transfer: {amount} SAR",
+            "bank_below_min_amount": "Unavailable: total is below minimum ({amount} SAR)"
         },
         "receipt_received": "The transfer receipt for the plan has been received",
         "receipt_review_badge": "📋 The receipt is under review",
@@ -6595,6 +6644,20 @@
         "resumed": "Your subscription has been resumed",
         "save_n_percent": "Save {percent}%",
         "select_payment_method": "Select the available payment method",
+        "secure_payment_note": "Encrypted & secure checkout • Tax invoice issued to your registered company",
+        "payment_methods": {
+            "card_title": "Bank Card / mada",
+            "card_desc": "Instant & secure online card payment",
+            "tabby_title": "Tabby",
+            "tabby_desc": "Split in 4 interest-free payments",
+            "tabby_badge": "4 Payments",
+            "tamara_title": "Tamara",
+            "tamara_desc": "Pay in easy monthly installments",
+            "tamara_badge": "Installments",
+            "bank_title": "Direct Bank Transfer",
+            "bank_desc": "Transfer to the platform bank account & upload receipt",
+            "bank_badge": "Bank Transfer"
+        },
         "subscribe_now": "Subscribe now",
         "subscription": "Subscription",
         "subscription_error": "Subscription error",
@@ -6880,6 +6943,17 @@
             "no_comparison": "No comparison",
             "no_receipts": "No receipts",
             "notes_optional": "Notes (optional)",
+            "notes_required_override": "Override reason (required)",
+            "override_reason_placeholder": "Enter reason for overriding the amount mismatch (recorded in audit log)...",
+            "already_paid_on_invoice": "Previously paid on invoice",
+            "max_approvable_limit": "Maximum approvable amount is {amount} SAR (invoice remaining balance)",
+            "approved_amount_label": "Approved amount",
+            "remaining_balance": "Remaining balance",
+            "receipt_status": "Receipt status",
+            "payment_status": "Payment status",
+            "invoice_status": "Invoice status",
+            "override_permission_missing": "Amount mismatch override requires override permission (system.receipts.override)",
+            "override_does_not_exceed_due": "Note: Override only accepts an amount mismatch; it never allows approving more than the remaining balance.",
             "open_new_tab": "Open in new tab",
             "partial_approval": "Partial approval (credit a different amount than received)",
             "partial_approval_credit_a_different_amount_than_": "Partial approval (credit a different amount than received)",
@@ -6970,6 +7044,31 @@
                     "status": "Status"
                 },
                 "receipts_view": "View",
+                "state": {
+                    "awaiting_payment_desc": "An open invoice is awaiting payment to activate the subscription.",
+                    "awaiting_payment_title": "Pending payment",
+                    "cancel_confirm_body": "The unpaid request will be cancelled while preserving previous receipts and payment attempts. Do you want to continue?",
+                    "cancel_confirm_title": "Cancel subscription request",
+                    "cancel_error": "Unable to cancel the request right now. Please try again.",
+                    "cancel_request": "Cancel request",
+                    "cancel_success": "Subscription request cancelled successfully.",
+                    "complete_remaining": "Complete payment",
+                    "gateway_locked_partial": "Changing payment method or plan is disabled because the current invoice has an approved partial payment.",
+                    "invoice_number": "Invoice",
+                    "multiple_open_invoices_note": "Multiple open invoices exist; showing the invoice linked to the current action.",
+                    "paid_amount": "Paid amount",
+                    "partial_paid_locked_hint": "A partially paid invoice exists; you can only complete the remaining balance.",
+                    "partially_paid_desc": "A partial payment has been approved. Upload a receipt for the remaining balance to complete activation.",
+                    "partially_paid_title": "Partially paid",
+                    "receipt_rejected_desc": "Your previous bank transfer receipt was rejected. You can re-upload a new receipt on the same invoice, choose another plan, or cancel the request.",
+                    "receipt_rejected_reason": "Rejection reason",
+                    "receipt_rejected_title": "Receipt rejected",
+                    "remaining_amount": "Remaining balance",
+                    "reupload_receipt": "Re-upload receipt",
+                    "under_review_desc": "Your bank transfer receipt has been received and is currently under admin review.",
+                    "under_review_locked_hint": "You currently have a receipt under admin review.",
+                    "under_review_title": "Receipt under review"
+                },
                 "section_current": "Current subscription",
                 "section_history": "Subscription history",
                 "section_history_subtitle": "All your past subscriptions",
@@ -7211,7 +7310,7 @@
                 "grace_period": "Grace Period",
                 "payment_required": "Payment required",
                 "pending": "Awaiting payment",
-                "pending_payment": "Under review",
+                "pending_payment": "Pending payment",
                 "refunded": "Refunded",
                 "trial": "Trial",
                 "trialing": "Trial"
@@ -7487,6 +7586,7 @@
         "dunning": {
             "language_helper": "Which language should we use when we send you a reminder?",
             "language_label": "Reminder language",
+            "language_placeholder": "Select language...",
             "opted_out_helper": "Uncheck this to opt out of all dunning reminders. You can still see your billing status and pay invoices from the Billing page.",
             "opted_out_label": "I want to receive collection reminders by email/SMS/WhatsApp",
             "preferences_subtitle": "Choose how we contact you about overdue invoices. We default to friendly email reminders in your account language.",
@@ -7778,6 +7878,31 @@
             "retry": "Try again",
             "retry_payment": "Retry payment",
             "select_this_gateway": "Select this payment gateway to continue",
+            "status_cancelled_message": "The payment was cancelled before completion and the subscription was not activated.",
+            "status_cancelled_subtitle": "This payment attempt was cancelled and not completed.",
+            "status_cancelled_title": "Payment cancelled",
+            "status_initiated_message": "Payment confirmation is not complete yet. Please check back shortly or review the subscriptions list.",
+            "status_initiated_subtitle": "Waiting for confirmation from the payment provider.",
+            "status_initiated_title": "Payment in progress",
+            "status_label": "Payment status",
+            "status_pending_message": "This payment is still pending confirmation from the payment gateway. The subscription will not be activated until verified confirmation is received.",
+            "status_pending_subtitle": "Payment confirmation has not been received yet.",
+            "status_pending_title": "Payment pending",
+            "status_refunded_message": "This payment has been refunded and is no longer active.",
+            "status_refunded_subtitle": "This payment has been refunded.",
+            "status_refunded_title": "Payment refunded",
+            "status_unconfirmed_message": "The current payment status does not confirm completion. Please review the subscriptions list.",
+            "status_unconfirmed_subtitle": "Payment completion cannot be confirmed for this transaction.",
+            "status_unconfirmed_title": "Payment not confirmed",
+            "statuses": {
+                "cancelled": "Cancelled",
+                "failed": "Failed",
+                "initiated": "Processing",
+                "paid": "Paid",
+                "pending": "Pending",
+                "refunded": "Refunded",
+                "unknown": "Unconfirmed"
+            },
             "success_message": "Your subscription is now active and the invoice will be sent to your email address",
             "success_subtitle": "Your payment was received successfully.",
             "success_title": "Payment successful! 🎉",
@@ -7802,7 +7927,9 @@
                 "account_number": "Account number",
                 "accounts_title": "Bank Accounts",
                 "add_account": "+ Add account",
+                "bank_logo": "Bank logo (optional)",
                 "bank_name": "Bank name",
+                "bank_preset": "Select bank (auto-displays logo)",
                 "extras_subtitle": "Control how bank transfer payment confirmation works",
                 "extras_title": "Additional Bank Transfer Settings",
                 "iban": "IBAN",
@@ -7813,11 +7940,34 @@
                 "receipt_instructions_placeholder": "Example: the invoice number must appear in the transfer description...",
                 "receipt_instructions_title": "Additional receipt upload instructions",
                 "require_receipt": "Require tenants to upload a transfer receipt before activation",
-                "title": "Bank Transfer"
+                "remove_logo": "Remove logo",
+                "title": "Bank Transfer",
+                "upload_logo": "Upload custom logo"
             },
             "bnpl": {
                 "subtitle": "Allow tenants to split their subscriptions via Tabby or Tamara",
                 "title": "Installment Platforms (BNPL)"
+            },
+            "footer_badges": {
+                "applepay": "Apple Pay",
+                "bank_transfer": "Bank Transfer",
+                "mada": "mada",
+                "mastercard": "Mastercard",
+                "subtitle": "Control which payment badges appear in the public landing footer (shown only when enabled)",
+                "tabby": "Tabby",
+                "tamara": "Tamara",
+                "title": "Public Landing Footer Visibility",
+                "visa": "VISA"
+            },
+            "icons_config": {
+                "custom_logos": "Custom payment method logos (optional)",
+                "remove": "Reset to default",
+                "style_colored": "Brand Colors (Colored)",
+                "style_label": "Icon Display Style",
+                "style_monochrome": "Minimal Monochrome",
+                "subtitle": "Choose badge style or upload custom logos reflected in both the public footer and checkout",
+                "title": "Payment Method Icons Customization",
+                "upload": "Upload logo"
             },
             "company_info": {
                 "cr_number": "Commercial Registration",
@@ -8251,6 +8401,15 @@
             },
             "id": "ID",
             "legal_name": "Legal Name",
+            "links": {
+                "copied": "Link copied",
+                "copy": "Copy",
+                "open": "Open",
+                "portal_url": "Customer Portal URL",
+                "public_url": "Public Website URL",
+                "slug": "Tenant Slug",
+                "title": "Website & Portal Links"
+            },
             "link_the_tenant": "Link the tenant",
             "modals": {
                 "delete_centers": ":count centers",
@@ -8614,6 +8773,21 @@
                 "portal_tracking_desc": "Allow customers to track repair progress using plate/chassis number directly on site",
                 "subtitle": "Key value propositions that build customer trust and encourage appointment bookings",
                 "title": "Trust Badges & Workshop Features"
+            },
+            "links": {
+                "copied": "Link copied",
+                "copy": "Copy",
+                "custom_domain_pending_note": "The custom domain is still pending verification and is not active yet.",
+                "open": "Open",
+                "portal_url_label": "Customer Portal URL",
+                "public_url_label": "Public Website URL",
+                "slug_label": "Center Slug",
+                "status_draft": "Draft",
+                "status_published": "Published",
+                "status_unpublished": "Unpublished",
+                "subtitle": "Your official center links to share with customers or open the portal directly.",
+                "title": "Website Links",
+                "unpublished_hint": "The public site is currently unpublished; publish it to make it accessible to visitors."
             },
             "fields": {
                 "address": "Address",

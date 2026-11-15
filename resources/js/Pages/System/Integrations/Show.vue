@@ -172,17 +172,18 @@
                     </div>
 
                     <div class="flex gap-3 pt-4">
-                        <button
+                        <AppButton
                             type="submit"
-                            :disabled="form.processing"
-                            class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
+                            :loading="form.processing"
+                            variant="primary"
+                            size="md"
                         >
                             {{
                                 form.processing
                                     ? $t('common.saving')
                                     : $t('system.payment_settings.actions.save')
                             }}
-                        </button>
+                        </AppButton>
                     </div>
                 </form>
             </div>
@@ -203,17 +204,19 @@
                             dir="ltr"
                         />
                     </div>
-                    <button
+                    <AppButton
                         type="submit"
-                        :disabled="testForm.processing"
-                        class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
+                        :loading="testForm.processing"
+                        variant="primary"
+                        size="md"
+                        class="bg-emerald-600 hover:bg-emerald-700"
                     >
                         {{
                             testForm.processing
                                 ? $t('common.sending')
                                 : $t('integrations.send_test')
                         }}
-                    </button>
+                    </AppButton>
                 </form>
             </div>
 
@@ -345,6 +348,7 @@ const { t } = useI18n();
 import { ref, computed } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

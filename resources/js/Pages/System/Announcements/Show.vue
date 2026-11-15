@@ -53,20 +53,23 @@
                                 : $t('common.status_draft')
                         }}
                     </span>
-                    <button
+                    <AppButton
                         v-if="!announcement.is_published"
                         @click="publish"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
+                        variant="primary"
+                        size="md"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md"
                     >
                         {{ $t('system.announcements.publish_now') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         v-else
                         @click="unpublish"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                        variant="secondary"
+                        size="md"
                     >
                         {{ $t('system.announcements.stop') }}
-                    </button>
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -170,6 +173,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DOMPurify from 'dompurify';
 import { useFormatters } from '@/Composables/useFormatters';

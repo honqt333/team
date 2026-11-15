@@ -1,22 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
-import { useConfirm } from '@/Composables/useConfirm';
 
-const { t } = useI18n();
-const { confirm } = useConfirm();
+const { t, locale } = useI18n();
 
 const props = defineProps({
     subscriptions: { type: Array, default: () => [] },
+    billingState: { type: Object, default: null },
     canCancel: { type: Boolean, default: true },
     canResume: { type: Boolean, default: true },
 });
-
-const emit = defineEmits(['refresh']);
-
-const locale = computed(() => document.documentElement.lang || 'ar');
-const processing = ref(null);
 
 // Status badge styling. Every terminal status (cancelled, expired,
 // refunded, failed) AND the in-flight statuses (pending, pending_payment)
@@ -95,59 +87,38 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
 };
 
-async function cancel(sub) {
-    const ok = await confirm({
-        title: t('system.company_subscription.history.confirm_modal.title'),
-        message: t('system.company_subscription.history.confirm_modal.body'),
-        confirmText: t('system.company_subscription.history.confirm_modal.yes_cancel'),
-        cancelText: t('system.company_subscription.history.confirm_modal.go_back'),
-        type: 'danger',
-    });
-    if (!ok) return;
-
-    processing.value = sub.id;
-    router.post(
-        `/app/settings/billing/cancel/${sub.id}`,
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                processing.value = null;
-                emit('refresh');
-            },
+const rowStatus = (sub) => {
+    if (
+        props.billingState?.pending_subscription_id &&
+        Number(sub.id) === Number(props.billingState.pending_subscription_id) &&
+        props.billingState.display_status &&
+        props.billingState.display_status !== 'none'
+    ) {
+        if (props.billingState.display_status === 'under_review') {
+            return {
+                class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+                label: t('system.billing.page.state.under_review_title'),
+            };
         }
-    );
-}
-
-function resume(sub) {
-    processing.value = sub.id;
-    router.post(
-        `/app/settings/billing/resume/${sub.id}`,
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                processing.value = null;
-                emit('refresh');
-            },
+        if (props.billingState.display_status === 'partially_paid') {
+            return {
+                class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                label: t('system.billing.page.state.partially_paid_title'),
+            };
         }
-    );
-}
-
-function toggleAutoRenew(sub) {
-    processing.value = sub.id;
-    router.post(
-        `/app/settings/billing/auto-renew/${sub.id}`,
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                processing.value = null;
-                emit('refresh');
-            },
+        if (props.billingState.display_status === 'receipt_rejected') {
+            return {
+                class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+                label: t('system.billing.page.state.receipt_rejected_title'),
+            };
         }
-    );
-}
+    }
+
+    return {
+        class: statusClass(sub.status),
+        label: statusLabel(sub.status),
+    };
+};
 
 // Defensive: a single history row is short — a single line. Use
 // whitespace-nowrap so the dates and amount stay on one line and
@@ -204,11 +175,6 @@ const tableClass = 'whitespace-nowrap';
                             >
                                 {{ t('system.company_subscription.history.table.status') }}
                             </th>
-                            <th
-                                class="px-4 py-3 text-end text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-                            >
-                                {{ t('system.company_subscription.history.table.actions') }}
-                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -248,119 +214,14 @@ const tableClass = 'whitespace-nowrap';
                                 <span
                                     :class="[
                                         'inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold',
-                                        statusClass(sub.status),
+                                        rowStatus(sub).class,
                                     ]"
                                 >
                                     <span
                                         class="h-1.5 w-1.5 rounded-full bg-current opacity-70"
                                     ></span>
-                                    {{ statusLabel(sub.status) }}
+                                    {{ rowStatus(sub).label }}
                                 </span>
-                            </td>
-                            <td class="px-4 py-3 text-end">
-                                <div class="flex items-center justify-end gap-1">
-                                    <!-- Auto-renew toggle for active -->
-                                    <button
-                                        v-if="sub.status === 'active'"
-                                        type="button"
-                                        @click="toggleAutoRenew(sub)"
-                                        :disabled="processing === sub.id"
-                                        :title="
-                                            sub.auto_renew
-                                                ? t(
-                                                      'system.company_subscription.history.actions.disable_auto_renew'
-                                                  )
-                                                : t(
-                                                      'system.company_subscription.history.actions.enable_auto_renew'
-                                                  )
-                                        "
-                                        :class="[
-                                            'rounded p-1.5 transition-colors disabled:opacity-50',
-                                            sub.auto_renew
-                                                ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
-                                                : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                            />
-                                        </svg>
-                                    </button>
-
-                                    <!-- Cancel for active/trialing — the history list
-                                         normally doesn't show these (the controller
-                                         excludes the current subscription), but a
-                                         tenant might see one if the controller
-                                         filter changes in the future. Defensive. -->
-                                    <button
-                                        v-if="
-                                            canCancel &&
-                                            ['active', 'trialing', 'trial'].includes(sub.status)
-                                        "
-                                        type="button"
-                                        @click="cancel(sub)"
-                                        :disabled="processing === sub.id"
-                                        class="rounded p-1.5 text-rose-600 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-900/30"
-                                        :title="
-                                            t(
-                                                'system.company_subscription.history.actions.cancel_subscription'
-                                            )
-                                        "
-                                    >
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    </button>
-
-                                    <!-- Resume for cancelled — only shown if the
-                                         controller returned it (history usually
-                                         includes only the most recent cancelled). -->
-                                    <button
-                                        v-if="canResume && sub.status === 'cancelled'"
-                                        type="button"
-                                        @click="resume(sub)"
-                                        :disabled="processing === sub.id"
-                                        class="rounded p-1.5 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 dark:hover:bg-emerald-900/30"
-                                        :title="
-                                            t(
-                                                'system.company_subscription.history.actions.resume_subscription'
-                                            )
-                                        "
-                                    >
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
                             </td>
                         </tr>
                     </tbody>

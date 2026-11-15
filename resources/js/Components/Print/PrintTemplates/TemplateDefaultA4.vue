@@ -1,33 +1,44 @@
 <template>
     <div
-        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 print:w-full print:min-h-0 print:block relative flex flex-col"
+        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 print:w-full print:min-h-0 print:block relative flex flex-col print-a4-sheet"
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
+        <!-- Missing Historical Snapshots Notice (non-intrusive banner) -->
+        <div
+            v-if="hasMissingSnapshots"
+            class="mb-3 px-3 py-2 rounded border border-amber-300 bg-amber-50 text-amber-900 text-xs font-medium"
+            data-testid="missing-snapshots-warning"
+        >
+            {{ missingSnapshotsMessage }}
+        </div>
+
         <!-- Header: Logo & Center Info -->
         <div
             class="flex justify-between items-start pb-4 mb-6 border-b-2"
             :class="isModern ? 'border-dashed border-gray-300' : 'border-gray-800'"
         >
-            <div class="w-1/3">
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">
+            <div class="w-1/3 min-w-0">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1 break-words">
                     {{ centerData.name || $t('common.app_name') }}
                 </h1>
                 <p
                     v-if="printHelpers.isTaxEnabled(props.data) && centerData.tax_number"
                     class="text-sm text-gray-600"
                 >
-                    {{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}
+                    {{ $t('company_profile.profile.vat_number') }}:
+                    <span dir="ltr" class="inline-block font-mono">{{ centerData.tax_number }}</span>
                 </p>
                 <p v-if="centerData.cr_number" class="text-sm text-gray-600">
-                    {{ $t('company_profile.profile.cr_number') }}: {{ centerData.cr_number }}
+                    {{ $t('company_profile.profile.cr_number') }}:
+                    <span dir="ltr" class="inline-block font-mono">{{ centerData.cr_number }}</span>
                 </p>
                 <p v-if="centerData.phone" class="text-sm text-gray-600 mt-2">
-                    {{ centerData.phone }}
+                    <span dir="ltr" class="inline-block font-mono">{{ centerData.phone }}</span>
                 </p>
             </div>
 
             <div class="w-1/3 flex flex-col items-center justify-center">
-                <div v-if="visualSettings.show_logo" class="mb-3">
+                <div v-if="showLogo" class="mb-3">
                     <img
                         v-if="centerData.logo_url || centerData.logo"
                         :src="centerData.logo_url || centerData.logo"
@@ -75,22 +86,24 @@
                 <div class="text-sm font-medium" :class="isRtl ? 'text-left' : 'text-right'">
                     <p class="text-gray-800 font-bold" :class="isRtl ? 'text-right' : 'text-left'">
                         {{ $t('common.code') }}:
-                        <span class="font-mono">{{ data.code || 'T202620001' }}</span>
+                        <span class="font-mono inline-block" dir="ltr">{{
+                            data.code || (previewMode ? 'T202620001' : '-')
+                        }}</span>
                     </p>
                     <p
                         v-if="data.original_invoice_number"
                         class="text-sky-800 font-bold mt-0.5 text-xs"
                         :class="isRtl ? 'text-right' : 'text-left'"
                     >
-                        {{ isRtl ? 'الفاتورة الأصلية:' : 'Ref. Invoice:' }}
-                        <span class="font-mono">{{ data.original_invoice_number }}</span>
+                        {{ $t('invoices.original_invoice') }}:
+                        <span class="font-mono inline-block" dir="ltr">{{ data.original_invoice_number }}</span>
                     </p>
                     <p
                         v-if="data.return_reason"
                         class="text-gray-600 mt-0.5 text-[11px]"
                         :class="isRtl ? 'text-right' : 'text-left'"
                     >
-                        {{ isRtl ? 'سبب الإرجاع:' : 'Reason:' }}
+                        {{ $t('print.return_reason') }}:
                         <span>{{ data.return_reason }}</span>
                     </p>
                     <p class="text-gray-600 mt-0.5" :class="isRtl ? 'text-right' : 'text-left'">
@@ -182,11 +195,16 @@
                 <div class="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
                     <p>
                         <span class="text-gray-500">{{ $t('common.name') }}:</span>
-                        {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}
+                        {{
+                            data.customer?.name ||
+                            (previewMode ? (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') : '-')
+                        }}
                     </p>
                     <p>
                         <span class="text-gray-500">{{ $t('common.phone') }}:</span>
-                        <span dir="ltr">{{ data.customer?.phone || '+966 555 785 658' }}</span>
+                        <span dir="ltr">{{
+                            data.customer?.phone || (previewMode ? '+966 555 785 658' : '-')
+                        }}</span>
                     </p>
                     <p
                         v-if="
@@ -212,6 +230,7 @@
 
             <div
                 v-if="
+                    showVehicle &&
                     ![
                         'parts_invoice',
                         'purchase_invoice',
@@ -255,7 +274,10 @@
                                 alt="Make Logo"
                                 class="w-5 h-5 object-contain"
                             />
-                            {{ data.vehicle?.make || (isRtl ? 'مرسيدس' : 'Mercedes') }}
+                            {{
+                                data.vehicle?.make ||
+                                (previewMode ? (isRtl ? 'مرسيدس' : 'Mercedes') : '-')
+                            }}
                         </span>
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5 min-w-0">
@@ -311,14 +333,17 @@
                 <p>
                     {{ $t('work_orders.print_view.received_from') }}:
                     <strong class="underline underline-offset-4">
-                        {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}
+                        {{
+                            data.customer?.name ||
+                            (previewMode ? (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') : '-')
+                        }}
                     </strong>
                 </p>
                 <p class="mt-2">
                     {{ $t('work_orders.print_view.amount_of') }}:
                     <strong class="font-mono">
                         <PrintMoney
-                            :amount="data.amount || 250"
+                            :amount="previewMode ? data.amount || 250 : (data.amount ?? 0)"
                             :currency-code="data.currency_code"
                             :visual-settings="visualSettings"
                         />
@@ -508,20 +533,16 @@
                     <h3 class="font-bold text-gray-800 mb-2">
                         {{
                             data.is_company
-                                ? isRtl
-                                    ? 'البنود'
-                                    : 'Items'
+                                ? $t('print.items')
                                 : ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(
                                         documentType
                                     )
-                                  ? isRtl
-                                      ? 'قطع الغيار'
-                                      : 'Spare Parts'
+                                  ? $t('print.parts')
                                   : $t('work_orders.parts_total')
                         }}
                     </h3>
                     <table
-                        class="w-full text-xs border-collapse"
+                        class="w-full text-xs border-collapse print-items-table"
                         :class="isRtl ? 'text-right' : 'text-left'"
                     >
                         <thead>
@@ -531,13 +552,13 @@
                             >
                                 <th class="p-2 border border-gray-700 w-7 text-center">#</th>
                                 <th class="p-2 border border-gray-700">
-                                    {{ isRtl ? 'الوصف' : 'Description' }}
+                                    {{ $t('common.description') }}
                                 </th>
                                 <th class="p-2 border border-gray-700 w-20 text-center">
-                                    {{ isRtl ? 'السعر' : 'Price' }}
+                                    {{ $t('print.price') }}
                                 </th>
                                 <th class="p-2 border border-gray-700 w-20 text-center">
-                                    {{ isRtl ? 'الخصم' : 'Discount' }}
+                                    {{ $t('common.discount') }}
                                 </th>
                                 <th
                                     v-if="
@@ -549,34 +570,28 @@
                                     "
                                     class="p-2 border border-gray-700 w-24 text-center"
                                 >
-                                    {{ isRtl ? 'صافي السعر/الوحدة' : 'Net Unit Price' }}
+                                    {{ $t('invoices.net_unit_price') }}
                                 </th>
                                 <th class="p-2 border border-gray-700 w-20 text-center">
                                     {{
-                                        isRtl
-                                            ? ['purchase_invoice', 'purchase_return'].includes(
-                                                  documentType
-                                              ) && !data.is_company
-                                                ? 'الكمية المستلمة'
-                                                : 'الكمية'
-                                            : ['purchase_invoice', 'purchase_return'].includes(
-                                                    documentType
-                                                ) && !data.is_company
-                                              ? 'Received Qty'
-                                              : 'Qty'
+                                        ['purchase_invoice', 'purchase_return'].includes(
+                                            documentType
+                                        ) && !data.is_company
+                                            ? $t('invoices.received_qty')
+                                            : $t('common.qty')
                                     }}
                                 </th>
                                 <th class="p-2 border border-gray-700 w-22 text-center">
-                                    {{ isRtl ? 'المبلغ' : 'Amount' }}
+                                    {{ $t('common.amount') }}
                                 </th>
                                 <th
                                     v-if="hasPartsVat"
                                     class="p-2 border border-gray-700 w-20 text-center"
                                 >
-                                    {{ isRtl ? 'ضريبة (VAT)' : 'VAT' }}
+                                    {{ $t('common.vat') }}
                                 </th>
                                 <th class="p-2 border border-gray-700 w-22 text-center">
-                                    {{ isRtl ? 'المجموع' : 'Total' }}
+                                    {{ $t('common.total') }}
                                 </th>
                             </tr>
                         </thead>
@@ -1201,11 +1216,12 @@
         <!-- Totals Block & Summary (For pricing documents) -->
         <div
             v-if="showPricingColumns && documentType !== 'receipt' && documentType !== 'payments'"
-            class="flex justify-between items-start mb-12"
+            class="flex justify-between items-start mb-12 print-totals-block"
         >
             <div class="w-1/2 pr-4 text-sm text-gray-500">
                 <div
                     v-if="
+                        showTerms &&
                         documentSettings.print_terms &&
                         !documentSettings.terms_first_page &&
                         (documentSettings.terms?.length > 0 ||
@@ -1287,12 +1303,8 @@
                             <td class="py-2 px-2 text-gray-900">
                                 {{
                                     documentType === 'payments'
-                                        ? isRtl
-                                            ? 'إجمالي الفاتورة:'
-                                            : 'Invoice Total:'
-                                        : isRtl
-                                          ? 'المبلغ الإجمالي:'
-                                          : 'Total Amount:'
+                                        ? $t('work_orders.print_view.invoice_total') + ':'
+                                        : $t('common.total') + ':'
                                 }}
                             </td>
                             <td class="py-2 px-2 text-left text-gray-900 font-mono">
@@ -1304,11 +1316,11 @@
                             </td>
                         </tr>
                         <tr
-                            v-if="!['quotation'].includes(documentType)"
+                            v-if="showPayments"
                             class="text-gray-500 border-b border-gray-200"
                         >
                             <td class="py-1 px-2 font-bold">
-                                {{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}
+                                {{ $t('work_orders.print_view.total_paid') }}:
                             </td>
                             <td class="py-1 px-2 text-left font-mono font-bold">
                                 <PrintMoney
@@ -1319,11 +1331,11 @@
                             </td>
                         </tr>
                         <tr
-                            v-if="!['quotation'].includes(documentType) && (data.bad_debt || 0) > 0"
+                            v-if="showPayments && (data.bad_debt || 0) > 0"
                             class="text-amber-600 border-b border-gray-200"
                         >
                             <td class="py-1 px-2 font-bold">
-                                {{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}
+                                {{ $t('print.bad_debt') }}:
                             </td>
                             <td class="py-1 px-2 text-left font-mono font-bold">
                                 <PrintMoney
@@ -1334,10 +1346,10 @@
                             </td>
                         </tr>
                         <tr
-                            v-if="!['quotation'].includes(documentType)"
+                            v-if="showPayments"
                             class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black"
                         >
-                            <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
+                            <td class="py-1.5 px-2">{{ $t('work_orders.print_view.balance') }}:</td>
                             <td class="py-1.5 px-2 text-left font-mono">
                                 <PrintMoney
                                     :amount="totals.balance"
@@ -1387,7 +1399,7 @@
         </div>
 
         <!-- Signatures & Official Stamp Grid -->
-        <div class="mt-auto pt-8 border-t-2 border-gray-800">
+        <div class="mt-auto pt-8 border-t-2 border-gray-800 print-signatures-block">
             <div
                 class="grid gap-8 text-center text-sm font-bold text-gray-800 mb-8 relative"
                 :class="printHelpers.getSignatureGridClass(visibleSignatures.length || 2)"
@@ -1528,16 +1540,9 @@ import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import PrintMoney from '@/Components/Print/PrintMoney.vue';
-import { usePrint } from '@/Composables/usePrint';
-import { usePrintTotals } from '@/Composables/usePrintTotals';
+import { usePrintTemplateLogic } from '@/Composables/usePrintTemplateLogic';
 
 const page = usePage();
-const { locale } = useI18n();
-const isRtl = computed(() => locale.value === 'ar');
-
-// Use shared print composables
-const printHelpers = usePrint();
-const printTotals = usePrintTotals();
 
 const props = defineProps({
     documentType: {
@@ -1566,6 +1571,38 @@ const props = defineProps({
     },
 });
 
+const dummyItems = [
+    {
+        service_name: 'تغيير اقمشة',
+        description: 'قطع غيار أصلية مع ضبط الميزانية والفرامل',
+        qty: 1,
+        unit_price: 172.5,
+    },
+];
+
+const {
+    isRtl,
+    printHelpers,
+    printTotals,
+    filteredItems,
+    services,
+    parts,
+    showLogo,
+    showQrCode,
+    showStamp,
+    showPayments,
+    showWarranty,
+    showTerms,
+    showVehicle,
+    hasMissingSnapshots,
+    missingSnapshotsMessage,
+    totals,
+    getDocumentTitle,
+} = usePrintTemplateLogic(props, {
+    dummyItems,
+    qrDocumentTypes: ['invoice', 'parts_invoice', 'credit_note'],
+});
+
 // Decide if we show pricing columns (e.g., hide on work_order, checklist)
 const showPricingColumns = computed(() => {
     const hiddenTypes = ['work_order', 'checklist', 'job_card', 'condition_report'];
@@ -1589,26 +1626,6 @@ const isDueDatePast = computed(() => {
     return due < now;
 });
 
-// Services and Parts computeds for Invoice separation
-const filteredItems = computed(() => {
-    const items = props.data.items || dummyItems;
-    return items.filter((item) => item.status !== 'cancelled');
-});
-
-const services = computed(() => {
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType))
-        return [];
-    return filteredItems.value.filter((item) => !item.is_part);
-});
-
-const parts = computed(() => {
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) {
-        return filteredItems.value;
-    }
-    return filteredItems.value.filter((item) => item.is_part);
-});
-
-// Show VAT column only when at least one item has VAT
 const hasServicesVat = computed(() =>
     services.value.some((i) => printTotals.srvLineVat(i, props.data) > 0)
 );
@@ -1635,31 +1652,8 @@ const effectiveTemplate = computed(
         'TemplateDefaultA4'
 );
 const isModern = computed(() => effectiveTemplate.value === 'TemplateModernA4');
-const qrDocumentTypes = ['invoice', 'parts_invoice', 'credit_note'];
-const showQrCode = computed(() => {
-    if (!printHelpers.isTaxEnabled(props.data)) {
-        return false;
-    }
-    if (props.data?.qr_code_url) {
-        return true;
-    }
-    return props.previewMode && qrDocumentTypes.includes(props.documentType);
-});
-const showStamp = computed(
-    () => (props.documentSettings?.show_stamp ?? props.visualSettings?.show_stamp ?? true) !== false
-);
 
 const damageMarks = computed(() => props.data.damage_marks || []);
-
-// Dummy Fallback Data
-const dummyItems = [
-    {
-        service_name: 'تغيير اقمشة',
-        description: 'قطع غيار أصلية مع ضبط الميزانية والفرامل',
-        qty: 1,
-        unit_price: 172.5,
-    },
-];
 
 const dummyTerms = [
     'الضمان يسري على الأجزاء والخدمات المستبدلة فقط.',
@@ -1679,26 +1673,46 @@ const visibleSignatures = computed(() => {
             : defaultSignatures;
     return sigs.filter((s) => s.show !== false);
 });
-
-// Computed Totals - using shared composable
-const totals = computed(() => {
-    return printTotals.calculateTotals(
-        (props.data.items || dummyItems).filter((item) => item.status !== 'cancelled'),
-        props.data
-    );
-});
-
-// Document title logic
-// Document title - using shared composable
-function getDocumentTitle() {
-    const taxActive = printHelpers.isTaxEnabled(props.data);
-    let title = isRtl.value
-        ? props.documentSettings?.title_ar ||
-          printHelpers.getDocTypeTitle(props.documentType, taxActive)
-        : props.documentSettings?.title_en ||
-          printHelpers.getDocTypeTitle(props.documentType, taxActive);
-
-    title = String(title || '');
-    return printHelpers.cleanDocumentTitle(title, taxActive);
-}
 </script>
+
+<style scoped>
+.print-a4-sheet {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+.print-a4-sheet table td,
+.print-a4-sheet table th {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+@media print {
+    .print-a4-sheet {
+        width: 100% !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+
+    .print-a4-sheet thead {
+        display: table-header-group;
+    }
+
+    .print-a4-sheet tfoot {
+        display: table-footer-group;
+    }
+
+    .print-a4-sheet tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .print-totals-block,
+    .print-signatures-block {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+</style>

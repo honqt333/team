@@ -3965,7 +3965,18 @@
         "vehicle_report": "تقرير حالة المركبة",
         "vehicle_report_desc": "تقرير شامل عن حالة المركبة عند الاستلام",
         "work_order": "أمر العمل",
-        "work_order_desc": "قائمة الخدمات المطلوبة"
+        "work_order_desc": "قائمة الخدمات المطلوبة",
+        "parts": "قطع الغيار",
+        "items": "البنود",
+        "price": "السعر",
+        "bad_debt": "ديون معدومة",
+        "return_reason": "سبب الإرجاع",
+        "total_payments": "إجمالي المدفوعات",
+        "total_parts": "إجمالي قطع الغيار",
+        "report_info": "معلومات التقرير",
+        "employee": "الموظف",
+        "missing_snapshots_warning": "تنبيه: بعض بيانات المُصدر التاريخية غير مكتملة في هذا المستند",
+        "credit_note_reference_missing": "مرجع الفاتورة الأصلية غير متوفر"
     },
     "print_settings": {
         "a4_description": "طباعة A4 للمكاتب والمستندات الرسمية والمبيعات",
@@ -6317,6 +6328,10 @@
                 "description": "بيانات الشركة، الضرائب، فاتورة",
                 "title": "ملف الشركة"
             },
+            "notifications": {
+                "description": "التحكم في قنوات الإشعارات، أحداث التنبيهات، وقوالب الرسائل",
+                "title": "إعدادات الإشعارات"
+            },
             "departments": {
                 "description": "إدارة أقسام العمل",
                 "title": "الأقسام"
@@ -6328,10 +6343,6 @@
             "inventory": {
                 "description": "فئات قطع الغيار ووحدات المخزون",
                 "title": "إعدادات المخزون"
-            },
-            "notifications": {
-                "description": "التحكم في قنوات الإشعارات، أحداث التنبيهات، وقوالب الرسائل",
-                "title": "إعدادات الإشعارات"
             },
             "print": {
                 "description": "عناوين الوثائق، الشروط والأحكام، وتفضيلات الطباعة",
@@ -6379,6 +6390,7 @@
             "in_development": "قيد التطوير والتجهيز",
             "manage_notifications": "إدارة إعدادات الإشعارات",
             "manage_print": "إدارة إعدادات الطباعة",
+            "manage_whatsapp": "إدارة رسائل الواتساب",
             "manage_zatca": "إدارة الربط والاعتماد",
             "maps_desc": "ربط فروع المركز على خرائط جوجل وتسهيل الملاحة والوصول المباشر وتتبع طلبات المساعدة.",
             "maps_title": "خرائط جوجل ومواقع الفروع",
@@ -6404,6 +6416,7 @@
                 "save": "حفظ التغييرات",
                 "saving": "جاري الحفظ...",
                 "send_test": "إرسال إشعار تجريبي",
+                "send_test_whatsapp": "اختبار واتساب",
                 "sending_test": "جاري الإرسال..."
             },
             "channels": {
@@ -6447,9 +6460,31 @@
             "tabs": {
                 "channels": "قنوات الإرسال",
                 "events": "أحداث التنبيهات",
+                "logs": "سجل رسائل الواتساب",
                 "templates": "قوالب الرسائل"
             },
+            "whatsapp_card": {
+                "available_balance": "رصيد رسائل الواتساب المتاح",
+                "connected": "مزود الواتساب متصل ومفعّل",
+                "credits_unit": "رسالة",
+                "disconnected": "مزود الواتساب غير مفعّل",
+                "messages_unit": "رسالة مرسلة",
+                "provider_status": "حالة بوابة الواتساب",
+                "total_sent": "إجمالي الرسائل المستهلكة"
+            },
+            "logs": {
+                "credits": "الرصيد المستهلك",
+                "date": "التاريخ",
+                "description": "سجل رسائل الواتساب المرسلة من المنشأة وحالة تسليمها",
+                "empty": "لا توجد رسائل واتساب مسجلة حتى الآن",
+                "phone": "رقم الهاتف",
+                "status": "الحالة",
+                "template": "القالب",
+                "title": "سجل رسائل الواتساب",
+                "type": "النوع"
+            },
             "templates": {
+                "variable_inserted": "تمت إضافة المتغير {var} إلى القالب",
                 "appointment_booked": "نص إشعار تأكيد حجز الموعد",
                 "appointment_reminder": "نص إشعار التذكير بالموعد",
                 "description": "تخصيص نص الرسائل التلقائية مع دعم المتغيرات الديناميكية",
@@ -6498,6 +6533,8 @@
         "contact_support": "تواصل مع الدعم",
         "contact_us": "راسلنا",
         "continue_to_payment": "متابعة الدفع",
+        "copied": "تم النسخ",
+        "copy_iban": "نسخ",
         "create_failed": "حدث خطأ في إنشاء الاشتراك. يرجى المحاولة مرة أخرى.",
         "days_suffix": "يوم).",
         "discount": "الخصم",
@@ -6579,7 +6616,16 @@
             "upload_help": "يرجى رفع إيصال التحويل البنكي (صورة أو PDF، حتى 5 ميجابايت).",
             "upload_instructions": "تعليمات رفع الإيصال",
             "upload_receipt": "رفع الإيصال",
-            "upload_required": "يرجى رفع الإيصال"
+            "upload_required": "يرجى رفع الإيصال",
+            "min_amount_notice": "الحد الأدنى لمبلغ التحويل: {amount} ر.س",
+            "min_amount_error": "مبلغ التحويل يجب ألا يقل عن {amount} ر.س",
+            "grace_period_notice": "مهلة التحويل البنكي: {days} يومًا",
+            "receipt_optional_notice": "إرفاق الإيصال اختياري",
+            "due_balance_label": "الرصيد المستحق",
+            "submitting_status": "جاري إرسال طلب التحويل...",
+            "idempotent_replay_notice": "تم استرجاع نتيجة الطلب السابق نفسه دون إنشاء تكرار.",
+            "bank_min_amount": "الحد الأدنى للتحويل: {amount} ر.س",
+            "bank_below_min_amount": "غير متاح: الإجمالي أقل من الحد الأدنى ({amount} ر.س)"
         },
         "receipt_received": "تم استلام إيصال التحويل لباقة",
         "receipt_review_badge": "📋 الإيصال قيد المراجعة",
@@ -6598,6 +6644,20 @@
         "resumed": "تم استئناف اشتراكك بنجاح",
         "save_n_percent": "وفر {percent}٪",
         "select_payment_method": "اختر وسيلة الدفع المتاحة",
+        "secure_payment_note": "معاملة آمنة ومشفّرة • تصدر الفاتورة الضريبية باسم المنشأة المسجلة",
+        "payment_methods": {
+            "card_title": "البطاقة البنكية / مدى",
+            "card_desc": "دفع إلكتروني فوري وآمن عبر البطاقات البنكية",
+            "tabby_title": "تابي (Tabby)",
+            "tabby_desc": "قسّمها على 4 دفعات بدون فوائد أو رسوم",
+            "tabby_badge": "4 دفعات",
+            "tamara_title": "تمارا (Tamara)",
+            "tamara_desc": "ادفع على دفعات شهرية ميسّرة",
+            "tamara_badge": "تقسيط ميسّر",
+            "bank_title": "تحويل بنكي مباشر",
+            "bank_desc": "تحويل على الحساب البنكي للمنصة مع رفع الإيصال",
+            "bank_badge": "تحويل بنكي"
+        },
         "subscribe_now": "اشترك الآن",
         "subscription": "اشتراك",
         "subscription_error": "خطأ في إنشاء الاشتراك",
@@ -6883,6 +6943,17 @@
             "no_comparison": "لا مقارنة",
             "no_receipts": "لا توجد إيصالات",
             "notes_optional": "ملاحظات (اختياري)",
+            "notes_required_override": "سبب التجاوز (إلزامي)",
+            "override_reason_placeholder": "اكتب سبب قبول اختلاف المبلغ (يُسجل في سجل التدقيق)...",
+            "already_paid_on_invoice": "المسدد مسبقًا على الفاتورة",
+            "max_approvable_limit": "الحد الأقصى القابل للاعتماد هو {amount} ر.س (المتبقي على الفاتورة)",
+            "approved_amount_label": "المبلغ المعتمد فعليًا",
+            "remaining_balance": "الرصيد المتبقي",
+            "receipt_status": "حالة الإيصال",
+            "payment_status": "حالة الدفعة",
+            "invoice_status": "حالة الفاتورة",
+            "override_permission_missing": "تجاوز اختلاف المبلغ يتطلب صلاحية التجاوز (system.receipts.override)",
+            "override_does_not_exceed_due": "ملاحظة: التجاوز يقبل اختلاف المبلغ عن المتوقع فقط، ولا يسمح باعتماد مبلغ أكبر من الرصيد المتبقي.",
             "open_new_tab": "فتح في تبويب جديد",
             "partial_approval": "Envoy جزئية (اعتماد مبلغ مختلف عن المُحوّل)",
             "partial_approval_credit_a_different_amount_than_": "موافقة جزئية (اعتماد مبلغ مختلف عن المُحوّل)",
@@ -6973,6 +7044,31 @@
                     "status": "الحالة"
                 },
                 "receipts_view": "عرض",
+                "state": {
+                    "awaiting_payment_desc": "توجد فاتورة مفتوحة بانتظار السداد لإتمام تفعيل الاشتراك.",
+                    "awaiting_payment_title": "بانتظار الدفع",
+                    "cancel_confirm_body": "سيتم إلغاء الطلب غير المسدد مع الاحتفاظ بسجل الإيصالات والمحاولات السابقة. هل تريد المتابعة؟",
+                    "cancel_confirm_title": "إلغاء طلب الاشتراك",
+                    "cancel_error": "تعذّر إلغاء الطلب حالياً. يرجى المحاولة لاحقاً.",
+                    "cancel_request": "إلغاء الطلب",
+                    "cancel_success": "تم إلغاء طلب الاشتراك بنجاح.",
+                    "complete_remaining": "استكمال السداد",
+                    "gateway_locked_partial": "تغيير وسيلة الدفع أو الباقة معطّل لوجود سداد جزئي معتمد على الفاتورة الحالية.",
+                    "invoice_number": "رقم الفاتورة",
+                    "multiple_open_invoices_note": "توجد عدة فواتير مفتوحة؛ يتم عرض حالة الفاتورة المرتبطة بالإجراء الحالي.",
+                    "paid_amount": "المبلغ المسدد",
+                    "partial_paid_locked_hint": "توجد فاتورة مسددة جزئياً؛ يمكنك فقط استكمال سداد الرصيد المتبقي.",
+                    "partially_paid_desc": "تم اعتماد جزء من مبلغ الفاتورة. يرجى رفع إيصال للرصيد المتبقي لإتمام التفعيل.",
+                    "partially_paid_title": "مسددة جزئياً",
+                    "receipt_rejected_desc": "تم رفض إيصال التحويل البنكي السابق. يمكنك إعادة رفع إيصال جديد على الفاتورة نفسها أو اختيار باقة أخرى أو إلغاء الطلب.",
+                    "receipt_rejected_reason": "سبب الرفض",
+                    "receipt_rejected_title": "الإيصال مرفوض",
+                    "remaining_amount": "الرصيد المتبقي",
+                    "reupload_receipt": "إعادة رفع الإيصال",
+                    "under_review_desc": "تم استلام إيصال التحويل البنكي وهو قيد المراجعة الإدارية حالياً.",
+                    "under_review_locked_hint": "لديك إيصال قيد المراجعة الإدارية حالياً.",
+                    "under_review_title": "قيد مراجعة الإيصال"
+                },
                 "section_current": "الاشتراك الحالي",
                 "section_history": "سجل الاشتراكات",
                 "section_history_subtitle": "جميع اشتراكاتك السابقة",
@@ -7214,7 +7310,7 @@
                 "grace_period": "فترة سماح",
                 "payment_required": "الدفع مطلوب",
                 "pending": "بانتظار الدفع",
-                "pending_payment": "قيد المراجعة",
+                "pending_payment": "بانتظار الدفع",
                 "refunded": "مسترجع",
                 "trial": "تجريبي",
                 "trialing": "تجريبي"
@@ -7490,6 +7586,7 @@
         "dunning": {
             "language_helper": "أي لغة نستخدم عند إرسال التذكير؟",
             "language_label": "لغة التذكير",
+            "language_placeholder": "اختر اللغة...",
             "opted_out_helper": "ألغِ التحديد لإيقاف كل تذكيرات التحصيل. لا يزال بإمكانك مشاهدة حالة الفواتير وسدادها من صفحة الفوترة.",
             "opted_out_label": "أرغب في استلام تذكيرات التحصيل عبر الإيميل/SMS/WhatsApp",
             "preferences_subtitle": "اختر كيف نتواصل معك بخصوص الفواتير المتأخرة. الإعداد الافتراضي هو تذكير ودي عبر الإيميل بلغة حسابك.",
@@ -7781,6 +7878,31 @@
             "retry": "إعادة المحاولة",
             "retry_payment": "إعادة محاولة الدفع",
             "select_this_gateway": "اختر بوابة الدفع هذه للمتابعة.",
+            "status_cancelled_message": "تم إلغاء عملية الدفع قبل إتمامها، ولم يتم تفعيل الاشتراك.",
+            "status_cancelled_subtitle": "تم إلغاء هذه العملية ولم يكتمل الدفع.",
+            "status_cancelled_title": "تم إلغاء الدفع",
+            "status_initiated_message": "لم يكتمل تأكيد الدفع بعد. يرجى التحقق لاحقاً أو مراجعة سجل الاشتراكات.",
+            "status_initiated_subtitle": "جارٍ التحقق من عملية الدفع لدى مزود الدفع.",
+            "status_initiated_title": "الدفع قيد المعالجة",
+            "status_label": "حالة الدفع",
+            "status_pending_message": "لا تزال عملية الدفع قيد الانتظار ولم تُعتمد بعد من بوابة الدفع. لن يتم تفعيل الاشتراك حتى يصل تأكيد الدفع الموثوق.",
+            "status_pending_subtitle": "لم يتم تأكيد استلام الدفع بعد.",
+            "status_pending_title": "الدفع قيد الانتظار",
+            "status_refunded_message": "هذه الدفعة مسترجعة ولا تمثل دفعاً نشطاً.",
+            "status_refunded_subtitle": "تم رد مبلغ هذه العملية.",
+            "status_refunded_title": "تم استرجاع الدفع",
+            "status_unconfirmed_message": "حالة الدفع الحالية لا تؤكد إتمام السداد. يرجى مراجعة سجل الاشتراكات.",
+            "status_unconfirmed_subtitle": "لا يمكن تأكيد إتمام الدفع لهذه العملية.",
+            "status_unconfirmed_title": "حالة الدفع غير مؤكدة",
+            "statuses": {
+                "cancelled": "ملغي",
+                "failed": "فشل الدفع",
+                "initiated": "قيد المعالجة",
+                "paid": "مدفوع",
+                "pending": "قيد الانتظار",
+                "refunded": "مسترجع",
+                "unknown": "غير مؤكد"
+            },
             "success_message": "تم تفعيل الاشتراك وسيتم إرسال الفاتورة على البريد الإلكتروني",
             "success_subtitle": "تم استلام الدفع بنجاح.",
             "success_title": "تم الدفع بنجاح! 🎉",
@@ -7805,7 +7927,9 @@
                 "account_number": "رقم الحساب",
                 "accounts_title": "الحسابات البنكية",
                 "add_account": "+ إضافة حساب",
+                "bank_logo": "شعار البنك (اختياري)",
                 "bank_name": "اسم البنك",
+                "bank_preset": "اختر البنك (لظهور الشعار تلقائياً)",
                 "extras_subtitle": "للتحكم في عملية تأكيد الدفع عبر التحويل البنكي",
                 "extras_title": "إعدادات التحويل البنكي الإضافية",
                 "iban": "IBAN",
@@ -7816,11 +7940,34 @@
                 "receipt_instructions_placeholder": "مثال: يجب أن يظهر رقم الفاتورة في وصف التحويل...",
                 "receipt_instructions_title": "تعليمات إضافية لرفع الإيصال",
                 "require_receipt": "طلب إيصال التحويل من المستأجر قبل التفعيل",
-                "title": "التحويل البنكي"
+                "remove_logo": "إزالة الشعار",
+                "title": "التحويل البنكي",
+                "upload_logo": "رفع شعار مخصص"
             },
             "bnpl": {
                 "subtitle": "السماح للمستأجرين بتقسيط اشتراكاتهم عبر Tabby أو Tamara",
                 "title": "منصات التقسيط (BNPL)"
+            },
+            "footer_badges": {
+                "applepay": "Apple Pay",
+                "bank_transfer": "التحويل البنكي",
+                "mada": "مدى",
+                "mastercard": "Mastercard",
+                "subtitle": "تحكم في وسائل الدفع التي تظهر في تذييل صفحة الهبوط (تظهر فقط إذا كانت البوابة مفعّلة)",
+                "tabby": "تابي (Tabby)",
+                "tamara": "تمارا (Tamara)",
+                "title": "الظهور في فوتر الموقع العام",
+                "visa": "VISA"
+            },
+            "icons_config": {
+                "custom_logos": "تخصيص شعارات وسائل الدفع (اختياري)",
+                "remove": "استعادة الافتراضي",
+                "style_colored": "ألوان رسمية (Colored)",
+                "style_label": "نمط عرض الأيقونات",
+                "style_monochrome": "أحادي هادئ (Monochrome)",
+                "subtitle": "اختر نمط عرض أيقونات الدفع أو ارفع شعاراً مخصصاً ينعكس على الفوتر ونافذة الدفع",
+                "title": "تخصيص أيقونات طرق الدفع",
+                "upload": "رفع شعار"
             },
             "company_info": {
                 "cr_number": "السجل التجاري",
@@ -8254,6 +8401,15 @@
             },
             "id": "المعرّف",
             "legal_name": "الاسم القانوني",
+            "links": {
+                "copied": "تم نسخ الرابط",
+                "copy": "نسخ",
+                "open": "فتح",
+                "portal_url": "رابط بوابة العملاء",
+                "public_url": "رابط الموقع العام",
+                "slug": "معرّف المستأجر (Slug)",
+                "title": "روابط الموقع والبوابة"
+            },
             "link_the_tenant": "ربط المستأجر",
             "modals": {
                 "delete_centers": ":count مركز",
@@ -8617,6 +8773,21 @@
                 "portal_tracking_desc": "إظهار حقل للعميل في الموقع للبحث عن حالة سيارته برقم اللوحة مباشرة",
                 "subtitle": "نقاط القوة التي تميز ورشتك وتمنح العميل الطمأنينة لحجز الخدمة ومتابعة مركبته",
                 "title": "بطاقات الثقة ومزايا المركز"
+            },
+            "links": {
+                "copied": "تم نسخ الرابط",
+                "copy": "نسخ",
+                "custom_domain_pending_note": "النطاق المخصص لا يزال قيد التحقق ولن يُفعّل حتى يكتمل الربط.",
+                "open": "فتح",
+                "portal_url_label": "رابط بوابة العملاء",
+                "public_url_label": "رابط الموقع العام",
+                "slug_label": "معرّف المركز (Slug)",
+                "status_draft": "مسودة",
+                "status_published": "منشور",
+                "status_unpublished": "غير منشور",
+                "subtitle": "الروابط الرسمية الخاصة بمركزك لمشاركتها مع العملاء أو الوصول المباشر للبوابة.",
+                "title": "روابط الموقع الإلكتروني",
+                "unpublished_hint": "الموقع العام غير منشور حالياً؛ فعّل حالة النشر لإتاحته للزوار."
             },
             "fields": {
                 "address": "العنوان",

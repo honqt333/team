@@ -1,6 +1,8 @@
 import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/Composables/useConfirm';
+import { useToast } from '@/Composables/useToast';
 
 /**
  * The company-settings form: identity, VAT configuration, logo and stamp.
@@ -18,6 +20,8 @@ import { useI18n } from 'vue-i18n';
  */
 export function useCompanySettingsForm(props) {
     const { t } = useI18n();
+    const { confirm } = useConfirm();
+    const { error: toastError } = useToast();
 
     const vatMethodOptions = computed(() => [
         { value: false, label: t('system.company_settings.sections.vat.exclusive') },
@@ -109,7 +113,7 @@ export function useCompanySettingsForm(props) {
 
             window.location.reload();
         } catch (e) {
-            alert(e.message || 'Upload failed');
+            toastError(e.message || t('common.error_occurred'));
         } finally {
             uploading.value = false;
             if (logoInput.value) logoInput.value.value = '';
@@ -117,7 +121,14 @@ export function useCompanySettingsForm(props) {
     };
 
     const confirmRemoveLogo = async () => {
-        if (!confirm(t('system.company_settings.sections.branding.remove_confirm'))) {
+        const ok = await confirm({
+            title: t('common.confirm_delete_title'),
+            message: t('system.company_settings.sections.branding.remove_confirm'),
+            confirmText: t('common.delete'),
+            cancelText: t('common.cancel'),
+            type: 'danger',
+        });
+        if (!ok) {
             return;
         }
         uploading.value = true;
@@ -134,7 +145,7 @@ export function useCompanySettingsForm(props) {
             localPreview.value = null;
             window.location.reload();
         } catch (e) {
-            alert(e.message);
+            toastError(e.message || t('common.error_occurred'));
         } finally {
             uploading.value = false;
         }
@@ -171,7 +182,7 @@ export function useCompanySettingsForm(props) {
 
             window.location.reload();
         } catch (e) {
-            alert(e.message || 'Upload failed');
+            toastError(e.message || t('common.error_occurred'));
         } finally {
             uploadingStamp.value = false;
             if (stampInput.value) stampInput.value.value = '';
@@ -179,7 +190,14 @@ export function useCompanySettingsForm(props) {
     };
 
     const confirmRemoveStamp = async () => {
-        if (!confirm(t('system.company_settings.sections.branding.remove_confirm'))) {
+        const ok = await confirm({
+            title: t('common.confirm_delete_title'),
+            message: t('system.company_settings.sections.branding.remove_confirm'),
+            confirmText: t('common.delete'),
+            cancelText: t('common.cancel'),
+            type: 'danger',
+        });
+        if (!ok) {
             return;
         }
         uploadingStamp.value = true;
@@ -196,7 +214,7 @@ export function useCompanySettingsForm(props) {
             localStampPreview.value = null;
             window.location.reload();
         } catch (e) {
-            alert(e.message);
+            toastError(e.message || t('common.error_occurred'));
         } finally {
             uploadingStamp.value = false;
         }

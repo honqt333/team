@@ -48,14 +48,9 @@
                             class="flex items-center gap-1.5 p-1 bg-surface-muted rounded-xl border border-border"
                         >
                             <AppPrintButton
-                                :url="
-                                    route('app.invoices.purchases.index', {
-                                        ...tableFilters,
-                                        print: 1,
-                                    })
-                                "
                                 variant="icon"
-                                :title="$t('common.print')"
+                                :tooltip="$t('common.print')"
+                                @click="printPurchaseInvoices"
                             />
                             <div class="w-px h-5 bg-border mx-0.5"></div>
                             <AppViewModeToggle
@@ -65,27 +60,28 @@
                         </div>
 
                         <!-- Add Direct Purchase Invoice Button (Outer Left in RTL) -->
-                        <button
+                        <AppButton
                             v-if="can('purchasing.invoices.create') || isAnyAdmin()"
                             @click="showCreateModal = true"
                             type="button"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on rounded-xl font-bold shadow-xs transition-colors cursor-pointer text-sm"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('invoices.purchases.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('invoices.purchases.add') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -110,11 +106,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="tableFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="input-base ps-10 pe-4 py-2.5 text-sm w-full rounded-2xl"
+                                input-class="ps-10 rounded-2xl"
                             />
                         </div>
 
@@ -635,30 +631,11 @@
                                         </svg>
                                     </Link>
                                 </Tooltip>
-                                <Tooltip
+                                <AppPrintButton
                                     v-if="activeTab === 'invoices'"
-                                    :content="$t('common.print')"
-                                >
-                                    <Link
-                                        :href="route('app.invoices.purchases.print', item.id)"
-                                        target="_blank"
-                                        class="p-2 rounded-lg text-text-muted hover:text-success hover:bg-success-soft transition-colors"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                    </Link>
-                                </Tooltip>
+                                    size="sm"
+                                    :href="route('app.invoices.purchases.print', item.id)"
+                                />
                             </div>
                         </template>
                     </DataTable>
@@ -685,6 +662,8 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
@@ -862,6 +841,16 @@ const resetAllFilters = () => {
     sortColumn.value = '';
     sortDirection.value = 'desc';
     applyFilters();
+};
+
+const printPurchaseInvoices = () => {
+    window.open(
+        route('app.invoices.purchases.index', {
+            ...tableFilters,
+            print: 1,
+        }),
+        '_blank'
+    );
 };
 
 // Active Data and Rows

@@ -130,22 +130,25 @@
                 </template>
 
                 <template #actions>
-                    <button
+                    <AppButton
                         v-if="isManagedSection"
-                        type="button"
                         @click="openAddModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('common.add') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('common.add') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -177,12 +180,12 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="search"
                                 :placeholder="$t('common.search')"
                                 @input="handleSearch"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-border rounded-xl bg-surface-secondary text-content-primary placeholder-content-muted focus:ring-2 focus:ring-action-primary/30 focus:border-action-primary transition-colors"
+                                input-class="sm:w-64 ps-10 bg-surface-secondary"
                             />
                         </div>
 
@@ -382,7 +385,7 @@
                     :can-view="canViewAttachments"
                     :can-delete="canDeleteAttachments"
                     route-name="settings.storage"
-                    :show-full-page-link="true"
+                    :show-full-page-link="false"
                 />
             </div>
         </div>
@@ -431,6 +434,8 @@ import { ref, computed, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';

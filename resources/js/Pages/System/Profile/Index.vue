@@ -4,8 +4,9 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
-import { useForm, usePage, router } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppInput from '@/Components/App/AppInput.vue';
@@ -189,13 +190,14 @@ const enable2FA = () =>
                     />
 
                     <div class="flex items-center gap-4">
-                        <button
+                        <AppButton
                             type="submit"
-                            :disabled="profileForm.processing"
-                            class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                            :loading="profileForm.processing"
+                            variant="primary"
+                            size="md"
                         >
                             {{ $t('common.save_changes') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </form>
             </div>
@@ -233,13 +235,14 @@ const enable2FA = () =>
                         required
                     />
 
-                    <button
+                    <AppButton
                         type="submit"
-                        :disabled="passwordForm.processing"
-                        class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                        :loading="passwordForm.processing"
+                        variant="primary"
+                        size="md"
                     >
                         {{ $t('security.update_password') }}
-                    </button>
+                    </AppButton>
                 </form>
             </div>
 
@@ -381,16 +384,16 @@ const enable2FA = () =>
                                             autofocus
                                         />
                                     </div>
-                                    <button
+                                    <AppButton
                                         type="submit"
-                                        :disabled="
-                                            enable2FAForm.processing ||
-                                            enable2FAForm.code.length !== 6
-                                        "
-                                        class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50 h-[46px]"
+                                        :loading="enable2FAForm.processing"
+                                        :disabled="enable2FAForm.code.length !== 6"
+                                        variant="primary"
+                                        size="md"
+                                        class="bg-emerald-600 hover:bg-emerald-700 h-[46px]"
                                     >
                                         {{ $t('common.activate') }}
-                                    </button>
+                                    </AppButton>
                                 </div>
 
                                 <div class="text-sm">

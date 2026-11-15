@@ -79,16 +79,18 @@
                     </div>
 
                     <!-- Primary Mark As Paid CTA -->
-                    <button
+                    <AppButton
                         v-if="invoice.status === 'pending'"
                         @click="openMarkPaidModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-emerald-500/25 active:scale-95"
+                        variant="primary"
+                        size="md"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-emerald-500/25"
                     >
-                        <CheckIcon class="h-4 w-4" />
-                        <span>
-                            {{ $t('system.invoices.mark_as_paid') }}
-                        </span>
-                    </button>
+                        <template #iconLeft>
+                            <CheckIcon class="h-4 w-4" />
+                        </template>
+                        {{ $t('system.invoices.mark_as_paid') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 

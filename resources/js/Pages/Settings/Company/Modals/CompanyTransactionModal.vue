@@ -32,36 +32,40 @@
         <!-- Form Body -->
         <form id="company-transaction-form" @submit.prevent="submit" class="space-y-4">
             <!-- Title -->
-            <div>
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('company_profile.transactions.form.title') }}
-                    <span class="text-red-500">*</span>
-                </label>
-                <AppInput
-                    v-model="form.title"
-                    type="text"
-                    required
-                    :error="form.errors.title"
-                    :placeholder="$t('company_profile.transactions.form.title_placeholder')"
-                />
-            </div>
+            <FormField
+                id="transaction-title"
+                :label="$t('company_profile.transactions.form.title')"
+                required
+                :error="form.errors.title"
+            >
+                <template #default="{ id }">
+                    <AppInput
+                        :id="id"
+                        v-model="form.title"
+                        name="title"
+                        type="text"
+                        required
+                        :placeholder="$t('company_profile.transactions.form.title_placeholder')"
+                    />
+                </template>
+            </FormField>
 
             <!-- Date & Type -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Transaction Date -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('company_profile.transactions.form.date') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <CustomDatePicker v-model="form.transaction_date" required />
-                    <p v-if="form.errors.transaction_date" class="mt-1 text-xs text-red-500">
-                        {{ form.errors.transaction_date }}
-                    </p>
-                </div>
+                <FormField
+                    id="transaction-date"
+                    :label="$t('company_profile.transactions.form.date')"
+                    required
+                    :error="form.errors.transaction_date"
+                >
+                    <div data-field="transaction_date">
+                        <CustomDatePicker v-model="form.transaction_date" required />
+                    </div>
+                </FormField>
 
                 <!-- Transaction Type -->
-                <div>
+                <div data-field="transaction_type">
                     <SearchableSelect
                         v-model="form.transaction_type"
                         :options="transactionTypeOptions"
@@ -78,7 +82,7 @@
             <!-- Category & Linked Partner -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Income Category -->
-                <div>
+                <div data-field="income_category_id">
                     <SearchableSelect
                         v-model="form.income_category_id"
                         :options="filteredCategoryOptions"
@@ -92,7 +96,7 @@
                 </div>
 
                 <!-- Linked to (Contacts SearchableSelect) -->
-                <div>
+                <div data-field="contact_id">
                     <SearchableSelect
                         v-model="selectedContactKey"
                         :options="contactOptions"
@@ -123,16 +127,19 @@
             </div>
 
             <!-- Amount Input -->
-            <div>
-                <div class="flex items-center justify-between mb-1.5">
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {{
-                            form.is_taxable && form.is_vat_inclusive
-                                ? $t('company_profile.transactions.form.amount_inclusive')
-                                : $t('company_profile.transactions.form.amount_before_tax')
-                        }}
-                        <span class="text-red-500">*</span>
-                    </label>
+            <FormField
+                id="transaction-amount"
+                :label="
+                    form.is_taxable
+                        ? form.is_vat_inclusive
+                            ? $t('company_profile.transactions.form.amount_inclusive')
+                            : $t('company_profile.transactions.form.amount_before_tax')
+                        : $t('common.amount')
+                "
+                required
+                :error="form.errors.amount"
+            >
+                <template #label-action>
                     <span
                         v-if="form.is_taxable"
                         class="text-2xs font-semibold px-2 py-0.5 rounded-full"
@@ -148,20 +155,21 @@
                                 : $t('company_profile.transactions.table.vat_exclusive_badge')
                         }}
                     </span>
-                </div>
-                <div class="relative">
+                </template>
+                <template #default="{ id }">
                     <AppInput
+                        :id="id"
                         v-model="enteredAmount"
+                        name="amount"
                         type="number"
                         step="0.01"
                         min="0"
                         required
                         class="font-mono"
-                        :error="form.errors.amount"
                         placeholder="0.00"
                     />
-                </div>
-            </div>
+                </template>
+            </FormField>
 
             <!-- Tax Configuration Section (If VAT Enabled) -->
             <div
@@ -297,11 +305,11 @@
             </div>
 
             <!-- Attachment Upload -->
-            <div>
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('company_profile.transactions.form.attachment') }}
-                </label>
-
+            <FormField
+                id="transaction-attachment"
+                :label="$t('company_profile.transactions.form.attachment')"
+                :error="form.errors.attachment"
+            >
                 <!-- Existing Attachment Preview if available -->
                 <div
                     v-if="transaction?.attachment_url && !form.remove_attachment"
@@ -334,10 +342,12 @@
                         >
                             {{ $t('company_profile.transactions.table.view_attachment') }}
                         </a>
-                        <button
+                        <AppButton
                             type="button"
+                            variant="ghost"
+                            size="sm"
                             @click="form.remove_attachment = true"
-                            class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/60 transition-colors"
+                            class="!p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/60"
                             :title="$t('company_profile.transactions.form.remove_attachment')"
                         >
                             <svg
@@ -353,7 +363,7 @@
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                 />
                             </svg>
-                        </button>
+                        </AppButton>
                     </div>
                 </div>
 
@@ -362,18 +372,20 @@
                     v-model="form.attachment"
                     accept=".jpg,.jpeg,.png,.webp,.pdf"
                     :max-size-mb="10"
-                    :error="form.errors.attachment"
                     @select="() => (form.remove_attachment = false)"
                 />
-            </div>
+            </FormField>
 
             <!-- Notes -->
-            <div>
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('company_profile.transactions.form.notes') }}
-                </label>
-                <AppTextarea v-model="form.notes" rows="2" :error="form.errors.notes" />
-            </div>
+            <FormField
+                id="transaction-notes"
+                :label="$t('company_profile.transactions.form.notes')"
+                :error="form.errors.notes"
+            >
+                <template #default="{ id }">
+                    <AppTextarea :id="id" v-model="form.notes" name="notes" rows="2" />
+                </template>
+            </FormField>
         </form>
 
         <template #footer>
@@ -405,11 +417,14 @@ import axios from 'axios';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     show: Boolean,
@@ -692,6 +707,7 @@ function submit() {
 
     if (form.is_taxable && !form.contact_id) {
         form.setError('contact_id', t('company_profile.transactions.taxable_partner_hint'));
+        scrollToError(form.errors);
         return;
     }
 
@@ -700,6 +716,7 @@ function submit() {
             'is_taxable',
             t('company_profile.transactions.expense_tax_requires_supplier_vat')
         );
+        scrollToError(form.errors);
         return;
     }
 
@@ -715,15 +732,18 @@ function submit() {
                 _method: 'PUT',
             })).post(url, {
                 onSuccess: () => emit('saved'),
+                onError: () => scrollToError(form.errors),
             });
         } else {
             form.put(url, {
                 onSuccess: () => emit('saved'),
+                onError: () => scrollToError(form.errors),
             });
         }
     } else {
         form.post(url, {
             onSuccess: () => emit('saved'),
+            onError: () => scrollToError(form.errors),
         });
     }
 }

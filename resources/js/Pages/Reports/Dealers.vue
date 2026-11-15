@@ -33,7 +33,7 @@
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
                         <AppPrintButton
-                            variant="secondary"
+                            variant="icon"
                             :label="$t('reports.dealers_report.print_report')"
                             @click="handlePrint"
                         />
@@ -148,11 +148,11 @@
                     </div>
 
                     <div class="relative w-full lg:w-96">
-                        <input
+                        <AppInput
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.dealers_report.search_placeholder')"
-                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                            input-class="ps-10 py-2 text-xs"
                             @keydown.enter="applyFilters"
                         />
                         <div
@@ -542,13 +542,14 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-4">
                     {{ $t('reports.dealers_report.no_records_hint') }}
                 </p>
-                <button
-                    type="button"
+                <AppButton
                     @click="resetFilters"
-                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    variant="primary"
+                    size="sm"
+                    class="bg-indigo-600 hover:bg-indigo-700"
                 >
                     {{ $t('common.reset_filters') }}
-                </button>
+                </AppButton>
             </div>
         </div>
     </AppLayout>
@@ -559,6 +560,8 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
@@ -566,7 +569,6 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import { printDocument } from '@/Composables/usePrint';
 
 const { t } = useI18n();
 

@@ -16,23 +16,24 @@
             </div>
 
             <!-- Add Payment Button -->
-            <button
-                type="button"
+            <AppButton
                 @click="openModal"
-                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer ms-auto"
+                variant="primary"
+                size="md"
+                class="shadow-xs ms-auto"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M12 4v16m8-8H4"
-                    />
-                </svg>
-                <span class="text-sm">
-                    {{ $t('hr.financial.other_payments.add') }}
-                </span>
-            </button>
+                <template #iconLeft>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+                </template>
+                {{ $t('hr.financial.other_payments.add') }}
+            </AppButton>
         </div>
 
         <!-- Empty State -->
@@ -249,27 +250,41 @@
                 </div>
 
                 <div>
-                    <InputLabel :value="$t('hr.financial.other_payments.payment_title')" />
-                    <AppInput v-model="form.title" class="w-full" />
-                    <InputError :message="errors.title?.[0]" />
+                    <AppInput
+                        v-model="form.title"
+                        :label="$t('hr.financial.other_payments.payment_title')"
+                        :error="errors.title?.[0]"
+                        class="w-full"
+                    />
                 </div>
 
                 <div>
-                    <InputLabel :value="$t('common.amount')" />
-                    <AppInput v-model="form.amount" type="number" step="0.01" class="w-full" />
-                    <InputError :message="errors.amount?.[0]" />
+                    <AppInput
+                        v-model="form.amount"
+                        :label="$t('common.amount')"
+                        type="number"
+                        step="0.01"
+                        :error="errors.amount?.[0]"
+                        class="w-full"
+                    />
                 </div>
 
                 <div>
-                    <InputLabel :value="$t('hr.payroll.payment_date')" />
-                    <CustomDatePicker v-model="form.payment_date" class="w-full" />
-                    <InputError :message="errors.payment_date?.[0]" />
+                    <FormField
+                        :label="$t('hr.payroll.payment_date')"
+                        :error="errors.payment_date?.[0]"
+                    >
+                        <CustomDatePicker v-model="form.payment_date" class="w-full" />
+                    </FormField>
                 </div>
 
                 <div>
-                    <InputLabel :value="$t('common.notes')" />
-                    <AppTextarea v-model="form.notes" :rows="3" />
-                    <InputError :message="errors.notes?.[0]" />
+                    <AppTextarea
+                        v-model="form.notes"
+                        :label="$t('common.notes')"
+                        :error="errors.notes?.[0]"
+                        :rows="3"
+                    />
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-border-subtle">
@@ -298,11 +313,10 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import InputLabel from '@/Components/InputLabel.vue';
+import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
-import InputError from '@/Components/InputError.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 import { useToast } from '@/Composables/useToast';

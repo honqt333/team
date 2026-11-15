@@ -14,7 +14,7 @@
         <div class="mb-4">
             <a
                 :href="`/${tenant.slug}/portal/work-orders`"
-                class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-600 hover:text-slate-900"
+                class="inline-flex items-center gap-1.5 text-xs font-extrabold text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring rounded"
             >
                 <span>←</span>
                 <span>{{ t('customer_portal.portal_work_orders.back_to_list') }}</span>
@@ -22,11 +22,11 @@
         </div>
 
         <!-- Hero Tracker Card -->
-        <section class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
+        <section class="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <div class="flex flex-wrap items-center gap-3">
-                        <h2 class="text-xl font-black text-slate-900 sm:text-2xl">
+                        <h2 class="text-xl font-black text-text-primary sm:text-2xl">
                             {{
                                 t('customer_portal.portal_work_orders.code_title', {
                                     code: workOrder.code,
@@ -38,7 +38,7 @@
                             :label="workOrderStatusLabel(workOrder.status)"
                         />
                     </div>
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-text-secondary">
                         {{
                             [workOrder.vehicle_label, workOrder.center_name]
                                 .filter(Boolean)
@@ -57,12 +57,12 @@
             <!-- Hold Alert Banner -->
             <div
                 v-if="workOrder.status === 'on_hold'"
-                class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+                class="mt-5 rounded-2xl border border-warning/30 bg-warning-soft p-4 text-sm text-text-primary"
             >
                 <div class="font-extrabold">
                     {{ t('customer_portal.portal_work_orders.hold_alert_title') }}
                 </div>
-                <p v-if="workOrder.hold_reason" class="mt-1 text-xs text-amber-800">
+                <p v-if="workOrder.hold_reason" class="mt-1 text-xs text-text-secondary">
                     {{ workOrder.hold_reason }}
                 </p>
             </div>
@@ -70,14 +70,14 @@
             <!-- 4-Step Visual Progress Stepper -->
             <div class="mt-6">
                 <div class="mb-2 flex items-center justify-between text-xs">
-                    <span class="font-extrabold text-slate-700">
+                    <span class="font-extrabold text-text-secondary">
                         {{ t('customer_portal.portal_work_orders.progress_title') }}
                     </span>
-                    <span class="font-black text-[color:var(--tenant-primary,#2563eb)]">
+                    <span class="font-black text-brand-primary">
                         {{ workOrder.progress || 20 }}%
                     </span>
                 </div>
-                <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div class="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
                     <div
                         class="h-full rounded-full transition-all duration-500"
                         :style="{
@@ -94,11 +94,11 @@
                         class="rounded-2xl border p-3 text-xs transition"
                         :class="
                             (workOrder.stage_index || 1) >= idx + 1
-                                ? 'border-[color:var(--tenant-primary,#2563eb)]/30 bg-blue-50/50 text-slate-900'
-                                : 'border-slate-200/70 bg-slate-50/60 text-slate-400'
+                                ? 'border-brand-primary/30 bg-brand-primary-soft text-text-primary'
+                                : 'border-border bg-surface-muted text-text-secondary'
                         "
                     >
-                        <div class="text-[10px] font-bold uppercase opacity-70">0{{ idx + 1 }}</div>
+                        <div class="text-[10px] font-bold uppercase opacity-75">0{{ idx + 1 }}</div>
                         <div class="mt-0.5 font-extrabold">{{ stage.label }}</div>
                     </div>
                 </div>
@@ -106,35 +106,35 @@
 
             <!-- Metadata Grid -->
             <div
-                class="mt-6 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5 text-xs sm:grid-cols-4"
+                class="mt-6 grid grid-cols-2 gap-3 border-t border-border pt-5 text-xs sm:grid-cols-4"
             >
                 <div>
-                    <span class="text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.portal_work_orders.branch_label') }}
                     </span>
-                    <p class="mt-0.5 font-bold text-slate-800">
+                    <p class="mt-0.5 font-bold text-text-primary">
                         {{ workOrder.center_name || '—' }}
                     </p>
                 </div>
                 <div>
-                    <span class="text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.portal_work_orders.entry_date') }}
                     </span>
-                    <p class="mt-0.5 font-bold text-slate-800">
+                    <p class="mt-0.5 font-bold text-text-primary">
                         {{ formatDateOnly(workOrder.entry_date || workOrder.opened_at) || '—' }}
                     </p>
                 </div>
                 <div>
-                    <span class="text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.portal_work_orders.expected_delivery') }}
                     </span>
-                    <p class="mt-0.5 font-bold text-slate-800">
+                    <p class="mt-0.5 font-bold text-text-primary">
                         {{ formatDateOnly(workOrder.expected_end_date) || '—' }}
                     </p>
                 </div>
                 <div v-if="workOrder.odometer">
-                    <span class="text-slate-400">Odometer</span>
-                    <p class="mt-0.5 font-bold text-slate-800" dir="ltr">
+                    <span class="text-text-secondary">Odometer</span>
+                    <p class="mt-0.5 font-bold text-text-primary" dir="ltr">
                         {{
                             t('customer_portal.portal_work_orders.odometer_unit', {
                                 km: Number(workOrder.odometer).toLocaleString(),
@@ -148,10 +148,10 @@
         <!-- Unified Linked Invoice Bar -->
         <div
             v-if="workOrder.linked_invoice"
-            class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xs"
+            class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3 shadow-xs"
         >
             <div class="flex items-center gap-2">
-                <span class="text-xs font-extrabold text-slate-600">
+                <span class="text-xs font-extrabold text-text-secondary">
                     {{ t('invoices.title') }}
                 </span>
             </div>
@@ -170,24 +170,24 @@
         >
             <div
                 v-if="workOrder.customer_complaint"
-                class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                class="rounded-2xl border border-border bg-surface p-5 shadow-sm"
             >
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-text-secondary">
                     {{ t('customer_portal.portal_work_orders.complaint_label') }}
                 </h3>
-                <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-800">
+                <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-primary">
                     {{ workOrder.customer_complaint }}
                 </p>
             </div>
 
             <div
                 v-if="workOrder.initial_assessment"
-                class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                class="rounded-2xl border border-border bg-surface p-5 shadow-sm"
             >
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-text-secondary">
                     {{ t('customer_portal.portal_work_orders.assessment_label') }}
                 </h3>
-                <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-800">
+                <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-primary">
                     {{ workOrder.initial_assessment }}
                 </p>
             </div>
@@ -197,19 +197,19 @@
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
             <div class="space-y-6 lg:col-span-2">
                 <!-- Services Section -->
-                <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                    <h3 class="text-sm font-extrabold text-slate-900">
+                <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+                    <h3 class="text-sm font-extrabold text-text-primary">
                         {{ t('customer_portal.portal_work_orders.services_section') }}
                     </h3>
 
                     <div
                         v-if="!workOrder.items || workOrder.items.length === 0"
-                        class="mt-3 text-sm text-slate-500"
+                        class="mt-3 text-sm text-text-secondary"
                     >
                         —
                     </div>
 
-                    <div v-else class="mt-4 divide-y divide-slate-100">
+                    <div v-else class="mt-4 divide-y divide-border">
                         <div
                             v-for="item in workOrder.items"
                             :key="item.id"
@@ -217,12 +217,12 @@
                         >
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm font-bold text-slate-900">
+                                    <span class="text-sm font-bold text-text-primary">
                                         {{ item.title }}
                                     </span>
                                     <span
                                         v-if="item.is_warranty"
-                                        class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800"
+                                        class="rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-bold text-text-primary"
                                     >
                                         {{ t('customer_portal.portal_invoices.warranty_badge') }}
                                     </span>
@@ -237,9 +237,9 @@
                                 </div>
                             </div>
 
-                            <div class="text-end text-sm font-extrabold text-slate-900" dir="ltr">
+                            <div class="text-end text-sm font-extrabold text-text-primary" dir="ltr">
                                 {{ formatMoney(item.total) }}
-                                <span class="text-xs font-normal text-slate-500">
+                                <span class="text-xs font-normal text-text-secondary">
                                     {{ workOrder.currency_code }}
                                 </span>
                             </div>
@@ -250,23 +250,23 @@
                 <!-- Spare Parts Section -->
                 <section
                     v-if="workOrder.parts && workOrder.parts.length > 0"
-                    class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                    class="rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-6"
                 >
-                    <h3 class="text-sm font-extrabold text-slate-900">
+                    <h3 class="text-sm font-extrabold text-text-primary">
                         {{ t('customer_portal.portal_work_orders.parts_section') }}
                     </h3>
 
-                    <div class="mt-4 divide-y divide-slate-100">
+                    <div class="mt-4 divide-y divide-border">
                         <div
                             v-for="part in workOrder.parts"
                             :key="part.id"
                             class="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                         >
                             <div class="min-w-0 flex-1">
-                                <div class="text-sm font-bold text-slate-900">
+                                <div class="text-sm font-bold text-text-primary">
                                     {{ part.name }}
                                 </div>
-                                <div class="mt-0.5 text-xs text-slate-500">
+                                <div class="mt-0.5 text-xs text-text-secondary">
                                     <span v-if="part.part_number" dir="ltr">
                                         #{{ part.part_number }} ·
                                     </span>
@@ -276,9 +276,9 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="text-end text-sm font-extrabold text-slate-900" dir="ltr">
+                            <div class="text-end text-sm font-extrabold text-text-primary" dir="ltr">
                                 {{ formatMoney(part.total) }}
-                                <span class="text-xs font-normal text-slate-500">
+                                <span class="text-xs font-normal text-text-secondary">
                                     {{ workOrder.currency_code }}
                                 </span>
                             </div>
@@ -289,36 +289,36 @@
 
             <!-- Financial Summary & Linked Invoice -->
             <div>
-                <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                    <h3 class="text-sm font-extrabold text-slate-900">
+                <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+                    <h3 class="text-sm font-extrabold text-text-primary">
                         {{ t('customer_portal.portal_work_orders.financial_summary') }}
                     </h3>
 
                     <div class="mt-4 space-y-2.5 text-sm">
                         <div
                             v-if="workOrder.tax_enabled"
-                            class="flex items-center justify-between text-slate-600"
+                            class="flex items-center justify-between text-text-secondary"
                         >
                             <span>
                                 {{ t('customer_portal.portal_invoices.subtotal_excl_tax') }}
                             </span>
-                            <span class="font-bold" dir="ltr">
+                            <span class="font-bold text-text-primary" dir="ltr">
                                 {{ formatMoney(workOrder.total_excl_tax) }}
                                 {{ workOrder.currency_code }}
                             </span>
                         </div>
                         <div
                             v-if="workOrder.tax_enabled"
-                            class="flex items-center justify-between text-slate-600"
+                            class="flex items-center justify-between text-text-secondary"
                         >
                             <span>{{ t('customer_portal.portal_quotes.tax_amount') }}</span>
-                            <span class="font-bold" dir="ltr">
+                            <span class="font-bold text-text-primary" dir="ltr">
                                 {{ formatMoney(workOrder.total_tax) }}
                                 {{ workOrder.currency_code }}
                             </span>
                         </div>
                         <div
-                            class="flex items-center justify-between border-t border-slate-100 pt-3 text-base font-black text-slate-900"
+                            class="flex items-center justify-between border-t border-border pt-3 text-base font-black text-text-primary"
                         >
                             <span>{{ t('customer_portal.portal_quotes.total_incl_tax') }}</span>
                             <span dir="ltr">
@@ -383,14 +383,14 @@ function itemStatusLabel(status) {
 function itemStatusClass(status) {
     switch (status) {
         case 'completed':
-            return 'bg-emerald-100 text-emerald-800';
+            return 'bg-success-soft text-text-primary';
         case 'in_progress':
         case 'ready_for_qc':
-            return 'bg-blue-100 text-blue-800';
+            return 'bg-info-soft text-info';
         case 'on_hold':
-            return 'bg-amber-100 text-amber-800';
+            return 'bg-warning-soft text-text-primary';
         default:
-            return 'bg-slate-100 text-slate-700';
+            return 'bg-surface-muted text-text-secondary';
     }
 }
 

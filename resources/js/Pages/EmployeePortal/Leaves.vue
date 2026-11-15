@@ -36,20 +36,24 @@
                     </div>
 
                     <!-- Actions -->
-                    <button
+                    <AppButton
                         @click="showRequestModal = true"
-                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
+                        variant="primary"
+                        size="md"
+                        class="shadow-lg shadow-focus-ring-soft"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('hr.leaves.request_leave') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('hr.leaves.request_leave') }}
+                    </AppButton>
                 </div>
             </div>
 
@@ -102,6 +106,7 @@
 <script setup>
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';

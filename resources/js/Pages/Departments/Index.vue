@@ -45,29 +45,28 @@
                         </div>
 
                         <!-- Add Button (Anchored Outer Left in RTL) -->
-                        <button
+                        <AppButton
                             v-if="canManage"
                             @click="openCreateModal"
                             type="button"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">
-                                {{ $t('departments.add') }}
-                            </span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('departments.add') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -92,11 +91,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="tableFilters.search"
                                 :placeholder="$t('departments.search')"
-                                class="block w-full ps-11 pe-4 py-2.5 text-sm text-content-primary bg-surface-primary border border-border-subtle rounded-xl focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all outline-none placeholder-content-muted shadow-xs"
+                                input-class="ps-11"
                             />
                         </div>
 
@@ -460,11 +459,12 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';

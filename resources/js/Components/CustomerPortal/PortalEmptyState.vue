@@ -11,10 +11,10 @@ defineProps({
 
 <template>
     <div
-        class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-10 text-center shadow-sm"
+        class="rounded-2xl bg-surface border border-border p-10 text-center shadow-sm"
     >
         <div
-            class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3"
+            class="w-12 h-12 rounded-2xl bg-surface-muted text-text-secondary flex items-center justify-center mx-auto mb-3"
         >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -25,8 +25,8 @@ defineProps({
                 />
             </svg>
         </div>
-        <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">{{ message }}</p>
-        <p v-if="hint" class="mt-1 text-xs text-slate-400 max-w-sm mx-auto">{{ hint }}</p>
+        <p class="text-sm font-semibold text-text-primary">{{ message }}</p>
+        <p v-if="hint" class="mt-1 text-xs text-text-secondary max-w-sm mx-auto">{{ hint }}</p>
         <div v-if="$slots.default" class="mt-4">
             <slot />
         </div>

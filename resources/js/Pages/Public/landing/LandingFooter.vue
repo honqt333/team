@@ -9,12 +9,24 @@
  *     injected SVG, so they had no accessible name (axe: `link-name`).
  *     Each one now carries an `aria-label` and `rel="noopener noreferrer"`.
  */
-defineProps({
+import { computed } from 'vue';
+import PaymentMethodBadge from '@/Components/Common/PaymentMethodBadge.vue';
+
+const props = defineProps({
     settings: { type: Object, required: true },
     isRtl: { type: Boolean, default: false },
     t: { type: Function, required: true },
     getSocialIcon: { type: Function, required: true },
     activeLegalPage: { type: String, default: null },
+    paymentBadges: { type: Object, default: () => ({}) },
+    paymentIcons: { type: Object, default: () => ({ style: 'colored', logos: {} }) },
+});
+
+const visiblePaymentMethods = computed(() => {
+    const b = props.paymentBadges || {};
+    return ['mada', 'visa', 'mastercard', 'applepay', 'tabby', 'tamara', 'bank_transfer'].filter(
+        (key) => Boolean(b[key])
+    );
 });
 
 const emit = defineEmits(['open-legal']);
@@ -99,6 +111,21 @@ const PLATFORM_NAMES = {
         </div>
 
         <div class="footer-bottom">
+            <div
+                v-if="visiblePaymentMethods.length"
+                class="mb-4 flex flex-wrap items-center justify-center gap-2"
+                :aria-label="isRtl ? 'وسائل الدفع المتاحة' : 'Accepted payment methods'"
+            >
+                <PaymentMethodBadge
+                    v-for="method in visiblePaymentMethods"
+                    :key="method"
+                    :method="method"
+                    :style-mode="paymentIcons?.style || 'colored'"
+                    :custom-logo-url="paymentIcons?.logos?.[method] || null"
+                    :is-rtl="isRtl"
+                />
+            </div>
+
             <p>{{ t('copyright_text_ar', 'copyright_text_en') }}</p>
         </div>
     </footer>

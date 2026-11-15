@@ -17,13 +17,14 @@
                             v-if="balance > 0.01"
                             :text="$t('purchasing.suppliers.record_payment')"
                         >
-                            <button
+                            <AppButton
                                 v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
+                                size="sm"
+                                variant="success"
                                 @click="showPaymentModal = true"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                             >
                                 <svg
-                                    class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -38,7 +39,7 @@
                                 <span class="hidden sm:inline">
                                     {{ $t('purchasing.suppliers.record_payment') }}
                                 </span>
-                            </button>
+                            </AppButton>
                         </Tooltip>
 
                         <Tooltip :text="$t('common.edit')">
@@ -551,7 +552,7 @@
                             <!-- Action Buttons: Print Statement -->
                             <div class="flex items-center gap-2 self-end lg:self-auto">
                                 <AppPrintButton
-                                    variant="button"
+                                    variant="icon"
                                     :label="$t('purchasing.suppliers.print_statement')"
                                     @click="printStatement"
                                 />
@@ -846,11 +847,11 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="invoiceSearchQuery"
                                     :placeholder="$t('common.search') + '...'"
-                                    class="block w-full ps-11 pe-4 py-2.5 text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-focus-ring/10 focus:border-action-primary transition-all outline-none"
+                                    input-class="ps-11 rounded-2xl"
                                 />
                             </div>
                             <div class="flex items-center gap-2 self-end sm:self-auto">
@@ -1762,6 +1763,8 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import CreateModal from './CreateModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';

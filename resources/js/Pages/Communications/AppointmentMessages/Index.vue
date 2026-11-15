@@ -7,11 +7,7 @@
                 :title="$t('communications.appointment_messages.title')"
                 :subtitle="$t('communications.appointment_messages.subtitle')"
                 :total-count="toEnglish(pagination.total)"
-                :count-label="
-                    $t('communications.appointment_messages.results_count', {
-                        count: toEnglish(pagination.total),
-                    })
-                "
+                :count-label="$t('communications.appointment_messages.results_count')"
             >
                 <template #icon>
                     <svg
@@ -92,11 +88,10 @@
                         <label class="block text-xs font-bold text-content-muted mb-1">
                             {{ $t('communications.appointment_messages.filter_search') }}
                         </label>
-                        <input
+                        <AppInput
                             v-model="filters.search"
                             type="text"
                             :placeholder="$t('common.search')"
-                            class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-colors"
                             @keyup.enter="applyFilters"
                         />
                     </div>
@@ -109,13 +104,14 @@
                     >
                         {{ $t('communications.appointment_messages.clear_filters') }}
                     </button>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="applyFilters"
-                        class="px-4 py-2 text-xs font-bold rounded-xl text-white bg-action-primary hover:bg-action-primary-hover shadow-xs transition-colors cursor-pointer"
+                        variant="primary"
+                        size="sm"
+                        class="shadow-xs"
                     >
                         {{ $t('common.apply') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
 
@@ -213,19 +209,20 @@
 
                     <template #cell-actions="{ item }">
                         <div class="flex items-center justify-center">
-                            <button
+                            <AppButton
                                 v-if="item.is_retryable && canRetry"
                                 type="button"
+                                size="xs"
+                                variant="primary"
                                 @click="confirmRetry(item)"
                                 :aria-label="
                                     $t('communications.appointment_messages.actions.retry_aria', {
                                         id: item.id,
                                     })
                                 "
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover transition-colors cursor-pointer"
                             >
                                 {{ $t('communications.appointment_messages.actions.retry') }}
-                            </button>
+                            </AppButton>
                             <span v-else class="text-xs text-content-muted">—</span>
                         </div>
                     </template>
@@ -340,8 +337,10 @@
                             </div>
 
                             <div v-if="row.is_retryable && canRetry" class="flex justify-end pt-1">
-                                <button
+                                <AppButton
                                     type="button"
+                                    size="xs"
+                                    variant="primary"
                                     @click="confirmRetry(row)"
                                     :aria-label="
                                         $t(
@@ -351,10 +350,9 @@
                                             }
                                         )
                                     "
-                                    class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover transition-colors cursor-pointer"
                                 >
                                     {{ $t('communications.appointment_messages.actions.retry') }}
-                                </button>
+                                </AppButton>
                             </div>
                         </div>
                     </div>
@@ -395,6 +393,8 @@ import { computed, reactive, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';

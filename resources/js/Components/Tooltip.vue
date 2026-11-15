@@ -14,6 +14,7 @@
                 <div
                     v-if="isVisible && tooltipText && !disabled"
                     ref="tooltip"
+                    :dir="resolvedDir"
                     :style="tooltipStyle"
                     class="fixed z-[9999] px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-xl whitespace-nowrap pointer-events-none"
                 >
@@ -28,7 +29,7 @@
 
 <script setup>
 import { activeModalElement } from '@/Support/modalStack';
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
     text: {
@@ -56,9 +57,65 @@ const isVisible = ref(false);
 const trigger = ref(null);
 const tooltip = ref(null);
 const position = ref({ top: 0, left: 0 });
+const resolvedDir = ref('rtl');
+let dirObserver = null;
+
+const resolveDirection = () => {
+    if (typeof document === 'undefined') return 'rtl';
+
+    const modalDirEl = activeModalElement.value?.closest?.('[dir]');
+    if (modalDirEl) {
+        return modalDirEl.getAttribute('dir') === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    const ownerDirEl = trigger.value?.closest?.('[dir]');
+    if (ownerDirEl) {
+        return ownerDirEl.getAttribute('dir') === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    if (trigger.value) {
+        return getComputedStyle(trigger.value).direction === 'ltr' ? 'ltr' : 'rtl';
+    }
+
+    return document.documentElement.dir === 'ltr' ? 'ltr' : 'rtl';
+};
+
+const syncDirection = () => {
+    resolvedDir.value = resolveDirection();
+};
+
+onMounted(() => {
+    syncDirection();
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+        const ownerDirEl = trigger.value?.closest?.('[dir]') || null;
+        dirObserver = new MutationObserver(() => syncDirection());
+        dirObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['dir'],
+        });
+        if (ownerDirEl && ownerDirEl !== document.documentElement) {
+            dirObserver.observe(ownerDirEl, {
+                attributes: true,
+                attributeFilter: ['dir'],
+            });
+        }
+    }
+});
+
+watch(activeModalElement, () => {
+    syncDirection();
+});
+
+onUnmounted(() => {
+    if (dirObserver) {
+        dirObserver.disconnect();
+        dirObserver = null;
+    }
+});
 
 const show = async () => {
     if (props.disabled || !tooltipText.value) return;
+    syncDirection();
     isVisible.value = true;
     await nextTick();
     updatePosition();

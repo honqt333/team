@@ -1,104 +1,153 @@
 <script setup>
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
+import PaymentMethodBadge from '@/Components/Common/PaymentMethodBadge.vue';
 
-import { computed } from 'vue';
+const { t, locale } = useI18n();
 
 const props = defineProps({
     modelValue: { type: String, required: true },
     enabledGateways: { type: Array, default: () => [] },
     paymentMethods: { type: Object, default: () => ({}) },
+    paymentIcons: { type: Object, default: () => ({ style: 'colored', logos: {} }) },
     bankTransferEnabled: { type: [Boolean, Number, String], default: false },
+    defaultGateway: { type: String, default: '' },
+    totalAmount: { type: [Number, String], default: null },
+    lockedGateway: { type: String, default: '' },
+    lockedReason: { type: String, default: '' },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-const GATEWAYS = [
-    {
-        key: 'moyasar',
-        name_ar: 'مُيَسَّر (Moyasar)',
-        name_en: 'Moyasar',
-        description_ar: 'مدى • فيزا • ماستركارد • Apple Pay',
-        description_en: 'mada • Visa • Mastercard • Apple Pay',
-        methods: ['mada', 'visa', 'mastercard', 'applepay'],
-        icon: 'moyasar',
-    },
-    {
-        key: 'tap',
-        name_ar: 'تاب (Tap Payments)',
-        name_en: 'Tap Payments',
-        description_ar: 'الدفع الإلكتروني السريع والآمن',
-        description_en: 'Fast & secure online payments',
-        methods: ['mada', 'visa', 'mastercard', 'applepay'],
-        icon: 'tap',
-    },
-    {
-        key: 'tabby',
-        name_ar: 'تابي (Tabby)',
-        name_en: 'Tabby',
-        description_ar: 'قسمها على 4 دفعات بدون فوائد أو رسوم',
-        description_en: 'Split in 4 interest-free payments',
-        badge_ar: '4 دفعات',
-        badge_en: '4 Payments',
-        methods: [],
-        icon: 'tabby',
-    },
-    {
-        key: 'tamara',
-        name_ar: 'تمارا (Tamara)',
-        name_en: 'Tamara',
-        description_ar: 'ادفع على دفعات شهرية ميسرة',
-        description_en: 'Split payments into installments',
-        badge_ar: 'تقسيط ميسر',
-        badge_en: 'Installments',
-        methods: [],
-        icon: 'tamara',
-    },
-    {
-        key: 'bank_transfer',
-        name_ar: 'تحويل بنكي مباشر',
-        name_en: 'Bank Transfer',
-        description_ar: 'إيداع على حساب المؤسسة البنكي',
-        description_en: 'Direct transfer to company account',
-        badge_ar: 'تحويل بنكي',
-        badge_en: 'Manual Transfer',
-        methods: [],
-        icon: 'bank',
-    },
-];
+const CARD_GATEWAY_KEYS = ['moyasar', 'tap', 'paytabs'];
 
-const locale = computed(() => document.documentElement.lang || 'ar');
+const enabledCardMethods = computed(() => {
+    const pm = props.paymentMethods || {};
+    const list = [];
+    if (pm.mada_enabled !== false) list.push('mada');
+    if (pm.visa_enabled !== false) list.push('visa');
+    if (pm.mastercard_enabled !== false) list.push('mastercard');
+    if (pm.applepay_enabled !== false) list.push('applepay');
+    return list;
+});
 
-const availableGateways = computed(() => {
-    // 1. Extract gateway names from enabledGateways array (if provided)
+const resolvedCardGateway = computed(() => {
     const enabledNames = (props.enabledGateways || [])
         .map((g) => (typeof g === 'string' ? g : g?.name || g?.key))
         .filter(Boolean);
-
-    // 2. Check paymentMethods object properties
     const pm = props.paymentMethods || {};
 
-    const isMoyasarEnabled = enabledNames.includes('moyasar') || Boolean(pm.moyasar?.enabled);
-    const isTapEnabled = enabledNames.includes('tap') || Boolean(pm.tap?.enabled);
-    const isTabbyEnabled = enabledNames.includes('tabby') || Boolean(pm.tabby?.enabled);
-    const isTamaraEnabled = enabledNames.includes('tamara') || Boolean(pm.tamara?.enabled);
-    const isBankEnabled =
-        enabledNames.includes('bank_transfer') ||
-        Boolean(props.bankTransferEnabled) ||
-        Boolean(pm.bank_transfer_enabled);
+    const enabledCards = CARD_GATEWAY_KEYS.filter(
+        (key) => enabledNames.includes(key) || Boolean(pm[key]?.enabled)
+    );
 
-    return GATEWAYS.filter((g) => {
-        if (g.key === 'moyasar') return isMoyasarEnabled;
-        if (g.key === 'tap') return isTapEnabled;
-        if (g.key === 'tabby') return isTabbyEnabled;
-        if (g.key === 'tamara') return isTamaraEnabled;
-        if (g.key === 'bank_transfer') return isBankEnabled;
-        return false;
-    });
+    if (!enabledCards.length) return null;
+
+    if (props.defaultGateway && enabledCards.includes(props.defaultGateway)) {
+        return props.defaultGateway;
+    }
+
+    return enabledCards[0];
 });
 
-function select(key) {
-    emit('update:modelValue', key);
+const availableGateways = computed(() => {
+    const enabledNames = (props.enabledGateways || [])
+        .map((g) => (typeof g === 'string' ? g : g?.name || g?.key))
+        .filter(Boolean);
+    const pm = props.paymentMethods || {};
+
+    const options = [];
+
+    if (resolvedCardGateway.value) {
+        options.push({
+            key: resolvedCardGateway.value,
+            title: t('subscription.payment_methods.card_title'),
+            description: t('subscription.payment_methods.card_desc'),
+            methods: enabledCardMethods.value,
+            icon: 'card',
+        });
+    }
+
+    if (enabledNames.includes('tabby') || Boolean(pm.tabby?.enabled)) {
+        options.push({
+            key: 'tabby',
+            title: t('subscription.payment_methods.tabby_title'),
+            description: t('subscription.payment_methods.tabby_desc'),
+            badge: t('subscription.payment_methods.tabby_badge'),
+            methods: [],
+            icon: 'tabby',
+        });
+    }
+
+    if (enabledNames.includes('tamara') || Boolean(pm.tamara?.enabled)) {
+        options.push({
+            key: 'tamara',
+            title: t('subscription.payment_methods.tamara_title'),
+            description: t('subscription.payment_methods.tamara_desc'),
+            badge: t('subscription.payment_methods.tamara_badge'),
+            methods: [],
+            icon: 'tamara',
+        });
+    }
+
+    const bankMinAmount = Number(pm.bank_transfer_min_amount || 0);
+    const totalNum =
+        props.totalAmount !== null && props.totalAmount !== undefined
+            ? Number(props.totalAmount)
+            : null;
+    const bankBelowMin =
+        bankMinAmount > 0 && totalNum !== null && totalNum > 0 && totalNum < bankMinAmount;
+
+    if (
+        enabledNames.includes('bank_transfer') ||
+        Boolean(props.bankTransferEnabled) ||
+        Boolean(pm.bank_transfer_enabled)
+    ) {
+        options.push({
+            key: 'bank_transfer',
+            title: t('subscription.payment_methods.bank_title'),
+            description: bankBelowMin
+                ? t('subscription.receipt.bank_below_min_amount', {
+                      amount: bankMinAmount.toFixed(2),
+                  })
+                : bankMinAmount > 0
+                  ? `${t('subscription.payment_methods.bank_desc')} (${t('subscription.receipt.bank_min_amount', { amount: bankMinAmount.toFixed(2) })})`
+                  : t('subscription.payment_methods.bank_desc'),
+            badge: t('subscription.payment_methods.bank_badge'),
+            methods: [],
+            icon: 'bank',
+            disabled: totalNum === null || bankBelowMin,
+        });
+    }
+
+    if (props.lockedGateway) {
+        return options.map((opt) =>
+            opt.key === props.lockedGateway
+                ? opt
+                : { ...opt, disabled: true, subtitle: props.lockedReason || opt.subtitle }
+        );
+    }
+
+    return options;
+});
+
+watch(
+    availableGateways,
+    (list) => {
+        const current = list.find((g) => g.key === props.modelValue);
+        if (current && current.disabled) {
+            const fallback = list.find((g) => !g.disabled);
+            if (fallback) {
+                emit('update:modelValue', fallback.key);
+            }
+        }
+    },
+    { immediate: true }
+);
+
+function select(gw) {
+    if (gw.disabled) return;
+    emit('update:modelValue', gw.key);
 }
 </script>
 
@@ -119,7 +168,7 @@ function select(key) {
                         d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"
                     />
                 </svg>
-                {{ $t('subscription.select_payment_method') }}
+                {{ t('subscription.select_payment_method') }}
             </p>
         </div>
 
@@ -129,40 +178,42 @@ function select(key) {
                 v-for="gw in availableGateways"
                 :key="gw.key"
                 type="button"
-                @click="select(gw.key)"
+                :disabled="Boolean(gw.disabled)"
+                @click="select(gw)"
                 :class="[
-                    'group relative flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-start transition-all duration-200 cursor-pointer shadow-sm',
-                    modelValue === gw.key
-                        ? 'border-action-primary bg-selection-bg shadow-md ring-2 ring-focus-ring'
-                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700/80 dark:bg-slate-800 dark:hover:border-slate-600',
+                    'group relative flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-start transition-all duration-200 shadow-sm',
+                    gw.disabled
+                        ? 'cursor-not-allowed opacity-60 border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60'
+                        : modelValue === gw.key
+                          ? 'cursor-pointer border-action-primary bg-selection-bg shadow-md ring-2 ring-focus-ring'
+                          : 'cursor-pointer border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700/80 dark:bg-slate-800 dark:hover:border-slate-600',
                 ]"
             >
-                <!-- Authentic Brand Logo Badge Container -->
+                <!-- Brand / Method Icon -->
                 <div
                     class="flex h-12 w-14 flex-shrink-0 items-center justify-center rounded-xl shadow-sm transition-transform duration-200 group-hover:scale-105 overflow-hidden"
                 >
-                    <!-- Moyasar Brand Logo -->
+                    <!-- Unified Card Payment Icon -->
                     <div
-                        v-if="gw.icon === 'moyasar'"
-                        class="w-full h-full bg-gradient-to-br from-[#1E52D9] to-[#0D38A8] text-white flex flex-col items-center justify-center p-1 rounded-xl shadow-inner font-extrabold select-none"
+                        v-if="gw.icon === 'card'"
+                        class="w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-center rounded-xl shadow-inner select-none"
                     >
-                        <span class="text-[11px] font-black tracking-tighter leading-none">
-                            moyasar
-                        </span>
-                        <span class="text-[7px] text-blue-200 font-medium tracking-widest mt-0.5">
-                            {{ $t('system.company_subscription.gateways.moyasar') }}
-                        </span>
+                        <svg
+                            class="w-6 h-6 text-action-primary"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            />
+                        </svg>
                     </div>
 
-                    <!-- Tap Payments Brand Logo -->
-                    <div
-                        v-else-if="gw.icon === 'tap'"
-                        class="w-full h-full bg-gradient-to-br from-[#2ACE95] to-[#128082] text-white font-black text-xs tracking-tighter flex items-center justify-center rounded-xl shadow-inner select-none"
-                    >
-                        <span class="text-sm font-black tracking-tight">tap</span>
-                    </div>
-
-                    <!-- Tabby Official Brand Logo Badge -->
+                    <!-- Tabby Brand Badge -->
                     <div
                         v-else-if="gw.icon === 'tabby'"
                         class="w-full h-full bg-[#3BFFC3] text-black font-black text-xs tracking-tighter flex items-center justify-center rounded-xl shadow-inner border border-black/10 select-none"
@@ -172,7 +223,7 @@ function select(key) {
                         </span>
                     </div>
 
-                    <!-- Tamara Official Brand Logo Badge -->
+                    <!-- Tamara Brand Badge -->
                     <div
                         v-else-if="gw.icon === 'tamara'"
                         class="w-full h-full bg-gradient-to-tr from-[#E8927C] via-[#F4B49F] to-[#E5836C] text-[#2B2320] font-black text-xs tracking-tighter flex items-center justify-center rounded-xl shadow-inner select-none"
@@ -205,51 +256,35 @@ function select(key) {
                 <div class="min-w-0 flex-1 space-y-1">
                     <div class="flex items-center justify-between gap-1">
                         <p class="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                            {{ locale === 'ar' ? gw.name_ar : gw.name_en }}
+                            {{ gw.title }}
                         </p>
                         <span
-                            v-if="gw.badge_ar"
-                            class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                            v-if="gw.badge"
+                            class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 whitespace-nowrap"
                         >
-                            {{ locale === 'ar' ? gw.badge_ar : gw.badge_en }}
+                            {{ gw.badge }}
                         </span>
                     </div>
                     <p
-                        class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-1"
+                        class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-2"
                     >
-                        {{ locale === 'ar' ? gw.description_ar : gw.description_en }}
+                        {{ gw.description }}
                     </p>
 
-                    <!-- Recognized Brand Logos (Mada, Visa, Mastercard, Apple Pay) -->
+                    <!-- Recognized Card Brand Icons (mada, Visa, Mastercard, Apple Pay) -->
                     <div
                         v-if="gw.methods.length"
-                        class="flex items-center gap-1.5 pt-0.5 flex-wrap"
+                        class="flex items-center gap-1 pt-1 flex-nowrap"
                     >
-                        <!-- Mada Official Style Logo Badge -->
-                        <span
-                            class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-[10px] font-black text-[#0082BA] border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-[#38bdf8] dark:border-emerald-800/40"
-                        >
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#00A859]"></span>
-                            {{ $t('payments.methods.mada') }}
-                        </span>
-                        <!-- Visa Logo Badge -->
-                        <span
-                            class="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-50 text-[10px] font-black text-blue-700 border border-blue-200/60 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/40"
-                        >
-                            VISA
-                        </span>
-                        <!-- Mastercard Logo Badge -->
-                        <span
-                            class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-[10px] font-black text-amber-700 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40"
-                        >
-                            Mastercard
-                        </span>
-                        <!-- Apple Pay Logo Badge -->
-                        <span
-                            class="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-black text-slate-800 border border-slate-300/60 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600"
-                        >
-                            Pay
-                        </span>
+                        <PaymentMethodBadge
+                            v-for="m in gw.methods"
+                            :key="m"
+                            :method="m"
+                            size="sm"
+                            :style-mode="paymentIcons?.style || 'colored'"
+                            :custom-logo-url="paymentIcons?.logos?.[m] || null"
+                            :is-rtl="locale === 'ar'"
+                        />
                     </div>
                 </div>
 
@@ -286,7 +321,7 @@ function select(key) {
             class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-800/50 dark:bg-amber-900/10"
         >
             <p class="text-xs font-bold text-amber-700 dark:text-amber-300">
-                {{ $t('subscription.no_payment_methods') }}
+                {{ t('subscription.no_payment_methods') }}
             </p>
         </div>
     </div>

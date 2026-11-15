@@ -53,15 +53,15 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ $t('hr.settings.employee_types.title') }}
                             </h3>
-                            <button
+                            <AppButton
                                 @click="openModal('employee_type')"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="rounded-2xl font-black shadow-lg shadow-focus-ring-soft"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -73,9 +73,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
-                            </button>
+                                </template>
+                                {{ $t('common.add') }}
+                            </AppButton>
                         </div>
 
                         <SettingsTable
@@ -92,15 +92,15 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ $t('hr.settings.job_titles.title') }}
                             </h3>
-                            <button
+                            <AppButton
                                 @click="openModal('job_title')"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="rounded-2xl font-black shadow-lg shadow-focus-ring-soft"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -112,9 +112,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
-                            </button>
+                                </template>
+                                {{ $t('common.add') }}
+                            </AppButton>
                         </div>
 
                         <SettingsTable
@@ -137,15 +137,15 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ $t('hr.settings.allowances.title') }}
                             </h3>
-                            <button
+                            <AppButton
                                 @click="openModal('allowance')"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -157,9 +157,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
-                            </button>
+                                </template>
+                                {{ $t('common.add') }}
+                            </AppButton>
                         </div>
 
                         <SettingsTable
@@ -220,15 +220,15 @@
                                     {{ $t('hr.settings.biometric_devices.subtitle') }}
                                 </p>
                             </div>
-                            <button
+                            <AppButton
                                 @click="openDeviceModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -240,9 +240,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
-                            </button>
+                                </template>
+                                {{ $t('common.add') }}
+                            </AppButton>
                         </div>
 
                         <!-- Devices List -->
@@ -333,15 +333,15 @@
                                     {{ $t('hr.settings.shifts.subtitle') }}
                                 </p>
                             </div>
-                            <button
+                            <AppButton
                                 @click="openShiftModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="rounded-2xl font-black shadow-lg shadow-focus-ring-soft"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -353,9 +353,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
-                            </button>
+                                </template>
+                                {{ $t('common.add') }}
+                            </AppButton>
                         </div>
 
                         <!-- Shifts List -->
@@ -619,16 +619,16 @@
                                         }}
                                     </label>
                                     <div class="flex items-center gap-2">
-                                        <input
+                                        <AppInput
                                             type="number"
                                             name="max_deduction_percentage"
                                             v-model="
                                                 attendanceSettingsForm.max_deduction_percentage
                                             "
-                                            min="0"
-                                            max="100"
+                                            :min="0"
+                                            :max="100"
                                             step="0.5"
-                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
+                                            input-class="w-24 text-center font-bold text-lg"
                                         />
                                         <span class="text-rose-700 dark:text-rose-300">%</span>
                                     </div>
@@ -675,37 +675,19 @@
                                     }}
                                 </span>
                                 <div class="flex items-center gap-3">
-                                    <button
+                                    <AppButton
                                         type="submit"
-                                        :disabled="savingAttendanceSettings"
-                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
+                                        :loading="savingAttendanceSettings"
+                                        variant="primary"
+                                        size="md"
+                                        class="shadow-md shadow-focus-ring-soft"
                                     >
-                                        <svg
-                                            v-if="savingAttendanceSettings"
-                                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                class="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                stroke-width="4"
-                                            ></circle>
-                                            <path
-                                                class="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            ></path>
-                                        </svg>
                                         {{
                                             savingAttendanceSettings
                                                 ? $t('common.saving')
                                                 : $t('common.save')
                                         }}
-                                    </button>
+                                    </AppButton>
                                 </div>
                             </div>
                         </form>
@@ -722,15 +704,15 @@
                                     {{ $t('hr.settings.regulations.subtitle') }}
                                 </p>
                             </div>
-                            <button
+                            <AppButton
                                 @click="openRegulationModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
+                                variant="primary"
+                                size="md"
+                                class="rounded-2xl font-black shadow-lg shadow-focus-ring-soft"
                             >
-                                <div
-                                    class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                                >
+                                <template #iconLeft>
                                     <svg
-                                        class="w-4 h-4 text-white"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -742,11 +724,9 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                     </svg>
-                                </div>
-                                <span class="tracking-tight uppercase">
-                                    {{ $t('hr.settings.regulations.add') }}
-                                </span>
-                            </button>
+                                </template>
+                                {{ $t('hr.settings.regulations.add') }}
+                            </AppButton>
                         </div>
 
                         <div v-if="regulations.length" class="space-y-6">

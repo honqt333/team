@@ -393,26 +393,29 @@
 
                     <!-- Filter Actions: Apply & Reset -->
                     <div class="sm:col-span-2 flex items-center gap-2">
-                        <button
-                            type="button"
+                        <AppButton
                             @click="applyFilters"
-                            class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-lg shadow-focus-ring-soft transition-all hover:-translate-y-0.5"
+                            variant="primary"
+                            size="md"
+                            class="flex-1 rounded-2xl shadow-lg shadow-focus-ring-soft"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.payments_report.apply_filters') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('reports.payments_report.apply_filters') }}
+                        </AppButton>
 
                         <button
                             type="button"
@@ -438,12 +441,12 @@
                             {{ $t('reports.payments_report.direct_search') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="filterForm.search"
                                 @keyup.enter="applyFilters"
                                 :placeholder="$t('reports.payments_report.search_placeholder')"
-                                class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 pe-8 focus:ring-2 focus:ring-focus-ring focus:outline-none dark:text-white"
+                                input-class="pe-8 text-xs"
                             />
                             <button
                                 v-if="filterForm.search"
@@ -785,6 +788,8 @@ import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

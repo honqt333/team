@@ -58,6 +58,10 @@ const props = defineProps({
     ogImageUrl: { type: String, default: '' },
     /** The schema.org JSON-LD graph (built server-side). */
     jsonLd: { type: Object, default: null },
+    /** Safe boolean flags of enabled payment methods for the public footer. */
+    paymentBadges: { type: Object, default: () => ({}) },
+    /** Icon style & custom logo overrides from system payment settings. */
+    paymentIcons: { type: Object, default: () => ({ style: 'colored', logos: {} }) },
 });
 
 /**
@@ -157,6 +161,7 @@ function switchLang() {
 
 // ── CMS live preview sync ──────────────────────────────────────────────────
 function handlePostMessage(event) {
+    if (event.origin !== window.location.origin) return;
     if (event.data?.type === 'KHIDMH_PREVIEW_UPDATE' && event.data?.settings) {
         liveSettings.value = { ...liveSettings.value, ...event.data.settings };
     }
@@ -422,6 +427,8 @@ onUnmounted(() => {
                 :t="t"
                 :get-social-icon="getSocialIcon"
                 :active-legal-page="activeLegalPage"
+                :payment-badges="paymentBadges"
+                :payment-icons="paymentIcons"
                 @open-legal="activeLegalPage = $event"
             />
 

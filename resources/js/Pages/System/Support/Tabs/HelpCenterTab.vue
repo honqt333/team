@@ -327,21 +327,24 @@
                         </p>
                     </div>
 
-                    <button
-                        type="button"
+                    <AppButton
                         @click="openVideoModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
+                        variant="primary"
+                        size="sm"
+                        class="shadow-md shadow-focus-ring-soft"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('help.admin.videos.add') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('help.admin.videos.add') }}
+                    </AppButton>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -431,26 +434,29 @@
                             />
                         </div>
 
-                        <button
-                            type="button"
+                        <AppButton
                             @click="openTopicModal()"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all shrink-0"
+                            variant="primary"
+                            size="sm"
+                            class="shadow-md shadow-focus-ring-soft shrink-0"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('help.admin.topics.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('help.admin.topics.add') }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -584,21 +590,24 @@
                         </p>
                     </div>
 
-                    <button
-                        type="button"
+                    <AppButton
                         @click="openCategoryModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
+                        variant="primary"
+                        size="sm"
+                        class="shadow-md shadow-focus-ring-soft"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('help.admin.categories.add') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('help.admin.categories.add') }}
+                    </AppButton>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -657,21 +666,24 @@
                         </p>
                     </div>
 
-                    <button
-                        type="button"
+                    <AppButton
                         @click="openFaqModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
+                        variant="primary"
+                        size="sm"
+                        class="shadow-md shadow-focus-ring-soft"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('help.admin.faq.add') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('help.admin.faq.add') }}
+                    </AppButton>
                 </div>
 
                 <div class="space-y-3">

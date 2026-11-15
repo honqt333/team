@@ -94,8 +94,11 @@ describe('AppFileUpload', () => {
         });
 
         expect(imageWrapper.find('img').attributes('src')).toBe('/storage/brand/logo.png');
-        const buttons = imageWrapper.findAll('button');
-        await buttons[1].trigger('click');
+        const trigger = imageWrapper.find('[data-testid="image-upload-trigger"]');
+        expect(trigger.exists()).toBe(true);
+        const removeBtn = imageWrapper.find('[data-testid="image-remove-btn"]');
+        expect(removeBtn.exists()).toBe(true);
+        await removeBtn.trigger('click');
         expect(imageWrapper.emitted('remove-existing')).toHaveLength(1);
     });
 });

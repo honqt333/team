@@ -106,19 +106,14 @@
             gap: 14px;
         }
 
+        /* The real brandmark, not a placeholder letter. logo-blue.svg is
+           the app tile on the brand-primary shell — it carries its own
+           shape and colours, so no background is painted here. */
         .brand-mark {
             width: 54px;
             height: 54px;
-            border-radius: 16px;
-            background: linear-gradient(140deg, #4aa3df 0%, #1d5fa8 55%, #0b2f5c 100%);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            display: grid;
-            place-items: center;
-            font-family: 'PlexEn', sans-serif;
-            font-weight: 600;
-            font-size: 22px;
-            color: #ffffff;
-            letter-spacing: 0.02em;
+            display: block;
+            flex: 0 0 auto;
         }
 
         .brand-names {
@@ -202,7 +197,7 @@
 
     <div class="content">
         <div class="brand">
-            <div class="brand-mark">K</div>
+            <img class="brand-mark" src="../public/images/brand/logo-blue.svg" alt="">
             <div class="brand-names">
                 <span class="brand-ar">{{BRAND_AR}}</span>
                 <span class="brand-en">{{BRAND_EN}}</span>

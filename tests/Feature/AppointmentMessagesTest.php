@@ -10,6 +10,8 @@ use App\Models\Appointment;
 use App\Models\AppointmentMessageDelivery;
 use App\Models\Center;
 use App\Models\CenterWorkingHour;
+use App\Models\Credits\SmsUsageLog;
+use App\Models\Credits\TenantSmsBalance;
 use App\Models\Customer;
 use App\Models\CustomerPortalOtp;
 use App\Models\Integration\Integration;
@@ -24,11 +26,13 @@ use App\Services\Messaging\AppointmentMessageReminderScanner;
 use App\Services\Messaging\AppointmentMessageTemplate;
 use App\Services\Messaging\SmsService;
 use App\Support\CustomerPortalSession;
+use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
@@ -1159,5 +1163,433 @@ class AppointmentMessagesTest extends TestCase
             }
         }
         $this->assertGreaterThan(0, $warningCount, 'no warning was logged for the OTP channel failure');
+    }
+
+    public function test_send_job_resolves_center_id_from_appointment_and_clears_tenancy_context(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create([
+            'tenant_id' => $tenant->id,
+            'is_active' => true,
+        ]);
+        $secondCenter = Center::factory()->create([
+            'tenant_id' => $tenant->id,
+            'is_active' => true,
+        ]);
+        $customer = $this->customerIn($tenant, '+966501234567');
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $secondCenter->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $appointment = Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $secondCenter->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'scheduled_at' => Carbon::now()->addDays(2),
+            'estimated_end_at' => Carbon::now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+
+        $delivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenant->id,
+            'appointment_id' => $appointment->id,
+            'customer_id' => $customer->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointment->scheduled_at,
+            'idempotency_key' => hash('sha256', 'center-test-1'),
+            'phone_hash' => hash('sha256', '+966501234567'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        // Simulate a stale/wrong center context before the worker picks up the job
+        TenancyContext::set($tenant->id, $center->id);
+
+        $observedTenantId = null;
+        $observedCenterId = null;
+
+        $spy = Mockery::mock(SmsService::class);
+        $spy->shouldReceive('send')
+            ->once()
+            ->andReturnUsing(function () use (&$observedTenantId, &$observedCenterId) {
+                $observedTenantId = TenancyContext::tenantId();
+                $observedCenterId = TenancyContext::centerId();
+
+                return ['success' => true, 'message_id' => 'msg-center-1', 'provider' => 'fake'];
+            });
+        $this->app->instance(SmsService::class, $spy);
+
+        (new SendAppointmentMessage($delivery->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+
+        $this->assertSame($tenant->id, $observedTenantId);
+        $this->assertSame($secondCenter->id, $observedCenterId);
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+        $this->assertSame(AppointmentMessageDelivery::STATUS_SENT, $delivery->fresh()->status);
+    }
+
+    public function test_consecutive_send_jobs_do_not_leak_tenancy_context_across_tenants_or_centers(): void
+    {
+        $tenantA = $this->publishedTenant();
+        $centerA = Center::factory()->create([
+            'tenant_id' => $tenantA->id,
+            'is_active' => true,
+        ]);
+        $customerA = $this->customerIn($tenantA, '+966501111111');
+        $vehicleA = Vehicle::factory()->create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA->id,
+            'customer_id' => $customerA->id,
+        ]);
+        $appointmentA = Appointment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA->id,
+            'customer_id' => $customerA->id,
+            'vehicle_id' => $vehicleA->id,
+            'scheduled_at' => Carbon::now()->addDays(2),
+            'estimated_end_at' => Carbon::now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+        $deliveryA = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenantA->id,
+            'appointment_id' => $appointmentA->id,
+            'customer_id' => $customerA->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointmentA->scheduled_at,
+            'idempotency_key' => hash('sha256', 'leak-test-a'),
+            'phone_hash' => hash('sha256', '+966501111111'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        $tenantB = Tenant::factory()->create([
+            'status' => 'active',
+            'slug' => 'tenant-b-'.uniqid(),
+        ]);
+        $centerB = Center::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'is_active' => true,
+        ]);
+        $customerB = $this->customerIn($tenantB, '+966502222222');
+        $vehicleB = Vehicle::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'center_id' => $centerB->id,
+            'customer_id' => $customerB->id,
+        ]);
+        $appointmentB = Appointment::create([
+            'tenant_id' => $tenantB->id,
+            'center_id' => $centerB->id,
+            'customer_id' => $customerB->id,
+            'vehicle_id' => $vehicleB->id,
+            'scheduled_at' => Carbon::now()->addDays(3),
+            'estimated_end_at' => Carbon::now()->addDays(3)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+        $deliveryB = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenantB->id,
+            'appointment_id' => $appointmentB->id,
+            'customer_id' => $customerB->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointmentB->scheduled_at,
+            'idempotency_key' => hash('sha256', 'leak-test-b'),
+            'phone_hash' => hash('sha256', '+966502222222'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        $observedContexts = [];
+        $spy = Mockery::mock(SmsService::class);
+        $spy->shouldReceive('send')
+            ->twice()
+            ->andReturnUsing(function () use (&$observedContexts) {
+                $observedContexts[] = [
+                    'tenant_id' => TenancyContext::tenantId(),
+                    'center_id' => TenancyContext::centerId(),
+                ];
+
+                return ['success' => true, 'message_id' => 'msg-seq', 'provider' => 'fake'];
+            });
+        $this->app->instance(SmsService::class, $spy);
+
+        (new SendAppointmentMessage($deliveryA->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+
+        (new SendAppointmentMessage($deliveryB->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+
+        $this->assertSame([
+            ['tenant_id' => $tenantA->id, 'center_id' => $centerA->id],
+            ['tenant_id' => $tenantB->id, 'center_id' => $centerB->id],
+        ], $observedContexts);
+    }
+
+    public function test_send_job_clears_tenancy_context_on_failure_and_handles_retry_and_missing_appointment(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create([
+            'tenant_id' => $tenant->id,
+            'is_active' => true,
+        ]);
+        $customer = $this->customerIn($tenant, '+966503333333');
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+        ]);
+        $appointment = Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'scheduled_at' => Carbon::now()->addDays(2),
+            'estimated_end_at' => Carbon::now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+        $delivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenant->id,
+            'appointment_id' => $appointment->id,
+            'customer_id' => $customer->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointment->scheduled_at,
+            'idempotency_key' => hash('sha256', 'retry-test'),
+            'phone_hash' => hash('sha256', '+966503333333'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        // 1. Failure clears TenancyContext and marks delivery failed
+        $failingSms = Mockery::mock(SmsService::class);
+        $failingSms->shouldReceive('send')
+            ->once()
+            ->andThrow(new RuntimeException('temporary_provider_error'));
+        $this->app->instance(SmsService::class, $failingSms);
+
+        try {
+            (new SendAppointmentMessage($delivery->id))->handle(
+                app(AppointmentMessageTemplate::class),
+                app(SmsService::class)
+            );
+            $this->fail('Expected RuntimeException to be rethrown for retry.');
+        } catch (RuntimeException) {
+            // Expected
+        }
+
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+        $this->assertSame(AppointmentMessageDelivery::STATUS_FAILED, $delivery->fresh()->status);
+
+        // 2. Re-queued retry succeeds with correct center_id and clears TenancyContext
+        $delivery->refresh()->update(['status' => AppointmentMessageDelivery::STATUS_QUEUED]);
+        $retryCenterId = null;
+        $succeedingSms = Mockery::mock(SmsService::class);
+        $succeedingSms->shouldReceive('send')
+            ->once()
+            ->andReturnUsing(function () use (&$retryCenterId) {
+                $retryCenterId = TenancyContext::centerId();
+
+                return ['success' => true, 'message_id' => 'msg-retry-ok', 'provider' => 'fake'];
+            });
+        $this->app->instance(SmsService::class, $succeedingSms);
+
+        (new SendAppointmentMessage($delivery->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+
+        $this->assertSame($center->id, $retryCenterId);
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+        $this->assertSame(AppointmentMessageDelivery::STATUS_SENT, $delivery->fresh()->status);
+
+        // 3. Deleted appointment (missing delivery/appointment) exits cleanly and clears TenancyContext
+        $missingDelivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenant->id,
+            'appointment_id' => $appointment->id,
+            'customer_id' => $customer->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_REMINDER_24H,
+            'scheduled_at_snapshot' => $appointment->scheduled_at,
+            'idempotency_key' => hash('sha256', 'missing-appt'),
+            'phone_hash' => hash('sha256', '+966503333333'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+        $missingDeliveryId = $missingDelivery->id;
+
+        $appointment->delete();
+
+        (new SendAppointmentMessage($missingDeliveryId))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+
+        $this->assertNull(AppointmentMessageDelivery::find($missingDeliveryId));
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+    }
+
+    public function test_send_job_rejects_cross_tenant_appointment_mismatch_and_skips_without_sending(): void
+    {
+        $tenantA = $this->publishedTenant();
+        $centerA = Center::factory()->create([
+            'tenant_id' => $tenantA->id,
+            'is_active' => true,
+        ]);
+        $customerA = $this->customerIn($tenantA, '+966501234567');
+
+        $tenantB = Tenant::factory()->create([
+            'status' => 'active',
+            'slug' => 'tenant-b-mismatch-'.uniqid(),
+        ]);
+        $centerB = Center::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'is_active' => true,
+        ]);
+        $customerB = $this->customerIn($tenantB, '+966509998888');
+        $vehicleB = Vehicle::factory()->create([
+            'tenant_id' => $tenantB->id,
+            'center_id' => $centerB->id,
+            'customer_id' => $customerB->id,
+        ]);
+        $appointmentB = Appointment::create([
+            'tenant_id' => $tenantB->id,
+            'center_id' => $centerB->id,
+            'customer_id' => $customerB->id,
+            'vehicle_id' => $vehicleB->id,
+            'scheduled_at' => Carbon::now()->addDays(2),
+            'estimated_end_at' => Carbon::now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+
+        // Corrupted delivery in tenantA referencing tenantB's appointment
+        $delivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenantA->id,
+            'appointment_id' => $appointmentB->id,
+            'customer_id' => $customerA->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointmentB->scheduled_at,
+            'idempotency_key' => hash('sha256', 'cross-tenant-mismatch'),
+            'phone_hash' => hash('sha256', '+966501234567'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        TenancyContext::set($tenantB->id, $centerB->id);
+
+        $spy = Mockery::mock(SmsService::class);
+        $spy->shouldNotReceive('send');
+        $this->app->instance(SmsService::class, $spy);
+
+        (new SendAppointmentMessage($delivery->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            app(SmsService::class)
+        );
+
+        $this->assertSame(AppointmentMessageDelivery::STATUS_SKIPPED, $delivery->fresh()->status);
+        $this->assertSame('appointment_missing', $delivery->fresh()->error_code);
+        $this->assertSame(0, SmsUsageLog::count());
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
+    }
+
+    public function test_send_job_records_appointment_center_id_on_sms_usage_log(): void
+    {
+        Http::fake([
+            '*' => Http::response(['MessageID' => 'prov-msg-123', 'status' => 'sent'], 200),
+        ]);
+
+        $integration = Integration::create([
+            'name' => 'Fake Unifonic',
+            'name_ar' => 'مزود تجريبي',
+            'type' => 'sms',
+            'provider' => 'unifonic',
+            'is_active' => true,
+            'is_default' => true,
+            'config' => [
+                'app_sid' => 'test-sid',
+                'sender_id' => 'KHIDMAH',
+            ],
+        ]);
+
+        $tenant = $this->publishedTenant();
+        $firstCenter = Center::factory()->create([
+            'tenant_id' => $tenant->id,
+            'is_active' => true,
+        ]);
+        $secondCenter = Center::factory()->create([
+            'tenant_id' => $tenant->id,
+            'is_active' => true,
+        ]);
+        $customer = $this->customerIn($tenant, '+966501234567');
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $secondCenter->id,
+            'customer_id' => $customer->id,
+        ]);
+        $appointment = Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $secondCenter->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'scheduled_at' => Carbon::now()->addDays(2),
+            'estimated_end_at' => Carbon::now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_SCHEDULED,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+        ]);
+
+        TenantSmsBalance::getOrCreate($tenant->id)->addCredits(5);
+
+        $delivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenant->id,
+            'appointment_id' => $appointment->id,
+            'customer_id' => $customer->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $appointment->scheduled_at,
+            'idempotency_key' => hash('sha256', 'usage-log-center'),
+            'phone_hash' => hash('sha256', '+966501234567'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        // Stale wrong center before worker runs
+        TenancyContext::set($tenant->id, $firstCenter->id);
+
+        $smsService = new SmsService($integration);
+        (new SendAppointmentMessage($delivery->id))->handle(
+            app(AppointmentMessageTemplate::class),
+            $smsService
+        );
+
+        $usageLog = SmsUsageLog::withoutGlobalScopes()->where('tenant_id', $tenant->id)->first();
+        $this->assertNotNull($usageLog);
+        $this->assertSame($secondCenter->id, (int) $usageLog->center_id);
+        $this->assertSame(4, (int) TenantSmsBalance::where('tenant_id', $tenant->id)->value('balance'));
+        $this->assertNull(TenancyContext::tenantId());
+        $this->assertNull(TenancyContext::centerId());
     }
 }

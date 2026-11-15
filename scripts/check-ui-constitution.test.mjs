@@ -259,3 +259,153 @@ test('handles --base (PR diff), untracked, renamed, deleted files, and ignores u
 
     fs.rmSync(tmp, { recursive: true, force: true });
 });
+
+test('detects hardcoded hex colors (UI-003-HEX) while exempting tokens.css, marketing landing, CSS IDs, and url(#clip)', () => {
+    const tmp = makeTempProject({
+        'resources/js/Design/tokens.css': `:root {\n  --color-brand-primary: #2563eb;\n}\n`,
+        'resources/js/Pages/Public/landing/Hero.vue': `<template><div class="bg-[#0f172a]">{{ $t('common.app_name') }}</div></template>`,
+        'resources/js/Pages/SafeCss.vue': `<template><div class="bg-surface" style="color: var(--color-text-primary)">{{ $t('common.save') }}</div></template>
+<style>
+#app-shell {
+  background: var(--color-surface);
+  clip-path: url(#clip0);
+}
+</style>`,
+        'resources/js/Pages/HexBad.vue': `<template>
+    <div class="bg-[#2563eb] text-[#fff]" style="border-color: #dc2626">{{ $t('common.save') }}</div>
+</template>
+<style>
+.bad { color: #0f172a; }
+</style>`,
+    });
+
+    assert.equal(inspectFile('resources/js/Design/tokens.css', sampleLocales, tmp).length, 0);
+    assert.equal(inspectFile('resources/js/Pages/Public/landing/Hero.vue', sampleLocales, tmp).length, 0);
+    assert.equal(inspectFile('resources/js/Pages/SafeCss.vue', sampleLocales, tmp).length, 0);
+
+    const bad = inspectFile('resources/js/Pages/HexBad.vue', sampleLocales, tmp);
+    const hexFindings = bad.filter((f) => f.rule === 'UI-003-HEX');
+    assert.equal(hexFindings.length, 3);
+    assert.ok(hexFindings.every((f) => f.severity === 'ERROR'));
+    fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('detects design token definitions outside tokens.css (UI-TOKEN-OUTSIDE) without flagging var() usage', () => {
+    const tmp = makeTempProject({
+        'resources/js/Design/tokens.css': `:root {\n  --color-surface: #ffffff;\n  --space-4: 1rem;\n}\n`,
+        'resources/js/Design/custom.css': `:root {\n  --color-brand-alt: #111111;\n  --space-custom: 2rem;\n}\n.box { background: var(--color-surface); }\n`,
+        'resources/js/Pages/TokenInVue.vue': `<template><div class="bg-surface">{{ $t('common.save') }}</div></template>
+<style>
+.card {
+  --radius-card: 12px;
+  padding: var(--space-4);
+}
+</style>`,
+    });
+
+    assert.equal(inspectFile('resources/js/Design/tokens.css', sampleLocales, tmp).length, 0);
+
+    const badCss = inspectFile('resources/js/Design/custom.css', sampleLocales, tmp);
+    assert.equal(badCss.filter((f) => f.rule === 'UI-TOKEN-OUTSIDE').length, 2);
+
+    const badVue = inspectFile('resources/js/Pages/TokenInVue.vue', sampleLocales, tmp);
+    assert.equal(badVue.filter((f) => f.rule === 'UI-TOKEN-OUTSIDE').length, 1);
+    fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('detects unauthorized React/UI libraries in imports and package.json (UI-UNAUTHORIZED-LIB)', () => {
+    const tmp = makeTempProject({
+        'package.json': JSON.stringify({
+            name: 'test',
+            dependencies: { vue: '^3.4.0', react: '^19.0.0' },
+            devDependencies: { '@radix-ui/react-dialog': '^1.0.0', vitest: '^2.1.5' },
+        }, null, 2),
+        'resources/js/Pages/ReactBad.vue': `<script setup>
+import React from 'react';
+import { Dialog } from '@radix-ui/react-dialog';
+import { Button } from 'shadcn-ui';
+</script>
+<template><div class="bg-surface">{{ $t('common.save') }}</div></template>`,
+    });
+
+    const pkgFindings = inspectFile('package.json', sampleLocales, tmp);
+    assert.equal(pkgFindings.filter((f) => f.rule === 'UI-UNAUTHORIZED-LIB').length, 2);
+
+    const vueFindings = inspectFile('resources/js/Pages/ReactBad.vue', sampleLocales, tmp);
+    assert.equal(vueFindings.filter((f) => f.rule === 'UI-UNAUTHORIZED-LIB').length, 3);
+    fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('fails explicitly when --base ref is missing instead of silent PASS', () => {
+    const tmp = makeTempProject({
+        'resources/js/Pages/Safe.vue': `<template><div class="bg-surface">{{ $t('common.save') }}</div></template>`,
+    }, true);
+
+    assert.throws(
+        () => runConstitutionCheck(parseArgs(['--base', 'origin/nonexistent-branch']), tmp),
+        /unavailable or cannot be resolved/
+    );
+    fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('CI --base mode catches deliberate new violations while isolating untouched legacy errors', () => {
+    const tmp = makeTempProject({
+        'resources/js/Pages/LegacyWithErrors.vue': `<script setup>
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+</script>
+<template>
+    <div v-html="legacyHtml" style="color: #111111">
+        <PrimaryButton>{{ $t('common.save') }}</PrimaryButton>
+    </div>
+</template>`,
+    }, true);
+
+    execFileSync('git', ['checkout', '-b', 'feature/safe-pr'], { cwd: tmp, stdio: 'ignore' });
+    fs.writeFileSync(
+        path.join(tmp, 'resources/js/Pages/LegacyWithErrors.vue'),
+        `<script setup>
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+</script>
+<template>
+    <div v-html="legacyHtml" style="color: #111111">
+        <PrimaryButton>{{ $t('common.save') }}</PrimaryButton>
+        <p class="text-text-primary">{{ $t('work_orders.title') }}</p>
+    </div>
+</template>`,
+        'utf8'
+    );
+    execFileSync('git', ['add', '.'], { cwd: tmp, stdio: 'ignore' });
+    execFileSync('git', ['commit', '-m', 'safe addition on legacy file'], { cwd: tmp, stdio: 'ignore' });
+
+    const safePrReport = runConstitutionCheck(parseArgs(['--base', 'main']), tmp);
+    assert.equal(safePrReport.errors.length, 0);
+    assert.ok(safePrReport.legacySkippedCount >= 3);
+
+    // Now introduce a deliberate new violation on a new file in the PR
+    fs.writeFileSync(
+        path.join(tmp, 'resources/js/Pages/NewViolation.vue'),
+        `<template><div class="bg-[#ff0000]">{{ $t('common.save') }}</div></template>`,
+        'utf8'
+    );
+    execFileSync('git', ['add', '.'], { cwd: tmp, stdio: 'ignore' });
+    execFileSync('git', ['commit', '-m', 'deliberate hex violation'], { cwd: tmp, stdio: 'ignore' });
+
+    const badPrReport = runConstitutionCheck(parseArgs(['--base', 'main']), tmp);
+    assert.equal(badPrReport.errors.length, 1);
+    assert.equal(badPrReport.errors[0].rule, 'UI-003-HEX');
+    fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('detects parallel design sources (UI-PARALLEL-DESIGN-SOURCE) in changed files without flagging .agents/skills', () => {
+    const tmp = makeTempProject({}, true);
+    fs.mkdirSync(path.join(tmp, 'design-system/khidmah-pro'), { recursive: true });
+    fs.mkdirSync(path.join(tmp, '.agents/skills/design-system'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, 'design-system/khidmah-pro/MASTER.md'), '# Master\n', 'utf8');
+    fs.writeFileSync(path.join(tmp, 'DESIGN.md'), '# Design\n', 'utf8');
+    fs.writeFileSync(path.join(tmp, '.agents/skills/design-system/SKILL.md'), '# Skill\n', 'utf8');
+
+    const report = runConstitutionCheck(parseArgs(['--changed']), tmp);
+    const parallel = report.errors.filter((f) => f.rule === 'UI-PARALLEL-DESIGN-SOURCE');
+    assert.equal(parallel.length, 2);
+    fs.rmSync(tmp, { recursive: true, force: true });
+});

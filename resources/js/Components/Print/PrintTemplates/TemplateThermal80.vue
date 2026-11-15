@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bg-white text-gray-900 font-mono p-4 mx-auto relative select-text text-xs leading-normal"
+        class="bg-white text-gray-900 p-4 mx-auto relative select-text text-xs leading-normal print-thermal-sheet"
         :class="
             previewMode
                 ? 'w-[80mm] shadow-xl border border-gray-200 rounded-lg scale-95 origin-top'
@@ -8,6 +8,15 @@
         "
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
+        <!-- Missing Historical Snapshots Notice -->
+        <div
+            v-if="hasMissingSnapshots"
+            class="mb-2 px-2 py-1 rounded border border-amber-300 bg-amber-50 text-amber-900 text-[10px] font-medium text-center"
+            data-testid="missing-snapshots-warning"
+        >
+            {{ missingSnapshotsMessage }}
+        </div>
+
         <!-- Center Header -->
         <div
             class="text-center pb-3 border-b transition-all duration-300"
@@ -16,7 +25,7 @@
             "
         >
             <div
-                v-if="visualSettings.show_logo && (centerData.logo_url || centerData.logo)"
+                v-if="showLogo && (centerData.logo_url || centerData.logo)"
                 class="w-12 h-12 mx-auto mb-1"
             >
                 <img
@@ -26,7 +35,7 @@
                 />
             </div>
             <h2
-                class="text-sm font-bold text-gray-900 transition-all duration-300"
+                class="text-sm font-bold text-gray-900 transition-all duration-300 break-words"
                 :style="{ color: isSleek ? primaryColor : '#111827' }"
             >
                 {{ centerData.name || $t('common.app_name') }}
@@ -35,16 +44,17 @@
                 v-if="printHelpers.isTaxEnabled(props.data) && centerData.tax_number"
                 class="text-[10px] text-gray-500 mt-0.5"
             >
-                {{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}
+                {{ $t('company_profile.profile.vat_number') }}:
+                <span dir="ltr" class="inline-block font-mono">{{ centerData.tax_number }}</span>
             </p>
-            <p class="text-[9px] text-gray-400 mt-0.5">{{ centerData.address }}</p>
+            <p class="text-[9px] text-gray-400 mt-0.5 break-words">{{ centerData.address }}</p>
         </div>
 
         <!-- Document Details -->
         <div
             class="py-2 border-b border-dashed border-gray-300 text-[10px] text-gray-600 space-y-0.5"
         >
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center gap-2">
                 <span
                     class="font-bold text-gray-800 transition-all duration-300"
                     :class="
@@ -56,24 +66,24 @@
                 >
                     {{ getDocumentTitle() }}
                 </span>
-                <span class="font-bold" :style="{ color: primaryColor }">
-                    #{{ data.code || 'WO-100293' }}
+                <span class="font-bold font-mono" dir="ltr" :style="{ color: primaryColor }">
+                    {{ data.code ? '#' + data.code : previewMode ? '#WO-100293' : '-' }}
                 </span>
             </div>
             <div class="flex justify-between">
                 <span>{{ $t('work_orders.print_view.date') }}:</span>
-                <span>{{ printHelpers.formatDate(data.created_at || new Date()) }}</span>
+                <span dir="ltr" class="font-mono">{{ printHelpers.formatDate(data.created_at || new Date()) }}</span>
             </div>
             <div
                 v-if="data.original_invoice_number"
                 class="flex justify-between text-indigo-700 font-bold"
             >
-                <span>{{ isRtl ? 'الفاتورة الأصلية' : 'Ref. Invoice' }}:</span>
-                <span>#{{ data.original_invoice_number }}</span>
+                <span>{{ $t('invoices.original_invoice') }}:</span>
+                <span dir="ltr" class="font-mono">#{{ data.original_invoice_number }}</span>
             </div>
-            <div v-if="data.return_reason" class="flex justify-between text-gray-500 text-[9px]">
-                <span>{{ isRtl ? 'سبب الإرجاع' : 'Reason' }}:</span>
-                <span>{{ data.return_reason }}</span>
+            <div v-if="data.return_reason" class="flex justify-between gap-2 text-gray-500 text-[9px]">
+                <span>{{ $t('print.return_reason') }}:</span>
+                <span class="break-words text-end">{{ data.return_reason }}</span>
             </div>
             <div
                 v-if="data.expected_end_date"
@@ -133,7 +143,10 @@
                     }}:
                 </span>
                 <span class="font-bold text-gray-900">
-                    {{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}
+                    {{
+                        data.customer?.name ||
+                        (previewMode ? (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') : '-')
+                    }}
                 </span>
             </div>
             <div
@@ -174,7 +187,10 @@
                             alt="Make Logo"
                             class="w-3.5 h-3.5 object-contain"
                         />
-                        {{ data.vehicle?.make || (isRtl ? 'تويوتا' : 'Toyota') }}
+                        {{
+                            data.vehicle?.make ||
+                            (previewMode ? (isRtl ? 'تويوتا' : 'Toyota') : '-')
+                        }}
                     </span>
                 </div>
                 <div class="flex flex-wrap justify-between items-center gap-1 min-w-0">
@@ -192,7 +208,7 @@
                         {{ printHelpers.getLocalizedColor(data.vehicle.color, isRtl) }}
                     </span>
                 </div>
-                <div class="flex justify-between">
+                <div v-if="previewMode || data.odometer" class="flex justify-between">
                     <span>{{ $t('work_orders.print_view.odometer') }}:</span>
                     <span>{{ data.odometer || '45,210' }}{{ ' ' + $t('common.km') }}</span>
                 </div>
@@ -218,7 +234,7 @@
                     </span>
                     <span class="font-bold text-emerald-600 text-sm" dir="ltr">
                         <PrintMoney
-                            :amount="data.amount || 250"
+                            :amount="previewMode ? data.amount || 250 : (data.amount ?? 0)"
                             :currency-code="data.currency_code"
                             :visual-settings="visualSettings"
                         />
@@ -227,14 +243,17 @@
                 <p>
                     {{ $t('work_orders.print_view.received_from') }}:
                     <strong>
-                        {{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}
+                        {{
+                            data.customer?.name ||
+                            (previewMode ? (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') : '-')
+                        }}
                     </strong>
                 </p>
                 <p class="mt-1">
                     {{ $t('common.amount') }}:
                     <strong>
                         <PrintMoney
-                            :amount="data.amount || 250"
+                            :amount="previewMode ? data.amount || 250 : (data.amount ?? 0)"
                             :currency-code="data.currency_code"
                             :visual-settings="visualSettings"
                         />
@@ -295,7 +314,7 @@
                             </span>
                             <span v-if="showPricingColumns" dir="ltr">
                                 <PrintMoney
-                                    :amount="printTotals.lineSubtotalDisplay(item)"
+                                    :amount="printTotals.lineSubtotalDisplay(item, props.data)"
                                     :currency-code="data.currency_code"
                                     :visual-settings="visualSettings"
                                 />
@@ -362,7 +381,7 @@
                             </span>
                             <span v-if="showPricingColumns" dir="ltr">
                                 <PrintMoney
-                                    :amount="printTotals.lineSubtotalDisplay(item)"
+                                    :amount="printTotals.lineSubtotalDisplay(item, props.data)"
                                     :currency-code="data.currency_code"
                                     :visual-settings="visualSettings"
                                 />
@@ -487,7 +506,7 @@
                         </span>
                         <span v-if="showPricingColumns" dir="ltr">
                             <PrintMoney
-                                :amount="printTotals.lineSubtotalDisplay(item)"
+                                :amount="printTotals.lineSubtotalDisplay(item, props.data)"
                                 :currency-code="data.currency_code"
                                 :visual-settings="visualSettings"
                             />
@@ -573,12 +592,8 @@
                 <span>
                     {{
                         documentType === 'payments'
-                            ? isRtl
-                                ? 'إجمالي الفاتورة:'
-                                : 'Invoice Total:'
-                            : isRtl
-                              ? 'الإجمالي النهائي:'
-                              : 'Total Amount:'
+                            ? $t('work_orders.print_view.invoice_total') + ':'
+                            : $t('common.total') + ':'
                     }}
                 </span>
                 <span :style="{ color: primaryColor }" dir="ltr">
@@ -590,10 +605,10 @@
                 </span>
             </div>
             <div
-                v-if="!['quotation', 'proforma_invoice'].includes(documentType)"
+                v-if="showPayments"
                 class="flex justify-between text-gray-500 text-[10px]"
             >
-                <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
+                <span>{{ $t('work_orders.print_view.total_paid') }}:</span>
                 <PrintMoney
                     :amount="totals.paid - (data.bad_debt || 0)"
                     :currency-code="data.currency_code"
@@ -601,13 +616,10 @@
                 />
             </div>
             <div
-                v-if="
-                    !['quotation', 'proforma_invoice'].includes(documentType) &&
-                    (data.bad_debt || 0) > 0
-                "
+                v-if="showPayments && (data.bad_debt || 0) > 0"
                 class="flex justify-between text-amber-600 text-[10px]"
             >
-                <span>{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</span>
+                <span>{{ $t('print.bad_debt') }}:</span>
                 <PrintMoney
                     :amount="data.bad_debt"
                     :currency-code="data.currency_code"
@@ -615,10 +627,10 @@
                 />
             </div>
             <div
-                v-if="!['quotation', 'proforma_invoice'].includes(documentType)"
+                v-if="showPayments"
                 class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded"
             >
-                <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>
+                <span>{{ $t('work_orders.print_view.balance') }}:</span>
                 <PrintMoney
                     :amount="totals.balance"
                     :currency-code="data.currency_code"
@@ -805,12 +817,10 @@ import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import PrintMoney from '@/Components/Print/PrintMoney.vue';
-import { usePrint } from '@/Composables/usePrint';
-import { usePrintTotals } from '@/Composables/usePrintTotals';
+import { usePrintTemplateLogic } from '@/Composables/usePrintTemplateLogic';
 
 const page = usePage();
-const { t, locale } = useI18n();
-const isRtl = computed(() => locale.value === 'ar');
+const { t } = useI18n();
 
 const props = defineProps({
     documentType: {
@@ -839,9 +849,35 @@ const props = defineProps({
     },
 });
 
-// Use shared print composables
-const printHelpers = usePrint();
-const printTotals = usePrintTotals();
+const {
+    isRtl,
+    printHelpers,
+    printTotals,
+    filteredItems,
+    services,
+    parts,
+    showLogo,
+    showQrCode,
+    showStamp,
+    showPayments,
+    showWarranty,
+    showTerms,
+    showVehicle,
+    hasMissingSnapshots,
+    missingSnapshotsMessage,
+    totals,
+    getDocumentTitle,
+} = usePrintTemplateLogic(props, {
+    dummyItems: [
+        {
+            service_name: 'فحص كمبيوتر وبرمجة كاملة',
+            description: 'فحص الحساسات ومسح الأخطاء',
+            qty: 1,
+            unit_price: 150,
+        },
+    ],
+    qrDocumentTypes: ['invoice', 'parts_invoice', 'credit_note', 'receipt'],
+});
 
 // Destructure helpers for use in template
 const {
@@ -889,25 +925,6 @@ const showExclusive = computed(() => {
     return taxSettings?.show_amount_before_vat ?? true;
 });
 
-// Services and Parts computeds for Invoice separation
-const filteredItems = computed(() => {
-    const items = props.data.items || dummyItems;
-    return items.filter((item) => item.status !== 'cancelled');
-});
-
-const services = computed(() => {
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType))
-        return [];
-    return filteredItems.value.filter((item) => !item.is_part);
-});
-
-const parts = computed(() => {
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) {
-        return filteredItems.value;
-    }
-    return filteredItems.value.filter((item) => item.is_part);
-});
-
 const effectiveTemplate = computed(
     () =>
         props.documentSettings?.template ||
@@ -915,24 +932,6 @@ const effectiveTemplate = computed(
         'TemplateThermal80'
 );
 const isSleek = computed(() => effectiveTemplate.value === 'TemplateSleekThermal');
-const showQrCode = computed(
-    () => printHelpers.isTaxEnabled(props.data) && Boolean(props.data?.qr_code_url)
-);
-const showStamp = computed(
-    () => (props.documentSettings?.show_stamp ?? props.visualSettings?.show_stamp ?? true) !== false
-);
-
-function getDocumentTitle() {
-    const taxActive = printHelpers.isTaxEnabled(props.data);
-    let title = isRtl.value
-        ? props.documentSettings?.title_ar ||
-          printHelpers.getDocTypeTitle(props.documentType, taxActive)
-        : props.documentSettings?.title_en ||
-          printHelpers.getDocTypeTitle(props.documentType, taxActive);
-
-    title = String(title || '');
-    return printHelpers.cleanDocumentTitle(title, taxActive);
-}
 
 const damageMarks = computed(() => props.data.damage_marks || []);
 
@@ -981,12 +980,43 @@ const visibleSignatures = computed(() => {
             : defaultSignatures;
     return sigs.filter((s) => s.show !== false);
 });
-
-// Computed Totals - using shared composable
-const totals = computed(() => {
-    return printTotals.calculateTotals(
-        (props.data.items || dummyItems).filter((item) => item.status !== 'cancelled'),
-        props.data
-    );
-});
 </script>
+
+<style scoped>
+.print-thermal-sheet {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.print-thermal-sheet table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.print-thermal-sheet th,
+.print-thermal-sheet td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+@media print {
+    .print-thermal-sheet {
+        width: 100% !important;
+        max-width: 74mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .print-thermal-sheet thead {
+        display: table-header-group;
+    }
+
+    .print-thermal-sheet tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+</style>

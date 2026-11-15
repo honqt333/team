@@ -87,13 +87,16 @@
                                     inputmode="numeric"
                                 />
                             </div>
-                            <button
+                            <AppButton
                                 type="submit"
-                                :disabled="form.processing || form.code.length !== 6"
-                                class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                :loading="form.processing"
+                                :disabled="form.code.length !== 6"
+                                variant="primary"
+                                size="md"
+                                class="bg-emerald-600 hover:bg-emerald-700"
                             >
                                 {{ $t('common.activate') }}
-                            </button>
+                            </AppButton>
                         </form>
                         <p v-if="$page.props.errors?.code" class="text-red-500 text-sm mt-1">
                             {{ $page.props.errors.code }}
@@ -116,6 +119,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import TwoFactorManageSection from '@/Components/System/TwoFactorManageSection.vue';

@@ -49,6 +49,11 @@
                 accept="image/*"
                 :max-size-mb="2"
                 :error="form.errors.logo"
+                @select="form.remove_logo = false"
+                @remove-existing="
+                    form.logo_path = '';
+                    form.remove_logo = true;
+                "
             />
 
             <div
@@ -102,6 +107,7 @@ const form = useForm({
     is_active: props.make?.is_active ?? true,
     logo: null,
     logo_path: props.make?.logo_path || '',
+    remove_logo: false,
     _method: props.make ? 'put' : undefined,
 });
 

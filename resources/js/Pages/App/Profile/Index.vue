@@ -5,7 +5,7 @@ import AppTabs from '@/Components/Common/AppTabs.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -13,11 +13,10 @@ import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import DangerButton from '@/Components/DangerButton.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 
 const props = defineProps({
@@ -118,8 +117,7 @@ const profileForm = useForm({
     email: user.value.email,
 });
 
-const uploadPhoto = (event) => {
-    const file = event.target.files[0];
+const uploadPhoto = (file) => {
     if (!file) return;
 
     photoForm.photo = file;
@@ -131,6 +129,17 @@ const uploadPhoto = (event) => {
         },
         onError: (errors) => {
             if (errors.photo) error(errors.photo);
+            photoForm.reset();
+        },
+    });
+};
+
+const deletePhoto = () => {
+    photoForm.delete(route('app.profile.photo.delete'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            success(t('profile.photo.deleted'));
+            photoForm.reset();
         },
     });
 };
@@ -189,6 +198,19 @@ const preferencesForm = useForm({
     hide_floating_button: Boolean(props.preferences?.hide_floating_button),
     hide_floating_contact: Boolean(props.preferences?.hide_floating_contact),
 });
+
+watch(
+    () => props.preferences,
+    (nextPrefs) => {
+        if (!nextPrefs) return;
+        preferencesForm.layout = nextPrefs.layout || 'side';
+        preferencesForm.open_whatsapp = nextPrefs.open_whatsapp || 'app';
+        preferencesForm.whatsapp_sharing_preference = nextPrefs.whatsapp_sharing_preference || 'form';
+        preferencesForm.hide_floating_button = Boolean(nextPrefs.hide_floating_button);
+        preferencesForm.hide_floating_contact = Boolean(nextPrefs.hide_floating_contact);
+    },
+    { deep: true }
+);
 
 const savePreferences = () => {
     preferencesForm.post(route('app.profile.preferences'), {
@@ -293,9 +315,31 @@ const regenerateCodes = () =>
             <!-- Header Section with Integrated Tabs -->
             <PageHeader :title="user.name">
                 <template #icon>
-                    <!-- Photo Display & Upload Overlay -->
+                    <AppFileUpload
+                        v-if="user.can_update_photo"
+                        v-model="photoForm.photo"
+                        variant="image"
+                        compact-preview
+                        size="sm"
+                        :existing-url="user.photo_url || ''"
+                        :loading="photoForm.processing"
+                        :upload-button-text="$t('profile.photo.update')"
+                        accept="image/png,image/jpeg,image/webp"
+                        :max-size-mb="2"
+                        @select="uploadPhoto"
+                        @invalid="({ message }) => error(message)"
+                        @remove-existing="deletePhoto"
+                    >
+                        <template #placeholder>
+                            <span class="text-white text-2xl font-black select-none">
+                                {{ user.name?.charAt(0).toUpperCase() }}
+                            </span>
+                        </template>
+                    </AppFileUpload>
+
                     <div
-                        class="relative w-full h-full rounded-2xl overflow-hidden group flex items-center justify-center cursor-pointer select-none"
+                        v-else
+                        class="relative w-full h-full rounded-xl overflow-hidden flex items-center justify-center select-none"
                     >
                         <img
                             v-if="user.photo_url"
@@ -306,56 +350,6 @@ const regenerateCodes = () =>
                         <span v-else class="text-white text-2xl font-black">
                             {{ user.name?.charAt(0).toUpperCase() }}
                         </span>
-
-                        <!-- Upload Overlay -->
-                        <div
-                            v-if="user.can_update_photo"
-                            @click="$refs.photoInput.click()"
-                            class="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
-                            :title="$t('profile.photo.update')"
-                        >
-                            <svg
-                                class="w-5 h-5 text-white mb-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                                />
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                            </svg>
-                            <span class="text-[10px] text-white/90 font-medium">
-                                {{ $t('profile.photo.update') }}
-                            </span>
-                        </div>
-
-                        <!-- Hidden Input -->
-                        <input
-                            type="file"
-                            ref="photoInput"
-                            class="hidden"
-                            accept="image/*"
-                            @change="uploadPhoto"
-                        />
-
-                        <!-- Loading State -->
-                        <div
-                            v-if="photoForm.processing"
-                            class="absolute inset-0 bg-white/70 dark:bg-gray-800/70 flex items-center justify-center"
-                        >
-                            <div
-                                class="w-6 h-6 border-2 border-action-primary border-t-transparent rounded-full animate-spin"
-                            ></div>
-                        </div>
                     </div>
                 </template>
 
@@ -656,11 +650,11 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         name="name"
                                         v-model="profileForm.name"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary text-sm"
+                                        input-class="ps-10"
                                         required
                                     />
                                 </div>
@@ -696,11 +690,11 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="email"
                                         name="email"
                                         v-model="profileForm.email"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary text-sm"
+                                        input-class="ps-10"
                                         required
                                     />
                                 </div>
@@ -736,12 +730,12 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="tel"
-                                        :value="user.phone"
+                                        :model-value="user.phone"
                                         disabled
                                         dir="ltr"
-                                        class="w-full ps-10 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-mono text-sm cursor-not-allowed"
+                                        input-class="ps-10 font-mono"
                                     />
                                 </div>
                                 <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
@@ -750,13 +744,13 @@ const regenerateCodes = () =>
                             </div>
 
                             <div class="pt-2">
-                                <PrimaryButton
+                                <AppButton
                                     type="submit"
                                     :disabled="profileForm.processing"
                                     :loading="profileForm.processing"
                                 >
                                     {{ $t('profile.info.save_changes') }}
-                                </PrimaryButton>
+                                </AppButton>
                             </div>
                         </form>
                     </div>
@@ -1078,13 +1072,13 @@ const regenerateCodes = () =>
 
                             <!-- Save Preferences -->
                             <div>
-                                <PrimaryButton
+                                <AppButton
                                     type="submit"
                                     :disabled="preferencesForm.processing"
                                     :loading="preferencesForm.processing"
                                 >
                                     {{ $t('profile.preferences.save') }}
-                                </PrimaryButton>
+                                </AppButton>
                             </div>
                         </form>
                     </div>
@@ -1262,13 +1256,13 @@ const regenerateCodes = () =>
                                     </SelectableCard>
                                 </div>
 
-                                <PrimaryButton
+                                <AppButton
                                     @click="sendCode"
                                     :disabled="sendCodeForm.processing"
                                     :loading="sendCodeForm.processing"
                                 >
                                     {{ $t('security.send_verification_code') }}
-                                </PrimaryButton>
+                                </AppButton>
                             </div>
 
                             <!-- Step 2: Enter Code -->
@@ -1285,12 +1279,12 @@ const regenerateCodes = () =>
                                 </p>
                                 <form @submit.prevent="enable2FA" class="flex items-start gap-3">
                                     <div>
-                                        <input
+                                        <AppInput
                                             type="text"
                                             v-model="codeForm.code"
                                             maxlength="6"
                                             placeholder="000000"
-                                            class="w-40 text-center text-2xl tracking-widest rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-2 focus:ring-focus-ring"
+                                            input-class="w-40 text-center text-2xl tracking-widest font-mono"
                                             dir="ltr"
                                             inputmode="numeric"
                                             autofocus
@@ -1438,11 +1432,11 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="password"
                                         name="current_password"
                                         v-model="passwordForm.current_password"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
+                                        input-class="ps-10"
                                         required
                                     />
                                 </div>
@@ -1478,11 +1472,11 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="password"
                                         name="password"
                                         v-model="passwordForm.password"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
+                                        input-class="ps-10"
                                         required
                                     />
                                 </div>
@@ -1518,24 +1512,24 @@ const regenerateCodes = () =>
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="password"
                                         name="password_confirmation"
                                         v-model="passwordForm.password_confirmation"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
+                                        input-class="ps-10"
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div class="pt-2">
-                                <PrimaryButton
+                                <AppButton
                                     type="submit"
                                     :disabled="passwordForm.processing"
                                     :loading="passwordForm.processing"
                                 >
                                     {{ $t('security.update_password') }}
-                                </PrimaryButton>
+                                </AppButton>
                             </div>
                         </form>
                     </div>
@@ -1632,9 +1626,9 @@ const regenerateCodes = () =>
 
                 <template #footer>
                     <div class="flex justify-end">
-                        <SecondaryButton @click="showPermissionsModal = false">
+                        <AppButton variant="secondary" @click="showPermissionsModal = false">
                             {{ $t('profile.permissions_modal.close') }}
-                        </SecondaryButton>
+                        </AppButton>
                     </div>
                 </template>
             </BaseModal>
@@ -1656,16 +1650,22 @@ const regenerateCodes = () =>
                         />
                     </div>
                     <div class="flex gap-3">
-                        <DangerButton
+                        <AppButton
                             type="submit"
+                            variant="danger"
                             :disabled="disableForm.processing"
+                            :loading="disableForm.processing"
                             class="flex-1"
                         >
                             {{ $t('security.deactivate') }}
-                        </DangerButton>
-                        <SecondaryButton type="button" @click="showDisableModal = false">
+                        </AppButton>
+                        <AppButton
+                            type="button"
+                            variant="secondary"
+                            @click="showDisableModal = false"
+                        >
                             {{ $t('system.company_subscription.history.confirm_modal.go_back') }}
-                        </SecondaryButton>
+                        </AppButton>
                     </div>
                 </form>
             </BaseModal>
@@ -1690,16 +1690,21 @@ const regenerateCodes = () =>
                         />
                     </div>
                     <div class="flex gap-3">
-                        <PrimaryButton
+                        <AppButton
                             type="submit"
                             :disabled="regenForm.processing"
+                            :loading="regenForm.processing"
                             class="flex-1"
                         >
                             {{ $t('security.new_codes') }}
-                        </PrimaryButton>
-                        <SecondaryButton type="button" @click="showRegenModal = false">
+                        </AppButton>
+                        <AppButton
+                            type="button"
+                            variant="secondary"
+                            @click="showRegenModal = false"
+                        >
                             {{ $t('common.cancel') }}
-                        </SecondaryButton>
+                        </AppButton>
                     </div>
                 </form>
             </BaseModal>

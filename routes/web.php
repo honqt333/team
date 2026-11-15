@@ -382,6 +382,7 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
     Route::patch('/profile', [App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
     Route::post('/profile/preferences', [App\Http\Controllers\App\ProfileController::class, 'updatePreferences'])->name('app.profile.preferences');
     Route::post('/profile/photo', [App\Http\Controllers\App\ProfileController::class, 'updatePhoto'])->middleware('throttle:uploads')->name('app.profile.photo.update');
+    Route::delete('/profile/photo', [App\Http\Controllers\App\ProfileController::class, 'deletePhoto'])->name('app.profile.photo.delete');
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
     Route::get('/userProfile', fn () => redirect()->route('app.profile'));
 
@@ -648,6 +649,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/integrations', [SettingsController::class, 'integrations'])->name('settings.integrations');
     Route::get('/addons', [SettingsController::class, 'integrations'])->name('app.addons');
+    Route::prefix('addons/whatsapp')->middleware('permission:settings.company.manage')->name('app.addons.whatsapp.')->group(function () {
+        Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
+        Route::put('/', [NotificationSettingsController::class, 'update'])->name('update');
+        Route::post('/test', [NotificationSettingsController::class, 'sendTest'])->name('test');
+        Route::post('/test-whatsapp', [NotificationSettingsController::class, 'sendTestWhatsapp'])->name('test-whatsapp');
+    });
     Route::get('/integrations', fn () => redirect()->route('settings.integrations'));
     // /settings/website is a placeholder card on the settings
     // hub. The real edit form lives at /settings/website/edit;
@@ -703,6 +710,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
         Route::put('/', [NotificationSettingsController::class, 'update'])->name('update');
         Route::post('/test', [NotificationSettingsController::class, 'sendTest'])->name('test');
+        Route::post('/test-whatsapp', [NotificationSettingsController::class, 'sendTestWhatsapp'])->name('test-whatsapp');
     });
 
     // ZATCA Phase 2 Self-Onboarding
@@ -856,11 +864,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::patch('/settings/condition-categories/{conditionCategory}/toggle-active', [VehicleConditionCategoryController::class, 'toggleActive'])->name('app.condition-categories.toggle');
 
     // Departments
-    Route::apiResource('departments', DepartmentController::class);
+    Route::apiResource('departments', DepartmentController::class)->except(['show']);
     Route::patch('/departments/{department}/toggle-active', [DepartmentController::class, 'toggleActive']);
 
     // Services
-    Route::apiResource('services', ServiceController::class);
+    Route::apiResource('services', ServiceController::class)->except(['show']);
     Route::patch('/services/{service}/toggle-active', [ServiceController::class, 'toggleActive']);
     Route::post('/services/toggle-inspections-setting', [ServiceController::class, 'toggleInspectionsSetting'])->name('app.services.toggle-inspections-setting');
 
@@ -1447,6 +1455,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Payment Settings
     Route::get('/settings/payment', fn () => redirect()->route('system.settings.index', ['tab' => 'payment']))->name('system.settings.payment')->middleware('system.permission:system.payment.settings');
     Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update')->middleware('system.permission:system.payment.settings');
+    Route::post('/settings/payment/bank-logo', [PaymentSettingsController::class, 'uploadBankLogo'])->name('system.settings.payment.bank_logo')->middleware('system.permission:system.payment.settings');
+    Route::post('/settings/payment/method-logo', [PaymentSettingsController::class, 'uploadMethodLogo'])->name('system.settings.payment.method_logo')->middleware('system.permission:system.payment.settings');
 
     // Dunning Settings (Phase 6 — collection automation)
     Route::get('/settings/dunning', fn () => redirect()->route('system.settings.index', ['tab' => 'dunning']))->name('system.settings.dunning')->middleware('system.permission:system.settings.manage');

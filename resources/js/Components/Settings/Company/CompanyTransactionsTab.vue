@@ -32,11 +32,7 @@
                         :label="$t('common.print')"
                         @click="handlePrint"
                     />
-                    <button
-                        type="button"
-                        @click="exportCsv"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
-                    >
+                    <AppButton variant="ghost" size="sm" @click="exportCsv">
                         <svg
                             class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
                             fill="none"
@@ -51,14 +47,10 @@
                             />
                         </svg>
                         <span>{{ $t('common.export') }}</span>
-                    </button>
+                    </AppButton>
                 </div>
 
-                <button
-                    type="button"
-                    @click="$emit('add-transaction')"
-                    class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2"
-                >
+                <AppButton variant="primary" @click="$emit('add-transaction')">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -68,7 +60,7 @@
                         />
                     </svg>
                     <span>{{ $t('company_profile.transactions.add') }}</span>
-                </button>
+                </AppButton>
             </div>
         </div>
 
@@ -79,14 +71,10 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                 <!-- 1. Search -->
                 <div>
-                    <label class="block text-2xs font-bold text-gray-500 dark:text-gray-400 mb-1">
-                        {{ $t('common.search') }}
-                    </label>
-                    <input
+                    <AppInput
                         v-model="searchQuery"
-                        type="text"
+                        :label="$t('common.search')"
                         :placeholder="$t('company_profile.transactions.filters.search_placeholder')"
-                        class="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     />
                 </div>
 
@@ -157,24 +145,7 @@
             >
                 <div class="flex flex-wrap items-center gap-3">
                     <!-- Status Quick Pills -->
-                    <div
-                        class="flex items-center gap-1 p-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
-                    >
-                        <button
-                            v-for="st in statusOptions"
-                            :key="st.value"
-                            type="button"
-                            @click="filterStatus = st.value"
-                            :class="[
-                                'px-3 py-1 text-2xs font-bold rounded-lg transition-all',
-                                filterStatus === st.value
-                                    ? 'bg-emerald-600 text-white shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
-                            ]"
-                        >
-                            {{ st.label }}
-                        </button>
-                    </div>
+                    <AppTabs v-model="filterStatus" :tabs="statusTabs" variant="pills" />
 
                     <!-- Custom Date Pickers when datePreset === 'custom' -->
                     <div v-if="datePreset === 'custom'" class="flex flex-wrap items-center gap-2">
@@ -194,13 +165,9 @@
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    @click="resetFilters"
-                    class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 bg-white dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-gray-200 dark:border-gray-700 rounded-xl transition-colors"
-                >
+                <AppButton variant="secondary" size="sm" @click="resetFilters">
                     {{ $t('company_profile.transactions.filters.reset') }}
-                </button>
+                </AppButton>
             </div>
         </div>
 
@@ -220,7 +187,7 @@
                 </span>
                 <span class="text-gray-300 dark:text-gray-700">|</span>
                 <span class="text-gray-700 dark:text-gray-300">
-                    VAT:
+                    {{ $t('common.vat') }}:
                     <strong class="font-mono text-emerald-600 dark:text-emerald-400">
                         {{ formatMoneyPlain(summaryTotals.revenueVat) }}
                     </strong>
@@ -234,7 +201,7 @@
                 </span>
                 <span class="text-gray-300 dark:text-gray-700">|</span>
                 <span class="text-gray-700 dark:text-gray-300">
-                    VAT:
+                    {{ $t('common.vat') }}:
                     <strong class="font-mono text-rose-600 dark:text-rose-400" dir="ltr">
                         ({{ formatMoneyPlain(summaryTotals.expenseVat) }})
                     </strong>
@@ -264,15 +231,6 @@
                 </strong>
             </div>
         </div>
-
-        <!-- Hidden file input for quick row attachment upload -->
-        <input
-            ref="quickAttachmentInputRef"
-            type="file"
-            accept=".jpg,.jpeg,.png,.webp,.pdf"
-            class="hidden"
-            @change="onQuickAttachmentSelected"
-        />
 
         <!-- Transactions Table -->
         <div
@@ -729,22 +687,22 @@
                     {{ $t('common.page') }} {{ currentPage }} / {{ totalPages }}
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button
-                        type="button"
+                    <AppButton
+                        variant="secondary"
+                        size="sm"
                         :disabled="currentPage <= 1"
                         @click="currentPage--"
-                        class="px-3 py-1 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40"
                     >
                         {{ $t('common.previous') }}
-                    </button>
-                    <button
-                        type="button"
+                    </AppButton>
+                    <AppButton
+                        variant="secondary"
+                        size="sm"
                         :disabled="currentPage >= totalPages"
                         @click="currentPage++"
-                        class="px-3 py-1 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40"
                     >
                         {{ $t('common.next') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
         </div>
@@ -765,7 +723,7 @@
                 </span>
                 <span class="text-gray-300 dark:text-gray-700">|</span>
                 <span class="text-gray-700 dark:text-gray-300">
-                    VAT:
+                    {{ $t('common.vat') }}:
                     <strong class="font-mono text-emerald-600 dark:text-emerald-400">
                         {{ formatMoneyPlain(summaryTotals.revenueVat) }}
                     </strong>
@@ -779,7 +737,7 @@
                 </span>
                 <span class="text-gray-300 dark:text-gray-700">|</span>
                 <span class="text-gray-700 dark:text-gray-300">
-                    VAT:
+                    {{ $t('common.vat') }}:
                     <strong class="font-mono text-rose-600 dark:text-rose-400" dir="ltr">
                         ({{ formatMoneyPlain(summaryTotals.expenseVat) }})
                     </strong>
@@ -809,6 +767,38 @@
                 </strong>
             </div>
         </div>
+
+        <!-- Quick Attachment Upload Modal (AppFileUpload) -->
+        <BaseModal
+            :show="!!targetAttachmentTransaction"
+            :title="$t('company_profile.transactions.form.attachment')"
+            size="sm"
+            @close="closeQuickAttachmentModal"
+        >
+            <div v-if="targetAttachmentTransaction" class="space-y-4">
+                <AppFileUpload
+                    v-model="quickAttachmentFile"
+                    :label="$t('company_profile.transactions.form.attachment')"
+                    accept=".jpg,.jpeg,.png,.webp,.pdf"
+                    :max-size-mb="5"
+                    :loading="uploadingAttachment"
+                    @select="onQuickAttachmentSelected"
+                    @invalid="({ message }) => error(message)"
+                />
+            </div>
+
+            <template #footer>
+                <div class="flex items-center justify-end w-full">
+                    <AppButton
+                        variant="secondary"
+                        :disabled="uploadingAttachment"
+                        @click="closeQuickAttachmentModal"
+                    >
+                        {{ $t('common.cancel') }}
+                    </AppButton>
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- Approve / Post Confirmation Modal with Approval Date Picker -->
         <BaseModal
@@ -888,6 +878,8 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppButton from '@/Components/App/AppButton.vue';
@@ -928,8 +920,9 @@ const currentPage = ref(1);
 const pageSize = ref(15);
 
 // Quick attachment upload
-const quickAttachmentInputRef = ref(null);
 const targetAttachmentTransaction = ref(null);
+const quickAttachmentFile = ref(null);
+const uploadingAttachment = ref(false);
 
 // Approve modal state
 const approvingTransaction = ref(null);
@@ -986,6 +979,10 @@ const statusOptions = computed(() => [
     { value: 'draft', label: t('common.status_draft') },
     { value: 'approved', label: t('common.approved_label') },
 ]);
+
+const statusTabs = computed(() =>
+    statusOptions.value.map((st) => ({ id: st.value, label: st.label }))
+);
 
 watch(
     [
@@ -1203,19 +1200,23 @@ function formatSignedAmount(val, type) {
 }
 
 function triggerQuickAttachmentUpload(trans) {
+    quickAttachmentFile.value = null;
     targetAttachmentTransaction.value = trans;
-    if (quickAttachmentInputRef.value) {
-        quickAttachmentInputRef.value.value = '';
-        quickAttachmentInputRef.value.click();
-    }
 }
 
-function onQuickAttachmentSelected(e) {
-    const file = e.target.files?.[0];
-    if (!file || !targetAttachmentTransaction.value) return;
+function closeQuickAttachmentModal() {
+    if (uploadingAttachment.value) return;
+    targetAttachmentTransaction.value = null;
+    quickAttachmentFile.value = null;
+}
 
+function onQuickAttachmentSelected(file) {
+    const selected = Array.isArray(file) ? file[0] : file;
+    if (!selected || !targetAttachmentTransaction.value) return;
+
+    uploadingAttachment.value = true;
     const formData = new FormData();
-    formData.append('attachment', file);
+    formData.append('attachment', selected);
 
     router.post(
         route(
@@ -1228,6 +1229,10 @@ function onQuickAttachmentSelected(e) {
             onSuccess: () => {
                 success(t('company_profile.transactions.attachment_uploaded'));
                 targetAttachmentTransaction.value = null;
+                quickAttachmentFile.value = null;
+            },
+            onFinish: () => {
+                uploadingAttachment.value = false;
             },
         }
     );

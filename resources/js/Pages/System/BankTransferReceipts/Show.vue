@@ -16,6 +16,7 @@ const { formatDate, formatDateTime, formatNumber: formatCurrency } = useFormatte
 
 const props = defineProps({
     receipt: { type: Object, required: true },
+    canOverride: { type: Boolean, default: false },
 });
 
 // Optional chaining on `document?.documentElement?.lang` so the
@@ -44,19 +45,38 @@ const hasMismatch = computed(
     () => amountState.value.type === 'short' || amountState.value.type === 'over'
 );
 
-const canApprove = computed(() => {
-    if (processing.value) return false;
-    if (!hasMismatch.value) return true;
-    // Mismatch path — admin must tick the explicit override checkbox.
-    return forceApprove.value;
+const maxApprovableAmount = computed(() => {
+    const received = Number(props.receipt.transfer_amount || 0);
+    const expected =
+        props.receipt.expected_amount !== null && props.receipt.expected_amount !== undefined
+            ? Number(props.receipt.expected_amount)
+            : received;
+    return Math.max(0, Math.min(received, expected));
 });
 
-// When the modal opens, default the approved amount to the full
-// transferred amount. The admin then edits it down if they want a
-// partial approval.
+const partialExceedsLimit = computed(
+    () => partialApproval.value && Number(approvedAmount.value || 0) > maxApprovableAmount.value + 0.001
+);
+
+const canApprove = computed(() => {
+    if (processing.value) return false;
+    if (partialApproval.value) {
+        const amt = Number(approvedAmount.value);
+        if (!amt || amt <= 0 || amt > maxApprovableAmount.value + 0.001) {
+            return false;
+        }
+    }
+    if (!hasMismatch.value) return true;
+    // Mismatch path — admin must hold override permission, tick the explicit override checkbox, AND provide a reason.
+    return props.canOverride && forceApprove.value && approveNotes.value.trim().length > 0;
+});
+
+// When the modal opens, default the approved amount to the max approvable
+// amount (capped by remaining invoice balance). The admin can edit it down
+// for a partial approval.
 watch(showApproveModal, (open) => {
     if (open) {
-        approvedAmount.value = Number(props.receipt.transfer_amount);
+        approvedAmount.value = maxApprovableAmount.value || Number(props.receipt.transfer_amount);
         partialApproval.value = false;
         forceApprove.value = false;
         approveNotes.value = '';
@@ -96,8 +116,7 @@ async function confirmApprove() {
     // immediate feedback without a round-trip.
     if (partialApproval.value) {
         const amt = Number(approvedAmount.value);
-        const received = Number(props.receipt.transfer_amount);
-        if (!amt || amt <= 0 || amt > received + 0.01) {
+        if (!amt || amt <= 0 || amt > maxApprovableAmount.value + 0.001) {
             return;
         }
     }
@@ -450,6 +469,64 @@ const amountState = computed(() => {
                         >
                             {{ amountState.message }}
                         </p>
+                        <div
+                            class="mt-4 grid grid-cols-2 gap-2 border-t border-current/10 pt-3 text-xs"
+                        >
+                            <div v-if="receipt.approved_amount !== null && receipt.approved_amount !== undefined">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.approved_amount_label') }}:
+                                </span>
+                                <span class="font-mono font-bold text-gray-900 dark:text-white">
+                                    {{ formatCurrency(receipt.approved_amount) }} SAR
+                                </span>
+                            </div>
+                            <div v-if="receipt.invoice_paid_amount !== null && receipt.invoice_paid_amount !== undefined">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.already_paid_on_invoice') }}:
+                                </span>
+                                <span class="font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                                    {{ formatCurrency(receipt.invoice_paid_amount) }} SAR
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.remaining_balance') }}:
+                                </span>
+                                <span class="font-mono font-bold text-gray-900 dark:text-white">
+                                    {{ formatCurrency(amountState.expected) }} SAR
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.receipt_status') }}:
+                                </span>
+                                <span class="font-semibold text-gray-900 dark:text-white">
+                                    {{ receipt.status }}
+                                </span>
+                            </div>
+                            <div v-if="receipt.payment?.status">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.payment_status') }}:
+                                </span>
+                                <span class="font-semibold text-gray-900 dark:text-white">
+                                    {{ receipt.payment.status }}
+                                </span>
+                            </div>
+                            <div v-if="receipt.payment?.invoice?.status">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('system.bank_transfer_receipts.invoice_status') }}:
+                                </span>
+                                <span class="font-semibold text-gray-900 dark:text-white">
+                                    {{ receipt.payment.invoice.status }}
+                                </span>
+                            </div>
+                        </div>
+                        <p
+                            v-if="receipt.review_notes"
+                            class="mt-3 rounded-lg bg-white/60 p-2 text-xs text-gray-700 dark:bg-gray-900/40 dark:text-gray-200"
+                        >
+                            {{ receipt.review_notes }}
+                        </p>
                     </div>
 
                     <div class="rounded-xl border border-action-primary/25 bg-selection-bg p-5">
@@ -528,17 +605,19 @@ const amountState = computed(() => {
 
                     <!-- Action buttons -->
                     <div v-if="receipt.status === 'pending'" class="space-y-2">
-                        <button
+                        <AppButton
                             @click="approve"
-                            :disabled="processing"
-                            class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            :loading="processing"
+                            variant="primary"
+                            size="md"
+                            class="w-full bg-emerald-600 hover:bg-emerald-700"
                         >
                             {{
                                 locale === 'ar'
                                     ? $t('system.bank_transfer_receipts.approve_and_activate_2')
                                     : 'Approve and activate'
                             }}
-                        </button>
+                        </AppButton>
                         <button
                             @click="showRejectModal = true"
                             :disabled="processing"
@@ -751,7 +830,18 @@ const amountState = computed(() => {
                         amountState.type === 'over',
                 }"
             >
-                <div class="flex justify-between">
+                <div
+                    v-if="Number(receipt.invoice_paid_amount || 0) > 0"
+                    class="flex justify-between"
+                >
+                    <span class="text-gray-600 dark:text-gray-300">
+                        {{ $t('system.bank_transfer_receipts.already_paid_on_invoice') }}
+                    </span>
+                    <span class="font-mono font-semibold text-emerald-700 dark:text-emerald-300">
+                        {{ formatCurrency(receipt.invoice_paid_amount) }} SAR
+                    </span>
+                </div>
+                <div class="mt-1 flex justify-between">
                     <span class="text-gray-600 dark:text-gray-300">
                         {{ locale === 'ar' ? $t('system.bank_transfer_receipts.due') : 'Due' }}
                     </span>
@@ -800,24 +890,33 @@ const amountState = computed(() => {
                 </div>
             </div>
 
-            <!-- Mismatch override — only shows when there's a diff.
-                         The checkbox is the explicit "I know what I'm doing"
-                         signal that gates the confirm button. -->
-            <label
-                v-if="hasMismatch"
-                class="mt-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
+            <!-- Mismatch override — only shows when there's a diff AND user holds system.receipts.override. -->
+            <div
+                v-if="hasMismatch && canOverride"
+                class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
             >
-                <AppToggle v-model="forceApprove" />
-                <span class="text-amber-800 dark:text-amber-200">
-                    {{
-                        locale === 'ar'
-                            ? $t(
-                                  'system.bank_transfer_receipts.approve_despite_the_amount_mismatch_will_be_reco'
-                              )
-                            : 'Approve despite the amount mismatch (will be recorded in the audit log)'
-                    }}
-                </span>
-            </label>
+                <label class="flex items-start gap-2">
+                    <AppToggle v-model="forceApprove" />
+                    <span class="text-amber-800 dark:text-amber-200">
+                        {{
+                            locale === 'ar'
+                                ? $t(
+                                      'system.bank_transfer_receipts.approve_despite_the_amount_mismatch_will_be_reco'
+                                  )
+                                : 'Approve despite the amount mismatch (will be recorded in the audit log)'
+                        }}
+                    </span>
+                </label>
+                <p class="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                    {{ $t('system.bank_transfer_receipts.override_does_not_exceed_due') }}
+                </p>
+            </div>
+            <div
+                v-else-if="hasMismatch && !canOverride"
+                class="mt-4 rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs font-medium text-rose-700 dark:border-rose-700 dark:bg-rose-900/20 dark:text-rose-300"
+            >
+                {{ $t('system.bank_transfer_receipts.override_permission_missing') }}
+            </div>
 
             <!-- Partial approval — admin can choose to credit only
                          part of what the tenant transferred. The shortfall
@@ -847,7 +946,7 @@ const amountState = computed(() => {
                         type="number"
                         step="0.01"
                         min="0.01"
-                        :max="Number(receipt.transfer_amount)"
+                        :max="maxApprovableAmount"
                         :label="
                             locale === 'ar'
                                 ? $t('system.bank_transfer_receipts.approved_amount')
@@ -856,6 +955,16 @@ const amountState = computed(() => {
                         dir="ltr"
                         class="font-mono"
                     />
+                    <p
+                        v-if="partialExceedsLimit"
+                        class="text-xs font-medium text-rose-600 dark:text-rose-400"
+                    >
+                        {{
+                            $t('system.bank_transfer_receipts.max_approvable_limit', {
+                                amount: formatCurrency(maxApprovableAmount),
+                            })
+                        }}
+                    </p>
                     <p
                         v-if="partialShortfall > 0"
                         class="text-xs text-amber-700 dark:text-amber-300"
@@ -875,17 +984,22 @@ const amountState = computed(() => {
                 <AppTextarea
                     v-model="approveNotes"
                     :rows="3"
+                    :required="hasMismatch && forceApprove"
                     :label="
-                        locale === 'ar'
-                            ? $t('system.bank_transfer_receipts.notes_optional')
-                            : 'Notes (optional)'
+                        hasMismatch && forceApprove
+                            ? $t('system.bank_transfer_receipts.notes_required_override')
+                            : locale === 'ar'
+                              ? $t('system.bank_transfer_receipts.notes_optional')
+                              : 'Notes (optional)'
                     "
                     :placeholder="
-                        locale === 'ar'
-                            ? $t(
-                                  'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
-                              )
-                            : 'e.g. Confirmed full amount received from tenant...'
+                        hasMismatch && forceApprove
+                            ? $t('system.bank_transfer_receipts.override_reason_placeholder')
+                            : locale === 'ar'
+                              ? $t(
+                                    'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
+                                )
+                              : 'e.g. Confirmed full amount received from tenant...'
                     "
                 />
             </div>

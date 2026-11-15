@@ -37,7 +37,7 @@
 
         <div
             v-if="bookingError"
-            class="mb-4 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-900/20 p-4 text-sm text-rose-700 dark:text-rose-200"
+            class="mb-4 rounded-2xl border border-danger/30 bg-danger-soft p-4 text-sm text-danger"
         >
             {{ bookingError }}
         </div>
@@ -54,18 +54,18 @@
         -->
         <section
             v-show="currentStep === 0"
-            class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800"
+            class="bg-surface rounded-2xl p-5 sm:p-6 border border-border"
         >
-            <h2 class="text-lg font-bold mb-1">
+            <h2 class="text-lg font-bold mb-1 text-text-primary">
                 {{ t('customer_portal.booking.select_vehicle') }}
             </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 {{ t('customer_portal.booking.step_vehicle') }}
             </p>
 
             <div
                 v-if="vehicles.length === 0"
-                class="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 text-center text-sm text-slate-500 dark:text-slate-400"
+                class="rounded-xl bg-surface-muted p-6 text-center text-sm text-text-secondary"
             >
                 {{ t('customer_portal.booking.no_vehicles') }}
             </div>
@@ -80,16 +80,16 @@
                 />
             </div>
 
-            <h2 class="text-lg font-bold mb-1">
+            <h2 class="text-lg font-bold mb-1 text-text-primary">
                 {{ t('customer_portal.booking.select_services') }}
             </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 {{ t('customer_portal.booking.step_services') }}
             </p>
 
             <div
                 v-if="availableServices.length === 0"
-                class="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 text-center text-sm text-slate-500 dark:text-slate-400"
+                class="rounded-xl bg-surface-muted p-6 text-center text-sm text-text-secondary"
             >
                 {{ t('customer_portal.booking.no_services') }}
             </div>
@@ -101,7 +101,7 @@
                     :class="
                         form.serviceIds.includes(s.id)
                             ? 'border-transparent ring-2'
-                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            : 'border-border hover:bg-surface-muted'
                     "
                     :style="
                         form.serviceIds.includes(s.id)
@@ -116,8 +116,8 @@
                     <AppToggle :value="s.id" v-model="form.serviceIds" />
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="font-bold text-sm">{{ s.name }}</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400" dir="ltr">
+                            <span class="font-bold text-sm text-text-primary">{{ s.name }}</span>
+                            <span class="text-xs text-text-secondary" dir="ltr">
                                 {{
                                     t('customer_portal.booking.duration_minutes', {
                                         count: s.duration_minutes,
@@ -127,7 +127,7 @@
                         </div>
                         <p
                             v-if="s.description"
-                            class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
+                            class="mt-0.5 text-xs text-text-secondary"
                         >
                             {{ s.description }}
                         </p>
@@ -147,18 +147,18 @@
         -->
         <section
             v-show="currentStep === 1"
-            class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800"
+            class="bg-surface rounded-2xl p-5 sm:p-6 border border-border"
         >
-            <h2 class="text-lg font-bold mb-1">
+            <h2 class="text-lg font-bold mb-1 text-text-primary">
                 {{ t('customer_portal.booking.select_branch') }}
             </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 {{ t('customer_portal.booking.step_center') }}
             </p>
 
             <div
                 v-if="centers.length === 0"
-                class="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 text-center text-sm text-slate-500 dark:text-slate-400 mb-6"
+                class="rounded-xl bg-surface-muted p-6 text-center text-sm text-text-secondary mb-6"
             >
                 {{ t('customer_portal.booking.no_centers') }}
             </div>
@@ -173,10 +173,10 @@
                 />
             </div>
 
-            <h2 class="text-lg font-bold mb-1">
+            <h2 class="text-lg font-bold mb-1 text-text-primary">
                 {{ t('customer_portal.booking.pick_date') }}
             </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 {{ t('customer_portal.booking.pick_time') }}
             </p>
 
@@ -188,10 +188,10 @@
                 />
             </div>
 
-            <p v-if="loadingSlots" class="text-sm text-slate-500 dark:text-slate-400">
+            <p v-if="loadingSlots" class="text-sm text-text-secondary">
                 {{ t('customer_portal.booking.loading_slots') }}
             </p>
-            <p v-else-if="slots.length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+            <p v-else-if="slots.length === 0" class="text-sm text-text-secondary">
                 {{ t('customer_portal.booking.no_slots') }}
             </p>
             <div v-else class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -203,8 +203,8 @@
                     class="px-3 py-2 rounded-lg text-sm font-semibold border transition"
                     :class="
                         form.scheduledAt === slot
-                            ? 'text-white border-transparent'
-                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            ? 'text-action-on border-transparent'
+                            : 'border-border text-text-primary hover:bg-surface-muted'
                     "
                     :style="
                         form.scheduledAt === slot
@@ -227,29 +227,29 @@
         -->
         <section
             v-show="currentStep === 2"
-            class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800"
+            class="bg-surface rounded-2xl p-5 sm:p-6 border border-border"
         >
-            <h2 class="text-lg font-bold mb-2">
+            <h2 class="text-lg font-bold mb-2 text-text-primary">
                 {{ t('customer_portal.booking.review_title') }}
             </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 {{ t('customer_portal.booking.review_intro') }}
             </p>
 
-            <dl class="divide-y divide-slate-100 dark:divide-slate-800">
+            <dl class="divide-y divide-border">
                 <div class="flex items-start justify-between gap-3 py-3">
-                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                    <dt class="text-sm text-text-secondary">
                         {{ t('customer_portal.booking.review_branch') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm">
+                    <dd class="font-semibold text-end text-sm text-text-primary">
                         {{ selectedCenter?.name || t('customer_portal.booking.no_branch_picked') }}
                     </dd>
                 </div>
                 <div class="flex items-start justify-between gap-3 py-3">
-                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                    <dt class="text-sm text-text-secondary">
                         {{ t('customer_portal.booking.review_vehicle') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm">
+                    <dd class="font-semibold text-end text-sm text-text-primary">
                         <SaudiPlateDisplay
                             v-if="selectedVehicle?.plate_number"
                             :plate-number="selectedVehicle.plate_number"
@@ -259,25 +259,25 @@
                     </dd>
                 </div>
                 <div class="flex items-start justify-between gap-3 py-3">
-                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                    <dt class="text-sm text-text-secondary">
                         {{ t('customer_portal.booking.review_services') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm">
+                    <dd class="font-semibold text-end text-sm text-text-primary">
                         <ul v-if="selectedServices.length > 0" class="space-y-0.5">
                             <li v-for="s in selectedServices" :key="s.id">
                                 {{ s.name }}
                             </li>
                         </ul>
-                        <span v-else class="text-slate-400">
+                        <span v-else class="text-text-secondary">
                             {{ t('customer_portal.booking.no_services_picked') }}
                         </span>
                     </dd>
                 </div>
                 <div class="flex items-start justify-between gap-3 py-3">
-                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                    <dt class="text-sm text-text-secondary">
                         {{ t('customer_portal.booking.review_date') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm" dir="ltr">
+                    <dd class="font-semibold text-end text-sm text-text-primary" dir="ltr">
                         {{
                             form.scheduledAt
                                 ? formatSlotDateTime(form.scheduledAt)
@@ -286,10 +286,10 @@
                     </dd>
                 </div>
                 <div class="flex items-start justify-between gap-3 py-3">
-                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                    <dt class="text-sm text-text-secondary">
                         {{ t('customer_portal.booking.review_duration') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm" dir="ltr">
+                    <dd class="font-semibold text-end text-sm text-text-primary" dir="ltr">
                         {{
                             t('customer_portal.booking.duration_minutes', {
                                 count: estimatedDuration,
@@ -300,19 +300,18 @@
             </dl>
 
             <!-- Optional Booking Notes -->
-            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div class="mt-4 pt-4 border-t border-border">
                 <label
-                    class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5"
+                    class="block text-sm font-semibold text-text-primary mb-1.5"
                 >
                     {{ t('customer_portal.portal_appointments.notes_label') }}
                 </label>
-                <textarea
+                <AppTextarea
                     v-model="form.notes"
-                    rows="3"
-                    maxlength="1000"
+                    :rows="3"
+                    :maxlength="1000"
                     :placeholder="t('customer_portal.portal_appointments.notes_placeholder')"
-                    class="w-full rounded-xl border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-                ></textarea>
+                />
             </div>
         </section>
 
@@ -330,7 +329,7 @@
                 v-if="currentStep > 0"
                 type="button"
                 @click="prev"
-                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold border border-border text-text-primary hover:bg-surface-muted"
             >
                 {{ t('customer_portal.booking.btn_back') }}
             </button>
@@ -341,7 +340,7 @@
                 type="button"
                 @click="next"
                 :disabled="!canAdvance"
-                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-action-on disabled:opacity-40"
                 :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 {{ t('customer_portal.booking.btn_next') }}
@@ -351,7 +350,7 @@
                 type="button"
                 @click="submit"
                 :disabled="submitting || !canSubmit"
-                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-action-on disabled:opacity-40"
                 :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 {{
@@ -373,27 +372,27 @@
         -->
         <aside
             v-if="hasAnySelection"
-            class="mt-6 sm:hidden bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800"
+            class="mt-6 sm:hidden bg-surface rounded-2xl p-4 border border-border"
         >
             <p
-                class="text-[10px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-2"
+                class="text-[10px] uppercase tracking-wider font-bold text-text-secondary mb-2"
             >
                 {{ t('customer_portal.booking.sticky_summary_label') }}
             </p>
             <ul class="space-y-1.5 text-sm">
                 <li class="flex items-center justify-between gap-2">
-                    <span class="text-slate-500 dark:text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.booking.sticky_branch') }}
                     </span>
-                    <span class="font-semibold truncate ms-2">
+                    <span class="font-semibold truncate ms-2 text-text-primary">
                         {{ selectedCenter?.name || t('customer_portal.booking.no_branch_picked') }}
                     </span>
                 </li>
                 <li class="flex items-center justify-between gap-2">
-                    <span class="text-slate-500 dark:text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.booking.sticky_vehicle') }}
                     </span>
-                    <span class="font-semibold truncate ms-2" dir="ltr">
+                    <span class="font-semibold truncate ms-2 text-text-primary" dir="ltr">
                         {{
                             selectedVehicle?.plate_number ||
                             t('customer_portal.booking.no_vehicle_picked')
@@ -401,10 +400,10 @@
                     </span>
                 </li>
                 <li class="flex items-center justify-between gap-2">
-                    <span class="text-slate-500 dark:text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.booking.sticky_services') }}
                     </span>
-                    <span class="font-semibold truncate ms-2">
+                    <span class="font-semibold truncate ms-2 text-text-primary">
                         {{
                             form.serviceIds.length > 0
                                 ? form.serviceIds.length
@@ -413,10 +412,10 @@
                     </span>
                 </li>
                 <li class="flex items-center justify-between gap-2">
-                    <span class="text-slate-500 dark:text-slate-400">
+                    <span class="text-text-secondary">
                         {{ t('customer_portal.booking.sticky_when') }}
                     </span>
-                    <span class="font-semibold truncate ms-2" dir="ltr">
+                    <span class="font-semibold truncate ms-2 text-text-primary" dir="ltr">
                         {{
                             form.scheduledAt
                                 ? formatSlotTime(form.scheduledAt)
@@ -432,8 +431,9 @@
 <script setup>
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import WizardStepper from '@/Components/CustomerPortal/WizardStepper.vue';

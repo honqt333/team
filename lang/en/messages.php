@@ -146,6 +146,11 @@ return [
     // are distinguishable from the tenant-facing ones above.
     // ─────────────────────────────────────────────────────────────────
     'system' => [
+        'video_duration_extract_failed' => 'Could not automatically extract the video duration from this link; you can enter it manually.',
+        'svg_unsafe' => 'The uploaded SVG file contains unsafe scripts',
+        'integration_balance_unsupported' => 'This provider does not support fetching balance',
+        'audit_snapshot_generated' => 'Fresh audit snapshot generated successfully! (Score: :score%)',
+        'audit_snapshot_missing' => 'No audit snapshot found. Run audit first.',
         'settings' => [
             'saved' => 'Settings updated successfully',
             'saved_success' => 'Settings saved successfully',
@@ -377,12 +382,5 @@ return [
         'deactivated' => 'Partner deactivated successfully',
         'deleted' => 'Partner deleted successfully',
         'cannot_delete_has_relations' => 'Cannot delete partner with linked work orders or invoices',
-    ],
-    'system' => [
-        'video_duration_extract_failed' => 'Could not automatically extract the video duration from this link; you can enter it manually.',
-        'svg_unsafe' => 'The uploaded SVG file contains unsafe scripts',
-        'integration_balance_unsupported' => 'This provider does not support fetching balance',
-        'audit_snapshot_generated' => 'Fresh audit snapshot generated successfully! (Score: :score%)',
-        'audit_snapshot_missing' => 'No audit snapshot found. Run audit first.',
     ],
 ];

@@ -426,46 +426,52 @@
                                 </h3>
                             </div>
                             <div v-if="!isReadOnly" class="flex flex-wrap items-center gap-2">
-                                <button
-                                    type="button"
+                                <AppButton
                                     @click="openAllocationModal"
-                                    class="px-3.5 py-2 bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                    variant="primary"
+                                    size="sm"
+                                    class="shadow-sm"
                                 >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M12 4v16m8-8H4"
-                                        />
-                                    </svg>
+                                    <template #iconLeft>
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2.5"
+                                                d="M12 4v16m8-8H4"
+                                            />
+                                        </svg>
+                                    </template>
                                     {{ $t('work_orders.purchases.select_to_add') }}
-                                </button>
-                                <button
-                                    type="button"
+                                </AppButton>
+                                <AppButton
                                     @click="openQuickPurchaseModal"
-                                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                    variant="primary"
+                                    size="sm"
+                                    class="bg-emerald-600 hover:bg-emerald-700 shadow-sm"
                                 >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M12 4v16m8-8H4"
-                                        />
-                                    </svg>
+                                    <template #iconLeft>
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2.5"
+                                                d="M12 4v16m8-8H4"
+                                            />
+                                        </svg>
+                                    </template>
                                     {{ $t('work_orders.purchases.quick_create_invoice') }}
-                                </button>
+                                </AppButton>
                             </div>
                         </div>
 
@@ -1346,14 +1352,14 @@
                             {{ $t('work_orders.purchases.select_to_add') }}
                         </h3>
                     </div>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="openQuickPurchaseFromAllocation"
-                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
+                        variant="primary"
+                        size="sm"
+                        class="bg-emerald-600 hover:bg-emerald-700"
                     >
-                        <span>+</span>
-                        <span>{{ $t('work_orders.purchases.quick_create_invoice') }}</span>
-                    </button>
+                        + {{ $t('work_orders.purchases.quick_create_invoice') }}
+                    </AppButton>
                 </div>
             </template>
 
@@ -1657,15 +1663,14 @@
 //     own prop types first (out of scope for Goal 2)
 
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppCheckbox from '@/Components/App/AppCheckbox.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
 import { useToast } from '@/Composables/useToast';
@@ -1693,7 +1698,6 @@ import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.v
 import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNoteModal.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
-import AppButton from '@/Components/App/AppButton.vue';
 import WorkOrderSuggestionsPanel from '@/Components/WorkOrders/WorkOrderSuggestionsPanel.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
@@ -1706,7 +1710,7 @@ import WorkOrderPhotosTab from '@/Components/WorkOrders/WorkOrderPhotosTab.vue';
 import WorkOrderActivitiesTab from '@/Components/WorkOrders/WorkOrderActivitiesTab.vue';
 import WorkOrderAttachmentsTab from '@/Components/WorkOrders/WorkOrderAttachmentsTab.vue';
 import BaseModal from '@/Components/BaseModal.vue';
-import { PACKAGES_DEPT_KEY, useWorkOrderItems } from '@/Composables/useWorkOrderItems';
+import { useWorkOrderItems } from '@/Composables/useWorkOrderItems';
 import { useWorkOrderStatus, type StatusAction } from '@/Composables/useWorkOrderStatus';
 import { useWorkOrderNotes } from '@/Composables/useWorkOrderNotes';
 

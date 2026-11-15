@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
@@ -310,11 +311,11 @@ const handleDelete = async (item) => {
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 v-model="search"
                                 type="text"
                                 :placeholder="t('system_settings.attachments.search_placeholder')"
-                                class="w-full ps-10 pe-4 py-2 text-sm border border-border rounded-xl bg-surface-secondary text-content-primary placeholder-content-muted focus:ring-2 focus:ring-action-primary/30 focus:border-action-primary transition-colors"
+                                input-class="ps-10 bg-surface-secondary"
                                 @input="handleSearchInput"
                             />
                         </div>

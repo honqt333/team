@@ -766,7 +766,7 @@ watch(notifMenuOpen, (open) => {
 });
 
 const handleLogout = () => {
-    router.post(route('logout'));
+    router.post(route('admin.logout'));
 };
 
 // ── Language Toggle ───────────────────────────────────────────────────

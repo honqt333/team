@@ -9,86 +9,31 @@
                 {{ $t('reports.tax_periods_report.consolidated_notice') }}
             </p>
             <!-- Header Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div
-                        class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1"
-                    >
-                        <Link
-                            :href="route('app.reports.tax-periods.index')"
-                            class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                        >
-                            {{ $t('reports.tax_periods_report.back_to_tax_periods') }}
-                        </Link>
-                        <span>/</span>
-                        <span class="text-gray-900 dark:text-white font-medium">
-                            {{ periodMeta.name_ar }}
-                        </span>
-                    </div>
-                    <h1
-                        class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3"
-                    >
-                        <span>{{ $t('reports.tax_periods_report.preview_transactions') }}</span>
-                        <span
-                            class="text-xs px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold rounded-full"
-                        >
-                            {{ periodMeta.period_key }}
-                        </span>
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono">
-                        {{ periodMeta.start_date }} &larr; {{ periodMeta.end_date }}
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <button
+            <PageHeader
+                :title="$t('reports.tax_periods_report.preview_transactions')"
+                :subtitle="`${periodMeta.name_ar} • ${periodMeta.period_key} (${periodMeta.start_date} ← ${periodMeta.end_date})`"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-700"
+                glowFrom="from-emerald-500"
+                badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                badgeDot="bg-emerald-500"
+            >
+                <template #back>
+                    <BackButton :href="route('app.reports.tax-periods.index')" />
+                </template>
+                <template #actions>
+                    <AppButton
                         type="button"
                         @click="saveTaxPeriod"
+                        :loading="isSubmitting"
                         :disabled="isSubmitting || selectedCount === 0"
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition-all duration-200"
                     >
-                        <svg
-                            v-if="isSubmitting"
-                            class="w-5 h-5 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8H4z"
-                            ></path>
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                            />
-                        </svg>
-                        <span>
-                            {{ $t('reports.tax_periods_report.save_period_btn') }} ({{
-                                selectedCount
-                            }})
-                        </span>
-                    </button>
-                </div>
-            </div>
+                        {{ $t('reports.tax_periods_report.save_period_btn') }} ({{ selectedCount }})
+                    </AppButton>
+                </template>
+            </PageHeader>
 
             <!-- Live Calculation Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -342,8 +287,11 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

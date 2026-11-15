@@ -9,7 +9,7 @@ import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue
 import RoleFormModal from './RoleFormModal.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppInput from '@/Components/App/AppInput.vue';
-import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
@@ -143,23 +143,26 @@ const deleteRole = async (role) => {
                 </template>
 
                 <template #actions>
-                    <button
+                    <AppButton
                         v-if="can('users.create')"
-                        type="button"
                         @click="openCreateModal"
-                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on font-bold rounded-xl transition-all hover:scale-[1.02] shadow-xs hover:shadow-md active:scale-95 cursor-pointer"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs hover:shadow-md"
                     >
-                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path
-                                fill-rule="evenodd"
-                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                        <span class="relative hidden sm:inline">
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </template>
+                        <span class="hidden sm:inline">
                             {{ t('roles.add', 'إضافة دور') }}
                         </span>
-                    </button>
+                    </AppButton>
                 </template>
 
                 <template #filters>

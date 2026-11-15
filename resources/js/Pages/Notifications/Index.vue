@@ -8,7 +8,7 @@
                 :title="$t('notifications.title')"
                 :subtitle="$t('system.notifications.all_subtitle')"
                 :total-count="unreadCount > 0 ? toEnglish(unreadCount) : null"
-                :count-label="$t('notifications.unread_count', { count: toEnglish(unreadCount) })"
+                :count-label="$t('notifications.unread_count')"
             >
                 <template #icon>
                     <svg

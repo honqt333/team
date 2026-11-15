@@ -148,11 +148,24 @@
                                 <span>{{ $t('common.edit') }}</span>
                             </button>
 
-                            <button
+                            <AppPrintButton
+                                size="sm"
+                                variant="icon"
+                                :label="$t('inventory.parts.print_barcode')"
+                                :tooltip="$t('inventory.parts.print_barcode')"
                                 @click="printBarcode"
-                                :title="$t('inventory.parts.print_barcode')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all"
-                            >
+                            />
+                        </div>
+
+                        <!-- Primary CTA Button -->
+                        <AppButton
+                            v-if="can('inventory.moves.create')"
+                            @click="openStockModal"
+                            variant="primary"
+                            size="md"
+                            class="shadow-md shadow-focus-ring-soft"
+                        >
+                            <template #iconLeft>
                                 <svg
                                     class="w-4 h-4"
                                     fill="none"
@@ -162,37 +175,13 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                        stroke-width="2.5"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                     />
                                 </svg>
-                                <span class="hidden sm:inline">
-                                    {{ $t('inventory.parts.print_barcode') }}
-                                </span>
-                            </button>
-                        </div>
-
-                        <!-- Primary CTA Button -->
-                        <button
-                            v-if="can('inventory.moves.create')"
-                            @click="openStockModal"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-focus-ring-soft hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 transition-all"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                />
-                            </svg>
-                            <span>{{ $t('inventory.parts.warehouse_stock') }}</span>
-                        </button>
+                            </template>
+                            {{ $t('inventory.parts.warehouse_stock') }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -867,8 +856,9 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';

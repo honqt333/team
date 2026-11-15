@@ -1,307 +1,65 @@
-<template>
-    <AppLayout>
-        <Head :title="$t('service_bays.title')" />
-
-        <div class="space-y-6">
-            <PageHeader
-                :title="$t('service_bays.title')"
-                :subtitle="$t('service_bays.subtitle')"
-                gradientFrom="from-action-primary"
-                gradientTo="to-cyan-600"
-                glowFrom="from-action-primary"
-            >
-                <template #back>
-                    <BackButton :href="backUrl" />
-                </template>
-
-                <template #icon>
-                    <svg
-                        class="w-9 h-9 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2.5"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                    </svg>
-                </template>
-            </PageHeader>
-
-            <!-- New / Edit form -->
-            <div
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm"
-            >
-                <h3
-                    class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2"
-                >
-                    <span class="w-2 h-2 rounded-full bg-primary-600"></span>
-                    {{ form.id ? $t('service_bays.edit_bay') : $t('service_bays.add_bay') }}
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('service_bays.name') }}
-                            <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            :placeholder="$t('service_bays.name_placeholder')"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-focus-ring"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('service_bays.code') }}
-                        </label>
-                        <input
-                            v-model="form.code"
-                            type="text"
-                            :placeholder="$t('service_bays.code_placeholder')"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-focus-ring"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('service_bays.type') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.type"
-                            :options="typeOptions"
-                            option-label="label"
-                            option-value="value"
-                            :label="''"
-                        />
-                    </div>
-                    <div class="flex items-center pb-2">
-                        <AppToggle
-                            v-model="form.is_active"
-                            :label="$t('service_bays.active')"
-                            color="success"
-                        />
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="save"
-                        :disabled="busy || !form.name.trim()"
-                        class="btn-primary !text-xs !py-1.5"
-                    >
-                        {{ form.id ? $t('common.save') : $t('common.create') }}
-                    </button>
-                    <button
-                        v-if="form.id"
-                        type="button"
-                        @click="reset"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                        {{ $t('common.cancel') }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- List -->
-            <div
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm"
-            >
-                <div class="overflow-x-auto">
-                    <DataTable
-                        structured
-                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-700"
-                    >
-                        <thead class="bg-gray-50 dark:bg-gray-900/40">
-                            <tr>
-                                <th
-                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                                >
-                                    {{ $t('service_bays.name') }}
-                                </th>
-                                <th
-                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                                >
-                                    {{ $t('service_bays.code') }}
-                                </th>
-                                <th
-                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                                >
-                                    {{ $t('service_bays.type') }}
-                                </th>
-                                <th
-                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                                >
-                                    {{ $t('service_bays.status') }}
-                                </th>
-                                <th
-                                    class="px-4 py-2 text-end text-xs font-bold text-gray-700 dark:text-gray-200"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                            <tr v-for="bay in bays" :key="bay.id">
-                                <td class="px-4 py-2 text-sm">{{ bay.name }}</td>
-                                <td
-                                    class="px-4 py-2 text-sm font-mono text-gray-500 dark:text-gray-400"
-                                >
-                                    {{ bay.code || '—' }}
-                                </td>
-                                <td class="px-4 py-2 text-sm">
-                                    {{ bay.type ? $t(`service_bays.types.${bay.type}`) : '—' }}
-                                </td>
-                                <td class="px-4 py-2 text-sm">
-                                    <span
-                                        :class="
-                                            bay.is_active
-                                                ? 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                                : 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                                        "
-                                    >
-                                        {{
-                                            bay.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-2 text-end space-x-2">
-                                    <button
-                                        type="button"
-                                        @click="edit(bay)"
-                                        class="text-xs font-bold text-action-primary hover:underline"
-                                    >
-                                        {{ $t('common.edit') }}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        @click="remove(bay)"
-                                        :disabled="busy"
-                                        class="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
-                                    >
-                                        {{ $t('common.delete') }}
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr v-if="!bays.length">
-                                <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-400">
-                                    {{ $t('service_bays.empty') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </DataTable>
-                </div>
-            </div>
-        </div>
-    </AppLayout>
-</template>
-
 <script setup>
-import DataTable from '@/Components/Common/DataTable.vue';
-import { reactive, ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
-import axios from 'axios';
-import { useI18n } from 'vue-i18n';
+import { ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
-import AppToggle from '@/Components/Common/AppToggle.vue';
-import { useConfirm } from '@/Composables/useConfirm';
-import { useToast } from '@/Composables/useToast';
+import AppButton from '@/Components/App/AppButton.vue';
+import ServiceBaysTab from '@/Components/Services/ServiceBaysTab.vue';
 
-const props = defineProps({
-    bays: { type: Array, default: () => [] },
+defineProps({
+    bays: {
+        type: Array,
+        default: () => [],
+    },
 });
 
-const { t } = useI18n();
-const { confirm } = useConfirm();
-const { error: toastError } = useToast();
-const busy = ref(false);
-
-const backUrl = computed(() => {
-    if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('from') === 'settings') {
-            return '/app/settings';
-        }
-    }
-    return route('appointments.index');
-});
-
-const types = ['maintenance', 'polish', 'tires', 'electrical', 'wash', 'inspection', 'general'];
-
-const typeOptions = computed(() => [
-    { value: '', label: t('service_bays.no_type') },
-    ...types.map((key) => ({
-        value: key,
-        label: t(`service_bays.types.${key}`),
-    })),
-]);
-
-const form = reactive({
-    id: null,
-    name: '',
-    code: '',
-    type: '',
-    is_active: true,
-});
-
-function reset() {
-    form.id = null;
-    form.name = '';
-    form.code = '';
-    form.type = '';
-    form.is_active = true;
-}
-
-function edit(bay) {
-    form.id = bay.id;
-    form.name = bay.name;
-    form.code = bay.code || '';
-    form.type = bay.type || '';
-    form.is_active = !!bay.is_active;
-}
-
-async function save() {
-    if (!form.name.trim()) return;
-    busy.value = true;
-    try {
-        if (form.id) {
-            await axios.put(route('service-bays.update', { serviceBay: form.id }), form);
-        } else {
-            await axios.post(route('service-bays.store'), form);
-        }
-        reset();
-        router.reload();
-    } finally {
-        busy.value = false;
-    }
-}
-
-async function remove(bay) {
-    if (bay.has_active_appointments) {
-        toastError(t('service_bays.has_active_appointments'));
-        return;
-    }
-    if (!(await confirm(t('service_bays.confirm_delete')))) return;
-    busy.value = true;
-    try {
-        await axios.delete(route('service-bays.destroy', { serviceBay: bay.id }));
-        reset();
-        router.reload();
-    } finally {
-        busy.value = false;
-    }
-}
+const serviceBaysTabRef = ref(null);
+const openCreateBayModal = () => {
+    serviceBaysTabRef.value?.openCreateModal();
+};
 </script>
+
+<template>
+    <Head :title="$t('service_bays.title')" />
+
+    <AppLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            <PageHeader
+                :title="$t('service_bays.title')"
+                :subtitle="$t('service_bays.subtitle')"
+            >
+                <template #icon>
+                    <BackButton :fallback-route="route('services.index', { tab: 'bays' })" />
+                </template>
+                <template #actions>
+                    <AppButton
+                        @click="openCreateBayModal"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
+                    >
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('service_bays.add_bay') }}
+                    </AppButton>
+                </template>
+            </PageHeader>
+
+            <ServiceBaysTab ref="serviceBaysTabRef" :bays="bays" />
+        </div>
+    </AppLayout>
+</template>

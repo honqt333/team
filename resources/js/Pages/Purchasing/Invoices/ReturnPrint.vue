@@ -115,32 +115,59 @@ const getTenantAddress = (tenant) => {
     return addr || '';
 };
 
+const resolvedCenter = computed(
+    () => props.returnInvoice.center || props.returnInvoice.purchase_invoice?.center || {}
+);
+
+const resolvedTenant = computed(
+    () =>
+        props.returnInvoice.tenant ||
+        props.returnInvoice.purchase_invoice?.tenant ||
+        page.props?.tenant ||
+        {}
+);
+
 const mappedPrintData = computed(() => {
-    const lines = (props.returnInvoice.lines || []).map((line) => ({
-        service_name: line.part?.name || '—',
-        description: line.part?.sku || 'NO-SKU',
-        qty: Number(line.qty || 1),
-        unit_price: Number(line.unit_cost || 0),
-        discount: 0,
-        is_part: true,
-        is_taxable: true,
-        tax_rate_snapshot: Number(line.tax_rate || 0),
-        tax_amount: Number(line.tax_amount || 0),
-        total: Number(line.total || 0),
-    }));
+    const lines = (props.returnInvoice.lines || []).map((line) => {
+        const taxRate = Number(line.tax_rate || 0);
+        const taxAmount = Number(line.tax_amount || 0);
+
+        return {
+            service_name: line.part?.name || '—',
+            description: line.part?.sku || 'NO-SKU',
+            qty: Number(line.qty || 1),
+            unit_price: Number(line.unit_cost || 0),
+            discount: 0,
+            is_part: true,
+            is_taxable: taxAmount > 0 || taxRate > 0,
+            tax_rate_snapshot: taxRate,
+            tax_amount: taxAmount,
+            total: Number(line.total || 0),
+        };
+    });
+
+    const totalAmount = Number(props.returnInvoice.total || 0);
+    const totalTax = Number(props.returnInvoice.tax_amount || 0);
+    const tenantVatEnabled =
+        resolvedTenant.value?.tax_settings?.vat_enabled ?? page.props?.tenant?.tax_settings?.vat_enabled;
+    const taxEnabled = totalTax > 0 ? true : Boolean(tenantVatEnabled);
+    const refundedAmount = Number(props.returnInvoice.refunded_amount ?? 0);
+    const remainingRefund = Number(
+        props.returnInvoice.remaining_refund ?? Math.max(0, totalAmount - refundedAmount)
+    );
 
     return {
         code: props.returnInvoice.code,
         created_at: props.returnInvoice.return_date,
         entry_date: props.returnInvoice.return_date,
-        tax_enabled_snapshot: true,
+        tax_enabled_snapshot: taxEnabled,
         currency_code: props.returnInvoice.currency_code,
         pricing_mode_snapshot: 'exclusive',
         total_excl_tax: Number(props.returnInvoice.subtotal || 0),
-        total_tax: Number(props.returnInvoice.tax_amount || 0),
-        total_incl_tax: Number(props.returnInvoice.total || 0),
-        total_paid: Number(props.returnInvoice.total || 0),
-        balance: 0,
+        total_tax: totalTax,
+        total_incl_tax: totalAmount,
+        total_paid: refundedAmount,
+        balance: remainingRefund,
         discount_amount: 0,
         customer: {
             name: props.returnInvoice.purchase_invoice?.supplier?.name || '—',
@@ -153,14 +180,14 @@ const mappedPrintData = computed(() => {
 });
 
 const mappedCenterData = computed(() => {
-    const center = props.returnInvoice.purchase_invoice?.center || {};
-    const tenant = props.returnInvoice.purchase_invoice?.tenant || page.props?.tenant || {};
+    const center = resolvedCenter.value;
+    const tenant = resolvedTenant.value;
     return {
         name: isRtl.value
             ? center.name_ar || center.name || tenant.name
             : center.name_en || center.name || tenant.name,
-        tax_number: center.vat_number || tenant.vat_number,
-        cr_number: tenant.cr_number,
+        tax_number: center.vat_number || tenant.tax_settings?.tax_number || tenant.vat_number,
+        cr_number: center.cr_number || tenant.cr_number,
         phone: center.phone || tenant.phone,
         logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
         iban: tenant.iban || '',
@@ -171,8 +198,7 @@ const mappedCenterData = computed(() => {
 
 const documentSettings = computed(() => {
     const tenantSettings =
-        props.returnInvoice.purchase_invoice?.tenant?.print_settings ||
-        page?.props?.tenant?.print_settings;
+        resolvedTenant.value?.print_settings || page?.props?.tenant?.print_settings;
     return resolveDocumentSettings({
         tenantSettings,
         documentType: 'purchase_return',
@@ -196,9 +222,8 @@ const documentSettings = computed(() => {
 
 const visualSettings = computed(() => {
     const tenantSettings =
-        props.returnInvoice.purchase_invoice?.tenant?.print_settings ||
-        page?.props?.tenant?.print_settings;
-    const center = props.returnInvoice.purchase_invoice?.center || {};
+        resolvedTenant.value?.print_settings || page?.props?.tenant?.print_settings;
+    const center = resolvedCenter.value;
     return resolveVisualSettings({
         tenantSettings,
         center,

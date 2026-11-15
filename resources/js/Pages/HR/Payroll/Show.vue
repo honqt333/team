@@ -80,43 +80,51 @@
                             </svg>
                             <span>{{ $t('hr.payroll.regenerate') }}</span>
                         </button>
-                        <button
+                        <AppButton
                             @click="approvePayroll"
                             :disabled="processing"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                            variant="primary"
+                            size="sm"
+                            class="shadow-sm"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('hr.payroll.approve') }}
+                        </AppButton>
+                    </div>
+                    <AppButton
+                        v-if="payrollRun.status === 'approved'"
+                        @click="openPaidModal"
+                        :disabled="processing"
+                        variant="primary"
+                        size="sm"
+                        class="bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+                    >
+                        <template #iconLeft>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M5 13l4 4L19 7"
+                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
                                 />
                             </svg>
-                            <span>{{ $t('hr.payroll.approve') }}</span>
-                        </button>
-                    </div>
-                    <button
-                        v-if="payrollRun.status === 'approved'"
-                        @click="openPaidModal"
-                        :disabled="processing"
-                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                            />
-                        </svg>
-                        <span>{{ $t('hr.payroll.mark_paid') }}</span>
-                    </button>
+                        </template>
+                        {{ $t('hr.payroll.mark_paid') }}
+                    </AppButton>
                     <a
                         :href="route('app.hr.payroll.export-wps', payrollRun.id)"
                         class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
@@ -131,22 +139,7 @@
                         </svg>
                         <span>{{ $t('hr.payroll.export_wps') }}</span>
                     </a>
-                    <a
-                        :href="route('app.hr.payroll.print', payrollRun.id)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                            />
-                        </svg>
-                        <span>{{ $t('common.print') }}</span>
-                    </a>
+                    <AppPrintButton :href="route('app.hr.payroll.print', payrollRun.id)" />
                 </template>
             </PageHeader>
 
@@ -347,27 +340,12 @@
                                     {{ formatCurrency(item.net_salary) }}
                                 </td>
                                 <td class="px-4 py-3 text-center align-middle">
-                                    <a
+                                    <AppPrintButton
+                                        size="sm"
+                                        :tooltip="$t('hr.payroll.print_payslip')"
                                         :href="route('app.hr.payroll.payslip', item.id)"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="text-gray-400 hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all p-1 inline-block"
-                                        :title="$t('hr.payroll.print_payslip')"
-                                    >
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                    </a>
+                                        class="opacity-0 group-hover:opacity-100"
+                                    />
                                 </td>
                                 <td
                                     class="px-4 py-3 text-end align-middle whitespace-nowrap"
@@ -542,6 +520,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 

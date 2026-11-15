@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import PreviewPane from '@/Components/System/Website/PreviewPane.vue';
@@ -340,54 +341,30 @@ watch(
                     </div>
 
                     <!-- CTA Button -->
-                    <button
+                    <AppButton
                         @click="submit"
-                        :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
+                        :loading="form.processing"
+                        variant="primary"
+                        size="md"
+                        class="shadow-md hover:shadow-focus-ring-soft"
                     >
-                        <svg
-                            v-if="!form.processing"
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-4 h-4 animate-spin"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
                                 stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <span>
-                            {{
-                                form.processing
-                                    ? t('system.website.saving')
-                                    : t('system.website.save')
-                            }}
-                        </span>
-                    </button>
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </template>
+                        {{ form.processing ? t('system.website.saving') : t('system.website.save') }}
+                    </AppButton>
                 </template>
             </PageHeader>
 
@@ -555,55 +532,30 @@ watch(
                             </span>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <button
-                                type="button"
+                            <AppButton
                                 @click="submit"
-                                :disabled="form.processing"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95 disabled:opacity-50 cursor-pointer"
+                                :loading="form.processing"
+                                variant="primary"
+                                size="md"
+                                class="shadow-md hover:shadow-focus-ring-soft"
                             >
-                                <svg
-                                    v-if="!form.processing"
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M5 13l4 4L19 7"
-                                    />
-                                </svg>
-                                <svg
-                                    v-else
-                                    class="w-4 h-4 animate-spin"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        class="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
                                         stroke="currentColor"
-                                        stroke-width="4"
-                                    />
-                                    <path
-                                        class="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v8H4z"
-                                    />
-                                </svg>
-                                <span>
-                                    {{
-                                        form.processing
-                                            ? t('system.website.saving')
-                                            : t('system.website.save')
-                                    }}
-                                </span>
-                            </button>
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ form.processing ? t('system.website.saving') : t('system.website.save') }}
+                            </AppButton>
                         </div>
                     </div>
                 </Transition>
@@ -655,16 +607,16 @@ textarea.input-enterprise {
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: var(--color-border-strong);
     border-radius: 20px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: var(--color-text-muted);
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #4b5563;
+    background: var(--color-border-strong);
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+    background: var(--color-text-muted);
 }
 </style>

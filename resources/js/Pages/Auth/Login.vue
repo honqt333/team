@@ -2,7 +2,7 @@
 const { t } = useI18n();
 
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ref, computed } from 'vue';
@@ -83,7 +83,7 @@ const submit = () => {
                 >
                     {{ $t('center_settings.contact.email') }}
                 </label>
-                <input
+                <AppInput
                     id="email"
                     type="email"
                     v-model="form.email"
@@ -91,14 +91,9 @@ const submit = () => {
                     autofocus
                     autocomplete="username"
                     :placeholder="isRTL ? 'البريد الإلكتروني' : 'Email'"
-                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                    :class="
-                        form.errors.email
-                            ? 'border-red-500 dark:border-red-500'
-                            : 'border-gray-300 dark:border-gray-600'
-                    "
+                    :error="form.errors.email"
+                    input-class="px-4 py-3"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <!-- Password -->
@@ -110,19 +105,15 @@ const submit = () => {
                     {{ $t('auth.password') }}
                 </label>
                 <div class="relative">
-                    <input
+                    <AppInput
                         id="password"
                         :type="showPassword ? 'text' : 'password'"
                         v-model="form.password"
                         required
                         autocomplete="current-password"
                         :placeholder="isRTL ? 'كلمة المرور' : 'Password'"
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                        :class="
-                            form.errors.password
-                                ? 'border-red-500 dark:border-red-500'
-                                : 'border-gray-300 dark:border-gray-600'
-                        "
+                        :error="form.errors.password"
+                        input-class="px-4 py-3 pe-12"
                     />
                     <button
                         type="button"
@@ -165,7 +156,6 @@ const submit = () => {
                         </svg>
                     </button>
                 </div>
-                <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <!-- Submit Button -->

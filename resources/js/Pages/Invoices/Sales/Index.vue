@@ -95,11 +95,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="tableFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="block w-full ps-10 pe-4 py-2.5 text-sm text-text-primary bg-surface border border-border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none"
+                                input-class="ps-10"
                             />
                         </div>
 
@@ -537,27 +537,10 @@
                                         </svg>
                                     </Link>
                                 </Tooltip>
-                                <Tooltip :content="$t('common.print')">
-                                    <Link
-                                        :href="route('app.invoices.print', item.id)"
-                                        target="_blank"
-                                        class="p-2 rounded-lg text-text-muted hover:text-success hover:bg-success-soft transition-colors"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                    </Link>
-                                </Tooltip>
+                                <AppPrintButton
+                                    size="sm"
+                                    :href="route('app.invoices.print', item.id)"
+                                />
                             </div>
                         </template>
                     </DataTable>
@@ -572,6 +555,7 @@ import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import DataTable from '@/Components/Common/DataTable.vue';

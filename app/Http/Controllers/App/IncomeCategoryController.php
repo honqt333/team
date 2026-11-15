@@ -6,12 +6,12 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\IncomeCategory;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class IncomeCategoryController extends Controller
 {
     /**
@@ -19,6 +19,7 @@ class IncomeCategoryController extends Controller
      */
     public function index(Request $request): Response
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
         $query = IncomeCategory::with('updatedBy')->orderBy('name_ar');
 
         if ($request->filled('search')) {
@@ -47,6 +48,8 @@ class IncomeCategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -68,6 +71,8 @@ class IncomeCategoryController extends Controller
      */
     public function update(Request $request, IncomeCategory $incomeCategory): RedirectResponse
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -88,6 +93,8 @@ class IncomeCategoryController extends Controller
      */
     public function destroy(IncomeCategory $incomeCategory): RedirectResponse
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         if ($incomeCategory->hasLinkedData()) {
             return redirect()->back()->with('error', 'لا يمكن حذف فئة الحساب لوجود بيانات مرتبطة بها.');
         }
@@ -102,6 +109,8 @@ class IncomeCategoryController extends Controller
      */
     public function toggleActive(IncomeCategory $incomeCategory): RedirectResponse
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $incomeCategory->update(['is_active' => ! $incomeCategory->is_active]);
 
         return redirect()->back()->with('success', 'تم تعديل حالة النشاط بنجاح');

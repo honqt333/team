@@ -27,6 +27,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const OUT = resolve('public/images/brand');
 const SRC = resolve('public/images/brand/logo.svg');
 const MARK_SRC = resolve('public/images/brand/logo-mark.svg');
+const BLUE_SRC = resolve('public/images/brand/logo-blue.svg');
 
 const NAVY = '#0f172a';
 const NAVY_2 = '#1e293b';
@@ -35,6 +36,7 @@ mkdirSync(OUT, { recursive: true });
 
 const shellSvg = readFileSync(SRC, 'utf8');
 const markSvg = readFileSync(MARK_SRC, 'utf8');
+const blueSvg = readFileSync(BLUE_SRC, 'utf8');
 
 /** Wrap an SVG in an HTML page and screenshot it at an exact pixel size. */
 async function render(browser, svg, size, { background = 'transparent', padding = 0 } = {}) {
@@ -110,6 +112,14 @@ function buildIco(entries) {
         console.log('wrote', `favicon-${size}.png`);
     }
 
+    /* /favicon.png is a convention bots and browsers request even when the
+       markup points elsewhere, so it must carry the CURRENT mark. */
+    {
+        const buf = await render(browser, shellSvg, 512);
+        writeFileSync(resolve(OUT, 'favicon.png'), buf);
+        console.log('wrote favicon.png (512x512)');
+    }
+
     const icoEntries = [];
     for (const size of [16, 32, 48]) {
         const buf = await render(browser, shellSvg, size);
@@ -123,6 +133,54 @@ function buildIco(entries) {
         const buf = await render(browser, markSvg, size);
         writeFileSync(resolve(OUT, `logo-mark-${size}.png`), buf);
         console.log('wrote', `logo-mark-${size}.png`);
+    }
+
+    /* --- the brand-primary app tile ------------------------------------- */
+    for (const size of [32, 64, 128, 192, 256, 512, 1024]) {
+        const buf = await render(browser, blueSvg, size);
+        writeFileSync(resolve(OUT, `logo-blue-${size}.png`), buf);
+        console.log('wrote', `logo-blue-${size}.png`);
+    }
+
+    /* --- the landing-page header mark (WebP) --------------------------- */
+    /* The landing header offers this WebP first and the CMS PNG as the
+       fallback, so the WebP has to carry the CURRENT mark or browsers
+       that support it show a stale one.
+
+       Playwright cannot write WebP (its screenshot type is png|jpeg
+       only), so the browser encodes it: the SVG is drawn to a canvas and
+       exported with toDataURL('image/webp'). */
+    {
+        const page = await browser.newPage({ deviceScaleFactor: 1 });
+        await page.setViewportSize({ width: 176, height: 176 });
+        const sized = shellSvg.replace(/<svg([^>]*)>/, (m, attrs) =>
+            `<svg${attrs.replace(/\s(width|height)="[^"]*"/g, '')}>`
+        );
+        const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+            html,body{margin:0;padding:0;background:transparent;}
+            .art{width:176px;height:176px;} .art>svg{width:100%;height:100%;display:block;}
+        </style></head><body><div class="art">${sized}</div></body></html>`;
+        await page.setContent(html, { waitUntil: 'load' });
+
+        const dataUrl = await page.evaluate(async () => {
+            const svgText = document.querySelector('svg').outerHTML;
+            const url = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml' }));
+            const img = new Image();
+            await new Promise((res, rej) => {
+                img.onload = res;
+                img.onerror = rej;
+                img.src = url;
+            });
+            const canvas = document.createElement('canvas');
+            canvas.width = 176;
+            canvas.height = 176;
+            canvas.getContext('2d').drawImage(img, 0, 0, 176, 176);
+            return canvas.toDataURL('image/webp', 0.9);
+        });
+
+        writeFileSync(resolve('public/images/landing/logo.webp'), Buffer.from(dataUrl.split(',')[1], 'base64'));
+        await page.close();
+        console.log('wrote public/images/landing/logo.webp (176x176 WebP)');
     }
 
     /* --- the OG / social share image ------------------------------------ */

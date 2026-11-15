@@ -25,7 +25,7 @@ const activeIndex = computed(() => props.tabs.findIndex((t) => t.id === props.mo
                         : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200',
                 ]"
             >
-                <span v-if="tab.icon" v-html="tab.icon" class="h-4 w-4"></span>
+                <span v-if="tab.icon" v-safe-html="tab.icon" class="h-4 w-4"></span>
                 <span>{{ tab.label }}</span>
                 <span
                     v-if="tab.badge !== undefined && tab.badge !== null && tab.badge > 0"

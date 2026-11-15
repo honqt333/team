@@ -73,49 +73,31 @@
                         </a>
 
                         <!-- Save button -->
-                        <button
-                            type="button"
+                        <AppButton
                             @click="submit"
-                            :disabled="form.processing"
-                            class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-white font-medium text-sm shadow-md transition-all disabled:opacity-60"
+                            :loading="form.processing"
+                            variant="primary"
+                            size="md"
+                            class="shadow-md"
                             :style="{ backgroundColor: form.primary_color || '#2563eb' }"
                         >
-                            <svg
-                                v-if="form.processing"
-                                class="w-4 h-4 animate-spin"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
                                     stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v8H4z"
-                                ></path>
-                            </svg>
-                            <svg
-                                v-else
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </template>
                             {{ t('tenant_site.admin.save') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </template>
             </PageHeader>
@@ -151,10 +133,9 @@
                                 >
                                     {{ t('tenant_site.admin.fields.site_name') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.site_name"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     :placeholder="w.display_name"
                                 />
                                 <p v-if="errors.site_name" class="text-xs text-rose-500 mt-1">
@@ -168,10 +149,9 @@
                                 >
                                     {{ t('tenant_site.admin.fields.tagline') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.tagline"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     placeholder="أفضل ورشة لصيانة السيارات والميكانيكا بأحدث التقنيات"
                                 />
                                 <p v-if="errors.tagline" class="text-xs text-rose-500 mt-1">
@@ -346,10 +326,9 @@
                                 >
                                     {{ t('tenant_site.admin.announcement.text') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.settings.announcement_bar.text"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     :placeholder="
                                         t('tenant_site.admin.announcement.text_placeholder')
                                     "
@@ -520,10 +499,10 @@
                                                     )
                                                 }}
                                             </label>
-                                            <input
+                                            <AppInput
                                                 v-model="banner.badge"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                                input-class="px-3 py-2 text-xs"
                                                 placeholder="عرض خاص لفترة محدودة"
                                             />
                                         </div>
@@ -538,10 +517,10 @@
                                                     )
                                                 }}
                                             </label>
-                                            <input
+                                            <AppInput
                                                 v-model="banner.title"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                                input-class="px-3 py-2 text-xs"
                                                 placeholder="خصم 20% على فحص وبرمجة كمبيوتر السيارة"
                                             />
                                         </div>
@@ -557,12 +536,11 @@
                                                 )
                                             }}
                                         </label>
-                                        <textarea
+                                        <AppTextarea
                                             v-model="banner.subtitle"
-                                            rows="2"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
+                                            :rows="2"
                                             placeholder="احصل على تقرير فحص تفصيلي شامل لأكثر من 50 نقطة في المركبة مع ضمان شهر كامل"
-                                        ></textarea>
+                                        />
                                     </div>
 
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -574,10 +552,10 @@
                                                     t('tenant_site.admin.banners_manager.cta_text')
                                                 }}
                                             </label>
-                                            <input
+                                            <AppInput
                                                 v-model="banner.cta_text"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                                input-class="px-3 py-2 text-xs"
                                                 placeholder="احجز الآن"
                                             />
                                         </div>
@@ -590,10 +568,10 @@
                                                     t('tenant_site.admin.banners_manager.cta_link')
                                                 }}
                                             </label>
-                                            <input
+                                            <AppInput
                                                 v-model="banner.cta_link"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                                input-class="px-3 py-2 text-xs"
                                                 placeholder="#booking أو رابط واتساب"
                                             />
                                         </div>
@@ -791,10 +769,10 @@
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                     />
                                 </svg>
-                                <input
+                                <AppInput
                                     v-model="serviceSearch"
                                     type="text"
-                                    class="w-full ps-9 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                    input-class="ps-9 py-2 text-xs"
                                     :placeholder="
                                         t('tenant_site.admin.services_manager.search_services')
                                     "
@@ -936,11 +914,10 @@
                                 >
                                     {{ t('tenant_site.admin.fields.contact_phone') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.contact_phone"
                                     type="text"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="0501234567"
                                 />
                                 <p v-if="errors.contact_phone" class="text-xs text-rose-500 mt-1">
@@ -954,11 +931,10 @@
                                 >
                                     {{ t('tenant_site.admin.fields.contact_whatsapp') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.contact_whatsapp"
                                     type="text"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="966501234567"
                                 />
                                 <p
@@ -975,11 +951,10 @@
                                 >
                                     {{ t('tenant_site.admin.fields.contact_email') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.contact_email"
                                     type="email"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="info@workshop.com"
                                 />
                                 <p v-if="errors.contact_email" class="text-xs text-rose-500 mt-1">
@@ -994,10 +969,9 @@
                             >
                                 {{ t('tenant_site.admin.fields.address') }}
                             </label>
-                            <input
+                            <AppInput
                                 v-model="form.address_line"
                                 type="text"
-                                class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                 placeholder="الرياض — صناعية أم الحمام — شارع الورش الرئيسي"
                             />
                             <p v-if="errors.address_line" class="text-xs text-rose-500 mt-1">
@@ -1028,11 +1002,11 @@
                                 >
                                     {{ label }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.social_links[key]"
                                     type="url"
                                     dir="ltr"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                    input-class="px-3 py-2 text-xs"
                                     placeholder="https://..."
                                 />
                             </div>
@@ -1044,6 +1018,131 @@
                 <!-- TAB 5: CUSTOM DOMAIN & SEO -->
                 <!-- ═════════════════════════════════════════════════════════════════════════════ -->
                 <div v-show="activeTab === 'domain_seo'" class="space-y-6">
+                    <!-- Website & Portal Links -->
+                    <section
+                        v-if="w.tenant_slug"
+                        class="bg-surface rounded-2xl p-6 shadow-sm border border-border-default space-y-4"
+                    >
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-base font-semibold text-text-primary">
+                                    {{ $t('tenant_site.admin.links.title') }}
+                                </h2>
+                                <p class="text-xs text-text-muted mt-0.5">
+                                    {{ $t('tenant_site.admin.links.subtitle') }}
+                                </p>
+                            </div>
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                                :class="publishStatusBadgeClass"
+                            >
+                                {{ publishStatusLabel }}
+                            </span>
+                        </div>
+
+                        <div
+                            v-if="form.status !== 'published'"
+                            class="rounded-xl border border-warning-200 bg-warning-50 px-3.5 py-2.5 text-xs text-warning-800"
+                        >
+                            {{ $t('tenant_site.admin.links.unpublished_hint') }}
+                        </div>
+
+                        <div
+                            v-if="w.custom_domain && !isCustomDomainActive"
+                            class="rounded-xl border border-border-default bg-bg-subtle px-3.5 py-2.5 text-xs text-text-secondary"
+                        >
+                            {{ $t('tenant_site.admin.links.custom_domain_pending_note') }}
+                        </div>
+
+                        <div class="space-y-3">
+                            <!-- Tenant Slug (Read-Only) -->
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <AppInput
+                                        :model-value="w.tenant_slug"
+                                        :label="$t('tenant_site.admin.links.slug_label')"
+                                        readonly
+                                        dir="ltr"
+                                    />
+                                </div>
+                                <AppButton
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    @click="copyLink(w.tenant_slug)"
+                                >
+                                    {{ $t('tenant_site.admin.links.copy') }}
+                                </AppButton>
+                            </div>
+
+                            <!-- Public Website URL -->
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <AppInput
+                                        :model-value="fullPublicUrl || publicUrl || ''"
+                                        :label="$t('tenant_site.admin.links.public_url_label')"
+                                        readonly
+                                        dir="ltr"
+                                    />
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <AppButton
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        @click="copyLink(fullPublicUrl || publicUrl)"
+                                    >
+                                        {{ $t('tenant_site.admin.links.copy') }}
+                                    </AppButton>
+                                    <AppButton
+                                        v-if="publicUrl"
+                                        as="a"
+                                        :href="fullPublicUrl || publicUrl"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        variant="secondary"
+                                        size="sm"
+                                    >
+                                        {{ $t('tenant_site.admin.links.open') }}
+                                    </AppButton>
+                                </div>
+                            </div>
+
+                            <!-- Customer Portal URL -->
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <AppInput
+                                        :model-value="fullPortalUrl || portalUrl || ''"
+                                        :label="$t('tenant_site.admin.links.portal_url_label')"
+                                        readonly
+                                        dir="ltr"
+                                    />
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <AppButton
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        @click="copyLink(fullPortalUrl || portalUrl)"
+                                    >
+                                        {{ $t('tenant_site.admin.links.copy') }}
+                                    </AppButton>
+                                    <AppButton
+                                        v-if="portalUrl"
+                                        as="a"
+                                        :href="fullPortalUrl || portalUrl"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        variant="secondary"
+                                        size="sm"
+                                    >
+                                        {{ $t('tenant_site.admin.links.open') }}
+                                    </AppButton>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- Custom Domain -->
                     <section
                         class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4"
@@ -1120,11 +1219,11 @@
                                         >
                                             https://
                                         </span>
-                                        <input
+                                        <AppInput
                                             v-model="form.custom_domain"
                                             type="text"
                                             dir="ltr"
-                                            class="w-full ps-20 pe-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm font-mono focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                            input-class="ps-20 font-mono"
                                             :placeholder="
                                                 t(
                                                     'tenant_site.admin.custom_domain.input_placeholder'
@@ -1221,15 +1320,14 @@
                                 >
                                     {{ t('tenant_site.admin.fields.seo_title') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.seo_title"
                                     type="text"
                                     maxlength="70"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     :placeholder="form.site_name || w.display_name"
                                 />
                                 <span class="text-[11px] text-gray-400 mt-1 block">
-                                    {{ form.seo_title.length }}/70 حرف
+                                    {{ (form.seo_title || '').length }}/70 حرف
                                 </span>
                                 <p v-if="errors.seo_title" class="text-xs text-rose-500 mt-1">
                                     {{ errors.seo_title }}
@@ -1242,17 +1340,16 @@
                                 >
                                     {{ t('tenant_site.admin.fields.seo_description') }}
                                 </label>
-                                <textarea
+                                <AppTextarea
                                     v-model="form.seo_description"
-                                    rows="3"
-                                    maxlength="200"
-                                    class="w-full px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
+                                    :rows="3"
+                                    :maxlength="200"
                                     :placeholder="
                                         form.tagline || 'مركز متخصص في صيانة وفحص وبرمجة السيارات'
                                     "
-                                ></textarea>
+                                />
                                 <span class="text-[11px] text-gray-400 block">
-                                    {{ form.seo_description.length }}/200 حرف
+                                    {{ (form.seo_description || '').length }}/200
                                 </span>
                                 <p v-if="errors.seo_description" class="text-xs text-rose-500 mt-1">
                                     {{ errors.seo_description }}
@@ -1274,8 +1371,9 @@
                                 dir="ltr"
                             >
                                 {{
-                                    form.custom_domain ||
-                                    `https://khidmh.pro/${w.tenant_slug || 'workshop'}`
+                                    isCustomDomainActive
+                                        ? `https://${w.custom_domain}`
+                                        : fullPublicUrl || `/${w.tenant_slug || 'workshop'}`
                                 }}
                             </div>
                             <div
@@ -1335,10 +1433,10 @@
                                     >
                                         {{ t('tenant_site.admin.features_manager.badge_title') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="badge.title"
                                         type="text"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
+                                        input-class="px-3 py-2 text-xs"
                                     />
                                 </div>
                                 <div>
@@ -1347,11 +1445,10 @@
                                     >
                                         {{ t('tenant_site.admin.features_manager.badge_desc') }}
                                     </label>
-                                    <textarea
+                                    <AppTextarea
                                         v-model="badge.desc"
-                                        rows="2"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
-                                    ></textarea>
+                                        :rows="2"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -1567,6 +1664,9 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ColorField from '@/Components/ColorField.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -1579,9 +1679,11 @@ import { computed, ref, h } from 'vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useToast } from '@/Composables/useToast';
 
 const { activeCurrencySymbol } = useNumberFormat();
 const { confirm } = useConfirm();
+const { success: showSuccess } = useToast();
 
 const props = defineProps({
     website: { type: Object, default: () => ({}) },
@@ -2050,7 +2152,61 @@ function submit() {
     });
 }
 
+const siteOrigin = computed(() => {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+        return window.location.origin;
+    }
+    return '';
+});
+
+const isCustomDomainActive = computed(
+    () => Boolean(w.custom_domain && w.custom_domain_status === 'active'),
+);
+
 const publicUrl = computed(() => {
     return w.tenant_slug ? `/${w.tenant_slug}` : null;
 });
+
+const fullPublicUrl = computed(() => {
+    if (isCustomDomainActive.value) {
+        return `https://${w.custom_domain}`;
+    }
+    if (!publicUrl.value) return null;
+    return siteOrigin.value ? `${siteOrigin.value}${publicUrl.value}` : publicUrl.value;
+});
+
+const portalUrl = computed(() => {
+    return w.tenant_slug ? `/${w.tenant_slug}/portal/login` : null;
+});
+
+const fullPortalUrl = computed(() => {
+    if (!portalUrl.value) return null;
+    return siteOrigin.value ? `${siteOrigin.value}${portalUrl.value}` : portalUrl.value;
+});
+
+const publishStatusBadgeClass = computed(() => {
+    if (form.status === 'published') {
+        return 'bg-success-100 text-success-700';
+    }
+    if (form.status === 'unpublished') {
+        return 'bg-warning-100 text-warning-800';
+    }
+    return 'bg-bg-subtle text-text-secondary';
+});
+
+const publishStatusLabel = computed(() => {
+    if (form.status === 'published') return t('tenant_site.admin.links.status_published');
+    if (form.status === 'unpublished') return t('tenant_site.admin.links.status_unpublished');
+    return t('tenant_site.admin.links.status_draft');
+});
+
+async function copyLink(value) {
+    if (!value) return;
+    try {
+        await navigator.clipboard?.writeText(String(value));
+        showSuccess(t('tenant_site.admin.links.copied'));
+    } catch {
+        // Clipboard permission denied or unavailable
+    }
+}
 </script>

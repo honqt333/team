@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const { t, locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
@@ -37,7 +37,7 @@ const submit = () => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('auth.password') }}
                 </label>
-                <input
+                <AppInput
                     id="password"
                     type="password"
                     v-model="form.password"
@@ -45,9 +45,9 @@ const submit = () => {
                     autofocus
                     autocomplete="current-password"
                     :placeholder="isRTL ? 'أدخل كلمة المرور' : 'Enter password'"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    :error="form.errors.password"
+                    input-class="px-4 py-3"
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <!-- Submit Button -->

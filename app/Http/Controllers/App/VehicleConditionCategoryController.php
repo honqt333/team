@@ -6,14 +6,16 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleConditionCategory;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleConditionCategoryController extends Controller
 {
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -30,6 +32,8 @@ class VehicleConditionCategoryController extends Controller
 
     public function update(Request $request, VehicleConditionCategory $conditionCategory): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionCategory->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
         }
@@ -48,6 +52,8 @@ class VehicleConditionCategoryController extends Controller
 
     public function destroy(VehicleConditionCategory $conditionCategory): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionCategory->source === 'system') {
             abort(403, __('common.cannot_delete_system_data'));
         }
@@ -63,6 +69,8 @@ class VehicleConditionCategoryController extends Controller
 
     public function toggleActive(VehicleConditionCategory $conditionCategory): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         if ($conditionCategory->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
         }

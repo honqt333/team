@@ -7,9 +7,11 @@ namespace App\Http\Controllers\App;
 use App\Models\Department;
 use App\Models\Quote;
 use App\Models\Service;
+use App\Models\ServiceBay;
 use App\Models\Setting;
 use App\Models\VehicleConditionCategory;
 use App\Models\WorkOrder;
+use App\Support\Permissions;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -146,6 +148,27 @@ class ServiceController
 
         Log::info('Packages found in index:', ['count' => $packages->count(), 'sample' => $packages->take(1)->toArray()]);
 
+        $user = auth()->user();
+        $serviceBays = $user && $user->can(Permissions::APPOINTMENTS_MANAGE)
+            ? ServiceBay::where('center_id', $centerId)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get()
+                ->map(fn ($bay) => [
+                    'id' => $bay->id,
+                    'name' => $bay->name,
+                    'code' => $bay->code,
+                    'type' => $bay->type,
+                    'is_active' => $bay->is_active,
+                    'notes' => $bay->notes,
+                    'sort_order' => $bay->sort_order,
+                    'has_active_appointments' => $bay->appointments()
+                        ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
+                        ->exists(),
+                ])
+                ->values()
+            : collect();
+
         return Inertia::render('Services/Index', [
             'departments' => $departments,
             'unassignedServices' => $unassignedServices,
@@ -154,6 +177,7 @@ class ServiceController
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
             'otherBranchesServices' => $otherBranchesServices,
             'otherBranchesPackages' => $otherBranchesPackages,
+            'serviceBays' => $serviceBays,
         ]);
     }
 

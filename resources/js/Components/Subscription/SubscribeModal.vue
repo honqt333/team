@@ -3,7 +3,10 @@ import { ref, computed, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
+import BankAccountCard from './BankAccountCard.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
 import BankTransferReceiptUpload from './BankTransferReceiptUpload.vue';
 import MoyasarPaymentForm from './MoyasarPaymentForm.vue';
@@ -13,23 +16,30 @@ const props = defineProps({
     plan: { type: Object, default: null }, // Selected plan
     enabledGateways: { type: Array, default: () => [] },
     paymentSettings: { type: Object, default: () => ({}) },
+    paymentIcons: { type: Object, default: () => ({ style: 'colored', logos: {} }) },
     bankAccounts: { type: Array, default: () => [] },
     bankInstructions: { type: String, default: null },
     companyInfo: { type: Object, default: () => ({}) },
     vatSettings: { type: Object, default: () => ({ enabled: true, rate: 15, inclusive: false }) },
+    initialGateway: { type: String, default: '' },
+    billingState: { type: Object, default: null },
 });
 const emit = defineEmits(['close', 'success']);
 
 const { t, locale } = useI18n();
+const page = usePage();
 
 // Read the CSRF token from Inertia's shared page props (always fresh
 // per request) — the meta tag in the document can be stale if the
 // session rotated or the user opened the page a long time ago.
 const csrfToken = computed(
     () =>
-        usePage().props.value?.csrf_token ||
+        page.props?.csrf_token ||
+        page.props?.value?.csrf_token ||
         document.querySelector('meta[name="csrf-token"]')?.content
 );
+
+const { activeCurrencyCode: currencyCode } = useNumberFormat();
 
 const billingCycle = ref('yearly');
 const promoInput = ref('');
@@ -54,12 +64,21 @@ watch(
                 .map((g) => (typeof g === 'string' ? g : g?.name || g?.key))
                 .filter(Boolean);
             const pm = props.paymentSettings || {};
-            if (available.includes('moyasar') || pm.moyasar?.enabled) {
-                selectedGateway.value = 'moyasar';
-            } else if (available.includes('bank_transfer') || pm.bank_transfer_enabled) {
+            const defaultGw = pm.default_gateway;
+            if (props.billingState?.display_status === 'partially_paid') {
                 selectedGateway.value = 'bank_transfer';
+            } else if (props.initialGateway) {
+                selectedGateway.value = props.initialGateway;
+            } else if (defaultGw && (available.includes(defaultGw) || pm[defaultGw]?.enabled)) {
+                selectedGateway.value = defaultGw;
+            } else if (available.includes('moyasar') || pm.moyasar?.enabled) {
+                selectedGateway.value = 'moyasar';
             } else if (available.includes('tap') || pm.tap?.enabled) {
                 selectedGateway.value = 'tap';
+            } else if (available.includes('paytabs') || pm.paytabs?.enabled) {
+                selectedGateway.value = 'paytabs';
+            } else if (available.includes('bank_transfer') || pm.bank_transfer_enabled) {
+                selectedGateway.value = 'bank_transfer';
             } else if (available.length > 0) {
                 selectedGateway.value = available[0];
             } else {
@@ -80,9 +99,25 @@ watch([billingCycle, validPromo], () => {
     if (props.open) calculate();
 });
 
+async function extractErrorMessage(response, fallback) {
+    try {
+        const data = await response.json();
+        if (data?.error) return data.error;
+        if (data?.errors && typeof data.errors === 'object') {
+            const firstError = Object.values(data.errors).flat()[0];
+            if (firstError) return firstError;
+        }
+        if (data?.message) return data.message;
+    } catch {
+        // Non-JSON response (e.g. HTML error page)
+    }
+    return fallback;
+}
+
 async function calculate() {
     if (!props.plan) return;
     loading.value = true;
+    error.value = null;
     try {
         const response = await fetch('/app/settings/billing/calculate', {
             method: 'POST',
@@ -98,6 +133,10 @@ async function calculate() {
                 promo_code: validPromo.value?.code || null,
             }),
         });
+        if (!response.ok) {
+            error.value = await extractErrorMessage(response, t('subscription.pricing_error'));
+            return;
+        }
         pricing.value = await response.json();
     } catch (e) {
         error.value = t('subscription.pricing_error');
@@ -107,6 +146,10 @@ async function calculate() {
 }
 
 async function subscribe() {
+    if (!pricing.value) {
+        error.value = t('subscription.pricing_error');
+        return;
+    }
     if (!selectedGateway.value) {
         error.value = t('subscription.choose_payment_method');
         return;
@@ -130,6 +173,10 @@ async function subscribe() {
                 promo_code: validPromo.value?.code || null,
             }),
         });
+        if (!response.ok) {
+            error.value = await extractErrorMessage(response, t('subscription.subscription_error'));
+            return;
+        }
         const data = await response.json();
 
         if (data.error) {
@@ -196,6 +243,9 @@ async function subscribe() {
 }
 
 async function cancelPendingAttempt() {
+    if (props.billingState?.allowed_actions?.can_cancel_pending !== true) {
+        return;
+    }
     try {
         await fetch('/app/settings/billing/cancel-pending', {
             method: 'POST',
@@ -409,7 +459,7 @@ const formatCurrency = (amount) => {
                         </div>
                     </div>
                     <span class="text-lg font-black text-action-primary">
-                        {{ formatCurrency(plan?.price_yearly) }} SAR
+                        {{ formatCurrency(plan?.price_yearly) }} {{ currencyCode }}
                     </span>
                 </div>
             </div>
@@ -436,7 +486,7 @@ const formatCurrency = (amount) => {
                             {{ t('subscription.subtotal', 'السعر الأساسي') }}
                         </span>
                         <span class="font-mono text-slate-900 dark:text-white">
-                            {{ formatCurrency(pricing.base_price) }} SAR
+                            {{ formatCurrency(pricing.base_price) }} {{ currencyCode }}
                         </span>
                     </div>
                     <div
@@ -444,7 +494,7 @@ const formatCurrency = (amount) => {
                         class="flex justify-between text-emerald-600 dark:text-emerald-400"
                     >
                         <span>{{ t('subscription.discount', 'الخصم') }}</span>
-                        <span class="font-mono">- {{ formatCurrency(pricing.discount) }} SAR</span>
+                        <span class="font-mono">- {{ formatCurrency(pricing.discount) }} {{ currencyCode }}</span>
                     </div>
                     <div
                         v-if="vatSettings.enabled && pricing.vat_amount > 0"
@@ -459,7 +509,7 @@ const formatCurrency = (amount) => {
                                 )
                             }}
                         </span>
-                        <span class="font-mono">{{ formatCurrency(pricing.vat_amount) }} SAR</span>
+                        <span class="font-mono">{{ formatCurrency(pricing.vat_amount) }} {{ currencyCode }}</span>
                     </div>
                     <div
                         class="flex justify-between border-t border-slate-200 pt-2 text-base font-bold dark:border-slate-700"
@@ -468,18 +518,38 @@ const formatCurrency = (amount) => {
                             {{ t('subscription.total', 'الإجمالي') }}
                         </span>
                         <span class="font-mono text-action-primary">
-                            {{ formatCurrency(pricing.total) }} SAR
+                            {{ formatCurrency(pricing.total) }} {{ currencyCode }}
                         </span>
                     </div>
                 </div>
             </div>
 
+            <!-- Partial payment gateway lock notice -->
+            <p
+                v-if="billingState?.display_status === 'partially_paid'"
+                class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-medium text-amber-800 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-200"
+            >
+                {{ t('system.billing.page.state.gateway_locked_partial') }}
+            </p>
+
             <!-- Payment methods -->
             <PaymentMethodSelector
+                v-if="pricing"
                 v-model="selectedGateway"
                 :enabled-gateways="enabledGateways"
                 :payment-methods="paymentSettings"
+                :payment-icons="paymentIcons"
                 :bank-transfer-enabled="paymentSettings.bank_transfer_enabled"
+                :default-gateway="paymentSettings?.default_gateway || ''"
+                :total-amount="pricing?.total ?? null"
+                :locked-gateway="
+                    billingState?.display_status === 'partially_paid' ? 'bank_transfer' : ''
+                "
+                :locked-reason="
+                    billingState?.display_status === 'partially_paid'
+                        ? t('system.billing.page.state.gateway_locked_partial')
+                        : ''
+                "
             />
 
             <!-- Bank transfer details (if selected) -->
@@ -491,24 +561,11 @@ const formatCurrency = (amount) => {
                     {{ t('subscription.bank_accounts', 'الحسابات البنكية') }}
                 </p>
                 <div class="space-y-3">
-                    <div
+                    <BankAccountCard
                         v-for="(acc, idx) in bankAccounts"
                         :key="idx"
-                        class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800"
-                    >
-                        <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                            {{ acc.bank_name }}
-                        </p>
-                        <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                            {{ acc.account_name }}
-                        </p>
-                        <p
-                            class="mt-1 font-mono text-xs text-slate-700 dark:text-slate-300"
-                            dir="ltr"
-                        >
-                            {{ acc.iban || acc.account_number }}
-                        </p>
-                    </div>
+                        :account="acc"
+                    />
                 </div>
                 <p
                     v-if="bankInstructions"
@@ -527,44 +584,35 @@ const formatCurrency = (amount) => {
             </p>
         </div>
 
-        <template v-if="!success && !bankTransferResult" #footer>
-            <div class="flex items-center justify-end gap-2 w-full">
-                <button
-                    type="button"
-                    @click="close"
-                    :disabled="loading"
-                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
-                >
-                    {{ t('common.cancel', 'إلغاء') }}
-                </button>
-                <button
-                    type="button"
-                    @click="subscribe"
-                    :disabled="loading || !pricing"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                >
-                    <svg
-                        v-if="loading"
-                        class="h-4 w-4 animate-spin"
-                        fill="none"
-                        viewBox="0 0 24 24"
+        <template v-if="!success && !bankTransferResult && !gatewayFormData" #footer>
+            <div class="w-full space-y-2.5">
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <AppButton
+                        variant="secondary"
+                        size="md"
+                        :disabled="loading"
+                        @click="close"
                     >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        />
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
+                        {{ t('common.cancel', 'إلغاء') }}
+                    </AppButton>
+                    <AppButton
+                        variant="primary"
+                        size="md"
+                        :loading="loading"
+                        :disabled="loading || !pricing"
+                        @click="subscribe"
+                    >
+                        {{ t('subscription.continue_to_payment', 'متابعة الدفع') }}
+                    </AppButton>
+                </div>
+                <p
+                    class="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400"
+                >
+                    <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    <span>{{ t('subscription.continue_to_payment', 'متابعة الدفع') }}</span>
-                </button>
+                    <span>{{ t('subscription.secure_payment_note') }}</span>
+                </p>
             </div>
         </template>
     </BaseModal>

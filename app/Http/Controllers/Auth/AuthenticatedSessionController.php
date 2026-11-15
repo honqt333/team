@@ -139,4 +139,48 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
+    /**
+     * Destroy an authenticated system-admin session without disturbing
+     * an isolated tenant/employee `web` session when both share a browser.
+     */
+    public function destroyAdmin(Request $request): RedirectResponse
+    {
+        $hadAdmin = Auth::guard('admin')->check();
+        $webUser = Auth::guard('web')->user();
+        $isWebSystemAdmin = $webUser && (bool) $webUser->is_system_admin;
+
+        if (! $hadAdmin && ! $isWebSystemAdmin) {
+            abort(403);
+        }
+
+        if ($hadAdmin) {
+            Auth::guard('admin')->logout();
+        }
+
+        if ($isWebSystemAdmin) {
+            Auth::guard('web')->logout();
+            $webUser = null;
+        }
+
+        $request->session()->forget([
+            'impersonating_from',
+            'impersonating_from_guard',
+            'impersonating_tenant',
+            '2fa:user_id',
+            '2fa:user_type',
+        ]);
+
+        if ($webUser !== null) {
+            $request->session()->regenerate();
+            $request->session()->regenerateToken();
+        } else {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        Inertia::clearHistory();
+
+        return redirect()->route('admin.login');
+    }
 }

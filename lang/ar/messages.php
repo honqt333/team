@@ -146,6 +146,11 @@ return [
     // are distinguishable from the tenant-facing ones above.
     // ─────────────────────────────────────────────────────────────────
     'system' => [
+        'video_duration_extract_failed' => 'تعذر استخراج مدة الفيديو تلقائياً من هذا الرابط، يمكنك إدخالها يدوياً.',
+        'svg_unsafe' => 'ملف SVG المرفوع يحتوي على برمجيات غير آمنة',
+        'integration_balance_unsupported' => 'هذا المزود لا يدعم جلب الرصيد',
+        'audit_snapshot_generated' => 'تم إنشاء لقطة التدقيق بنجاح (الدرجة: :score%)',
+        'audit_snapshot_missing' => 'لم يتم العثور على لقطة تدقيق. يرجى تشغيل التدقيق أولاً.',
         'settings' => [
             'saved' => 'تم تحديث الإعدادات بنجاح',
             'saved_success' => 'تم حفظ الإعدادات بنجاح',
@@ -377,12 +382,5 @@ return [
         'deactivated' => 'تم تعطيل الشريك بنجاح',
         'deleted' => 'تم حذف الشريك بنجاح',
         'cannot_delete_has_relations' => 'لا يمكن حذف الشريك لوجود كروت عمل أو فواتير مرتبطة به',
-    ],
-    'system' => [
-        'video_duration_extract_failed' => 'تعذر استخراج مدة الفيديو تلقائياً من هذا الرابط، يمكنك إدخالها يدوياً.',
-        'svg_unsafe' => 'ملف SVG المرفوع يحتوي على برمجيات غير آمنة',
-        'integration_balance_unsupported' => 'هذا المزود لا يدعم جلب الرصيد',
-        'audit_snapshot_generated' => 'تم إنشاء لقطة التدقيق بنجاح (الدرجة: :score%)',
-        'audit_snapshot_missing' => 'لم يتم العثور على لقطة تدقيق. يرجى تشغيل التدقيق أولاً.',
     ],
 ];

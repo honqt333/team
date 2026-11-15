@@ -547,12 +547,12 @@
                         >
                             {{ $t('reports.employees_report.ticket_no') }}
                         </label>
-                        <input
+                        <AppInput
                             v-model="localFilters.ticket_no"
                             type="text"
                             placeholder="WO-000001"
+                            input-class="text-xs font-medium"
                             @keyup.enter="applyFilters"
-                            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                     </div>
 
@@ -578,12 +578,12 @@
                             {{ $t('reports.employees_report.direct_search') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 v-model="localFilters.search"
                                 type="text"
                                 :placeholder="$t('reports.employees_report.search_placeholder')"
+                                input-class="pr-10 pl-4 text-xs font-medium"
                                 @keyup.enter="applyFilters"
-                                class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                             <div
                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"
@@ -1291,6 +1291,7 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

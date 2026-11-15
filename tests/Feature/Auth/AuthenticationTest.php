@@ -134,4 +134,133 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/system');
         $this->assertAuthenticated('admin');
     }
+
+    public function test_system_admin_logout_terminates_admin_session_and_blocks_system_access(): void
+    {
+        $admin = AdminUser::create([
+            'name' => 'System Admin',
+            'email' => 'admin-logout@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $this->post('/admin/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect('/system');
+
+        $this->assertAuthenticated('admin');
+        $oldSessionId = session()->getId();
+        $oldCsrfToken = session()->token();
+
+        $logoutResponse = $this->post(route('admin.logout'));
+
+        $logoutResponse->assertRedirect(route('admin.login'));
+        $this->assertGuest('admin');
+        $this->assertNotSame($oldSessionId, session()->getId());
+        $this->assertNotSame($oldCsrfToken, session()->token());
+
+        $this->get('/system')->assertRedirect(route('login'));
+    }
+
+    public function test_system_admin_logout_preserves_isolated_web_guard_session(): void
+    {
+        $admin = AdminUser::create([
+            'name' => 'System Admin',
+            'email' => 'admin-isolated@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+        $user = User::factory()->create(['is_system_admin' => false]);
+
+        $this->actingAs($user, 'web');
+        $this->actingAs($admin, 'admin');
+
+        $this->assertAuthenticated('web');
+        $this->assertAuthenticated('admin');
+
+        $oldSessionId = session()->getId();
+        $oldCsrfToken = session()->token();
+
+        $this->post(route('admin.logout'))
+            ->assertRedirect(route('admin.login'));
+
+        $this->assertGuest('admin');
+        $this->assertAuthenticatedAs($user, 'web');
+        $this->assertNotSame($oldSessionId, session()->getId());
+        $this->assertNotSame($oldCsrfToken, session()->token());
+
+        $this->get('/system')->assertForbidden();
+    }
+
+    public function test_unauthenticated_request_to_admin_logout_is_redirected(): void
+    {
+        $this->post('/admin/logout')->assertRedirect(route('login'));
+        $this->assertGuest('admin');
+    }
+
+    public function test_regular_web_user_cannot_call_admin_logout(): void
+    {
+        $user = User::factory()->create(['is_system_admin' => false]);
+
+        $this->actingAs($user, 'web')
+            ->post(route('admin.logout'))
+            ->assertForbidden();
+
+        $this->assertAuthenticatedAs($user, 'web');
+        $this->assertGuest('admin');
+    }
+
+    public function test_system_admin_logout_logs_out_both_admin_and_system_admin_web_guards(): void
+    {
+        $admin = AdminUser::create([
+            'name' => 'System Admin',
+            'email' => 'admin-dual@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+        $systemWebUser = User::factory()->create([
+            'email' => 'admin-dual@example.com',
+            'is_system_admin' => true,
+        ]);
+
+        $this->actingAs($systemWebUser, 'web');
+        $this->actingAs($admin, 'admin');
+
+        $oldSessionId = session()->getId();
+
+        $this->post(route('admin.logout'))
+            ->assertRedirect(route('admin.login'));
+
+        $this->assertGuest('admin');
+        $this->assertGuest('web');
+        $this->assertNotSame($oldSessionId, session()->getId());
+
+        $this->get('/system')->assertRedirect(route('login'));
+    }
+
+    public function test_admin_logout_rejects_get_requests_and_uses_web_csrf_middleware(): void
+    {
+        $admin = AdminUser::create([
+            'name' => 'System Admin',
+            'email' => 'admin-get@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get('/admin/logout')
+            ->assertMethodNotAllowed();
+
+        $this->assertAuthenticatedAs($admin, 'admin');
+
+        $route = app('router')->getRoutes()->getByName('admin.logout');
+        $this->assertNotNull($route);
+        $this->assertContains('POST', $route->methods());
+        $this->assertContains('web', $route->gatherMiddleware());
+    }
 }

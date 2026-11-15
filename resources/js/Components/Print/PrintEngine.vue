@@ -1,13 +1,19 @@
 <template>
     <div class="print-engine-wrapper">
         <slot>
-            <component :is="activeTemplate" v-bind="props" :documentType="normalizedDocType" />
+            <component
+                :is="activeTemplate"
+                v-bind="props"
+                :data="normalizedData"
+                :documentType="normalizedDocType"
+            />
         </slot>
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { usePrintTotals } from '@/Composables/usePrintTotals';
 import TemplateDefaultA4 from './PrintTemplates/TemplateDefaultA4.vue';
 import TemplateThermal80 from './PrintTemplates/TemplateThermal80.vue';
 import TemplateCustomersReport from './PrintTemplates/TemplateCustomersReport.vue';
@@ -46,6 +52,22 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+});
+
+const { normalizeItems } = usePrintTotals();
+
+const normalizedData = computed(() => {
+    const raw = props.data || {};
+    if (
+        Array.isArray(raw.items) &&
+        raw.items.length > 0 &&
+        !raw.parts?.length &&
+        !raw.services?.length
+    ) {
+        return raw;
+    }
+    const items = normalizeItems(raw);
+    return items.length > 0 ? { ...raw, items } : raw;
 });
 
 const normalizedDocType = computed(() => {

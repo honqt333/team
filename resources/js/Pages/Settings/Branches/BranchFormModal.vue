@@ -33,8 +33,6 @@ const form = useForm({
 const centerTypeOptions = computed(() => [
     { value: 'main', label: t('company_profile.branches.center_type_main') },
     { value: 'branch', label: t('company_profile.branches.center_type_branch') },
-    { value: 'workshop', label: t('company_profile.branches.center_type_workshop') },
-    { value: 'warehouse', label: t('company_profile.branches.center_type_warehouse') },
 ]);
 
 const close = () => {
@@ -99,6 +97,7 @@ const submit = () => {
                         :aria-describedby="field.describedBy"
                         :invalid="field.hasError"
                         v-model="form.name_ar"
+                        name="name_ar"
                         dir="rtl"
                         :placeholder="t('company_profile.branches.name_ar_placeholder')"
                         class="w-full"
@@ -117,6 +116,7 @@ const submit = () => {
                         :aria-describedby="field.describedBy"
                         :invalid="field.hasError"
                         v-model="form.name_en"
+                        name="name_en"
                         dir="ltr"
                         :placeholder="t('company_profile.branches.name_en_placeholder')"
                         class="w-full"
@@ -125,16 +125,18 @@ const submit = () => {
                 </FormField>
             </div>
 
-            <SearchableSelect
-                v-model="form.center_type"
-                :options="centerTypeOptions"
-                option-label="label"
-                option-value="value"
-                :label="t('company_profile.branches.center_type')"
-                :placeholder="t('common.select')"
-                required
-                :error="form.errors.center_type"
-            />
+            <div data-field="center_type">
+                <SearchableSelect
+                    v-model="form.center_type"
+                    :options="centerTypeOptions"
+                    option-label="label"
+                    option-value="value"
+                    :label="t('company_profile.branches.center_type')"
+                    :placeholder="t('common.select')"
+                    required
+                    :error="form.errors.center_type"
+                />
+            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -147,6 +149,7 @@ const submit = () => {
                         :aria-describedby="field.describedBy"
                         :invalid="field.hasError"
                         v-model="form.manager_name"
+                        name="manager_name"
                         class="w-full"
                     />
                 </FormField>
@@ -161,6 +164,7 @@ const submit = () => {
                         :aria-describedby="field.describedBy"
                         :invalid="field.hasError"
                         v-model="form.phone"
+                        name="phone"
                         dir="ltr"
                         class="w-full"
                     />
@@ -177,6 +181,7 @@ const submit = () => {
                     :aria-describedby="field.describedBy"
                     :invalid="field.hasError"
                     v-model="form.email"
+                    name="email"
                     type="email"
                     dir="ltr"
                     class="w-full"

@@ -30,6 +30,11 @@ const props = defineProps({
     uploadButtonText: { type: String, default: '' },
     resetButtonText: { type: String, default: '' },
     compactPreview: { type: Boolean, default: false },
+    size: {
+        type: String,
+        default: 'md',
+        validator: (v) => ['sm', 'md'].includes(v),
+    },
 });
 
 const model = defineModel({ default: null });
@@ -50,6 +55,10 @@ const selectedFiles = computed(() => {
     if (!model.value) return [];
     return Array.isArray(model.value) ? model.value : [model.value];
 });
+
+const hasCustomImage = computed(
+    () => selectedFiles.value.length > 0 || Boolean(props.existingUrl)
+);
 
 const imagePreviewSrc = computed(() => {
     if (objectUrl.value) return objectUrl.value;
@@ -167,6 +176,18 @@ function openPicker() {
         inputRef.value?.click();
     }
 }
+
+function handleRemoveImage() {
+    if (isBusy.value) return;
+    localError.value = '';
+    if (selectedFiles.value.length > 0) {
+        removeFile(0);
+        return;
+    }
+    if (props.existingUrl) {
+        emit('remove-existing');
+    }
+}
 </script>
 
 <template>
@@ -183,38 +204,140 @@ function openPicker() {
             @dragleave.prevent="dragging = false"
             @drop.prevent="processFiles($event.dataTransfer?.files)"
         >
+            <input
+                ref="inputRef"
+                type="file"
+                :accept="accept"
+                :disabled="isBusy"
+                class="hidden"
+                @change="onBrowse"
+            />
+
             <div class="flex items-center gap-4">
-                <div
-                    class="w-16 h-16 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0"
-                    :class="compactPreview ? 'p-2.5' : 'p-1.5'"
-                >
-                    <img
-                        v-if="imagePreviewSrc"
-                        :src="imagePreviewSrc"
-                        :alt="label || $t('common.app_name')"
-                        :class="
-                            compactPreview
-                                ? 'w-8 h-8 object-contain'
-                                : 'w-full h-full object-contain'
-                        "
-                    />
-                    <svg
-                        v-else
-                        class="w-7 h-7 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                <div class="relative shrink-0">
+                    <div
+                        role="button"
+                        :tabindex="isBusy ? -1 : 0"
+                        data-testid="image-upload-trigger"
+                        :aria-label="uploadButtonText || label || $t('common.file_upload.choose_file')"
+                        :title="uploadButtonText || $t('common.file_upload.choose_file')"
+                        @click="openPicker"
+                        @keydown.enter.prevent="openPicker"
+                        @keydown.space.prevent="openPicker"
+                        class="group relative rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-hidden transition-all"
+                        :class="[
+                            size === 'sm' ? 'w-12 h-12 sm:w-13 sm:h-13 rounded-xl' : 'w-16 h-16',
+                            $slots.placeholder && !imagePreviewSrc
+                                ? 'p-0 border-transparent bg-transparent'
+                                : compactPreview
+                                  ? size === 'sm'
+                                      ? 'p-0'
+                                      : 'p-2.5'
+                                  : 'p-1.5',
+                            isBusy
+                                ? 'opacity-60 cursor-not-allowed'
+                                : 'cursor-pointer hover:border-action-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50',
+                        ]"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.75"
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        <img
+                            v-if="imagePreviewSrc"
+                            :src="imagePreviewSrc"
+                            :alt="label || $t('common.app_name')"
+                            :class="
+                                compactPreview
+                                    ? size === 'sm'
+                                        ? 'w-full h-full object-cover'
+                                        : 'w-8 h-8 object-contain'
+                                    : 'w-full h-full object-contain'
+                            "
                         />
-                    </svg>
+                        <slot v-else name="placeholder">
+                            <svg
+                                class="w-7 h-7 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.75"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                            </svg>
+                        </slot>
+
+                        <!-- Hover / Focus Upload Overlay -->
+                        <div
+                            v-if="!isBusy"
+                            class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                                />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                            </svg>
+                        </div>
+
+                        <!-- Loading Spinner Overlay -->
+                        <div
+                            v-if="loading"
+                            class="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex items-center justify-center pointer-events-none"
+                        >
+                            <svg
+                                class="w-5 h-5 animate-spin text-action-primary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                />
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Trash Icon Button to Remove Image -->
+                    <button
+                        v-if="hasCustomImage"
+                        type="button"
+                        data-testid="image-remove-btn"
+                        :disabled="isBusy"
+                        :title="resetButtonText || $t('common.file_upload.remove')"
+                        :aria-label="resetButtonText || $t('common.file_upload.remove')"
+                        @click.stop="handleRemoveImage"
+                        class="absolute -top-1.5 -end-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-sm border-2 border-white dark:border-gray-800 flex items-center justify-center transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer z-10"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                        </svg>
+                    </button>
                 </div>
 
-                <div class="max-w-xl">
+                <div v-if="label || defaultBadge || hint" class="max-w-xl">
                     <div v-if="label || defaultBadge" class="flex items-center gap-2 flex-wrap">
                         <h3 v-if="label" class="text-lg font-bold text-gray-900 dark:text-white">
                             {{ label }}
@@ -230,34 +353,6 @@ function openPicker() {
                         {{ hint }}
                     </p>
                 </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-                <input
-                    ref="inputRef"
-                    type="file"
-                    :accept="accept"
-                    :disabled="isBusy"
-                    class="hidden"
-                    @change="onBrowse"
-                />
-                <button
-                    type="button"
-                    :disabled="isBusy"
-                    @click="openPicker"
-                    class="px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                    {{ uploadButtonText || $t('common.file_upload.choose_file') }}
-                </button>
-                <button
-                    v-if="existingUrl && resetButtonText"
-                    type="button"
-                    :disabled="isBusy"
-                    @click="$emit('remove-existing')"
-                    class="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                    {{ resetButtonText }}
-                </button>
             </div>
         </div>
 

@@ -51,6 +51,94 @@
                     </div>
                 </div>
                 <div
+                    v-if="tenantSlug"
+                    class="rounded-lg border border-border-default bg-bg-subtle p-4 space-y-3"
+                >
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                        {{ $t('system.tenants.links.title') }}
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                            <div class="flex-1 min-w-0">
+                                <AppInput
+                                    :model-value="tenantSlug"
+                                    :label="$t('system.tenants.links.slug')"
+                                    readonly
+                                    dir="ltr"
+                                />
+                            </div>
+                            <AppButton
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                @click="copyLink(tenantSlug)"
+                            >
+                                {{ $t('system.tenants.links.copy') }}
+                            </AppButton>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                            <div class="flex-1 min-w-0">
+                                <AppInput
+                                    :model-value="publicSiteUrl"
+                                    :label="$t('system.tenants.links.public_url')"
+                                    readonly
+                                    dir="ltr"
+                                />
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <AppButton
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    @click="copyLink(publicSiteUrl)"
+                                >
+                                    {{ $t('system.tenants.links.copy') }}
+                                </AppButton>
+                                <AppButton
+                                    as="a"
+                                    :href="publicSiteUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    {{ $t('system.tenants.links.open') }}
+                                </AppButton>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+                            <div class="flex-1 min-w-0">
+                                <AppInput
+                                    :model-value="portalLoginUrl"
+                                    :label="$t('system.tenants.links.portal_url')"
+                                    readonly
+                                    dir="ltr"
+                                />
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <AppButton
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    @click="copyLink(portalLoginUrl)"
+                                >
+                                    {{ $t('system.tenants.links.copy') }}
+                                </AppButton>
+                                <AppButton
+                                    as="a"
+                                    :href="portalLoginUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    {{ $t('system.tenants.links.open') }}
+                                </AppButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
                     v-if="recentWorkOrders && recentWorkOrders.length"
                     class="rounded-lg border border-gray-200 p-3 dark:border-gray-700"
                 >
@@ -367,10 +455,45 @@
 import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormatters } from '@/Composables/useFormatters';
+import { useToast } from '@/Composables/useToast';
 
 const { formatDate, formatDateTime } = useFormatters();
+const { success: showSuccess } = useToast();
+
+const siteOrigin = computed(() => {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+        return window.location.origin;
+    }
+    return '';
+});
+
+const tenantSlug = computed(() => props.tenant?.slug || '');
+
+const publicSiteUrl = computed(() => {
+    if (!tenantSlug.value) return '';
+    return siteOrigin.value ? `${siteOrigin.value}/${tenantSlug.value}` : `/${tenantSlug.value}`;
+});
+
+const portalLoginUrl = computed(() => {
+    if (!tenantSlug.value) return '';
+    return siteOrigin.value
+        ? `${siteOrigin.value}/${tenantSlug.value}/portal/login`
+        : `/${tenantSlug.value}/portal/login`;
+});
+
+async function copyLink(value) {
+    if (!value) return;
+    try {
+        await navigator.clipboard?.writeText(String(value));
+        showSuccess(t('system.tenants.links.copied'));
+    } catch {
+        // Clipboard permission denied or unavailable
+    }
+}
 
 const props = defineProps({
     tenant: { type: Object, required: true },

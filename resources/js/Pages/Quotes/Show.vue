@@ -851,7 +851,6 @@
 </template>
 
 <script setup>
-import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -872,8 +871,6 @@ import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
 import AppButton from '@/Components/App/AppButton.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';

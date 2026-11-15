@@ -185,17 +185,91 @@
                     <div
                         v-for="(account, index) in form.bank_accounts"
                         :key="index"
-                        class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-3"
+                        class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-3 space-y-3"
                     >
+                        <!-- Bank preset + Logo preview/upload -->
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-[220px] flex-1">
+                                <div
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-800"
+                                >
+                                    <img
+                                        v-if="account.logo_url"
+                                        :src="account.logo_url"
+                                        :alt="account.bank_name || 'Bank'"
+                                        class="h-full w-full object-contain p-1"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex h-full w-full items-center justify-center text-[10px] font-black text-white select-none"
+                                        :style="{
+                                            backgroundColor:
+                                                resolveBankPreset(
+                                                    account.bank_code,
+                                                    account.bank_name
+                                                )?.color || '#334155',
+                                        }"
+                                    >
+                                        {{
+                                            resolveBankPreset(account.bank_code, account.bank_name)
+                                                ?.short || 'BANK'
+                                        }}
+                                    </div>
+                                </div>
+
+                                <div class="flex-1">
+                                    <SearchableSelect
+                                        :model-value="account.bank_code || 'other'"
+                                        :options="bankPresetOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :placeholder="
+                                            t('system.payment_settings.bank_transfer.bank_preset')
+                                        "
+                                        @update:model-value="onSelectBankPreset(index, $event)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <label
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                                >
+                                    <span>{{
+                                        uploadingLogoIdx === index
+                                            ? t('system.payment_settings.actions.saving')
+                                            : t('system.payment_settings.bank_transfer.upload_logo')
+                                    }}</span>
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        class="hidden"
+                                        :disabled="uploadingLogoIdx === index"
+                                        @change="onBankLogoSelected(index, $event)"
+                                    />
+                                </label>
+                                <button
+                                    v-if="account.logo_url"
+                                    type="button"
+                                    class="rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-gray-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                                    @click="account.logo_url = ''"
+                                >
+                                    {{ t('system.payment_settings.bank_transfer.remove_logo') }}
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <AppInput
                                 type="text"
                                 v-model="account.bank_name"
+                                :label="t('system.payment_settings.bank_transfer.bank_name')"
                                 :placeholder="t('system.payment_settings.bank_transfer.bank_name')"
                             />
                             <AppInput
                                 type="text"
                                 v-model="account.account_name"
+                                :label="t('system.payment_settings.bank_transfer.account_name')"
                                 :placeholder="
                                     t('system.payment_settings.bank_transfer.account_name')
                                 "
@@ -203,14 +277,20 @@
                             <AppInput
                                 type="text"
                                 v-model="account.iban"
+                                :label="t('system.payment_settings.bank_transfer.iban')"
                                 :placeholder="t('system.payment_settings.bank_transfer.iban')"
                                 dir="ltr"
                             />
-                            <div class="flex gap-2 items-center">
+                            <div class="flex gap-2 items-end">
                                 <div class="flex-1">
                                     <AppInput
                                         type="text"
                                         v-model="account.account_number"
+                                        :label="
+                                            t(
+                                                'system.payment_settings.bank_transfer.account_number'
+                                            )
+                                        "
                                         :placeholder="
                                             t(
                                                 'system.payment_settings.bank_transfer.account_number'
@@ -222,7 +302,7 @@
                                 <button
                                     type="button"
                                     @click="removeBankAccount(index)"
-                                    class="px-3 text-red-500 hover:text-red-700"
+                                    class="px-3 py-2 text-red-500 hover:text-red-700"
                                     :title="t('system.actions.delete')"
                                 >
                                     <svg
@@ -367,6 +447,106 @@
 
         <!-- Company Info + Subscription VAT — moved to CompanySettings -->
 
+        <!-- Public Landing Footer Badge Visibility -->
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+        >
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                {{ t('system.payment_settings.footer_badges.title') }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                {{ t('system.payment_settings.footer_badges.subtitle') }}
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label
+                    v-for="item in footerBadgeToggles"
+                    :key="item.key"
+                    class="flex items-center gap-2 cursor-pointer"
+                >
+                    <AppToggle v-model="form.footer_badges[item.key]" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ item.label }}</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Payment Method Icons Customization -->
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-5"
+        >
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                    {{ t('system.payment_settings.icons_config.title') }}
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('system.payment_settings.icons_config.subtitle') }}
+                </p>
+            </div>
+
+            <div class="max-w-sm">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ t('system.payment_settings.icons_config.style_label') }}
+                </label>
+                <SearchableSelect
+                    v-model="form.payment_icons.style"
+                    :options="iconStyleOptions"
+                    option-label="label"
+                    option-value="value"
+                />
+            </div>
+
+            <div>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ t('system.payment_settings.icons_config.custom_logos') }}
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div
+                        v-for="item in footerBadgeToggles"
+                        :key="item.key"
+                        class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/40"
+                    >
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <PaymentMethodBadge
+                                :method="item.key"
+                                :style-mode="form.payment_icons.style"
+                                :custom-logo-url="form.payment_icons.logos[item.key] || null"
+                                :is-rtl="locale === 'ar'"
+                            />
+                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
+                                {{ item.label }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <label
+                                class="rounded-md border border-gray-300 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                            >
+                                {{
+                                    uploadingMethodLogoKey === item.key
+                                        ? t('system.payment_settings.actions.saving')
+                                        : t('system.payment_settings.icons_config.upload')
+                                }}
+                                <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                    class="hidden"
+                                    :disabled="uploadingMethodLogoKey === item.key"
+                                    @change="onMethodLogoSelected(item.key, $event)"
+                                />
+                            </label>
+                            <button
+                                v-if="form.payment_icons.logos[item.key]"
+                                type="button"
+                                class="rounded-md border border-gray-300 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 dark:border-gray-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                                :title="t('system.payment_settings.icons_config.remove')"
+                                @click="form.payment_icons.logos[item.key] = null"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Bank Transfer Extra Controls -->
         <div
             v-if="form.bank_transfer_enabled"
@@ -481,14 +661,41 @@
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
-import { computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import PaymentMethodBadge from '@/Components/Common/PaymentMethodBadge.vue';
+import { computed, ref } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { BANK_PRESETS, resolveBankPreset } from '@/Utils/banks';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const page = usePage();
 const { scrollToError } = useFormScrollToError();
+const uploadingLogoIdx = ref(null);
+const uploadingMethodLogoKey = ref(null);
+
+const iconStyleOptions = computed(() => [
+    { value: 'colored', label: t('system.payment_settings.icons_config.style_colored') },
+    { value: 'monochrome', label: t('system.payment_settings.icons_config.style_monochrome') },
+]);
+
+const bankPresetOptions = computed(() =>
+    BANK_PRESETS.map((b) => ({
+        value: b.code,
+        label: locale.value === 'ar' ? b.name_ar : b.name_en,
+    }))
+);
+
+const footerBadgeToggles = computed(() => [
+    { key: 'mada', label: t('system.payment_settings.footer_badges.mada') },
+    { key: 'visa', label: t('system.payment_settings.footer_badges.visa') },
+    { key: 'mastercard', label: t('system.payment_settings.footer_badges.mastercard') },
+    { key: 'applepay', label: t('system.payment_settings.footer_badges.applepay') },
+    { key: 'tabby', label: t('system.payment_settings.footer_badges.tabby') },
+    { key: 'tamara', label: t('system.payment_settings.footer_badges.tamara') },
+    { key: 'bank_transfer', label: t('system.payment_settings.footer_badges.bank_transfer') },
+]);
 
 const props = defineProps({
     settings: Object,
@@ -552,15 +759,112 @@ const form = useForm({
     mastercard_enabled: props.settings?.mastercard_enabled ?? true,
     applepay_enabled: props.settings?.applepay_enabled ?? true,
     stcpay_enabled: props.settings?.stcpay_enabled ?? false,
+    footer_badges: {
+        mada: props.settings?.footer_badges?.mada ?? true,
+        visa: props.settings?.footer_badges?.visa ?? true,
+        mastercard: props.settings?.footer_badges?.mastercard ?? true,
+        applepay: props.settings?.footer_badges?.applepay ?? true,
+        tabby: props.settings?.footer_badges?.tabby ?? true,
+        tamara: props.settings?.footer_badges?.tamara ?? true,
+        bank_transfer: props.settings?.footer_badges?.bank_transfer ?? false,
+    },
+    payment_icons: {
+        style: props.settings?.payment_icons?.style || 'colored',
+        logos: {
+            mada: props.settings?.payment_icons?.logos?.mada || null,
+            visa: props.settings?.payment_icons?.logos?.visa || null,
+            mastercard: props.settings?.payment_icons?.logos?.mastercard || null,
+            applepay: props.settings?.payment_icons?.logos?.applepay || null,
+            tabby: props.settings?.payment_icons?.logos?.tabby || null,
+            tamara: props.settings?.payment_icons?.logos?.tamara || null,
+            bank_transfer: props.settings?.payment_icons?.logos?.bank_transfer || null,
+        },
+    },
 });
 
 const addBankAccount = () => {
     form.bank_accounts.push({
-        bank_name: '',
+        bank_code: 'alrajhi',
+        bank_name: locale.value === 'ar' ? 'مصرف الراجحي' : 'Al Rajhi Bank',
         account_name: '',
         iban: '',
         account_number: '',
+        logo_url: '',
     });
+};
+
+const onSelectBankPreset = (index, code) => {
+    const account = form.bank_accounts[index];
+    if (!account) return;
+    account.bank_code = code;
+    const preset = BANK_PRESETS.find((b) => b.code === code);
+    if (preset && code !== 'other') {
+        account.bank_name = locale.value === 'ar' ? preset.name_ar : preset.name_en;
+    }
+};
+
+const onBankLogoSelected = async (index, event) => {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+    uploadingLogoIdx.value = index;
+    try {
+        const body = new FormData();
+        body.append('logo', file);
+        const csrf =
+            page.props?.csrf_token ||
+            document.querySelector('meta[name="csrf-token"]')?.content ||
+            '';
+        const res = await fetch('/system/settings/payment/bank-logo', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body,
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data?.url && form.bank_accounts[index]) {
+                form.bank_accounts[index].logo_url = data.url;
+            }
+        }
+    } finally {
+        uploadingLogoIdx.value = null;
+        if (event.target) event.target.value = '';
+    }
+};
+
+const onMethodLogoSelected = async (methodKey, event) => {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+    uploadingMethodLogoKey.value = methodKey;
+    try {
+        const body = new FormData();
+        body.append('logo', file);
+        const csrf =
+            page.props?.csrf_token ||
+            document.querySelector('meta[name="csrf-token"]')?.content ||
+            '';
+        const res = await fetch('/system/settings/payment/method-logo', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body,
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data?.url) {
+                form.payment_icons.logos[methodKey] = data.url;
+            }
+        }
+    } finally {
+        uploadingMethodLogoKey.value = null;
+        if (event.target) event.target.value = '';
+    }
 };
 
 const removeBankAccount = (index) => {

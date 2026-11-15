@@ -13,6 +13,7 @@ return [
         'title' => 'Profile Information',
     ],
     'photo' => [
+        'deleted' => 'Profile photo deleted successfully',
         'hr_locked' => 'Photo is managed via HR employee profile',
         'success' => 'Profile photo updated successfully',
         'update' => 'Update Photo',

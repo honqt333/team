@@ -20,31 +20,44 @@
                 </template>
 
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                    </svg>
+                    <AppFileUpload
+                        variant="image"
+                        compact-preview
+                        size="sm"
+                        :existing-url="logoPreview || props.profile?.logo_url || ''"
+                        :loading="uploadingLogo"
+                        :upload-button-text="$t('company_profile.logo.upload')"
+                        :reset-button-text="$t('company_profile.logo.remove')"
+                        accept="image/png,image/jpeg,image/webp"
+                        :max-size-mb="2"
+                        @select="(file) => handleLogoUpload({ target: { files: [file] } })"
+                        @invalid="({ message }) => error(message)"
+                        @remove-existing="handleLogoDelete"
+                    >
+                        <template #placeholder>
+                            <svg
+                                class="w-6 h-6 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                            </svg>
+                        </template>
+                    </AppFileUpload>
+                </template>
+
+                <template #identity>
+                    <AppIdentityPills :items="companyIdentityPills" />
                 </template>
 
                 <template #filters>
                     <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
-                </template>
-
-                <template #actions>
-                    <span
-                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-emerald-50/50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-800/30"
-                    >
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M10 2a8 8 0 100 16 8 8 0 000-16zM8.5 12.5l-2-2 1-1 1 1 3-3 1 1-4 4z"
-                            />
-                        </svg>
-                        {{ $t('company_profile.tenant_level') }}
-                    </span>
                 </template>
             </PageHeader>
 
@@ -112,7 +125,7 @@
                                             {{ activeCountryMeta.dial_code }}
                                         </span>
                                     </div>
-                                    <input
+                                    <AppInput
                                         v-model="form.contact.phone"
                                         name="phone"
                                         type="tel"
@@ -120,7 +133,8 @@
                                         :placeholder="
                                             activeCountryMeta.local_placeholder || '501234567'
                                         "
-                                        class="w-full flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
+                                        class="flex-1"
+                                        input-class="font-medium"
                                     />
                                 </div>
                             </div>
@@ -132,13 +146,12 @@
                                 >
                                     {{ $t('company_profile.contact.email') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.contact.email"
                                     name="email"
                                     type="email"
                                     dir="ltr"
                                     placeholder="admin@team-group.com"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                 />
                             </div>
                         </div>
@@ -213,14 +226,13 @@
                                     >
                                         {{ $t('company_profile.profile.city') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.city"
                                         name="city"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.city_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -231,14 +243,13 @@
                                     >
                                         {{ $t('company_profile.profile.district') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.district"
                                         name="district"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.district_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -252,14 +263,13 @@
                                     >
                                         {{ $t('company_profile.address.street') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.street"
                                         name="street"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.address_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -270,12 +280,11 @@
                                     >
                                         {{ $t('company_profile.profile.building_number') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.building_number"
                                         name="building_number"
                                         type="text"
                                         placeholder="8545"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -289,12 +298,11 @@
                                     >
                                         {{ $t('company_profile.profile.postal_code') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.postal_code"
                                         name="postal_code"
                                         type="text"
                                         placeholder="23455"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -305,12 +313,12 @@
                                     >
                                         {{ $t('company_profile.profile.country') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.address.country"
                                         name="country"
                                         type="text"
                                         :placeholder="$t('company_profile.profile.country')"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
+                                        input-class="font-medium"
                                     />
                                 </div>
                             </div>
@@ -322,12 +330,12 @@
                                 >
                                     {{ $t('company_profile.profile.address_line') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.address.address_line"
                                     name="address_line"
                                     type="text"
                                     :placeholder="$t('company_profile.address.address_placeholder')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
+                                    input-class="font-medium"
                                 />
                             </div>
 
@@ -353,36 +361,15 @@
                                 }}
                             </span>
                             <div class="flex items-center gap-3">
-                                <button
+                                <AppButton
                                     @click="saveContactAndAddress()"
-                                    :disabled="saving"
-                                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                    :loading="saving"
+                                    variant="primary"
+                                    size="md"
+                                    class="bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
                                 >
-                                    <svg
-                                        v-if="saving"
-                                        class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            class="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                        ></circle>
-                                        <path
-                                            class="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
-                                    </svg>
-                                    <span v-if="saving">{{ $t('common.loading') }}</span>
-                                    <span v-else>
-                                        {{ $t('company_profile.contact.save_button') }}
-                                    </span>
-                                </button>
+                                    {{ saving ? $t('common.loading') : $t('company_profile.contact.save_button') }}
+                                </AppButton>
                             </div>
                         </div>
                     </div>
@@ -410,7 +397,7 @@
                                     }}
                                     <span class="text-red-500">*</span>
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.vat.vat_number"
                                     type="text"
                                     :maxlength="isSaudiTenant ? 15 : 30"
@@ -423,12 +410,11 @@
                                               ))
                                             : null
                                     "
-                                    :class="[
-                                        'w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent',
+                                    :input-class="
                                         fieldErrors.vat_number
                                             ? 'border-red-500'
-                                            : 'border-emerald-500 dark:border-emerald-500',
-                                    ]"
+                                            : 'border-emerald-500 dark:border-emerald-500'
+                                    "
                                 />
                                 <p
                                     v-if="fieldErrors.vat_number"
@@ -480,19 +466,12 @@
                                             </span>
                                         </div>
                                         <div class="relative">
-                                            <input
+                                            <AppInput
                                                 v-model.number="form.vat.services_vat_rate"
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.01"
+                                                type="text"
+                                                inputmode="decimal"
+                                                lang="en"
                                                 :disabled="isSaudiTenant"
-                                                :class="[
-                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
-                                                    isSaudiTenant
-                                                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
-                                                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
-                                                ]"
                                             />
                                             <span
                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
@@ -548,19 +527,12 @@
                                             </span>
                                         </div>
                                         <div class="relative">
-                                            <input
+                                            <AppInput
                                                 v-model.number="form.vat.parts_vat_rate"
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.01"
+                                                type="text"
+                                                inputmode="decimal"
+                                                lang="en"
                                                 :disabled="isSaudiTenant"
-                                                :class="[
-                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
-                                                    isSaudiTenant
-                                                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
-                                                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
-                                                ]"
                                             />
                                             <span
                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
@@ -731,13 +703,15 @@
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <button
+                            <AppButton
                                 @click="saveSection('vat')"
-                                :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                                :loading="saving"
+                                variant="primary"
+                                size="md"
+                                class="bg-emerald-600 hover:bg-emerald-700"
                             >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
 
@@ -807,27 +781,30 @@
                                         </p>
                                     </div>
                                 </div>
-                                <Link
+                                <AppButton
+                                    as="link"
                                     :href="route('settings.zatca.index')"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-sm transition-colors shrink-0"
+                                    variant="primary"
+                                    size="md"
+                                    class="bg-emerald-600 hover:bg-emerald-700 shadow-sm shrink-0"
                                 >
-                                    <span>
-                                        {{ $t('company_profile.zatca.manage_integration') }}
-                                    </span>
-                                    <svg
-                                        class="w-4 h-4 rtl:rotate-180"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                        />
-                                    </svg>
-                                </Link>
+                                    {{ $t('company_profile.zatca.manage_integration') }}
+                                    <template #iconRight>
+                                        <svg
+                                            class="w-4 h-4 rtl:rotate-180"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                            />
+                                        </svg>
+                                    </template>
+                                </AppButton>
                             </div>
                         </div>
 
@@ -964,31 +941,37 @@
                                         </p>
                                     </div>
                                 </div>
-                                <Link
+                                <AppButton
+                                    as="link"
                                     :href="route('settings.zatca.index')"
-                                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-emerald-600/20 transition-all hover:scale-102 shrink-0"
+                                    variant="primary"
+                                    size="lg"
+                                    class="bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 shrink-0"
                                 >
-                                    <span>{{ $t('company_profile.zatca.setup_integration') }}</span>
-                                    <svg
-                                        class="w-4 h-4 rtl:rotate-180"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                        />
-                                    </svg>
-                                </Link>
+                                    {{ $t('company_profile.zatca.setup_integration') }}
+                                    <template #iconRight>
+                                        <svg
+                                            class="w-4 h-4 rtl:rotate-180"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                            />
+                                        </svg>
+                                    </template>
+                                </AppButton>
                             </div>
                         </div>
                     </div>
 
                     <!-- Numbering Tab -->
-                    <div v-if="activeTab === 'numbering'" class="space-y-6">
+                    <!-- Numbering Tab (Developer only until ready) -->
+                    <div v-if="isDeveloper && activeTab === 'numbering'" class="space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
                             <h3
                                 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
@@ -1028,15 +1011,11 @@
                                 >
                                     {{ $t('company_profile.numbering.invoices_format') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.numbering.invoice_number_format"
                                     type="text"
-                                    :class="[
-                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
-                                        fieldErrors.invoice_number_format
-                                            ? 'border-red-500 focus:border-red-500'
-                                            : 'border-gray-300 dark:border-gray-600',
-                                    ]"
+                                    :error="fieldErrors.invoice_number_format"
+                                    input-class="font-mono"
                                 />
                                 <p
                                     v-if="fieldErrors.invoice_number_format"
@@ -1074,15 +1053,11 @@
                                 >
                                     {{ $t('company_profile.numbering.work_orders_format') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.numbering.work_order_number_format"
                                     type="text"
-                                    :class="[
-                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
-                                        fieldErrors.work_order_number_format
-                                            ? 'border-red-500 focus:border-red-500'
-                                            : 'border-gray-300 dark:border-gray-600',
-                                    ]"
+                                    :error="fieldErrors.work_order_number_format"
+                                    input-class="font-mono"
                                 />
                                 <p
                                     v-if="fieldErrors.work_order_number_format"
@@ -1120,15 +1095,11 @@
                                 >
                                     {{ $t('company_profile.numbering.quotes_format') }}
                                 </label>
-                                <input
+                                <AppInput
                                     v-model="form.numbering.quote_number_format"
                                     type="text"
-                                    :class="[
-                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
-                                        fieldErrors.quote_number_format
-                                            ? 'border-red-500 focus:border-red-500'
-                                            : 'border-gray-300 dark:border-gray-600',
-                                    ]"
+                                    :error="fieldErrors.quote_number_format"
+                                    input-class="font-mono"
                                 />
                                 <p
                                     v-if="fieldErrors.quote_number_format"
@@ -1218,18 +1189,21 @@
                         </div>
 
                         <div class="flex justify-end pt-2">
-                            <button
+                            <AppButton
                                 @click="saveSection('numbering')"
-                                :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                                :loading="saving"
+                                variant="primary"
+                                size="md"
+                                class="bg-emerald-600 hover:bg-emerald-700 shadow-sm hover:shadow-md"
                             >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
 
                     <!-- Workflow / Operations Policies Tab -->
-                    <div v-if="activeTab === 'workflow'" class="space-y-6">
+                    <!-- Workflow Tab (Developer only until ready) -->
+                    <div v-if="isDeveloper && activeTab === 'workflow'" class="space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
                             <h3
                                 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
@@ -1310,12 +1284,13 @@
                                     {{ $t('company_profile.policies.max_discount_desc') }}
                                 </p>
                                 <div class="flex items-center gap-3 pt-1">
-                                    <input
+                                    <AppInput
                                         type="number"
-                                        min="0"
-                                        max="100"
+                                        :min="0"
+                                        :max="100"
                                         v-model.number="form.workflow.max_discount_percentage"
-                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-focus-ring"
+                                        class="w-32"
+                                        input-class="font-mono font-bold"
                                     />
                                     <span class="text-sm font-bold text-gray-500">%</span>
                                 </div>
@@ -1334,12 +1309,13 @@
                                     {{ $t('company_profile.numbering.default_period_desc') }}
                                 </p>
                                 <div class="flex items-center gap-3 pt-1">
-                                    <input
+                                    <AppInput
                                         type="number"
-                                        min="0"
-                                        max="3650"
+                                        :min="0"
+                                        :max="3650"
                                         v-model.number="form.workflow.default_warranty_days"
-                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-focus-ring"
+                                        class="w-32"
+                                        input-class="font-mono font-bold"
                                     />
                                     <span class="text-sm text-gray-500">
                                         {{ $t('common.day') }}
@@ -1349,159 +1325,19 @@
                         </div>
 
                         <div class="flex justify-end pt-2">
-                            <button
+                            <AppButton
                                 @click="saveSection('workflow')"
-                                :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                                :loading="saving"
+                                variant="primary"
+                                size="md"
+                                class="bg-emerald-600 hover:bg-emerald-700 shadow-sm hover:shadow-md"
                             >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
 
-                    <!-- Notification Templates Tab -->
-                    <div v-if="activeTab === 'notifications'" class="space-y-6">
-                        <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
-                            <h3
-                                class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
-                            >
-                                <svg
-                                    class="w-5 h-5 text-emerald-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                    />
-                                </svg>
-                                {{ $t('company_profile.templates.title') }}
-                            </h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {{ $t('company_profile.templates.subtitle') }}
-                            </p>
-                        </div>
-
-                        <!-- Variables Legend -->
-                        <div
-                            class="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2"
-                        >
-                            <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                                {{ $t('company_profile.templates.available_variables') }}
-                            </p>
-                            <div class="flex flex-wrap gap-2 text-xs">
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {customer_name}
-                                </span>
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {plate_number}
-                                </span>
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {code}
-                                </span>
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {center_name}
-                                </span>
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {total}
-                                </span>
-                                <span
-                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
-                                >
-                                    {url}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <!-- 1. Work Order Created -->
-                            <div
-                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
-                            >
-                                <label
-                                    class="block text-sm font-bold text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('company_profile.templates.vehicle_received') }}
-                                </label>
-                                <textarea
-                                    rows="2"
-                                    v-model="form.notifications.work_order_created"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
-                                ></textarea>
-                            </div>
-
-                            <!-- 2. Work Order Completed -->
-                            <div
-                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
-                            >
-                                <label
-                                    class="block text-sm font-bold text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('company_profile.templates.service_completed') }}
-                                </label>
-                                <textarea
-                                    rows="2"
-                                    v-model="form.notifications.work_order_completed"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
-                                ></textarea>
-                            </div>
-
-                            <!-- 3. Quote Shared -->
-                            <div
-                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
-                            >
-                                <label
-                                    class="block text-sm font-bold text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('company_profile.templates.quote_shared') }}
-                                </label>
-                                <textarea
-                                    rows="2"
-                                    v-model="form.notifications.quote_shared"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
-                                ></textarea>
-                            </div>
-
-                            <!-- 4. Invoice Issued -->
-                            <div
-                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
-                            >
-                                <label
-                                    class="block text-sm font-bold text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('company_profile.templates.tax_invoice') }}
-                                </label>
-                                <textarea
-                                    rows="2"
-                                    v-model="form.notifications.invoice_issued"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
-                                ></textarea>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-2">
-                            <button
-                                @click="saveSection('notifications')"
-                                :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
-                            >
-                                {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Notification Templates Tab (moved to /app/settings/notifications?tab=templates) -->
 
                     <!-- Payment Tab (DEPRECATED — moved to /app/settings/billing) -->
                     <div v-if="activeTab === 'payment'" class="space-y-6">
@@ -1535,25 +1371,29 @@
                                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                                         {{ $t('company_profile.billing_moved.subtitle') }}
                                     </p>
-                                    <Link
+                                    <AppButton
+                                        as="link"
                                         :href="route('app.billing.index')"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-semibold text-sm transition-colors"
+                                        variant="primary"
+                                        size="md"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                            />
-                                        </svg>
+                                        <template #iconLeft>
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                                />
+                                            </svg>
+                                        </template>
                                         {{ $t('company_profile.billing_moved.cta') }}
-                                    </Link>
+                                    </AppButton>
                                 </div>
                             </div>
                         </div>
@@ -1662,11 +1502,10 @@
                                     >
                                         {{ $t('company_profile.admin_user.email') }}
                                     </label>
-                                    <input
+                                    <AppInput
                                         v-model="form.admin_user.email"
                                         type="email"
                                         dir="ltr"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -1685,10 +1524,9 @@
                                         >
                                             {{ $t('company_profile.admin_user.current_password') }}
                                         </label>
-                                        <input
+                                        <AppInput
                                             v-model="form.admin_user.current_password"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                     <div>
@@ -1697,10 +1535,9 @@
                                         >
                                             {{ $t('company_profile.admin_user.new_password') }}
                                         </label>
-                                        <input
+                                        <AppInput
                                             v-model="form.admin_user.new_password"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                     <div>
@@ -1709,10 +1546,9 @@
                                         >
                                             {{ $t('company_profile.admin_user.confirm_password') }}
                                         </label>
-                                        <input
+                                        <AppInput
                                             v-model="form.admin_user.new_password_confirmation"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                 </div>
@@ -1722,13 +1558,15 @@
                             </div>
 
                             <div class="flex justify-end pt-4">
-                                <button
+                                <AppButton
                                     @click="saveAdminUser()"
-                                    :disabled="saving"
-                                    class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                                    :loading="saving"
+                                    variant="primary"
+                                    size="md"
+                                    class="bg-emerald-600 hover:bg-emerald-700"
                                 >
                                     {{ saving ? $t('common.loading') : $t('common.save') }}
-                                </button>
+                                </AppButton>
                             </div>
                         </div>
                     </div>
@@ -1930,14 +1768,10 @@
                                                     >
                                                         {{ $t('common.view_invoice') }}
                                                     </Link>
-                                                    <a
+                                                    <AppPrintButton
+                                                        size="sm"
                                                         :href="route('app.invoices.print', inv.id)"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
-                                                    >
-                                                        {{ $t('common.print_emoji') }}
-                                                    </a>
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>
@@ -2066,19 +1900,15 @@
                                                     >
                                                         {{ $t('common.view_invoice') }}
                                                     </Link>
-                                                    <a
+                                                    <AppPrintButton
+                                                        size="sm"
                                                         :href="
                                                             route(
                                                                 'app.invoices.purchases.print',
                                                                 inv.id
                                                             )
                                                         "
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
-                                                    >
-                                                        {{ $t('common.print_emoji') }}
-                                                    </a>
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>
@@ -2147,18 +1977,22 @@
 </template>
 
 <script setup>
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppButton from '@/Components/App/AppButton.vue';
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppIdentityPills from '@/Components/Common/AppIdentityPills.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import CompanyTransactionModal from './Modals/CompanyTransactionModal.vue';
@@ -2167,8 +2001,6 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useNationalAddressMap } from '@/Composables/useNationalAddressMap';
 import NationalAddressMapCanvas from '@/Components/Common/NationalAddressMapCanvas.vue';
 import CompanyProfileTab from '@/Components/Settings/Company/CompanyProfileTab.vue';
-import CompanyAdminUserTab from '@/Components/Settings/Company/CompanyAdminUserTab.vue';
-import CompanyBranchesTab from '@/Components/Settings/Company/CompanyBranchesTab.vue';
 import CompanyTransactionsTab from '@/Components/Settings/Company/CompanyTransactionsTab.vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -2181,7 +2013,70 @@ const { confirm } = useConfirm();
 const { scrollToError } = useFormScrollToError();
 const { formatMoney } = useNumberFormat();
 const page = usePage();
-const tenantId = computed(() => page.props.auth?.user?.tenant_id || page.props.tenant?.id);
+const tenantId = computed(
+    () => page.props.tenant?.tenant_number || page.props.auth?.user?.tenant_id || page.props.tenant?.id
+);
+const isDeveloper = computed(() => Boolean(page.props.auth?.is_super_admin));
+
+const companyIdentityPills = computed(() => [
+    {
+        key: 'trade_name',
+        value:
+            form.value.profile.trade_name ||
+            form.value.profile.legal_name ||
+            props.profile?.trade_name ||
+            props.profile?.legal_name ||
+            t('common.app_name'),
+        tooltip: t('company_profile.profile.trade_name'),
+        variant: 'strong',
+        bold: true,
+    },
+    {
+        key: 'tenant_id',
+        value: tenantId.value ? `#${tenantId.value}` : '',
+        tooltip: t('company_profile.profile.tenant_id'),
+        dir: 'ltr',
+        mono: true,
+        semibold: true,
+    },
+    {
+        key: 'cr_number',
+        value: form.value.profile.cr_number,
+        tooltip: t('company_profile.profile.cr_number'),
+        dir: 'ltr',
+        mono: true,
+    },
+    {
+        key: 'owner_name',
+        value: form.value.profile.owner_name,
+        tooltip: t('company_profile.profile.owner_name'),
+    },
+    {
+        key: 'phone',
+        value: form.value.contact.phone,
+        tooltip: t('company_profile.profile.phone'),
+        dir: 'ltr',
+    },
+    {
+        key: 'email',
+        value: form.value.contact.email,
+        tooltip: t('company_profile.profile.email'),
+        dir: 'ltr',
+    },
+    {
+        key: 'city',
+        value: form.value.address.city,
+        tooltip: t('company_profile.profile.city'),
+    },
+    {
+        key: 'vat_number',
+        value: form.value.vat.vat_number,
+        tooltip: t('company_profile.profile.vat_number'),
+        dir: 'ltr',
+        mono: true,
+        variant: 'success',
+    },
+]);
 
 const props = defineProps({
     profile: Object,
@@ -2241,6 +2136,9 @@ const getInitialTab = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         if (tabParam) {
+            if (['numbering', 'workflow'].includes(tabParam) && !page.props.auth?.is_super_admin) {
+                return 'profile';
+            }
             return tabParam;
         }
     }
@@ -2361,10 +2259,13 @@ const tabs = computed(() => {
     if (isSaudiTenant.value) {
         items.push({ id: 'zatca', label: t('company_profile.tabs.zatca') });
     }
+    if (isDeveloper.value) {
+        items.push(
+            { id: 'numbering', label: t('company_profile.tabs.numbering') },
+            { id: 'workflow', label: t('company_profile.tabs.workflow') }
+        );
+    }
     items.push(
-        { id: 'numbering', label: t('company_profile.tabs.numbering') },
-        { id: 'workflow', label: t('company_profile.tabs.workflow') },
-        { id: 'notifications', label: t('company_profile.tabs.notifications') },
         { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
         { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
         { id: 'invoices', label: t('company_profile.tabs.invoices') }

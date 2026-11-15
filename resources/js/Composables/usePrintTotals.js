@@ -287,7 +287,84 @@ export function usePrintTotals() {
         };
     }
 
+    /**
+     * Normalize line items from data.items, data.parts, data.services, or data.lines
+     * without duplicating entries across sources, while preserving legitimate identical
+     * items that have no `id` within the same array and preserving item order.
+     */
+    function normalizeItems(data = {}) {
+        if (!data || typeof data !== 'object') return [];
+
+        const hasItems = Array.isArray(data.items) && data.items.length > 0;
+        const hasParts = Array.isArray(data.parts) && data.parts.length > 0;
+        const hasServices = Array.isArray(data.services) && data.services.length > 0;
+        const hasLines = Array.isArray(data.lines) && data.lines.length > 0;
+
+        if (hasItems && !hasParts && !hasServices) {
+            return data.items;
+        }
+
+        const merged = [];
+        const seenIds = new Set();
+        const primaryUnidentifiedCounts = new Map();
+
+        const itemFingerprint = (item) =>
+            `${item.service_name || item.description || ''}|${item.qty ?? 1}|${item.unit_price ?? 0}|${item.line_total_incl_tax ?? ''}|${Boolean(item.is_part)}`;
+
+        const pushPrimary = (item) => {
+            if (!item || typeof item !== 'object') return;
+            merged.push(item);
+            if (item.id != null) {
+                seenIds.add(item.id);
+            } else {
+                const fp = itemFingerprint(item);
+                primaryUnidentifiedCounts.set(fp, (primaryUnidentifiedCounts.get(fp) || 0) + 1);
+            }
+        };
+
+        const pushSecondary = (item, fallbackIsPart) => {
+            if (!item || typeof item !== 'object') return;
+            const normalized =
+                fallbackIsPart !== undefined && item.is_part === undefined
+                    ? { ...item, is_part: fallbackIsPart }
+                    : item;
+
+            if (normalized.id != null) {
+                if (seenIds.has(normalized.id)) return;
+                seenIds.add(normalized.id);
+                merged.push(normalized);
+                return;
+            }
+
+            const fp = itemFingerprint(normalized);
+            const remaining = primaryUnidentifiedCounts.get(fp) || 0;
+            if (remaining > 0) {
+                primaryUnidentifiedCounts.set(fp, remaining - 1);
+                return;
+            }
+
+            merged.push(normalized);
+        };
+
+        if (hasItems) {
+            data.items.forEach(pushPrimary);
+        } else if (hasLines) {
+            data.lines.forEach(pushPrimary);
+        }
+
+        if (hasServices) {
+            data.services.forEach((item) => pushSecondary(item, false));
+        }
+
+        if (hasParts) {
+            data.parts.forEach((item) => pushSecondary(item, true));
+        }
+
+        return merged;
+    }
+
     return {
+        normalizeItems,
         srvLineTotal,
         srvLineVat,
         srvLineExclTax,

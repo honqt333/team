@@ -59,7 +59,7 @@ const colorMap = {
                 colorMap[color]?.iconBg || colorMap.slate.iconBg,
                 colorMap[color]?.iconText || colorMap.slate.iconText,
             ]"
-            v-html="icon"
+            v-safe-html="icon"
         />
         <div class="min-w-0 flex-1">
             <p
@@ -106,7 +106,7 @@ const colorMap = {
                 colorMap[color]?.iconBg || colorMap.slate.iconBg,
                 colorMap[color]?.iconText || colorMap.slate.iconText,
             ]"
-            v-html="icon"
+            v-safe-html="icon"
         />
         <div class="min-w-0 flex-1">
             <p

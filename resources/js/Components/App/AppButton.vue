@@ -27,6 +27,8 @@ const props = defineProps({
                 'secondary',
                 'ghost',
                 'danger',
+                'success',
+                'warning',
                 'action',
                 'action-lg',
                 'action-xl',
@@ -40,7 +42,7 @@ const props = defineProps({
     size: {
         type: String,
         default: 'md',
-        validator: (v) => ['sm', 'md', 'lg'].includes(v),
+        validator: (v) => ['xs', 'sm', 'md', 'lg'].includes(v),
     },
     type: {
         type: String,
@@ -100,6 +102,8 @@ const iconSize = computed(() => {
         return 16;
     }
     switch (props.size) {
+        case 'xs':
+            return 12;
         case 'sm':
             return 14;
         case 'lg':
@@ -255,6 +259,13 @@ const iconSize = computed(() => {
 }
 
 /* --- Sizes --- */
+.app-btn--xs {
+    height: 1.75rem;
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+    border-radius: var(--radius-md);
+    gap: 0.25rem;
+}
 .app-btn--sm {
     height: var(--size-control-sm);
     padding-inline: var(--space-3);
@@ -317,6 +328,34 @@ const iconSize = computed(() => {
     --app-btn-bg-active: color-mix(in srgb, var(--color-danger) 78%, black);
     --app-btn-border-hover: var(--color-danger);
     box-shadow: var(--shadow-sm);
+}
+:global(.dark .app-btn--danger) {
+    --app-btn-bg: color-mix(in srgb, var(--color-danger) 68%, black);
+    --app-btn-border: color-mix(in srgb, var(--color-danger) 68%, black);
+    --app-btn-bg-hover: color-mix(in srgb, var(--color-danger) 56%, black);
+    --app-btn-bg-active: color-mix(in srgb, var(--color-danger) 48%, black);
+    --app-btn-border-hover: color-mix(in srgb, var(--color-danger) 56%, black);
+}
+
+/* success: green */
+.app-btn--success {
+    --app-btn-bg: var(--color-success);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-success);
+    --app-btn-bg-hover: color-mix(in srgb, var(--color-success) 88%, black);
+    --app-btn-bg-active: color-mix(in srgb, var(--color-success) 78%, black);
+    --app-btn-border-hover: var(--color-success);
+    box-shadow: var(--shadow-sm);
+}
+
+/* warning: amber */
+.app-btn--warning {
+    --app-btn-bg: var(--color-warning-soft);
+    --app-btn-fg: var(--color-warning);
+    --app-btn-border: color-mix(in srgb, var(--color-warning) 35%, transparent);
+    --app-btn-bg-hover: color-mix(in srgb, var(--color-warning) 18%, transparent);
+    --app-btn-bg-active: color-mix(in srgb, var(--color-warning) 26%, transparent);
+    --app-btn-border-hover: var(--color-warning);
 }
 
 /* --- Action variants (Indigo for primary actions) --- */

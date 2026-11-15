@@ -43,4 +43,22 @@ describe('useAutoOpenCreate', () => {
         expect(onCreate).not.toHaveBeenCalled();
         expect(window.location.search).toBe('?page=2');
     });
+
+    it('supports custom paramName such as edit=1 and strips it from URL', async () => {
+        window.history.replaceState({}, '', '/app/customers/42?edit=1&tab=vehicles');
+        const onEdit = vi.fn();
+
+        const TestComp = defineComponent({
+            setup() {
+                useAutoOpenCreate(onEdit, 'edit');
+                return () => null;
+            },
+        });
+
+        mount(TestComp);
+        await nextTick();
+
+        expect(onEdit).toHaveBeenCalledTimes(1);
+        expect(window.location.search).toBe('?tab=vehicles');
+    });
 });

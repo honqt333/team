@@ -5,18 +5,17 @@ import { router } from '@inertiajs/vue3';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { confirm } = useConfirm();
 const processing = ref(false);
 
 const props = defineProps({
     subscription: { type: Object, default: null },
     lifecycle: { type: Object, default: null },
+    billingState: { type: Object, default: null },
 });
 
 const emit = defineEmits(['renew']);
-
-const locale = computed(() => document.documentElement.lang || 'ar');
 
 const statusConfig = {
     active: {
@@ -68,8 +67,42 @@ const effectiveStatus = computed(() => {
     return props.subscription?.status || 'pending';
 });
 
-const status = computed(() => statusConfig[effectiveStatus.value] || statusConfig.pending);
+const isPendingInFlight = computed(() =>
+    ['pending', 'pending_payment'].includes(props.subscription?.status)
+);
+
+const billingDisplayConfig = {
+    under_review: {
+        class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+        labelKey: 'system.billing.page.state.under_review_title',
+    },
+    receipt_rejected: {
+        class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+        labelKey: 'system.billing.page.state.receipt_rejected_title',
+    },
+    partially_paid: {
+        class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+        labelKey: 'system.billing.page.state.partially_paid_title',
+    },
+    awaiting_payment: {
+        class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+        labelKey: 'system.billing.page.state.awaiting_payment_title',
+    },
+};
+
+const status = computed(() => {
+    if (isPendingInFlight.value && props.billingState?.display_status) {
+        const cfg = billingDisplayConfig[props.billingState.display_status];
+        if (cfg) return { class: cfg.class };
+    }
+    return statusConfig[effectiveStatus.value] || statusConfig.pending;
+});
+
 const statusLabel = computed(() => {
+    if (isPendingInFlight.value && props.billingState?.display_status) {
+        const cfg = billingDisplayConfig[props.billingState.display_status];
+        if (cfg) return t(cfg.labelKey);
+    }
     const key = `system.company_subscription.status.${effectiveStatus.value}`;
     return t(key);
 });
@@ -247,6 +280,28 @@ function resumeCurrentSubscription() {
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                     / {{ t('system.company_subscription.card.billing_yearly') }}
                 </p>
+                <div
+                    v-if="
+                        billingState?.display_status === 'partially_paid' &&
+                        billingState?.open_invoice
+                    "
+                    class="mt-2 space-y-0.5 text-xs"
+                >
+                    <p class="text-emerald-700 dark:text-emerald-300 font-semibold">
+                        {{ t('system.billing.page.state.paid_amount') }}:
+                        <span class="font-mono">
+                            {{ formatCurrency(billingState.open_invoice.paid_amount) }}
+                        </span>
+                        SAR
+                    </p>
+                    <p class="text-amber-700 dark:text-amber-300 font-semibold">
+                        {{ t('system.billing.page.state.remaining_amount') }}:
+                        <span class="font-mono">
+                            {{ formatCurrency(billingState.open_invoice.remaining_amount) }}
+                        </span>
+                        SAR
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -337,6 +392,7 @@ function resumeCurrentSubscription() {
                             ? t('system.company_subscription.card.auto_renew_enabled')
                             : t('system.company_subscription.card.auto_renew_disabled')
                     "
+                    :description="t('system.company_subscription.card.auto_renew_hint')"
                     size="sm"
                     color="success"
                     @update:model-value="toggleAutoRenew"

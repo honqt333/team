@@ -117,26 +117,30 @@
                             <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
                         </button>
 
-                        <button
+                        <AppButton
                             v-if="can('crm.vehicles.create') || isAnyAdmin()"
                             @click="openVehicleModal"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs bg-action-primary hover:bg-action-primary-hover text-white shadow-xs active:scale-95 transition-all cursor-pointer"
+                            variant="primary"
+                            size="sm"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('vehicles.add') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('vehicles.add') }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -559,11 +563,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="vehicleSearch"
                                         :placeholder="$t('vehicles.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                        input-class="sm:w-48 ps-10 bg-gray-50 dark:bg-gray-900"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -574,26 +578,30 @@
                                 />
                             </div>
                             <!-- Add Button -->
-                            <button
+                            <AppButton
                                 v-if="can('crm.vehicles.create') || isAnyAdmin()"
                                 @click="openVehicleModal"
-                                class="flex items-center justify-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                                variant="primary"
+                                size="md"
+                                class="shadow-lg shadow-focus-ring-soft"
                             >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('vehicles.add') }}
-                            </button>
+                            </AppButton>
                         </div>
 
                         <!-- Grid View -->
@@ -944,11 +952,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="workOrderSearch"
                                         :placeholder="$t('work_orders.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                        input-class="sm:w-48 ps-10 bg-gray-50 dark:bg-gray-900"
                                     />
                                 </div>
                                 <AppViewModeToggle
@@ -1307,11 +1315,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="quoteSearch"
                                         :placeholder="$t('quotes.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                        input-class="sm:w-48 ps-10 bg-gray-50 dark:bg-gray-900"
                                     />
                                 </div>
                                 <AppViewModeToggle
@@ -1573,11 +1581,11 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="invoiceSearch"
                                     :placeholder="$t('common.search') + '...'"
-                                    class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                    input-class="sm:w-48 ps-10 bg-gray-50 dark:bg-gray-900"
                                 />
                             </div>
                         </div>
@@ -1757,11 +1765,11 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="paymentSearch"
                                     :placeholder="$t('common.search') + '...'"
-                                    class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
+                                    input-class="sm:w-48 ps-10 bg-gray-50 dark:bg-gray-900"
                                 />
                             </div>
                         </div>
@@ -2030,6 +2038,8 @@ import { ref, computed, h, watch, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
@@ -2041,6 +2051,7 @@ import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
+import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
@@ -2101,6 +2112,12 @@ const headerAddress = computed(() => {
 
 // Modal states
 const showEditModal = ref(false);
+
+useAutoOpenCreate(() => {
+    if (can('crm.customers.update') || isAnyAdmin()) {
+        showEditModal.value = true;
+    }
+}, 'edit');
 const showStatementModal = ref(false);
 const showVehicleModal = ref(false);
 const showWorkOrderModal = ref(false);

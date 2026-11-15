@@ -24,11 +24,15 @@ const props = defineProps({
     },
     variant: {
         type: String,
-        default: 'secondary', // 'primary' | 'secondary' | 'ghost' | 'icon'
+        default: 'icon', // 'primary' | 'secondary' | 'ghost' | 'icon'
     },
     size: {
         type: String,
         default: 'md', // 'sm' | 'md' | 'lg'
+    },
+    href: {
+        type: String,
+        default: '',
     },
 });
 
@@ -36,7 +40,8 @@ const emit = defineEmits(['click']);
 
 const resolvedTooltip = computed(() => {
     if (props.tooltip) return props.tooltip;
-    if (props.variant === 'icon' || !props.label) return t('common.print');
+    if (props.label) return props.label;
+    if (props.variant === 'icon') return t('common.print');
     return '';
 });
 
@@ -78,12 +83,16 @@ const buttonClasses = computed(() => {
 
 <template>
     <Tooltip :text="resolvedTooltip" :disabled="!resolvedTooltip">
-        <button
-            type="button"
+        <component
+            :is="href && !disabled && !loading ? 'a' : 'button'"
+            :type="href && !disabled && !loading ? undefined : 'button'"
+            :href="href && !disabled && !loading ? href : undefined"
+            :target="href && !disabled && !loading ? '_blank' : undefined"
+            :rel="href && !disabled && !loading ? 'noopener noreferrer' : undefined"
             :class="buttonClasses"
-            :disabled="disabled || loading"
+            :disabled="!href ? disabled || loading : undefined"
             :aria-label="label || tooltip || t('common.print')"
-            @click="emit('click', $event)"
+            @click="!href && emit('click', $event)"
         >
             <!-- Loading Spinner -->
             <svg
@@ -125,6 +134,6 @@ const buttonClasses = computed(() => {
 
             <!-- Button Label (if not icon-only) -->
             <span v-if="variant !== 'icon' && label" class="truncate">{{ label }}</span>
-        </button>
+        </component>
     </Tooltip>
 </template>

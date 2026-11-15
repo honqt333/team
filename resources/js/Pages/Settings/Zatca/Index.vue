@@ -135,11 +135,11 @@
                         <label class="block text-xs font-bold text-content-secondary mb-1">
                             {{ $t('zatca.establishment_name') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             disabled
-                            :value="tenant.legal_name || tenant.name"
-                            class="w-full px-4 py-2.5 rounded-xl border border-border bg-surface-secondary text-content-secondary text-sm font-medium"
+                            :model-value="tenant.legal_name || tenant.name"
+                            input-class="bg-surface-secondary text-content-secondary font-medium"
                         />
                     </div>
 
@@ -147,11 +147,11 @@
                         <label class="block text-xs font-bold text-content-secondary mb-1">
                             {{ $t('zatca.tax_number_15') }}
                         </label>
-                        <input
+                        <AppInput
                             type="text"
                             disabled
-                            :value="tenant.vat_number"
-                            class="w-full px-4 py-2.5 rounded-xl border border-border bg-surface-secondary text-content-secondary text-sm font-mono font-bold"
+                            :model-value="tenant.vat_number"
+                            input-class="bg-surface-secondary text-content-secondary font-mono font-bold"
                         />
                     </div>
 
@@ -172,11 +172,11 @@
                         <label class="block text-xs font-bold text-content-secondary mb-1">
                             {{ $t('zatca.egs_serial_number') }}
                         </label>
-                        <input
+                        <AppInput
                             v-model="csrForm.egs_serial_number"
                             type="text"
                             :placeholder="$t('zatca.auto_generate_if_empty')"
-                            class="w-full px-4 py-2.5 rounded-xl border border-border bg-surface text-content-primary placeholder-content-muted text-sm font-mono focus:ring-2 focus:ring-action-primary/30 focus:border-action-primary"
+                            input-class="font-mono"
                         />
                     </div>
                 </div>
@@ -205,33 +205,34 @@
                 </div>
 
                 <div class="flex justify-end pt-4 border-t border-border-subtle">
-                    <button
-                        type="button"
+                    <AppButton
                         @click="submitCsr"
-                        :disabled="csrForm.processing"
-                        class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold text-sm shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                        :loading="csrForm.processing"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <span>
-                            {{
-                                setting.has_csr
-                                    ? $t('zatca.regenerate_csr')
-                                    : $t('zatca.generate_csr_and_continue')
-                            }}
-                        </span>
-                        <svg
-                            class="w-4 h-4 rtl:rotate-180"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                        </svg>
-                    </button>
+                        {{
+                            setting.has_csr
+                                ? $t('zatca.regenerate_csr')
+                                : $t('zatca.generate_csr_and_continue')
+                        }}
+                        <template #iconRight>
+                            <svg
+                                class="w-4 h-4 rtl:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                />
+                            </svg>
+                        </template>
+                    </AppButton>
                 </div>
             </div>
 
@@ -310,7 +311,7 @@
                     <label class="block text-sm font-bold text-content-primary">
                         {{ $t('zatca.fatoora_otp') }}
                     </label>
-                    <input
+                    <AppInput
                         v-model="otpForm.otp"
                         type="text"
                         maxlength="6"
@@ -319,7 +320,7 @@
                                 ? $t('zatca.enter_actual_otp')
                                 : '123456'
                         "
-                        class="w-full text-center text-2xl font-mono font-black tracking-[0.5em] px-4 py-3 rounded-2xl border-2 border-action-primary bg-surface text-content-primary focus:outline-none focus:ring-4 focus:ring-action-primary/20"
+                        input-class="text-center text-2xl font-mono font-black tracking-[0.5em] py-3 rounded-2xl border-2 border-action-primary"
                     />
                     <p v-if="otpForm.errors.otp" class="text-xs text-danger font-bold">
                         {{ otpForm.errors.otp }}
@@ -334,27 +335,31 @@
                     >
                         {{ $t('zatca.go_back') }}
                     </button>
-                    <button
-                        type="button"
+                    <AppButton
                         @click="submitOtp"
-                        :disabled="otpForm.processing || !otpForm.otp || otpForm.otp.length < 6"
-                        class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold text-sm shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                        :loading="otpForm.processing"
+                        :disabled="!otpForm.otp || otpForm.otp.length < 6"
+                        variant="primary"
+                        size="md"
+                        class="shadow-xs"
                     >
-                        <span>{{ $t('zatca.request_certificate_now') }}</span>
-                        <svg
-                            class="w-4 h-4 rtl:rotate-180"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                        </svg>
-                    </button>
+                        {{ $t('zatca.request_certificate_now') }}
+                        <template #iconRight>
+                            <svg
+                                class="w-4 h-4 rtl:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                />
+                            </svg>
+                        </template>
+                    </AppButton>
                 </div>
             </div>
 
@@ -488,27 +493,30 @@
                         >
                             {{ runningChecks ? $t('zatca.checking_now') : $t('zatca.run_checks') }}
                         </button>
-                        <button
-                            type="button"
+                        <AppButton
                             @click="submitProduction"
-                            :disabled="submittingProd"
-                            class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold text-sm shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                            :loading="submittingProd"
+                            variant="primary"
+                            size="md"
+                            class="shadow-xs"
                         >
-                            <span>{{ $t('zatca.production_certificate') }}</span>
-                            <svg
-                                class="w-4 h-4 rtl:rotate-180"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                />
-                            </svg>
-                        </button>
+                            {{ $t('zatca.production_certificate') }}
+                            <template #iconRight>
+                                <svg
+                                    class="w-4 h-4 rtl:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
+                                </svg>
+                            </template>
+                        </AppButton>
                     </div>
                 </div>
             </div>
@@ -690,6 +698,8 @@ import { Head, useForm, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

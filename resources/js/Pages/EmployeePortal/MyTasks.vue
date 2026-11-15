@@ -646,7 +646,7 @@ const saveChecklist = async () => {
                                     {{ $t('employee_portal.my_tasks') }}
                                 </h1>
                                 <p class="text-purple-200 text-sm mt-0.5">
-                                    مهام الصيانة الموكلة للفني
+                                    {{ $t('employee_portal.tasks_card.assigned_to_technician') }}
                                     {{ employee?.name_ar || employee?.name }}
                                 </p>
                             </div>
@@ -655,12 +655,12 @@ const saveChecklist = async () => {
 
                     <!-- Search Input -->
                     <div class="w-full md:w-80 relative">
-                        <input
+                        <AppInput
                             v-model="searchQuery"
                             @input="handleSearch"
                             type="text"
                             :placeholder="$t('employee_portal.search_tasks_placeholder')"
-                            class="w-full bg-white/10 text-white placeholder-purple-200/70 border border-white/20 rounded-xl px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 transition-all text-sm"
+                            input-class="bg-white/10 text-white placeholder-purple-200/70 border-white/20 pl-10 focus:ring-white/40 focus:bg-white/20"
                         />
                         <button
                             v-if="searchQuery"
@@ -771,7 +771,7 @@ const saveChecklist = async () => {
                                                 workOrder.vehicle?.display_name ||
                                                 (workOrder.vehicle?.make?.name
                                                     ? `${workOrder.vehicle.make.name} ${workOrder.vehicle.model?.name || ''}`
-                                                    : 'مركبة غير محددة')
+                                                    : $t('employee_portal.tasks_card.unspecified_vehicle'))
                                             }}
                                         </span>
                                     </div>
@@ -790,7 +790,7 @@ const saveChecklist = async () => {
                                         v-if="workOrder.vehicle?.color"
                                         class="text-gray-600 dark:text-gray-400 flex items-center gap-1"
                                     >
-                                        <span>🎨 اللون:</span>
+                                        <span>🎨 {{ $t('employee_portal.tasks_card.color_label') }}</span>
                                         <span class="font-medium text-gray-800 dark:text-gray-200">
                                             {{ workOrder.vehicle.color }}
                                         </span>
@@ -801,7 +801,7 @@ const saveChecklist = async () => {
                                         v-if="workOrder.vehicle?.vin"
                                         class="text-gray-600 dark:text-gray-400 flex items-center gap-1"
                                     >
-                                        <span>🔢 الشاصي:</span>
+                                        <span>🔢 {{ $t('employee_portal.tasks_card.vin_label') }}</span>
                                         <span
                                             class="font-mono text-gray-800 dark:text-gray-200"
                                             dir="ltr"
@@ -819,7 +819,7 @@ const saveChecklist = async () => {
                                         "
                                         class="text-gray-600 dark:text-gray-400 flex items-center gap-1 font-medium"
                                     >
-                                        <span>⏱️ العداد:</span>
+                                        <span>⏱️ {{ $t('employee_portal.tasks_card.odometer_label') }}</span>
                                         <span class="text-gray-900 dark:text-white font-bold">
                                             {{
                                                 Number(
@@ -829,7 +829,7 @@ const saveChecklist = async () => {
                                                 ).toLocaleString()
                                             }}
                                         </span>
-                                        <span>كم</span>
+                                        <span>{{ $t('employee_portal.tasks_card.km') }}</span>
                                     </div>
                                 </div>
 
@@ -838,14 +838,14 @@ const saveChecklist = async () => {
                                     class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400 pt-1"
                                 >
                                     <span class="flex items-center gap-1">
-                                        <span>👤 العميل:</span>
+                                        <span>👤 {{ $t('employee_portal.tasks_card.customer_label') }}</span>
                                         <span class="font-bold text-gray-800 dark:text-gray-200">
                                             {{
                                                 workOrder.vehicle?.customer?.name_ar ||
                                                 workOrder.vehicle?.customer?.name_en ||
                                                 workOrder.customer?.name ||
                                                 workOrder.contact_name ||
-                                                'عميل غير مسجل'
+                                                $t('employee_portal.tasks_card.unregistered_customer')
                                             }}
                                         </span>
                                     </span>
@@ -874,7 +874,7 @@ const saveChecklist = async () => {
                             <div
                                 class="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-2xs"
                             >
-                                <span>المهام الموكلة لك:</span>
+                                <span>{{ $t('employee_portal.tasks_card.assigned_tasks_count') }}</span>
                                 <span
                                     class="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold"
                                 >
@@ -892,14 +892,14 @@ const saveChecklist = async () => {
                                 v-if="workOrder.customer_complaint"
                                 class="p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-amber-900 dark:text-amber-200 flex items-start gap-1.5"
                             >
-                                <span class="font-bold shrink-0">⚠️ شكوى العميل:</span>
+                                <span class="font-bold shrink-0">⚠️ {{ $t('employee_portal.tasks_card.customer_complaint') }}</span>
                                 <span>{{ workOrder.customer_complaint }}</span>
                             </div>
                             <div
                                 v-if="workOrder.initial_assessment"
                                 class="p-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-900/30 text-blue-900 dark:text-blue-200 flex items-start gap-1.5"
                             >
-                                <span class="font-bold shrink-0">🔍 الفحص المبدئي:</span>
+                                <span class="font-bold shrink-0">🔍 {{ $t('employee_portal.tasks_card.initial_assessment') }}</span>
                                 <span>{{ workOrder.initial_assessment }}</span>
                             </div>
                         </div>
@@ -943,7 +943,7 @@ const saveChecklist = async () => {
                                         </span>
 
                                         <span class="text-xs text-gray-400 font-medium">
-                                            الكمية: {{ item.qty || 1 }}
+                                            {{ $t('employee_portal.tasks_card.qty_label') }} {{ item.qty || 1 }}
                                         </span>
                                     </div>
 
@@ -952,7 +952,7 @@ const saveChecklist = async () => {
                                         <span
                                             class="font-semibold text-gray-600 dark:text-gray-400"
                                         >
-                                            👥 فريق العمل على الخدمة:
+                                            👥 {{ $t('employee_portal.tasks_card.team_label') }}
                                         </span>
                                         <div
                                             v-for="tech in item.technicians"
@@ -969,19 +969,19 @@ const saveChecklist = async () => {
                                                 v-if="Number(tech.id) === currentUserId"
                                                 class="text-[10px] text-purple-600 font-bold"
                                             >
-                                                (أنت)
+                                                {{ $t('employee_portal.tasks_card.you_badge') }}
                                             </span>
                                             <span
                                                 v-if="tech.pivot?.completed_at"
                                                 class="text-emerald-600 font-bold"
-                                                title="أنهى دوره"
+                                                :title="$t('employee_portal.tasks_card.completed_role')"
                                             >
                                                 ✓
                                             </span>
                                             <span
                                                 v-else
                                                 class="text-amber-500 font-bold"
-                                                title="قيد العمل"
+                                                :title="$t('employee_portal.tasks_card.in_progress_role')"
                                             >
                                                 ⏳
                                             </span>
@@ -993,7 +993,7 @@ const saveChecklist = async () => {
                                         v-if="item.parts && item.parts.length > 0"
                                         class="text-xs text-blue-600 dark:text-blue-400 flex flex-wrap items-center gap-1.5 mt-2"
                                     >
-                                        <span class="font-semibold">📦 قطع الغيار:</span>
+                                        <span class="font-semibold">📦 {{ $t('employee_portal.tasks_card.parts_label') }}</span>
                                         <span
                                             v-for="part in item.parts"
                                             :key="part.id"
@@ -1047,40 +1047,43 @@ const saveChecklist = async () => {
                                         class="flex items-center gap-1 border-r border-gray-200 dark:border-gray-700 pr-2.5"
                                     >
                                         <!-- Start -->
-                                        <button
+                                        <AppButton
                                             v-if="!isTimerRunning(item) && !isTimerPaused(item)"
-                                            type="button"
                                             @click="startTimer(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 disabled:opacity-50 transition-colors shadow-2xs"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-emerald-600 hover:bg-emerald-700 shadow-2xs"
                                         >
                                             <span>▶</span>
-                                            بدء
-                                        </button>
+                                            {{ $t('employee_portal.tasks_card.timer_start') }}
+                                        </AppButton>
 
                                         <!-- Pause -->
-                                        <button
+                                        <AppButton
                                             v-if="isTimerRunning(item)"
-                                            type="button"
                                             @click="pauseTimer(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-1 disabled:opacity-50 transition-colors shadow-2xs"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-amber-500 hover:bg-amber-600 shadow-2xs"
                                         >
                                             <span>⏸</span>
-                                            إيقاف
-                                        </button>
+                                            {{ $t('employee_portal.tasks_card.timer_pause') }}
+                                        </AppButton>
 
                                         <!-- Resume -->
-                                        <button
+                                        <AppButton
                                             v-if="isTimerPaused(item)"
-                                            type="button"
                                             @click="resumeTimer(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 disabled:opacity-50 transition-colors shadow-2xs"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-emerald-600 hover:bg-emerald-700 shadow-2xs"
                                         >
                                             <span>▶</span>
-                                            استئناف
-                                        </button>
+                                            {{ $t('employee_portal.tasks_card.timer_resume') }}
+                                        </AppButton>
                                     </div>
                                 </div>
                             </div>
@@ -1092,7 +1095,7 @@ const saveChecklist = async () => {
                             >
                                 <div class="flex items-start gap-2">
                                     <span class="font-bold shrink-0">
-                                        📝 ملاحظة مسجلة في كرت العمل:
+                                        📝 {{ $t('employee_portal.tasks_card.work_order_note') }}
                                     </span>
                                     <span class="line-clamp-2">{{ item.technician_notes }}</span>
                                 </div>
@@ -1101,7 +1104,7 @@ const saveChecklist = async () => {
                                     @click="openNotesModal(workOrder, item)"
                                     class="text-amber-700 dark:text-amber-300 font-bold hover:underline shrink-0"
                                 >
-                                    تعديل
+                                    {{ $t('employee_portal.tasks_card.edit') }}
                                 </button>
                             </div>
 
@@ -1120,7 +1123,7 @@ const saveChecklist = async () => {
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
                                         >
                                             <span>✓</span>
-                                            أنجزت دورك في هذه الخدمة
+                                            {{ $t('employee_portal.tasks_card.you_completed_role') }}
                                         </span>
 
                                         <span
@@ -1130,11 +1133,11 @@ const saveChecklist = async () => {
                                             "
                                             class="text-xs text-amber-600 dark:text-amber-400 font-medium"
                                         >
-                                            (بانتظار استكمال:
+                                            ({{ $t('employee_portal.tasks_card.waiting_for') }}
                                             {{
                                                 otherPendingTechs(item)
                                                     .map((t) => t.name)
-                                                    .join('، ')
+                                                    .join(', ')
                                             }})
                                         </span>
                                     </div>
@@ -1142,51 +1145,54 @@ const saveChecklist = async () => {
                                     <!-- If technician has NOT completed their share yet -->
                                     <template v-else>
                                         <!-- Start Work -->
-                                        <button
+                                        <AppButton
                                             v-if="
                                                 item.status === 'pending' ||
                                                 item.status === 'on_hold'
                                             "
-                                            type="button"
                                             @click="startTimer(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3.5 py-2 bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+                                            variant="primary"
+                                            size="sm"
+                                            class="shadow-2xs"
                                         >
                                             <span>▶</span>
                                             {{ $t('employee_portal.actions.start_work') }}
-                                        </button>
+                                        </AppButton>
 
                                         <!-- In Progress -> Ready for QC -->
-                                        <button
+                                        <AppButton
                                             v-if="item.status === 'in_progress'"
-                                            type="button"
                                             @click="updateStatus(workOrder, item, 'ready_for_qc')"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-purple-600 hover:bg-purple-700 shadow-2xs"
                                         >
                                             <span>🔍</span>
                                             {{ $t('employee_portal.actions.ready_for_qc') }}
-                                        </button>
+                                        </AppButton>
 
                                         <!-- Complete Item Button (Handles Single and Multiple Technicians) -->
-                                        <button
+                                        <AppButton
                                             v-if="
                                                 item.status !== 'completed' &&
                                                 item.status !== 'cancelled'
                                             "
-                                            type="button"
                                             @click="completeItem(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-emerald-600 hover:bg-emerald-700 shadow-2xs"
                                         >
                                             <span>✓</span>
                                             <span v-if="otherAssignedTechs(item).length > 0">
-                                                إنهاء دوري في الخدمة
+                                                {{ $t('employee_portal.tasks_card.complete_my_role') }}
                                             </span>
                                             <span v-else>
                                                 {{ $t('employee_portal.actions.complete') }}
                                             </span>
-                                        </button>
+                                        </AppButton>
 
                                         <!-- Put On Hold -->
                                         <button
@@ -1196,7 +1202,7 @@ const saveChecklist = async () => {
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
                                             class="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-xl disabled:opacity-50 transition-colors"
                                         >
-                                            تعليق الخدمة
+                                            {{ $t('employee_portal.tasks_card.put_on_hold') }}
                                         </button>
                                     </template>
                                 </div>

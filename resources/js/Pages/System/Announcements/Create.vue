@@ -135,13 +135,14 @@
                     </div>
 
                     <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button
+                        <AppButton
                             type="submit"
-                            :disabled="form.processing"
-                            class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
+                            :loading="form.processing"
+                            variant="primary"
+                            size="md"
                         >
                             {{ $t('system.announcements.create_draft') }}
-                        </button>
+                        </AppButton>
                         <Link
                             :href="route('system.announcements.index')"
                             class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
@@ -164,6 +165,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';

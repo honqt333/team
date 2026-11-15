@@ -45,7 +45,7 @@ class BranchesController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required_without:name_en|nullable|string|max:255',
             'name_en' => 'required_without:name_ar|nullable|string|max:255',
-            'center_type' => 'required|string|in:main,branch,workshop,warehouse',
+            'center_type' => 'required|string|in:main,branch',
             'manager_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',

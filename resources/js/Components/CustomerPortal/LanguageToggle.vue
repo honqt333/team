@@ -11,21 +11,24 @@
         brand chrome.
     -->
     <div
-        class="inline-flex rounded-full border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 backdrop-blur p-0.5 text-xs font-semibold"
+        class="inline-flex rounded-full border border-border bg-surface/80 backdrop-blur p-0.5 text-xs font-semibold"
     >
         <a
             v-for="opt in options"
             :key="opt.value"
             :href="opt.href"
-            class="px-2.5 py-1 rounded-full transition"
+            class="px-2.5 py-1 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             :class="
                 locale?.current === opt.value
-                    ? 'text-white'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    ? ''
+                    : 'text-text-secondary hover:text-text-primary'
             "
             :style="
                 locale?.current === opt.value
-                    ? { backgroundColor: 'var(--tenant-primary, #2563eb)' }
+                    ? {
+                          backgroundColor: 'var(--tenant-primary, #2563eb)',
+                          color: activeTextColor,
+                      }
                     : {}
             "
         >
@@ -39,6 +42,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { computed } from 'vue';
+import { accessibleTextOn } from '@/Utils/colorContrast';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -55,6 +59,10 @@ const base = computed(() => {
     }
     return `/${props.tenant?.slug || 'tenant'}/portal/dashboard`;
 });
+
+const activeTextColor = computed(() =>
+    accessibleTextOn(props.tenant?.primary_color || '#2563eb')
+);
 
 const options = computed(() => [
     { value: 'ar', label: t('common.lang.ar'), href: `${base.value}?lang=ar` },

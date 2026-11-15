@@ -244,36 +244,44 @@
                     {{ t('quotes.public.action_prompt') }}
                 </p>
                 <div class="grid grid-cols-2 gap-4">
-                    <button
+                    <AppButton
                         @click="handleApprove"
-                        :disabled="submitting"
-                        class="group flex items-center justify-center gap-2 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95"
+                        :loading="submitting"
+                        variant="primary"
+                        size="lg"
+                        class="py-4 bg-emerald-500 hover:bg-emerald-600 font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </template>
                         {{ t('quotes.public.approve') }}
-                    </button>
-                    <button
+                    </AppButton>
+                    <AppButton
                         @click="showRejectModal = true"
                         :disabled="submitting"
-                        class="group flex items-center justify-center gap-2 py-4 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg shadow-red-200 dark:shadow-none transition-all active:scale-95"
+                        variant="danger"
+                        size="lg"
+                        class="py-4 font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-red-200 dark:shadow-none"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
+                        <template #iconLeft>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </template>
                         {{ t('quotes.public.reject') }}
-                    </button>
+                    </AppButton>
                 </div>
             </div>
 

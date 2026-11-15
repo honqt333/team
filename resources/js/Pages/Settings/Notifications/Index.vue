@@ -1,740 +1,21 @@
-<template>
-    <AppLayout>
-        <Head :title="$t('settings.notifications.title')" />
-
-        <div class="space-y-6">
-            <!-- Header Section -->
-            <PageHeader
-                :title="$t('settings.notifications.title')"
-                :subtitle="$t('settings.notifications.subtitle')"
-                gradientFrom="from-amber-600"
-                gradientTo="to-orange-700"
-                glowFrom="from-amber-500"
-                badgeBg="bg-amber-50/50 dark:bg-amber-900/30"
-                badgeText="text-amber-600 dark:text-amber-400"
-                badgeBorder="border-amber-100/50 dark:border-amber-800/30"
-                badgeDot="bg-amber-500"
-            >
-                <template #back>
-                    <BackButton :href="route('settings.integrations')" />
-                </template>
-
-                <template #icon>
-                    <svg
-                        class="w-8 h-8 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                        />
-                    </svg>
-                </template>
-
-                <template #actions>
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <button
-                            type="button"
-                            :disabled="testing"
-                            @click="sendTestNotification"
-                            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/80 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm disabled:opacity-50"
-                        >
-                            <svg
-                                class="w-4 h-4 text-amber-500 animate-spin"
-                                v-if="testing"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                />
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                            </svg>
-                            <svg
-                                v-else
-                                class="w-4 h-4 text-amber-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
-                            <span>
-                                {{
-                                    testing
-                                        ? $t('settings.notifications.actions.sending_test')
-                                        : $t('settings.notifications.actions.send_test')
-                                }}
-                            </span>
-                        </button>
-
-                        <button
-                            type="button"
-                            :disabled="form.processing"
-                            @click="submit"
-                            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl transition-all shadow-md shadow-amber-500/25 disabled:opacity-50"
-                        >
-                            <svg
-                                class="w-4 h-4 text-white animate-spin"
-                                v-if="form.processing"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                />
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                            </svg>
-                            <svg
-                                v-else
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                            <span>
-                                {{
-                                    form.processing
-                                        ? $t('settings.notifications.actions.saving')
-                                        : $t('settings.notifications.actions.save')
-                                }}
-                            </span>
-                        </button>
-                    </div>
-                </template>
-            </PageHeader>
-
-            <!-- Navigation Tabs -->
-            <div
-                class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3"
-            >
-                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" />
-            </div>
-
-            <!-- Tab 1: Channels -->
-            <div v-if="activeTab === 'channels'" class="space-y-6">
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-6"
-                >
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                            {{ $t('settings.notifications.channels.title') }}
-                        </h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {{ $t('settings.notifications.channels.description') }}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- In-App Notifications -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-start justify-between gap-4"
-                        >
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                            />
-                                        </svg>
-                                    </span>
-                                    <span
-                                        class="text-sm font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {{ $t('settings.notifications.channels.in_app') }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 pt-1">
-                                    {{ $t('settings.notifications.channels.in_app_desc') }}
-                                </p>
-                            </div>
-                            <AppToggle v-model="form.channels.in_app" color="primary" />
-                        </div>
-
-                        <!-- Email Notifications -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-start justify-between gap-4"
-                        >
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    </span>
-                                    <span
-                                        class="text-sm font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {{ $t('settings.notifications.channels.email') }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 pt-1">
-                                    {{ $t('settings.notifications.channels.email_desc') }}
-                                </p>
-                            </div>
-                            <AppToggle v-model="form.channels.email" color="blue" />
-                        </div>
-
-                        <!-- SMS Notifications -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-start justify-between gap-4"
-                        >
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                                            />
-                                        </svg>
-                                    </span>
-                                    <span
-                                        class="text-sm font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {{ $t('settings.notifications.channels.sms') }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 pt-1">
-                                    {{ $t('settings.notifications.channels.sms_desc') }}
-                                </p>
-                            </div>
-                            <AppToggle v-model="form.channels.sms" color="success" />
-                        </div>
-
-                        <!-- WhatsApp Notifications -->
-                        <div
-                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-start justify-between gap-4"
-                        >
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="p-2 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    </span>
-                                    <span
-                                        class="text-sm font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {{ $t('settings.notifications.channels.whatsapp') }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 pt-1">
-                                    {{ $t('settings.notifications.channels.whatsapp_desc') }}
-                                </p>
-                            </div>
-                            <AppToggle v-model="form.channels.whatsapp" color="success" />
-                        </div>
-                    </div>
-
-                    <!-- Channel Specific Configuration -->
-                    <div
-                        class="border-t border-gray-200 dark:border-gray-700 pt-5 grid grid-cols-1 sm:grid-cols-2 gap-4"
-                    >
-                        <div>
-                            <label
-                                class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('settings.notifications.channels.email_recipient') }}
-                            </label>
-                            <input
-                                v-model="form.channel_configs.email_recipient"
-                                type="email"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                                :placeholder="
-                                    $t('settings.notifications.channels.email_recipient_hint')
-                                "
-                            />
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-                                {{ $t('settings.notifications.channels.email_recipient_hint') }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('settings.notifications.channels.whatsapp_phone') }}
-                            </label>
-                            <input
-                                v-model="form.channel_configs.whatsapp_phone"
-                                type="text"
-                                dir="ltr"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                                :placeholder="
-                                    $t('settings.notifications.channels.whatsapp_phone_hint')
-                                "
-                            />
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-                                {{ $t('settings.notifications.channels.whatsapp_phone_hint') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 2: Events Matrix -->
-            <div v-if="activeTab === 'events'" class="space-y-6">
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-                >
-                    <div class="p-5 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                            {{ $t('settings.notifications.events.title') }}
-                        </h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {{ $t('settings.notifications.events.description') }}
-                        </p>
-                    </div>
-
-                    <!-- Desktop Matrix Table -->
-                    <div class="hidden sm:block overflow-x-auto">
-                        <DataTable
-                            structured
-                            class="w-full text-start divide-y divide-gray-200 dark:divide-gray-700"
-                        >
-                            <thead class="bg-gray-50 dark:bg-gray-900/50">
-                                <tr>
-                                    <th
-                                        scope="col"
-                                        class="py-3.5 px-6 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-                                    >
-                                        {{ $t('settings.notifications.events.table_event') }}
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="py-3.5 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-                                    >
-                                        {{ $t('settings.notifications.events.table_in_app') }}
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="py-3.5 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-                                    >
-                                        {{ $t('settings.notifications.events.table_email') }}
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="py-3.5 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-                                    >
-                                        {{ $t('settings.notifications.events.table_sms') }}
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="py-3.5 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-                                    >
-                                        {{ $t('settings.notifications.events.table_whatsapp') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody
-                                class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-800"
-                            >
-                                <tr
-                                    v-for="eventKey in eventKeys"
-                                    :key="eventKey"
-                                    class="hover:bg-gray-50/70 dark:hover:bg-gray-700/30 transition-colors"
-                                >
-                                    <td
-                                        class="py-3.5 px-6 text-sm font-medium text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ $t(`settings.notifications.events.${eventKey}`) }}
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <div class="inline-flex justify-center">
-                                            <AppToggle
-                                                v-model="form.events[eventKey].in_app"
-                                                size="sm"
-                                                color="primary"
-                                                :disabled="!form.channels.in_app"
-                                            />
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <div class="inline-flex justify-center">
-                                            <AppToggle
-                                                v-model="form.events[eventKey].email"
-                                                size="sm"
-                                                color="blue"
-                                                :disabled="!form.channels.email"
-                                            />
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <div class="inline-flex justify-center">
-                                            <AppToggle
-                                                v-model="form.events[eventKey].sms"
-                                                size="sm"
-                                                color="success"
-                                                :disabled="!form.channels.sms"
-                                            />
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <div class="inline-flex justify-center">
-                                            <AppToggle
-                                                v-model="form.events[eventKey].whatsapp"
-                                                size="sm"
-                                                color="success"
-                                                :disabled="!form.channels.whatsapp"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </DataTable>
-                    </div>
-
-                    <!-- Mobile Event Cards List -->
-                    <div
-                        class="block sm:hidden divide-y divide-gray-100 dark:divide-gray-700/60 p-4 space-y-4"
-                    >
-                        <div
-                            v-for="eventKey in eventKeys"
-                            :key="eventKey"
-                            class="pt-3 first:pt-0 space-y-3"
-                        >
-                            <span class="text-sm font-semibold text-gray-900 dark:text-white block">
-                                {{ $t(`settings.notifications.events.${eventKey}`) }}
-                            </span>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div
-                                    class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800"
-                                >
-                                    <span class="text-gray-600 dark:text-gray-400">
-                                        {{ $t('settings.notifications.events.table_in_app') }}
-                                    </span>
-                                    <AppToggle
-                                        v-model="form.events[eventKey].in_app"
-                                        size="sm"
-                                        color="primary"
-                                        :disabled="!form.channels.in_app"
-                                    />
-                                </div>
-                                <div
-                                    class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800"
-                                >
-                                    <span class="text-gray-600 dark:text-gray-400">
-                                        {{ $t('settings.notifications.events.table_email') }}
-                                    </span>
-                                    <AppToggle
-                                        v-model="form.events[eventKey].email"
-                                        size="sm"
-                                        color="blue"
-                                        :disabled="!form.channels.email"
-                                    />
-                                </div>
-                                <div
-                                    class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800"
-                                >
-                                    <span class="text-gray-600 dark:text-gray-400">
-                                        {{ $t('settings.notifications.events.table_sms') }}
-                                    </span>
-                                    <AppToggle
-                                        v-model="form.events[eventKey].sms"
-                                        size="sm"
-                                        color="success"
-                                        :disabled="!form.channels.sms"
-                                    />
-                                </div>
-                                <div
-                                    class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800"
-                                >
-                                    <span class="text-gray-600 dark:text-gray-400">
-                                        {{ $t('settings.notifications.events.table_whatsapp') }}
-                                    </span>
-                                    <AppToggle
-                                        v-model="form.events[eventKey].whatsapp"
-                                        size="sm"
-                                        color="success"
-                                        :disabled="!form.channels.whatsapp"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 3: Templates -->
-            <div v-if="activeTab === 'templates'" class="space-y-6">
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-6"
-                >
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                            {{ $t('settings.notifications.templates.title') }}
-                        </h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {{ $t('settings.notifications.templates.description') }}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6">
-                        <!-- Work Order Created Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{ $t('settings.notifications.templates.work_order_created') }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {customer_name}, {work_order_number}, {vehicle}, {company_name}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.work_order_created"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-
-                        <!-- Work Order Completed Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{
-                                        $t('settings.notifications.templates.work_order_completed')
-                                    }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {customer_name}, {work_order_number}, {vehicle}, {company_name}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.work_order_completed"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-
-                        <!-- Quote Shared Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{ $t('settings.notifications.templates.quote_shared') }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {customer_name}, {quote_number}, {total}, {company_name}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.quote_shared"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-
-                        <!-- Invoice Issued Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{ $t('settings.notifications.templates.invoice_issued') }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {customer_name}, {invoice_number}, {total}, {company_name}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.invoice_issued"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-
-                        <!-- Appointment Booked Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{ $t('settings.notifications.templates.appointment_booked') }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {customer_name}, {reference_number}, {date}, {company_name}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.appointment_booked"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-
-                        <!-- Low Stock Alert Template -->
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-200"
-                                >
-                                    {{ $t('settings.notifications.templates.low_stock_alert') }}
-                                </label>
-                                <span
-                                    class="text-[11px] text-amber-600 dark:text-amber-400 font-mono"
-                                >
-                                    {item_name}, {quantity}
-                                </span>
-                            </div>
-                            <textarea
-                                v-model="form.templates.low_stock_alert"
-                                rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            ></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sticky Save Footer for Mobile -->
-            <div
-                class="sm:hidden fixed bottom-0 inset-x-0 p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur border-t border-gray-200 dark:border-gray-700 flex gap-2 z-30"
-            >
-                <button
-                    type="button"
-                    :disabled="form.processing"
-                    @click="submit"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-md disabled:opacity-50"
-                >
-                    <svg
-                        class="w-4 h-4 text-white animate-spin"
-                        v-if="form.processing"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        />
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                    </svg>
-                    <span>
-                        {{
-                            form.processing
-                                ? $t('settings.notifications.actions.saving')
-                                : $t('settings.notifications.actions.save')
-                        }}
-                    </span>
-                </button>
-            </div>
-        </div>
-    </AppLayout>
-</template>
-
 <script setup>
-import DataTable from '@/Components/Common/DataTable.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import StatusBadge from '@/Components/Common/StatusBadge.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
+const { success: toastSuccess } = useToast();
 
 const props = defineProps({
     settings: {
@@ -745,16 +26,54 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    initialTab: {
+        type: String,
+        default: 'channels',
+    },
+    isWhatsappAddon: {
+        type: Boolean,
+        default: false,
+    },
+    backHref: {
+        type: String,
+        default: '',
+    },
+    whatsappSummary: {
+        type: Object,
+        default: () => ({
+            provider_active: false,
+            provider_name: null,
+            balance: 0,
+            total_purchased: 0,
+            total_used: 0,
+        }),
+    },
+    whatsappLogs: {
+        type: Array,
+        default: () => [],
+    },
 });
 
-const activeTab = ref('channels');
+const activeTab = ref(props.initialTab || 'channels');
 const testing = ref(false);
+const testingWhatsapp = ref(false);
+const activeTemplateKey = ref('work_order_created');
 
-const tabs = [
-    { id: 'channels', label: t('settings.notifications.tabs.channels') },
-    { id: 'events', label: t('settings.notifications.tabs.events') },
-    { id: 'templates', label: t('settings.notifications.tabs.templates') },
-];
+const tabs = computed(() => {
+    if (props.isWhatsappAddon) {
+        return [
+            { id: 'channels', label: t('settings.notifications.tabs.channels') },
+            { id: 'events', label: t('settings.notifications.tabs.events') },
+            { id: 'templates', label: t('settings.notifications.tabs.templates') },
+            { id: 'logs', label: t('settings.notifications.tabs.logs') },
+        ];
+    }
+
+    return [
+        { id: 'channels', label: t('settings.notifications.tabs.channels') },
+        { id: 'events', label: t('settings.notifications.tabs.events') },
+    ];
+});
 
 const eventKeys = [
     'appointment_booked',
@@ -769,6 +88,62 @@ const eventKeys = [
     'payment_received',
     'low_stock_alert',
 ];
+
+const templateConfigs = [
+    {
+        key: 'work_order_created',
+        labelKey: 'settings.notifications.templates.work_order_created',
+        vars: ['{customer_name}', '{work_order_number}', '{vehicle}', '{plate_number}', '{company_name}'],
+    },
+    {
+        key: 'work_order_completed',
+        labelKey: 'settings.notifications.templates.work_order_completed',
+        vars: ['{customer_name}', '{work_order_number}', '{vehicle}', '{plate_number}', '{company_name}'],
+    },
+    {
+        key: 'quote_shared',
+        labelKey: 'settings.notifications.templates.quote_shared',
+        vars: ['{customer_name}', '{quote_number}', '{total}', '{url}', '{company_name}'],
+    },
+    {
+        key: 'invoice_issued',
+        labelKey: 'settings.notifications.templates.invoice_issued',
+        vars: ['{customer_name}', '{invoice_number}', '{total}', '{url}', '{company_name}'],
+    },
+    {
+        key: 'appointment_booked',
+        labelKey: 'settings.notifications.templates.appointment_booked',
+        vars: ['{customer_name}', '{reference_number}', '{date}', '{center_name}', '{company_name}'],
+    },
+    {
+        key: 'appointment_reminder',
+        labelKey: 'settings.notifications.templates.appointment_reminder',
+        vars: ['{customer_name}', '{reference_number}', '{date}', '{center_name}', '{company_name}'],
+    },
+    {
+        key: 'low_stock_alert',
+        labelKey: 'settings.notifications.templates.low_stock_alert',
+        vars: ['{item_name}', '{quantity}'],
+    },
+];
+
+const quickVariables = [
+    '{customer_name}',
+    '{plate_number}',
+    '{code}',
+    '{center_name}',
+    '{total}',
+    '{url}',
+];
+
+const logColumns = computed(() => [
+    { key: 'created_at', label: t('settings.notifications.logs.date'), sortable: true },
+    { key: 'phone_number', label: t('settings.notifications.logs.phone'), sortable: false },
+    { key: 'message_type_label', label: t('settings.notifications.logs.type'), sortable: false },
+    { key: 'template_name', label: t('settings.notifications.logs.template'), sortable: false },
+    { key: 'credits_used', label: t('settings.notifications.logs.credits'), sortable: false },
+    { key: 'status', label: t('settings.notifications.logs.status'), sortable: false },
+]);
 
 const form = useForm({
     channels: {
@@ -793,8 +168,58 @@ const form = useForm({
     },
 });
 
+const routePrefix = computed(() =>
+    props.isWhatsappAddon ? 'app.addons.whatsapp' : 'settings.notifications'
+);
+
+const pageTitle = computed(() =>
+    props.isWhatsappAddon
+        ? t('settings.integrations.whatsapp_title')
+        : t('settings.notifications.title')
+);
+
+const pageSubtitle = computed(() =>
+    props.isWhatsappAddon
+        ? t('settings.integrations.whatsapp_desc')
+        : t('settings.notifications.subtitle')
+);
+
+const resolvedBackHref = computed(() => props.backHref || route('app.addons'));
+
 const submit = () => {
-    form.put(route('settings.notifications.update'), {
+    form.transform((data) => {
+        const scopedEvents = {};
+        for (const [eventKey, flags] of Object.entries(data.events || {})) {
+            scopedEvents[eventKey] = props.isWhatsappAddon
+                ? { sms: !!flags?.sms, whatsapp: !!flags?.whatsapp }
+                : { in_app: !!flags?.in_app, email: !!flags?.email };
+        }
+
+        if (props.isWhatsappAddon) {
+            return {
+                channels: {
+                    sms: !!data.channels.sms,
+                    whatsapp: !!data.channels.whatsapp,
+                },
+                channel_configs: {
+                    whatsapp_phone: data.channel_configs.whatsapp_phone,
+                },
+                events: scopedEvents,
+                templates: data.templates,
+            };
+        }
+
+        return {
+            channels: {
+                in_app: !!data.channels.in_app,
+                email: !!data.channels.email,
+            },
+            channel_configs: {
+                email_recipient: data.channel_configs.email_recipient,
+            },
+            events: scopedEvents,
+        };
+    }).put(route(`${routePrefix.value}.update`), {
         preserveScroll: true,
     });
 };
@@ -802,7 +227,7 @@ const submit = () => {
 const sendTestNotification = () => {
     testing.value = true;
     router.post(
-        route('settings.notifications.test'),
+        route(`${routePrefix.value}.test`),
         {},
         {
             preserveScroll: true,
@@ -812,4 +237,512 @@ const sendTestNotification = () => {
         }
     );
 };
+
+const sendTestWhatsapp = () => {
+    testingWhatsapp.value = true;
+    router.post(
+        route(`${routePrefix.value}.test-whatsapp`),
+        {
+            phone: form.channel_configs.whatsapp_phone,
+        },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                testingWhatsapp.value = false;
+            },
+        }
+    );
+};
+
+const insertVariable = (variable) => {
+    const key = activeTemplateKey.value || 'work_order_created';
+    const current = String(form.templates[key] || '');
+    form.templates[key] = current ? `${current} ${variable}` : variable;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(variable).catch(() => {});
+    }
+    toastSuccess(t('settings.notifications.templates.variable_inserted', { var: variable }));
+};
+
+const logStatusClasses = (status) => {
+    if (status === 'delivered' || status === 'read' || status === 'sent') {
+        return 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300 dark:ring-emerald-500/30';
+    }
+    if (status === 'failed') {
+        return 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 dark:bg-rose-900/20 dark:text-rose-300 dark:ring-rose-500/30';
+    }
+    return 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-500/30';
+};
 </script>
+
+<template>
+    <AppLayout>
+        <Head :title="pageTitle" />
+
+        <div class="space-y-6 pb-20 sm:pb-6">
+            <!-- Header Section (Constitution-compliant PageHeader + AppButton) -->
+            <PageHeader :title="pageTitle" :subtitle="pageSubtitle">
+                <template #back>
+                    <BackButton :href="resolvedBackHref" />
+                </template>
+
+                <template #icon>
+                    <svg
+                        class="w-7 h-7 text-brand-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                        <AppButton
+                            v-if="!isWhatsappAddon"
+                            :loading="testing"
+                            @click="sendTestNotification"
+                            variant="secondary"
+                            size="md"
+                            class="flex-1 sm:flex-initial"
+                        >
+                            {{
+                                testing
+                                    ? $t('settings.notifications.actions.sending_test')
+                                    : $t('settings.notifications.actions.send_test')
+                            }}
+                        </AppButton>
+
+                        <AppButton
+                            v-else
+                            :loading="testingWhatsapp"
+                            @click="sendTestWhatsapp"
+                            variant="secondary"
+                            size="md"
+                            class="flex-1 sm:flex-initial"
+                        >
+                            {{ $t('settings.notifications.actions.send_test_whatsapp') }}
+                        </AppButton>
+
+                        <AppButton
+                            :loading="form.processing"
+                            @click="submit"
+                            variant="primary"
+                            size="md"
+                            class="flex-1 sm:flex-initial"
+                        >
+                            {{
+                                form.processing
+                                    ? $t('settings.notifications.actions.saving')
+                                    : $t('settings.notifications.actions.save')
+                            }}
+                        </AppButton>
+                    </div>
+                </template>
+            </PageHeader>
+
+            <!-- WhatsApp Credits & Provider Status Summary (WhatsApp Addon only) -->
+            <div v-if="isWhatsappAddon" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                    class="bg-surface rounded-xl p-4 border border-border-subtle flex items-center justify-between"
+                >
+                    <div>
+                        <p class="text-xs text-text-secondary">
+                            {{ $t('settings.notifications.whatsapp_card.provider_status') }}
+                        </p>
+                        <p class="text-sm font-bold text-text-primary mt-1">
+                            {{
+                                whatsappSummary.provider_active
+                                    ? $t('settings.notifications.whatsapp_card.connected')
+                                    : $t('settings.notifications.whatsapp_card.disconnected')
+                            }}
+                        </p>
+                    </div>
+                    <StatusBadge
+                        :label="
+                            whatsappSummary.provider_active
+                                ? $t('common.active')
+                                : $t('common.inactive')
+                        "
+                        class="gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                        :class="
+                            whatsappSummary.provider_active
+                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300 dark:ring-emerald-500/30'
+                                : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-500/30'
+                        "
+                        :dot-class="whatsappSummary.provider_active ? 'bg-emerald-500' : 'bg-amber-500'"
+                    />
+                </div>
+
+                <div
+                    class="bg-surface rounded-xl p-4 border border-border-subtle flex items-center justify-between"
+                >
+                    <div>
+                        <p class="text-xs text-text-secondary">
+                            {{ $t('settings.notifications.whatsapp_card.available_balance') }}
+                        </p>
+                        <p class="text-xl font-bold text-brand-primary tabular-nums mt-0.5">
+                            {{ whatsappSummary.balance }}
+                        </p>
+                    </div>
+                    <span class="text-xs text-text-muted">
+                        {{ $t('settings.notifications.whatsapp_card.credits_unit') }}
+                    </span>
+                </div>
+
+                <div
+                    class="bg-surface rounded-xl p-4 border border-border-subtle flex items-center justify-between"
+                >
+                    <div>
+                        <p class="text-xs text-text-secondary">
+                            {{ $t('settings.notifications.whatsapp_card.total_sent') }}
+                        </p>
+                        <p class="text-xl font-bold text-text-primary tabular-nums mt-0.5">
+                            {{ whatsappSummary.total_used }}
+                        </p>
+                    </div>
+                    <span class="text-xs text-text-muted">
+                        {{ $t('settings.notifications.whatsapp_card.messages_unit') }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="border-b border-border-subtle pb-3">
+                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" />
+            </div>
+
+            <!-- Tab 1: Channels -->
+            <div v-if="activeTab === 'channels'" class="space-y-6">
+                <div class="bg-surface rounded-xl p-5 sm:p-6 border border-border-subtle space-y-6">
+                    <div>
+                        <h3 class="text-base font-bold text-text-primary">
+                            {{ $t('settings.notifications.channels.title') }}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-text-secondary mt-1">
+                            {{ $t('settings.notifications.channels.description') }}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- In-App Channel (Internal Notifications) -->
+                        <div
+                            v-if="!isWhatsappAddon"
+                            class="p-4 rounded-xl border border-border-subtle bg-surface-muted/40 flex items-start justify-between gap-4"
+                        >
+                            <div>
+                                <p class="text-sm font-bold text-text-primary">
+                                    {{ $t('settings.notifications.channels.in_app') }}
+                                </p>
+                                <p class="text-xs text-text-secondary mt-1">
+                                    {{ $t('settings.notifications.channels.in_app_desc') }}
+                                </p>
+                            </div>
+                            <AppToggle v-model="form.channels.in_app" />
+                        </div>
+
+                        <!-- Email Channel (Internal Notifications) -->
+                        <div
+                            v-if="!isWhatsappAddon"
+                            class="p-4 rounded-xl border border-border-subtle bg-surface-muted/40 flex items-start justify-between gap-4"
+                        >
+                            <div>
+                                <p class="text-sm font-bold text-text-primary">
+                                    {{ $t('settings.notifications.channels.email') }}
+                                </p>
+                                <p class="text-xs text-text-secondary mt-1">
+                                    {{ $t('settings.notifications.channels.email_desc') }}
+                                </p>
+                            </div>
+                            <AppToggle v-model="form.channels.email" />
+                        </div>
+
+                        <!-- WhatsApp Channel (Customer Messaging Addon) -->
+                        <div
+                            v-if="isWhatsappAddon"
+                            class="p-4 rounded-xl border border-border-subtle bg-surface-muted/40 flex items-start justify-between gap-4"
+                        >
+                            <div>
+                                <p class="text-sm font-bold text-text-primary">
+                                    {{ $t('settings.notifications.channels.whatsapp') }}
+                                </p>
+                                <p class="text-xs text-text-secondary mt-1">
+                                    {{ $t('settings.notifications.channels.whatsapp_desc') }}
+                                </p>
+                            </div>
+                            <AppToggle v-model="form.channels.whatsapp" />
+                        </div>
+
+                        <!-- SMS Channel (Customer Messaging Addon) -->
+                        <div
+                            v-if="isWhatsappAddon"
+                            class="p-4 rounded-xl border border-border-subtle bg-surface-muted/40 flex items-start justify-between gap-4"
+                        >
+                            <div>
+                                <p class="text-sm font-bold text-text-primary">
+                                    {{ $t('settings.notifications.channels.sms') }}
+                                </p>
+                                <p class="text-xs text-text-secondary mt-1">
+                                    {{ $t('settings.notifications.channels.sms_desc') }}
+                                </p>
+                            </div>
+                            <AppToggle v-model="form.channels.sms" />
+                        </div>
+                    </div>
+
+                    <!-- Channel Recipient Configs -->
+                    <div class="pt-4 border-t border-border-subtle">
+                        <div v-if="!isWhatsappAddon" class="space-y-1.5 max-w-xl">
+                            <label class="block text-sm font-semibold text-text-primary">
+                                {{ $t('settings.notifications.channels.email_recipient') }}
+                            </label>
+                            <AppInput
+                                v-model="form.channel_configs.email_recipient"
+                                type="email"
+                                dir="ltr"
+                                :placeholder="$t('settings.notifications.channels.email_recipient_hint')"
+                            />
+                            <p class="text-xs text-text-muted">
+                                {{ $t('settings.notifications.channels.email_recipient_hint') }}
+                            </p>
+                        </div>
+
+                        <div v-else class="space-y-1.5 max-w-xl">
+                            <label class="block text-sm font-semibold text-text-primary">
+                                {{ $t('settings.notifications.channels.whatsapp_phone') }}
+                            </label>
+                            <div class="flex gap-2 items-start">
+                                <div class="flex-1">
+                                    <AppInput
+                                        v-model="form.channel_configs.whatsapp_phone"
+                                        type="text"
+                                        dir="ltr"
+                                        placeholder="9665XXXXXXXX"
+                                    />
+                                </div>
+                                <AppButton
+                                    type="button"
+                                    variant="secondary"
+                                    size="md"
+                                    :loading="testingWhatsapp"
+                                    @click="sendTestWhatsapp"
+                                >
+                                    {{ $t('settings.notifications.actions.send_test_whatsapp') }}
+                                </AppButton>
+                            </div>
+                            <p class="text-xs text-text-muted">
+                                {{ $t('settings.notifications.channels.whatsapp_phone_hint') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Events Matrix -->
+            <div v-if="activeTab === 'events'" class="space-y-6">
+                <div class="bg-surface rounded-xl p-5 sm:p-6 border border-border-subtle space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-text-primary">
+                            {{ $t('settings.notifications.events.title') }}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-text-secondary mt-1">
+                            {{ $t('settings.notifications.events.description') }}
+                        </p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr
+                                    class="border-b border-border-subtle text-text-secondary text-xs"
+                                >
+                                    <th class="py-3 px-3 text-start font-semibold">
+                                        {{ $t('settings.notifications.events.table_event') }}
+                                    </th>
+                                    <th v-if="!isWhatsappAddon" class="py-3 px-3 text-center font-semibold">
+                                        {{ $t('settings.notifications.events.table_in_app') }}
+                                    </th>
+                                    <th v-if="!isWhatsappAddon" class="py-3 px-3 text-center font-semibold">
+                                        {{ $t('settings.notifications.events.table_email') }}
+                                    </th>
+                                    <th v-if="isWhatsappAddon" class="py-3 px-3 text-center font-semibold">
+                                        {{ $t('settings.notifications.events.table_whatsapp') }}
+                                    </th>
+                                    <th v-if="isWhatsappAddon" class="py-3 px-3 text-center font-semibold">
+                                        {{ $t('settings.notifications.events.table_sms') }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border-subtle">
+                                <tr
+                                    v-for="eventKey in eventKeys"
+                                    :key="eventKey"
+                                    class="hover:bg-surface-muted/40 transition-colors"
+                                >
+                                    <td class="py-3 px-3 font-medium text-text-primary">
+                                        {{ $t(`settings.notifications.events.${eventKey}`) }}
+                                    </td>
+                                    <td v-if="!isWhatsappAddon" class="py-3 px-3 text-center">
+                                        <div class="inline-flex justify-center">
+                                            <AppToggle
+                                                v-if="form.events[eventKey]"
+                                                v-model="form.events[eventKey].in_app"
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td v-if="!isWhatsappAddon" class="py-3 px-3 text-center">
+                                        <div class="inline-flex justify-center">
+                                            <AppToggle
+                                                v-if="form.events[eventKey]"
+                                                v-model="form.events[eventKey].email"
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td v-if="isWhatsappAddon" class="py-3 px-3 text-center">
+                                        <div class="inline-flex justify-center">
+                                            <AppToggle
+                                                v-if="form.events[eventKey]"
+                                                v-model="form.events[eventKey].whatsapp"
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td v-if="isWhatsappAddon" class="py-3 px-3 text-center">
+                                        <div class="inline-flex justify-center">
+                                            <AppToggle
+                                                v-if="form.events[eventKey]"
+                                                v-model="form.events[eventKey].sms"
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Templates (including migrated Company Notifications templates) -->
+            <div v-if="isWhatsappAddon && activeTab === 'templates'" class="space-y-6">
+                <div class="bg-surface rounded-xl p-5 sm:p-6 border border-border-subtle space-y-6">
+                    <div>
+                        <h3 class="text-base font-bold text-text-primary">
+                            {{ $t('settings.notifications.templates.title') }}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-text-secondary mt-1">
+                            {{ $t('settings.notifications.templates.description') }}
+                        </p>
+                    </div>
+
+                    <!-- Clickable Variables Legend -->
+                    <div
+                        class="p-4 rounded-xl bg-brand-primary-soft border border-brand-primary/20 space-y-2"
+                    >
+                        <p class="text-xs font-bold text-text-primary">
+                            {{ $t('company_profile.templates.available_variables') }}
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <AppButton
+                                v-for="variable in quickVariables"
+                                :key="variable"
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                class="font-mono text-xs"
+                                @click="insertVariable(variable)"
+                            >
+                                {{ variable }}
+                            </AppButton>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5">
+                        <div
+                            v-for="tpl in templateConfigs"
+                            :key="tpl.key"
+                            class="p-4 rounded-xl border border-border-subtle bg-surface-muted/30 space-y-2"
+                            @focusin="activeTemplateKey = tpl.key"
+                        >
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <label class="text-sm font-bold text-text-primary">
+                                    {{ $t(tpl.labelKey) }}
+                                </label>
+                                <span class="text-[11px] text-brand-primary font-mono">
+                                    {{ tpl.vars.join(', ') }}
+                                </span>
+                            </div>
+                            <AppTextarea v-model="form.templates[tpl.key]" :rows="3" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: WhatsApp Message Logs (DataTable) -->
+            <div v-if="isWhatsappAddon && activeTab === 'logs'" class="space-y-6">
+                <div class="bg-surface rounded-xl p-5 sm:p-6 border border-border-subtle space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-text-primary">
+                            {{ $t('settings.notifications.logs.title') }}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-text-secondary mt-1">
+                            {{ $t('settings.notifications.logs.description') }}
+                        </p>
+                    </div>
+
+                    <DataTable
+                        :columns="logColumns"
+                        :data="whatsappLogs"
+                        :empty-text="$t('settings.notifications.logs.empty')"
+                    >
+                        <template #cell-phone_number="{ row }">
+                            <span class="font-mono text-xs" dir="ltr">
+                                {{ row.phone_number }}
+                            </span>
+                        </template>
+                        <template #cell-template_name="{ row }">
+                            <span class="font-mono text-xs text-text-secondary">
+                                {{ row.template_name || '-' }}
+                            </span>
+                        </template>
+                        <template #cell-status="{ row }">
+                            <StatusBadge
+                                :label="row.status_label"
+                                class="gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                :class="logStatusClasses(row.status)"
+                            />
+                        </template>
+                    </DataTable>
+                </div>
+            </div>
+
+            <!-- Sticky Save Footer for Mobile -->
+            <div
+                class="sm:hidden fixed bottom-0 inset-x-0 p-3 bg-surface/95 backdrop-blur border-t border-border-subtle flex gap-2 z-30"
+            >
+                <AppButton
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    class="w-full"
+                    :loading="form.processing"
+                    @click="submit"
+                >
+                    {{
+                        form.processing
+                            ? $t('settings.notifications.actions.saving')
+                            : $t('settings.notifications.actions.save')
+                    }}
+                </AppButton>
+            </div>
+        </div>
+    </AppLayout>
+</template>

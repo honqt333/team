@@ -9,6 +9,8 @@
  * Once a composable is migrated to .ts, remove its declaration here.
  */
 
+import type { Ref } from 'vue';
+
 declare module '@/Composables/useLocalized' {
     export interface LocalizedItem {
         name_ar?: string;
@@ -31,7 +33,15 @@ declare module '@/Composables/useToast' {
         duration?: number;
         fromFlash?: boolean;
     }
+    interface ToastItem {
+        id: number;
+        type: 'success' | 'error' | 'info' | 'warning';
+        message: string;
+        title?: string;
+        duration?: number;
+    }
     export function useToast(): {
+        toasts: Ref<ToastItem[]>;
         clear: () => void;
         success: (message: string, options?: ToastOptions) => number | null;
         error: (message: string, options?: ToastOptions) => number | null;

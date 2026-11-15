@@ -723,18 +723,18 @@ onUnmounted(() => destroyMap());
 <style>
 .vue-tel-input {
     border-radius: 0.75rem !important;
-    border-color: #d1d5db !important;
+    border-color: var(--color-border-strong) !important;
 }
 .vue-tel-input.error-border {
-    border-color: #ef4444 !important;
+    border-color: var(--color-danger) !important;
 }
 .vue-tel-input.error-border:focus-within {
-    box-shadow: 0 0 0 2px #ef4444 !important;
+    box-shadow: 0 0 0 2px var(--color-danger) !important;
     border-color: transparent !important;
 }
 .dark .vue-tel-input {
-    border-color: #4b5563 !important;
-    background-color: #111827 !important;
+    border-color: var(--color-border-strong) !important;
+    background-color: var(--color-surface) !important;
 }
 .vue-tel-input:focus-within {
     box-shadow: 0 0 0 2px var(--color-focus-ring) !important;
@@ -745,20 +745,20 @@ onUnmounted(() => destroyMap());
     border-radius: 0 0.75rem 0.75rem 0 !important;
 }
 .dark .vti__input {
-    color: #f3f4f6 !important;
+    color: var(--color-text-primary) !important;
 }
 .vti__dropdown {
     border-radius: 0.75rem 0 0 0.75rem !important;
 }
 .dark .vti__dropdown-list {
-    background-color: #1f2937 !important;
-    border-color: #374151 !important;
+    background-color: var(--color-surface-raised) !important;
+    border-color: var(--color-border-strong) !important;
 }
 .dark .vti__dropdown-item.highlighted {
-    background-color: #374151 !important;
+    background-color: var(--color-surface-tertiary) !important;
 }
 .dark .vti__dropdown-item strong,
 .dark .vti__dropdown-item span {
-    color: #f3f4f6 !important;
+    color: var(--color-text-primary) !important;
 }
 </style>

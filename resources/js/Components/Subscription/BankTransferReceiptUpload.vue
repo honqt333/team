@@ -1,12 +1,13 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 import { ref, computed, watch, onUnmounted } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import BankAccountCard from './BankAccountCard.vue';
 
 const props = defineProps({
     // The setup payload from subscribe() — contains plan, billing_cycle,
@@ -23,8 +24,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['success', 'close']);
-
-const locale = computed(() => document.documentElement.lang || 'ar');
 
 // Read the CSRF token from Inertia's shared page props (always fresh
 // per request) — the meta tag in the document can be stale if the
@@ -60,7 +59,6 @@ const invoiceOptions = computed(() => [
     })),
 ]);
 
-const fileInput = ref(null);
 const errors = ref({});
 const error = ref(null);
 const processing = ref(false);
@@ -108,7 +106,6 @@ onUnmounted(() => {
 });
 
 const maxFileSize = 5; // MB
-const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 const defaultAmount = computed(() => {
     if (!props.setup?.total) return 0;
@@ -181,42 +178,73 @@ function stepLabelClass(step) {
     return 'text-gray-500 dark:text-gray-400';
 }
 
-function pickFile() {
-    fileInput.value?.click();
+const requireReceipt = computed(
+    () =>
+        props.setup?.bank_transfer_require_receipt ??
+        props.paymentSettings?.bank_transfer_require_receipt ??
+        true
+);
+
+const minAmount = computed(() =>
+    Number(
+        props.setup?.bank_transfer_min_amount ??
+            props.paymentSettings?.bank_transfer_min_amount ??
+            0
+    )
+);
+
+const maxDays = computed(() =>
+    Number(
+        props.setup?.bank_transfer_max_days ??
+            props.paymentSettings?.bank_transfer_max_days ??
+            0
+    )
+);
+
+function generateIdempotencyKey() {
+    return typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `bt-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function onFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+const idempotencyKey = ref(generateIdempotencyKey());
+const lastAttemptSignature = ref(null);
+const idempotentReplay = ref(false);
 
-    if (file.size > maxFileSize * 1024 * 1024) {
-        errors.value.receipt =
-            locale.value === 'ar'
-                ? t('subscription.receipt.file_too_large', { maxFileSize: maxFileSize })
-                : `File size exceeds ${maxFileSize} MB`;
-        return;
+const dueBalance = computed(() => {
+    if (form.value.subscription_invoice_id) {
+        const selected = props.pendingInvoices.find(
+            (inv) => inv.id === form.value.subscription_invoice_id
+        );
+        if (selected && selected.amount !== undefined) {
+            return Number(selected.amount);
+        }
     }
-    if (!acceptedTypes.includes(file.type)) {
-        errors.value.receipt = t('subscription.receipt.unsupported_type');
-        return;
-    }
+    return props.setup?.total !== undefined ? Number(props.setup.total) : null;
+});
 
-    form.value.receipt = file;
-    errors.value.receipt = null;
-}
-
-function removeFile() {
-    form.value.receipt = null;
-    if (fileInput.value) fileInput.value.value = '';
+function currentAttemptSignature() {
+    return JSON.stringify({
+        plan_id: props.setup?.plan?.id ?? null,
+        subscription_invoice_id: form.value.subscription_invoice_id ?? null,
+        transfer_amount: String(form.value.transfer_amount ?? ''),
+        transfer_reference: (form.value.transfer_reference ?? '').trim(),
+    });
 }
 
 async function submit() {
-    if (!form.value.receipt) {
+    if (requireReceipt.value && !form.value.receipt) {
         errors.value.receipt = t('subscription.receipt.upload_required');
         return;
     }
     if (!form.value.transfer_amount) {
         errors.value.transfer_amount = t('subscription.receipt.amount_required');
+        return;
+    }
+    if (minAmount.value > 0 && Number(form.value.transfer_amount) < minAmount.value) {
+        errors.value.transfer_amount = t('subscription.receipt.min_amount_error', {
+            amount: minAmount.value.toFixed(2),
+        });
         return;
     }
     if (!form.value.transfer_date) {
@@ -244,13 +272,22 @@ async function submit() {
         return;
     }
 
+    const signature = currentAttemptSignature();
+    if (lastAttemptSignature.value !== null && lastAttemptSignature.value !== signature) {
+        idempotencyKey.value = generateIdempotencyKey();
+    }
+    lastAttemptSignature.value = signature;
+
     processing.value = true;
     error.value = null;
     errors.value = {};
+    idempotentReplay.value = false;
 
     try {
         const data = new FormData();
-        data.append('receipt', form.value.receipt);
+        if (form.value.receipt) {
+            data.append('receipt', form.value.receipt);
+        }
         data.append('transfer_amount', form.value.transfer_amount);
         data.append('transfer_date', form.value.transfer_date);
         // Server validation requires these three as non-empty strings.
@@ -285,14 +322,17 @@ async function submit() {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken.value || '',
+                'Idempotency-Key': idempotencyKey.value,
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: data,
         });
 
-        const result = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        const result = contentType.includes('application/json') ? await response.json() : {};
         if (response.ok) {
+            idempotentReplay.value = Boolean(result.idempotent_replay);
             emit('success', result);
         } else {
             if (result.errors) {
@@ -326,6 +366,52 @@ async function submit() {
             <p v-else class="mt-1 text-xs text-action-primary">
                 {{ $t('subscription.receipt.upload_help') }}
             </p>
+            <div
+                v-if="dueBalance !== null || minAmount > 0 || maxDays > 0 || !requireReceipt"
+                class="mt-2 flex flex-wrap gap-2 text-[11px] font-medium text-selection-text"
+            >
+                <span
+                    v-if="dueBalance !== null"
+                    class="rounded-md bg-white/70 px-2 py-0.5 font-mono dark:bg-slate-800/70"
+                >
+                    {{ $t('subscription.receipt.due_balance_label') }}: {{ dueBalance.toFixed(2) }}
+                    SAR
+                </span>
+                <span
+                    v-if="minAmount > 0"
+                    class="rounded-md bg-white/70 px-2 py-0.5 dark:bg-slate-800/70"
+                >
+                    {{
+                        $t('subscription.receipt.min_amount_notice', {
+                            amount: minAmount.toFixed(2),
+                        })
+                    }}
+                </span>
+                <span
+                    v-if="maxDays > 0"
+                    class="rounded-md bg-white/70 px-2 py-0.5 dark:bg-slate-800/70"
+                >
+                    {{ $t('subscription.receipt.grace_period_notice', { days: maxDays }) }}
+                </span>
+                <span
+                    v-if="!requireReceipt"
+                    class="rounded-md bg-white/70 px-2 py-0.5 dark:bg-slate-800/70"
+                >
+                    {{ $t('subscription.receipt.receipt_optional_notice') }}
+                </span>
+            </div>
+            <p
+                v-if="processing"
+                class="mt-2 text-xs font-medium text-action-primary"
+            >
+                {{ $t('subscription.receipt.submitting_status') }}
+            </p>
+            <p
+                v-else-if="idempotentReplay"
+                class="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+            >
+                {{ $t('subscription.receipt.idempotent_replay_notice') }}
+            </p>
         </div>
 
         <!-- Bank accounts panel — shows where the tenant needs to transfer
@@ -341,29 +427,11 @@ async function submit() {
                 {{ $t('subscription.receipt.transfer_to_account') }}
             </p>
             <div class="mt-2 space-y-2">
-                <div
+                <BankAccountCard
                     v-for="(acc, idx) in setup.bank_accounts"
                     :key="idx"
-                    class="rounded border border-emerald-200 bg-white p-3 text-xs dark:border-emerald-800/50 dark:bg-gray-900/30"
-                >
-                    <p class="font-semibold text-emerald-700 dark:text-emerald-300">
-                        {{ acc.bank_name || '—' }}
-                    </p>
-                    <p v-if="acc.account_name" class="text-gray-700 dark:text-gray-300">
-                        {{ acc.account_name }}
-                    </p>
-                    <p v-if="acc.iban" class="font-mono text-gray-600 dark:text-gray-400" dir="ltr">
-                        IBAN: {{ acc.iban }}
-                    </p>
-                    <p
-                        v-if="acc.account_number"
-                        class="font-mono text-gray-600 dark:text-gray-400"
-                        dir="ltr"
-                    >
-                        {{ $t('system.payment_settings.bank_transfer.account_number') }}:
-                        {{ acc.account_number }}
-                    </p>
-                </div>
+                    :account="acc"
+                />
             </div>
         </div>
 

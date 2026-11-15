@@ -399,7 +399,7 @@ const scrollToHighlighted = () => {
                 {{ t('common.no_results') }}
             </div>
             <div v-else class="px-4 py-3 text-sm text-text-muted text-center">
-                {{ t('inventory.parts.search') }}
+                {{ searchPlaceholder || t('common.type_to_search') }}
             </div>
         </div>
 

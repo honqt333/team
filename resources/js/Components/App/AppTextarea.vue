@@ -173,7 +173,7 @@ defineExpose({ focus });
 
 .app-field__hint {
     font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
+    color: var(--color-text-secondary);
 }
 .app-field__error {
     font-size: var(--font-size-xs);

@@ -4,141 +4,67 @@
 
         <div class="space-y-6">
             <!-- Header Section (Screen Only) -->
-            <div
-                class="print:hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-            >
-                <div>
-                    <div
-                        class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1"
-                    >
-                        <Link
-                            :href="route('app.reports.tax-periods.index')"
-                            class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                        >
-                            {{ $t('reports.tax_periods_report.back_to_tax_periods') }}
-                        </Link>
-                        <span>/</span>
-                        <span class="text-gray-900 dark:text-white font-medium">
-                            {{ taxPeriod.name }}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ taxPeriod.name }}
-                        </h1>
-                        <span
-                            class="text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold"
-                        >
-                            {{ taxPeriod.period_key }}
-                        </span>
-                        <!-- Status Badge -->
-                        <span
-                            v-if="taxPeriod.status === 'posted'"
-                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                        >
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            {{ $t('reports.tax_periods_report.status_posted') }}
-                        </span>
-                        <span
-                            v-else
-                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"
-                        >
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            {{ $t('reports.tax_periods_report.status_draft') }}
-                        </span>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">
-                        {{ formatDate(taxPeriod.start_date) }} &larr;
-                        {{ formatDate(taxPeriod.end_date) }}
-                    </p>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <!-- Post / Lock Button (Draft Only, uses useConfirm) -->
-                    <button
-                        v-if="taxPeriod.status === 'draft'"
-                        type="button"
-                        @click="handlePostPeriod"
-                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 transition-all"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            <div class="print:hidden">
+                <PageHeader
+                    :title="`${taxPeriod.name} (${taxPeriod.period_key})`"
+                    :subtitle="`${formatDate(taxPeriod.start_date)} ← ${formatDate(taxPeriod.end_date)} • ${
+                        taxPeriod.status === 'posted'
+                            ? $t('reports.tax_periods_report.status_posted')
+                            : $t('reports.tax_periods_report.status_draft')
+                    }`"
+                    gradientFrom="from-emerald-600"
+                    gradientTo="to-teal-700"
+                    glowFrom="from-emerald-500"
+                    badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                    badgeText="text-emerald-600 dark:text-emerald-400"
+                    badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                    badgeDot="bg-emerald-500"
+                >
+                    <template #back>
+                        <BackButton :href="route('app.reports.tax-periods.index')" />
+                    </template>
+                    <template #actions>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <AppButton
+                                as="a"
+                                variant="secondary"
+                                size="sm"
+                                :href="route('app.reports.tax-periods.export-excel', taxPeriod.id)"
+                            >
+                                {{ $t('reports.tax_periods_report.export_excel') }}
+                            </AppButton>
+                            <AppButton
+                                as="a"
+                                variant="secondary"
+                                size="sm"
+                                :href="route('app.reports.tax-periods.export-zatca', taxPeriod.id)"
+                            >
+                                {{ $t('reports.tax_periods_report.export_zatca') }}
+                            </AppButton>
+                            <AppButton
+                                v-if="taxPeriod.status === 'draft'"
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                @click="handleRecreatePeriod"
+                            >
+                                {{ $t('reports.tax_periods_report.recreate_period_btn') }}
+                            </AppButton>
+                            <AppPrintButton
+                                @click="handlePrint"
+                                :label="$t('reports.tax_periods_report.print_declaration')"
                             />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.post_period_btn') }}</span>
-                    </button>
-
-                    <!-- Recreate / Refresh Button (Draft Only, uses useConfirm) -->
-                    <button
-                        v-if="taxPeriod.status === 'draft'"
-                        type="button"
-                        @click="handleRecreatePeriod"
-                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.recreate_period_btn') }}</span>
-                    </button>
-
-                    <!-- Export Excel -->
-                    <a
-                        :href="route('app.reports.tax-periods.export-excel', taxPeriod.id)"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-xs font-bold rounded-xl transition-all"
-                    >
-                        <svg
-                            class="w-4 h-4 text-emerald-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.export_excel') }}</span>
-                    </a>
-
-                    <!-- Export ZATCA -->
-                    <a
-                        :href="route('app.reports.tax-periods.export-zatca', taxPeriod.id)"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 text-xs font-bold rounded-xl transition-all"
-                    >
-                        <svg
-                            class="w-4 h-4 text-emerald-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.export_zatca') }}</span>
-                    </a>
-
-                    <!-- Print Button (uses usePrint composable per Constitution) -->
-                    <AppPrintButton
-                        @click="handlePrint"
-                        :label="$t('reports.tax_periods_report.print_declaration')"
-                    />
-                </div>
+                            <AppButton
+                                v-if="taxPeriod.status === 'draft'"
+                                type="button"
+                                size="sm"
+                                @click="handlePostPeriod"
+                            >
+                                {{ $t('reports.tax_periods_report.post_period_btn') }}
+                            </AppButton>
+                        </div>
+                    </template>
+                </PageHeader>
             </div>
 
             <!-- Posted Notice Banner (If Locked) -->
@@ -428,11 +354,11 @@
 
                         <!-- Filters for Detail Table (Using SearchableSelect) -->
                         <div class="flex flex-wrap items-center gap-3">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="searchQuery"
                                 :placeholder="$t('reports.tax_periods_report.search_placeholder')"
-                                class="text-xs bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 w-60 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
+                                input-class="py-1.5 text-xs w-60"
                             />
 
                             <div class="w-52">
@@ -599,8 +525,12 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed, watch } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';

@@ -1,19 +1,18 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import axios from 'axios';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppCheckbox from '@/Components/App/AppCheckbox.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import InputLabel from '@/Components/InputLabel.vue';
 import LoadingSpinner from '@/Components/Common/LoadingSpinner.vue';
 
 const props = defineProps({
     employee: Object,
 });
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const { success, error } = useToast();
 
 const loading = ref(true);

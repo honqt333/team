@@ -67,6 +67,13 @@ export function printDocument(options = {}) {
 
 /**
  * Resolve document-level print settings from tenant.print_settings with safe defaults.
+ *
+ * @param {object} [options]
+ * @param {Record<string, unknown> | null} [options.tenantSettings]
+ * @param {string} [options.documentType]
+ * @param {Record<string, unknown>} [options.defaults]
+ * @param {string | null} [options.customerSignatureUrl]
+ * @param {unknown} [options.legacyTerms]
  */
 export function resolveDocumentSettings({
     tenantSettings = null,
@@ -148,6 +155,11 @@ export function resolveDocumentSettings({
 
 /**
  * Resolve global visual print settings from tenant.print_settings.
+ *
+ * @param {object} [options]
+ * @param {Record<string, unknown> | null} [options.tenantSettings]
+ * @param {Record<string, unknown>} [options.center]
+ * @param {Record<string, unknown>} [options.overrides]
  */
 export function resolveVisualSettings({ tenantSettings = null, center = {}, overrides = {} } = {}) {
     const vis = tenantSettings?.visual || {};
@@ -301,7 +313,8 @@ export function usePrint() {
     /**
      * Get document type title (bilingual, tax-aware)
      */
-    function getDocTypeTitle(type, taxActive = true) {
+    function getDocTypeTitle(type, taxActive = true, targetLocale = null) {
+        const useAr = targetLocale ? targetLocale === 'ar' : isRtl.value;
         const titlesAr = {
             invoice: taxActive ? 'فاتورة ضريبية' : 'فاتورة',
             proforma_invoice: 'فاتورة أولية',
@@ -332,7 +345,7 @@ export function usePrint() {
             purchase_return: taxActive ? 'Tax Purchase Return Invoice' : 'Purchase Return Invoice',
             credit_note: taxActive ? 'Credit Note (Return Invoice)' : 'Credit Note',
         };
-        if (isRtl.value) {
+        if (useAr) {
             return titlesAr[type] || 'وثيقة رسمية';
         }
         return titlesEn[type] || 'Official Document';

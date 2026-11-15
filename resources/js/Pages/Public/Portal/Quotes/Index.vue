@@ -28,18 +28,18 @@
                 v-for="q in filteredQuotes"
                 :key="q.id"
                 :href="`/${tenant.slug}/portal/quote/${q.id}`"
-                class="group block rounded-2xl bg-white dark:bg-slate-900 border p-5 shadow-sm hover:shadow-md transition"
+                class="group block rounded-2xl bg-surface border p-5 shadow-sm hover:shadow-md transition"
                 :class="
                     q.can_be_actioned
-                        ? 'border-amber-300 dark:border-amber-700/80 ring-1 ring-amber-200/60 dark:ring-amber-900/40'
-                        : 'border-slate-200/80 dark:border-slate-800'
+                        ? 'border-warning/60 ring-1 ring-warning/30'
+                        : 'border-border'
                 "
             >
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div class="min-w-0 space-y-1.5">
                         <div class="flex flex-wrap items-center gap-2">
                             <span
-                                class="text-sm font-mono font-extrabold text-slate-900 dark:text-white"
+                                class="text-sm font-mono font-extrabold text-text-primary"
                                 dir="ltr"
                             >
                                 {{ q.code }}
@@ -51,11 +51,11 @@
                                 {{ quoteStatusLabel(q) }}
                             </span>
                         </div>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                        <p class="text-sm font-bold text-text-primary">
                             {{ q.vehicle_label || '—' }}
                         </p>
                         <div
-                            class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400"
+                            class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary"
                         >
                             <span v-if="q.center_name">{{ q.center_name }}</span>
                             <span v-if="q.created_at">
@@ -86,11 +86,11 @@
                             size="xs"
                         />
                         <p
-                            class="text-base font-extrabold text-slate-900 dark:text-white"
+                            class="text-base font-extrabold text-text-primary"
                             dir="ltr"
                         >
                             {{ formatMoney(q.total_incl_tax) }}
-                            <span class="text-xs font-semibold text-slate-500">
+                            <span class="text-xs font-semibold text-text-secondary">
                                 {{ q.currency_code }}
                             </span>
                         </p>
@@ -98,8 +98,8 @@
                             class="inline-flex items-center gap-1 text-xs font-bold"
                             :class="
                                 q.can_be_actioned
-                                    ? 'text-amber-600 dark:text-amber-400'
-                                    : 'text-slate-500 dark:text-slate-400'
+                                    ? 'text-amber-700 dark:text-amber-300'
+                                    : 'text-text-secondary'
                             "
                         >
                             {{ t('customer_portal.portal_quotes.view_details') }}

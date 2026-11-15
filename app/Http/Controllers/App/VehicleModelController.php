@@ -7,12 +7,12 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleModelController extends Controller
 {
     /**
@@ -20,6 +20,7 @@ class VehicleModelController extends Controller
      */
     public function index(Request $request): Response
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_VIEW);
         $query = VehicleModel::with(['make', 'updatedBy'])->orderedBySource()->ordered();
 
         if ($request->filled('search')) {
@@ -50,6 +51,8 @@ class VehicleModelController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'make_id' => 'required|exists:vehicle_makes,id',
             'name_ar' => 'required|string|max:255',
@@ -71,6 +74,8 @@ class VehicleModelController extends Controller
      */
     public function update(Request $request, VehicleModel $model): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($model->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
@@ -94,6 +99,8 @@ class VehicleModelController extends Controller
      */
     public function destroy(VehicleModel $model): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($model->source === 'system') {
             abort(403, __('common.cannot_delete_system_data'));
@@ -109,6 +116,8 @@ class VehicleModelController extends Controller
      */
     public function toggleActive(VehicleModel $model): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($model->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));

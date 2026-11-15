@@ -75,11 +75,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 v-model="filters.search"
                                 type="text"
                                 :placeholder="$t('inventory.stock.search_placeholder')"
-                                class="block w-full ps-11 pe-4 py-2.5 text-sm text-content-primary bg-surface-primary border border-border-subtle rounded-xl focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all outline-none placeholder-content-muted shadow-xs"
+                                input-class="ps-11"
                             />
                         </div>
 
@@ -618,11 +618,11 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';

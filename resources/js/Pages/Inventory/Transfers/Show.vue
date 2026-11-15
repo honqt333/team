@@ -1,23 +1,22 @@
 <template>
     <AppLayout :title="transfer.code">
-        <div class="p-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ transfer.code }}
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {{ transfer.from_warehouse?.name }} ← {{ transfer.to_warehouse?.name }}
-                    </p>
-                </div>
-                <span
-                    :class="statusClass(transfer.status)"
-                    class="px-3 py-1.5 text-sm font-medium rounded-full"
-                >
-                    {{ $t('inventory.transfers.statuses.' + transfer.status) }}
-                </span>
-            </div>
+        <div class="space-y-6">
+            <PageHeader
+                :title="transfer.code"
+                :subtitle="`${transfer.from_warehouse?.name || ''} ← ${transfer.to_warehouse?.name || ''}`"
+            >
+                <template #back>
+                    <BackButton :href="route('app.inventory.transfers.index')" />
+                </template>
+                <template #actions>
+                    <span
+                        :class="statusClass(transfer.status)"
+                        class="px-3 py-1.5 text-sm font-medium rounded-full"
+                    >
+                        {{ $t('inventory.transfers.statuses.' + transfer.status) }}
+                    </span>
+                </template>
+            </PageHeader>
 
             <!-- Info Card -->
             <div
@@ -64,21 +63,24 @@
                 class="flex gap-3 mb-6"
                 v-if="transfer.status === 'draft' || transfer.status === 'sent'"
             >
-                <button
+                <AppButton
                     v-if="transfer.status === 'draft'"
                     @click="sendTransfer"
                     :disabled="transfer.items?.length === 0"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="primary"
+                    size="md"
                 >
                     {{ $t('inventory.transfers.send') }}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                     v-if="transfer.status === 'sent'"
                     @click="receiveTransfer"
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    variant="primary"
+                    size="md"
+                    class="bg-green-600 hover:bg-green-700"
                 >
                     {{ $t('inventory.transfers.receive') }}
-                </button>
+                </AppButton>
                 <button
                     @click="cancelTransfer"
                     class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30"
@@ -263,6 +265,8 @@ import AppButton from '@/Components/App/AppButton.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';

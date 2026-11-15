@@ -121,28 +121,30 @@
                             </span>
                         </button>
 
-                        <button
+                        <AppButton
                             v-if="can('crm.work_orders.create') || isAnyAdmin()"
                             @click="openWorkOrderModal"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs bg-action-primary hover:bg-action-primary-hover text-white shadow-xs active:scale-95 transition-all cursor-pointer"
+                            variant="primary"
+                            size="sm"
+                            class="shadow-xs"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>
-                                {{ $t('common.btn_create_work_order') }}
-                            </span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('common.btn_create_work_order') }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -435,11 +437,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="workOrderSearch"
                                         :placeholder="$t('work_orders.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring transition-all shadow-sm"
+                                        input-class="sm:w-48 ps-10 py-2"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -765,11 +767,11 @@
                                             />
                                         </svg>
                                     </div>
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="quoteSearch"
                                         :placeholder="$t('quotes.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring transition-all shadow-sm"
+                                        input-class="sm:w-48 ps-10 py-2"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -1677,6 +1679,8 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';

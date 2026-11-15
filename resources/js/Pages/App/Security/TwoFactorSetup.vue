@@ -237,12 +237,12 @@ const regenerate = () =>
                         <form @submit.prevent="enable" class="space-y-4">
                             <div class="flex items-start gap-3">
                                 <div class="relative">
-                                    <input
+                                    <AppInput
                                         type="text"
                                         v-model="form.code"
-                                        maxlength="6"
+                                        :maxlength="6"
                                         placeholder="000000"
-                                        class="w-40 text-center text-2xl tracking-wider rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-focus-ring focus:border-action-primary"
+                                        input-class="w-40 text-center text-2xl tracking-wider font-mono"
                                         dir="ltr"
                                         inputmode="numeric"
                                         autofocus
@@ -254,13 +254,16 @@ const regenerate = () =>
                                         {{ form.errors.code }}
                                     </p>
                                 </div>
-                                <button
+                                <AppButton
                                     type="submit"
-                                    :disabled="form.processing || form.code.length !== 6"
-                                    class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50 h-[46px]"
+                                    :loading="form.processing"
+                                    :disabled="form.code.length !== 6"
+                                    variant="primary"
+                                    size="md"
+                                    class="bg-emerald-600 hover:bg-emerald-700 h-[46px]"
                                 >
                                     {{ $t('common.activate') }}
-                                </button>
+                                </AppButton>
                             </div>
 
                             <div class="text-sm">

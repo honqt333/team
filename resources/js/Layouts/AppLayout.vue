@@ -79,16 +79,10 @@
                             }}
                         </p>
                         <p
-                            v-if="page.props.center?.id"
-                            class="text-xs text-gray-500 dark:text-gray-400"
+                            v-if="page.props.tenant?.tenant_number || page.props.tenant?.id"
+                            class="text-xs text-gray-500 dark:text-gray-400 font-mono"
                         >
-                            #{{ page.props.center.id }}
-                        </p>
-                        <p
-                            v-else-if="page.props.tenant?.id"
-                            class="text-xs text-gray-500 dark:text-gray-400"
-                        >
-                            #{{ page.props.tenant.id }}
+                            #{{ page.props.tenant.tenant_number || page.props.tenant.id }}
                         </p>
                     </div>
                 </div>
@@ -1083,11 +1077,6 @@
                                 </svg>
                                 <span class="max-w-[180px] truncate">
                                     {{ getCenterName(page.props.center) }}
-                                </span>
-                                <span
-                                    class="text-[11px] font-mono text-gray-400 dark:text-gray-400"
-                                >
-                                    #{{ page.props.center.id }}
                                 </span>
                                 <svg
                                     class="w-3.5 h-3.5 text-gray-400 shrink-0"
@@ -2525,10 +2514,12 @@
                                 {{ getCenterName(page.props.center) }}
                             </p>
                             <p
-                                v-else-if="page.props.tenant?.id"
-                                class="text-xs text-gray-500 dark:text-gray-400"
+                                v-else-if="
+                                    page.props.tenant?.tenant_number || page.props.tenant?.id
+                                "
+                                class="text-xs text-gray-500 dark:text-gray-400 font-mono"
                             >
-                                #{{ page.props.tenant.id }}
+                                #{{ page.props.tenant.tenant_number || page.props.tenant.id }}
                             </p>
                         </div>
                     </div>
@@ -3396,9 +3387,9 @@
             </aside>
         </Transition>
 
-        <!-- Floating Quick Create SpeedDial (Hidden on Print) -->
+        <!-- Floating Quick Create SpeedDial (Hidden on Print or User Preference) -->
         <div
-            v-if="quickCreateItems.length > 0"
+            v-if="quickCreateItems.length > 0 && !isFloatingQuickActionsHidden"
             class="fixed bottom-6 end-6 z-40 flex flex-col items-end print:hidden quick-speeddial-root"
         >
             <Transition name="dropdown">
@@ -3506,6 +3497,9 @@ const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
 const centerMenuOpen = ref(false);
 const quickSpeedDialOpen = ref(false);
+const isFloatingQuickActionsHidden = computed(() =>
+    Boolean(page.props.preferences?.hide_floating_button)
+);
 
 const quickCreateItems = computed(() => {
     const items = [];
@@ -3728,15 +3722,15 @@ function handleKeyDown(event) {
 }
 
 // ─── Top Navigation Mode & Preferences ─────────────────────────────────────────
-const localNavLayout = ref(
-    typeof window !== 'undefined' ? localStorage.getItem('user_nav_layout') : null
-);
+const localNavLayout = ref(null);
 
 const layoutMode = computed(() => {
-    if (localNavLayout.value) {
-        return localNavLayout.value;
-    }
-    return page.props.preferences?.layout || 'side';
+    return (
+        localNavLayout.value ||
+        page.props.preferences?.layout ||
+        (typeof window !== 'undefined' ? localStorage.getItem('user_nav_layout') : null) ||
+        'side'
+    );
 });
 
 const isTopNav = computed(() => layoutMode.value === 'top');
@@ -3791,11 +3785,14 @@ function toggleNavLayout() {
 watch(
     () => page.props.preferences?.layout,
     (serverLayout) => {
-        if (serverLayout && typeof window !== 'undefined') {
+        if (serverLayout) {
             localNavLayout.value = serverLayout;
-            localStorage.setItem('user_nav_layout', serverLayout);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('user_nav_layout', serverLayout);
+            }
         }
-    }
+    },
+    { immediate: true }
 );
 
 // Close open dropdowns on Inertia page navigation

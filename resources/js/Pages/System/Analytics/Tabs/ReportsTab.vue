@@ -34,27 +34,31 @@
                     {{ report.description }}
                 </p>
 
-                <button
-                    type="button"
-                    class="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-action-primary-hover focus:outline-none focus:ring-2 focus:ring-focus-ring shadow-sm"
+                <AppButton
                     @click="download(report)"
+                    variant="primary"
+                    size="md"
+                    class="mt-4 shadow-sm"
                 >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3M4 7v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1M8 5h8a2 2 0 012 2v1"
-                        />
-                    </svg>
+                    <template #iconLeft>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3M4 7v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1M8 5h8a2 2 0 012 2v1"
+                            />
+                        </svg>
+                    </template>
                     {{ $t('common.export') }}
-                </button>
+                </AppButton>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
+import AppButton from '@/Components/App/AppButton.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

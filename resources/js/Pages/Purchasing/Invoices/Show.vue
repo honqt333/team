@@ -66,54 +66,36 @@
                         </Tooltip>
 
                         <!-- Print Button -->
-                        <Tooltip :content="$t('common.print')">
-                            <a
-                                :href="route('app.invoices.purchases.print', invoice.id)"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                </svg>
-                                <span>{{ $t('common.print') }}</span>
-                            </a>
-                        </Tooltip>
+                        <AppPrintButton :href="route('app.invoices.purchases.print', invoice.id)" />
 
                         <!-- Add Payment Button -->
                         <Tooltip
                             v-if="Number(invoice.balance) > 0.01"
                             :content="$t('payments.add_payment')"
                         >
-                            <button
+                            <AppButton
                                 @click="showPaymentModal = true"
-                                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                                variant="primary"
+                                size="sm"
+                                class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm hover:shadow"
                             >
-                                <svg
-                                    class="w-4 h-4 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                                <span>{{ $t('payments.add_payment') }}</span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('payments.add_payment') }}
+                            </AppButton>
                         </Tooltip>
 
                         <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
@@ -579,29 +561,33 @@
                         {{ $t('invoices.payments_history') }}
                     </h3>
                     <div class="flex items-center gap-2">
-                        <button
+                        <AppButton
                             v-if="Number(invoice.balance) > 0.01"
                             @click="
                                 showPaymentModal = true;
                                 paymentModalType = 'payment';
                             "
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-500/10 active:scale-95 shrink-0"
+                            variant="primary"
+                            size="sm"
+                            class="bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-500/10 shrink-0"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span>{{ $t('payments.add_payment') }}</span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('payments.add_payment') }}
+                        </AppButton>
                     </div>
                 </div>
 
@@ -734,26 +720,30 @@
                                         <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">
                                             {{ $t('payments.no_payments_desc') }}
                                         </p>
-                                        <button
+                                        <AppButton
                                             v-if="Number(invoice.balance) > 0.01"
                                             @click="showPaymentModal = true"
-                                            class="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                                            variant="primary"
+                                            size="sm"
+                                            class="bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M12 4v16m8-8H4"
-                                                />
-                                            </svg>
-                                            <span>{{ $t('payments.add_payment') }}</span>
-                                        </button>
+                                            <template #iconLeft>
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 4v16m8-8H4"
+                                                    />
+                                                </svg>
+                                            </template>
+                                            {{ $t('payments.add_payment') }}
+                                        </AppButton>
                                     </div>
                                 </td>
                             </tr>
@@ -1977,6 +1967,7 @@ import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaym
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';

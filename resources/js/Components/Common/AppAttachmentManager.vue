@@ -246,7 +246,7 @@
                         type="button"
                         variant="primary"
                         :loading="isUploading"
-                        :disabled="selectedFiles.length === 0"
+                        :disabled="normalizedFiles.length === 0"
                         @click="handleUploadSubmit"
                     >
                         {{ isUploading ? $t('common.loading') : $t('common.upload_files') }}
@@ -258,13 +258,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import AppButton from '@/Components/App/AppButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -285,16 +286,25 @@ const emit = defineEmits(['upload', 'delete', 'change', 'files-selected']);
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { formatFileSize } = useFormatters();
 const { success, error } = useToast();
 
 const showUploadModal = ref(false);
 const isUploading = ref(false);
 const selectedFiles = ref([]);
 
+function normalizeFiles(value) {
+    if (!value) return [];
+    const list = Array.isArray(value) ? value : [value];
+    return list.filter(Boolean);
+}
+
+const normalizedFiles = computed(() => normalizeFiles(selectedFiles.value));
+
 function closeModal() {
     if (isUploading.value) return;
     showUploadModal.value = false;
-    selectedFiles.value = [];
+    selectedFiles.value = props.allowMultiple ? [] : null;
 }
 
 function isPdf(attachment) {
@@ -358,12 +368,13 @@ async function handleDelete(attachment) {
 }
 
 function handleUploadSubmit() {
-    if (props.isReadOnly || isUploading.value || selectedFiles.value.length === 0) return;
+    const files = normalizedFiles.value;
+    if (props.isReadOnly || isUploading.value || files.length === 0) return;
 
     if (props.uploadUrl) {
         isUploading.value = true;
         const formData = new FormData();
-        selectedFiles.value.forEach((file) => {
+        files.forEach((file) => {
             if (props.uploadField) {
                 formData.append(props.uploadField, file);
                 return;
@@ -378,7 +389,7 @@ function handleUploadSubmit() {
             onSuccess: () => {
                 isUploading.value = false;
                 success(t('common.attachments_uploaded_successfully'));
-                emit('upload', selectedFiles.value);
+                emit('upload', files);
                 closeModal();
                 emit('change');
             },
@@ -391,7 +402,7 @@ function handleUploadSubmit() {
             },
         });
     } else {
-        emit('files-selected', selectedFiles.value);
+        emit('files-selected', files);
         closeModal();
     }
 }

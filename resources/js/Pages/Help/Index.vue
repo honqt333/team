@@ -41,11 +41,11 @@
             <!-- Search Bar & Fast Filters -->
             <div class="relative max-w-2xl mx-auto">
                 <div class="relative">
-                    <input
+                    <AppInput
                         v-model="searchQuery"
                         type="text"
                         :placeholder="$t('help.search_placeholder')"
-                        class="w-full px-5 py-4 ps-13 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent shadow-sm text-base transition-all"
+                        input-class="px-5 py-4 ps-13 rounded-2xl text-base shadow-sm"
                     />
                     <div
                         class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400"
@@ -613,6 +613,7 @@ import { ref, computed, h } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useVideoEmbed } from '@/Composables/useVideoEmbed';

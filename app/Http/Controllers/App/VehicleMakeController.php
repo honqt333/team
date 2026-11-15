@@ -6,13 +6,13 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleMakeController extends Controller
 {
     /**
@@ -20,6 +20,7 @@ class VehicleMakeController extends Controller
      */
     public function index(Request $request): Response
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_VIEW);
         $query = VehicleMake::with('updatedBy')->orderedBySource()->ordered();
 
         if ($request->filled('search')) {
@@ -44,6 +45,8 @@ class VehicleMakeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -69,6 +72,8 @@ class VehicleMakeController extends Controller
      */
     public function update(Request $request, VehicleMake $make): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($make->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));
@@ -79,6 +84,7 @@ class VehicleMakeController extends Controller
             'name_en' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|extensions:jpeg,png,jpg,webp|max:2048',
+            'remove_logo' => 'boolean',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -86,7 +92,14 @@ class VehicleMakeController extends Controller
                 Storage::disk('public')->delete($make->logo_path);
             }
             $validated['logo_path'] = $request->file('logo')->store('makes', 'public');
+        } elseif ($request->boolean('remove_logo')) {
+            if ($make->logo_path) {
+                Storage::disk('public')->delete($make->logo_path);
+            }
+            $validated['logo_path'] = null;
         }
+
+        unset($validated['logo'], $validated['remove_logo']);
 
         $validated['updated_by'] = auth()->id();
         $make->update($validated);
@@ -99,6 +112,8 @@ class VehicleMakeController extends Controller
      */
     public function destroy(VehicleMake $make): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($make->source === 'system') {
             abort(403, __('common.cannot_delete_system_data'));
@@ -114,6 +129,8 @@ class VehicleMakeController extends Controller
      */
     public function toggleActive(VehicleMake $make): RedirectResponse
     {
+        $this->authorize(Permissions::VEHICLE_SETTINGS_MANAGE);
+
         // Protect system data
         if ($make->source === 'system') {
             abort(403, __('common.cannot_modify_system_data'));

@@ -215,6 +215,25 @@ class ProfileController extends Controller
     }
 
     /**
+     * Delete the user's profile photo.
+     */
+    public function deletePhoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if (! $user->can_update_photo) {
+            return back()->with('error', __('profile.photo.hr_locked'));
+        }
+
+        if ($user->photo_path) {
+            Storage::disk('public')->delete($user->photo_path);
+            $user->update(['photo_path' => null]);
+        }
+
+        return back()->with('success', __('profile.photo.deleted'));
+    }
+
+    /**
      * Parse device and browser string from user agent.
      */
     protected function parseDevice(?string $userAgent): string

@@ -61,29 +61,28 @@
                         </div>
 
                         <!-- Create Invoice Button (Outer Left in RTL) -->
-                        <button
+                        <AppButton
                             v-if="can('crm.work_orders.create') || isAnyAdmin()"
                             @click="showCreateModal = true"
                             type="button"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                            <span class="text-sm">
-                                {{ $t('invoices.sales.create_invoice') }}
-                            </span>
-                        </button>
+                            <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </template>
+                            {{ $t('invoices.sales.create_invoice') }}
+                        </AppButton>
                     </div>
                 </template>
 
@@ -108,11 +107,11 @@
                                     />
                                 </svg>
                             </div>
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="tableFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="block w-full ps-11 pe-4 py-2.5 text-sm text-content-primary bg-surface-primary border border-border-subtle rounded-xl focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all outline-none placeholder-content-muted shadow-xs"
+                                input-class="ps-11"
                             />
                         </div>
 
@@ -683,12 +682,13 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
 import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import DataTable from '@/Components/Common/DataTable.vue';

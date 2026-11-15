@@ -1,8 +1,8 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -11,7 +11,6 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue', 'applied', 'cleared']);
 
-const locale = computed(() => document.documentElement.lang || 'ar');
 const loading = ref(false);
 const error = ref(null);
 

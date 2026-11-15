@@ -36,11 +36,11 @@
                     </div>
 
                     <!-- Month Selector -->
-                    <input
+                    <AppInput
                         type="month"
                         v-model="selectedMonth"
                         @change="changeMonth"
-                        class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                        input-class="w-auto"
                     />
                 </div>
             </div>

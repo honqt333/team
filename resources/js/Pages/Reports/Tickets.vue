@@ -315,12 +315,12 @@
                             {{ $t('reports.tickets_report.direct_search') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="filterForm.search"
                                 @keyup.enter="applyFilters"
                                 :placeholder="$t('reports.tickets_report.search_placeholder')"
-                                class="w-full ps-9 pe-9 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
+                                input-class="ps-9 pe-9 py-2 text-xs"
                             />
                             <svg
                                 class="w-4 h-4 text-gray-400 absolute start-3 top-2.5"
@@ -513,13 +513,14 @@
                         >
                             {{ $t('reports.payments_report.reset_filters') }}
                         </button>
-                        <button
-                            type="button"
+                        <AppButton
                             @click="applyFilters"
-                            class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all"
+                            variant="primary"
+                            size="sm"
+                            class="shadow-md shadow-blue-500/20"
                         >
                             {{ $t('reports.payments_report.apply_filters') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </div>
             </div>
@@ -1085,6 +1086,8 @@ import { reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

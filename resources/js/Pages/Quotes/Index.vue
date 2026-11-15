@@ -51,16 +51,13 @@
                         <AppViewModeToggle v-model="viewMode" storage-key="quotes" />
                     </div>
 
-                    <button
+                    <AppButton
                         v-if="can('quotes.create')"
                         @click="openCreateModal"
-                        class="flex items-center justify-center gap-3 px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-bold shadow-sm transition-all group/add"
                     >
-                        <div
-                            class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
-                        >
+                        <template #iconLeft>
                             <svg
-                                class="w-5 h-5"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -68,13 +65,13 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="3"
+                                    stroke-width="2.5"
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                        </div>
-                        <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
-                    </button>
+                        </template>
+                        {{ $t('quotes.add') }}
+                    </AppButton>
                 </template>
 
                 <template #filters>
@@ -100,10 +97,10 @@
                                         />
                                     </svg>
                                 </div>
-                                <input
+                                <AppInput
                                     type="text"
                                     v-model="tableFilters.search"
-                                    class="block w-full ps-11 pe-4 py-3.5 text-sm text-content-primary bg-surface-primary border border-border-default rounded-2xl focus:ring-4 focus:ring-action-primary/10 focus:border-action-primary transition-all outline-none shadow-sm"
+                                    input-class="ps-11 py-3.5 rounded-2xl"
                                     :placeholder="$t('quotes.search')"
                                 />
                             </div>
@@ -668,7 +665,7 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
+import AppButton from '@/Components/App/AppButton.vue';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -679,6 +676,7 @@ import { useAutoOpenCreate } from '@/Composables/useAutoOpenCreate';
 
 useAutoOpenCreate(() => openCreateModal());
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';

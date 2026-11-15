@@ -42,15 +42,15 @@
         </svg>
 
         <div class="relative">
-            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">
+            <p class="text-xs font-semibold uppercase tracking-wider text-white/95">
                 {{ kicker }}
             </p>
 
-            <h2 class="mt-2 max-w-2xl text-2xl font-black leading-tight sm:text-4xl">
+            <h2 class="mt-2 max-w-2xl text-2xl font-black leading-tight text-white sm:text-4xl">
                 {{ title }}
             </h2>
 
-            <p v-if="subtitle" class="mt-3 max-w-2xl text-sm leading-7 opacity-85 sm:text-base">
+            <p v-if="subtitle" class="mt-3 max-w-2xl text-sm leading-7 text-white/95 sm:text-base">
                 {{ subtitle }}
             </p>
 
@@ -59,25 +59,25 @@
                 class="mt-6 grid max-w-xl grid-cols-2 gap-4 rounded-2xl bg-white/10 p-4 text-sm backdrop-blur-sm"
             >
                 <div>
-                    <p class="opacity-70 text-[10px] uppercase tracking-wider">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-white/95">
                         {{ whenLabel }}
                     </p>
-                    <p class="font-semibold mt-0.5" dir="ltr">{{ whenValue }}</p>
+                    <p class="mt-0.5 font-semibold text-white" dir="ltr">{{ whenValue }}</p>
                 </div>
                 <div>
-                    <p class="opacity-70 text-[10px] uppercase tracking-wider">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-white/95">
                         {{ branchLabel }}
                     </p>
-                    <p class="font-semibold mt-0.5">{{ branchValue }}</p>
+                    <p class="mt-0.5 font-semibold text-white">{{ branchValue }}</p>
                 </div>
             </div>
 
             <div v-else-if="kind === 'work_order'" class="mt-5">
-                <p class="text-xs opacity-80 mb-1">
+                <p class="mb-1 text-xs font-semibold text-white/95">
                     {{ progressLabel }}
                 </p>
                 <div
-                    class="h-2 rounded-full bg-white/25 overflow-hidden"
+                    class="h-2 overflow-hidden rounded-full bg-white/25"
                     role="progressbar"
                     :aria-valuenow="progress"
                     aria-valuemin="0"
@@ -88,7 +88,7 @@
                         :style="{ width: progress + '%' }"
                     />
                 </div>
-                <p class="text-xs opacity-90 mt-1.5">
+                <p class="mt-1.5 text-xs font-medium text-white/95">
                     {{ progressCaption }}
                 </p>
             </div>
@@ -97,14 +97,14 @@
                 <a
                     v-if="ctaPrimary.href"
                     :href="ctaPrimary.href"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-slate-900 shadow-sm hover:bg-slate-50"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-surface px-5 py-3 text-sm font-extrabold text-text-primary shadow-sm transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
                 >
                     {{ ctaPrimary.label }}
                 </a>
                 <a
                     v-if="ctaSecondary && ctaSecondary.href"
                     :href="ctaSecondary.href"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/30 px-5 py-3 text-sm font-bold text-white hover:bg-white/10"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/40 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
                 >
                     {{ ctaSecondary.label }}
                 </a>

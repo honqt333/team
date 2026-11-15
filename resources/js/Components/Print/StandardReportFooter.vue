@@ -53,7 +53,7 @@ const userName = computed(() => {
 });
 
 const systemName = computed(() => {
-    return page.props.tenant?.name || page.props.app?.name || t('common.app_name');
+    return page.props.tenant?.name || page.props.app_name || t('common.app_name');
 });
 
 const footerText = computed(() => {

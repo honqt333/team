@@ -102,19 +102,19 @@
                         <span class="text-xs text-gray-500 dark:text-gray-400">
                             {{ $t('common.days') }}
                         </span>
-                        <button
-                            type="button"
-                            :disabled="savingKey === 'subscription.grace_period_days'"
+                        <AppButton
+                            :loading="savingKey === 'subscription.grace_period_days'"
                             @click="
                                 updateSetting(
                                     'subscription.grace_period_days',
                                     form.subscription_grace_period_days
                                 )
                             "
-                            class="px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
+                            variant="primary"
+                            size="sm"
                         >
                             {{ $t('common.save') }}
-                        </button>
+                        </AppButton>
                     </div>
                 </div>
             </div>
@@ -129,6 +129,7 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 
 const { t } = useI18n();
