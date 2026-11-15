@@ -168,4 +168,160 @@ class DashboardEnhancementsTest extends TestCase
             ->where('workingTechniciansNow.0.work_order_code', 'WO-ACTIVE-1')
         );
     }
+
+    public function test_dashboard_payment_methods_chart_aggregates_payments_accurately_and_respects_isolation(): void
+    {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        Permission::findOrCreate(Permissions::INVOICES_VIEW, 'web');
+
+        $tenantA = Tenant::create([
+            'name' => 'Tenant A Workshop',
+            'slug' => 'tenant-a-workshop',
+            'country' => 'SA',
+            'currency' => 'SAR',
+            'timezone' => 'Asia/Riyadh',
+            'is_active' => true,
+        ]);
+
+        $centerA1 = Center::create([
+            'tenant_id' => $tenantA->id,
+            'name' => 'Center A1',
+            'slug' => 'center-a1',
+            'is_active' => true,
+        ]);
+
+        $centerA2 = Center::create([
+            'tenant_id' => $tenantA->id,
+            'name' => 'Center A2',
+            'slug' => 'center-a2',
+            'is_active' => true,
+        ]);
+
+        $tenantB = Tenant::create([
+            'name' => 'Tenant B Workshop',
+            'slug' => 'tenant-b-workshop',
+            'country' => 'SA',
+            'currency' => 'SAR',
+            'timezone' => 'Asia/Riyadh',
+            'is_active' => true,
+        ]);
+
+        $centerB1 = Center::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Center B1',
+            'slug' => 'center-b1',
+            'is_active' => true,
+        ]);
+
+        $userA = User::factory()->create([
+            'tenant_id' => $tenantA->id,
+            'current_center_id' => $centerA1->id,
+            'is_active' => true,
+        ]);
+        $userA->centers()->attach($centerA1->id, ['tenant_id' => $tenantA->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenantA->id);
+        $userA->givePermissionTo(Permissions::INVOICES_VIEW);
+
+        // Single payment on mada: 250.50
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 250.50,
+            'payment_method' => 'mada',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+            'received_by' => $userA->id,
+        ]);
+
+        $this->actingAs($userA)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('charts.paymentMethods', 1)
+                ->where('charts.paymentMethods.0.method', 'mada')
+                ->where('charts.paymentMethods.0.total', 250.5)
+            );
+
+        // Multiple & partial payments on cash: 120.25 + 80.75 = 201.00
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 120.25,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+            'received_by' => $userA->id,
+        ]);
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 80.75,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+            'received_by' => $userA->id,
+        ]);
+
+        // Excluded: refund, bad_debt, soft-deleted payment
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 50.00,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_REFUND,
+            'received_by' => $userA->id,
+        ]);
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 40.00,
+            'payment_method' => 'mada',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_BAD_DEBT,
+            'received_by' => $userA->id,
+        ]);
+        $deletedPayment = Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA1->id,
+            'amount' => 999.00,
+            'payment_method' => 'visa',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+            'received_by' => $userA->id,
+        ]);
+        $deletedPayment->delete();
+
+        // Excluded: other center in same tenant (isolated by active center)
+        Payment::create([
+            'tenant_id' => $tenantA->id,
+            'center_id' => $centerA2->id,
+            'amount' => 500.00,
+            'payment_method' => 'transfer',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+        ]);
+        // Excluded: other tenant
+        Payment::create([
+            'tenant_id' => $tenantB->id,
+            'center_id' => $centerB1->id,
+            'amount' => 750.00,
+            'payment_method' => 'apple_pay',
+            'payment_date' => now(),
+            'type' => Payment::TYPE_PAYMENT,
+        ]);
+
+        $this->actingAs($userA)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('charts.paymentMethods', 2)
+                ->where('charts.paymentMethods.0.method', 'mada')
+                ->where('charts.paymentMethods.0.total', 250.5)
+                ->where('charts.paymentMethods.1.method', 'cash')
+                ->where('charts.paymentMethods.1.total', 201)
+            );
+    }
 }

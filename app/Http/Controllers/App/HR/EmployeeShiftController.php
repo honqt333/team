@@ -9,6 +9,7 @@ use App\Models\HR\Employee;
 use App\Models\HR\EmployeeShift;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmployeeShiftController extends Controller
 {
@@ -17,12 +18,13 @@ class EmployeeShiftController extends Controller
      */
     public function updateDefaultShift(Request $request, Employee $employee)
     {
-        if ($employee->tenant_id !== auth()->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $employee);
 
         $validated = $request->validate([
-            'default_shift_id' => 'nullable|exists:hr_shifts,id',
+            'default_shift_id' => [
+                'nullable',
+                Rule::exists('hr_shifts', 'id')->where('tenant_id', $employee->tenant_id),
+            ],
         ]);
 
         $employee->update([
@@ -37,13 +39,14 @@ class EmployeeShiftController extends Controller
      */
     public function updateWeeklySchedule(Request $request, Employee $employee)
     {
-        if ($employee->tenant_id !== auth()->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $employee);
 
         $validated = $request->validate([
             'schedule' => 'required|array',
-            'schedule.*' => 'nullable|exists:hr_shifts,id',
+            'schedule.*' => [
+                'nullable',
+                Rule::exists('hr_shifts', 'id')->where('tenant_id', $employee->tenant_id),
+            ],
         ]);
 
         $tenantId = TenancyContext::tenantId();

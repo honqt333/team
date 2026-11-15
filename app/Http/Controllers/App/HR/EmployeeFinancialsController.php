@@ -7,6 +7,7 @@ namespace App\Http\Controllers\App\HR;
 use App\Http\Controllers\Controller;
 use App\Models\HR\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmployeeFinancialsController extends Controller
 {
@@ -19,7 +20,11 @@ class EmployeeFinancialsController extends Controller
 
         $validated = $request->validate([
             'allowances' => 'array',
-            'allowances.*.id' => 'required|exists:hr_allowances,id',
+            'allowances.*.id' => [
+                'required',
+                'integer',
+                Rule::exists('hr_allowances', 'id')->where('tenant_id', $employee->tenant_id),
+            ],
             'allowances.*.custom_amount' => 'nullable|numeric|min:0',
             'allowances.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
             'allowances.*.start_date' => 'nullable|date',
@@ -51,7 +56,11 @@ class EmployeeFinancialsController extends Controller
 
         $validated = $request->validate([
             'deductions' => 'array',
-            'deductions.*.id' => 'required|exists:hr_deductions,id',
+            'deductions.*.id' => [
+                'required',
+                'integer',
+                Rule::exists('hr_deductions', 'id')->where('tenant_id', $employee->tenant_id),
+            ],
             'deductions.*.custom_amount' => 'nullable|numeric|min:0',
             'deductions.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
             'deductions.*.start_date' => 'nullable|date',

@@ -11,12 +11,14 @@ use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
+use App\Models\Tenant;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderLaborEntry;
 use App\Models\WorkOrderPhoto;
 use App\Services\WorkOrderLaborService;
 use App\Support\TenancyContext;
+use App\Support\TenantClock;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +45,38 @@ class EmployeePortalController extends Controller
     }
 
     /**
+     * Resolve current Carbon instance in the employee's tenant timezone.
+     */
+    protected function resolveTenantNow(Employee $employee): Carbon
+    {
+        $tenant = $employee->tenant_id ? Tenant::find((int) $employee->tenant_id) : null;
+
+        return TenantClock::now($tenant);
+    }
+
+    /**
+     * Find an unclosed overnight attendance record from the previous local day
+     * only when the employee's scheduled shift for that day is an overnight shift.
+     */
+    protected function findOpenOvernightAttendance(Employee $employee, Carbon $tenantNow): ?Attendance
+    {
+        $yesterday = $tenantNow->copy()->subDay()->startOfDay();
+        $yesterdayShift = $employee->getShiftForDate($yesterday);
+
+        if (! $yesterdayShift || ! $yesterdayShift->is_overnight) {
+            return null;
+        }
+
+        return Attendance::where('tenant_id', $employee->tenant_id)
+            ->where('center_id', $employee->center_id)
+            ->where('employee_id', $employee->id)
+            ->whereDate('date', $yesterday->toDateString())
+            ->whereNotNull('check_in')
+            ->whereNull('check_out')
+            ->first();
+    }
+
+    /**
      * Employee Dashboard - Overview of key info.
      */
     public function dashboard()
@@ -53,7 +87,7 @@ class EmployeePortalController extends Controller
         $employee->load(['jobTitle', 'department', 'center', 'defaultShift']);
 
         // Current month stats
-        $now = Carbon::now();
+        $now = $this->resolveTenantNow($employee);
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
 
@@ -136,17 +170,34 @@ class EmployeePortalController extends Controller
         $this->authorize('viewOwn', Employee::class);
 
         $employee = $this->getEmployee();
+        $tenantNow = $this->resolveTenantNow($employee);
 
         // Default to current month
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
+        $month = $request->get('month', $tenantNow->format('Y-m'));
         $startDate = Carbon::parse($month)->startOfMonth();
         $endDate = Carbon::parse($month)->endOfMonth();
 
-        $attendance = Attendance::where('employee_id', $employee->id)
+        $employee->load(['defaultShift', 'employeeShifts.shift']);
+
+        $attendance = Attendance::where('tenant_id', $employee->tenant_id)
+            ->where('center_id', $employee->center_id)
+            ->where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate, $endDate])
-            ->with('shift:id,name_ar,name_en,start_time,end_time')
             ->orderBy('date')
-            ->get();
+            ->get()
+            ->each(function (Attendance $record) use ($employee): void {
+                $shift = $record->date ? $employee->getShiftForDate($record->date) : null;
+
+                if (
+                    $shift
+                    && (int) $shift->tenant_id === (int) $employee->tenant_id
+                    && ($shift->center_id === null || (int) $shift->center_id === (int) $employee->center_id)
+                ) {
+                    $record->setAttribute('shift', $shift->only(['id', 'name_ar', 'name_en', 'start_time', 'end_time']));
+                } else {
+                    $record->setAttribute('shift', null);
+                }
+            });
 
         // Calculate monthly summary
         $summary = [
@@ -156,7 +207,15 @@ class EmployeePortalController extends Controller
             'early_leave' => $attendance->where('status', 'early_leave')->count(),
             'total_hours' => round($attendance->sum(function ($a) {
                 if ($a->check_in && $a->check_out) {
-                    return Carbon::parse($a->check_out)->diffInMinutes(Carbon::parse($a->check_in)) / 60;
+                    $dateStr = $a->date ? $a->date->format('Y-m-d') : '1970-01-01';
+                    $checkIn = Carbon::parse($dateStr.' '.Carbon::parse($a->check_in)->format('H:i'));
+                    $checkOut = Carbon::parse($dateStr.' '.Carbon::parse($a->check_out)->format('H:i'));
+
+                    if ($checkOut->lt($checkIn)) {
+                        $checkOut->addDay();
+                    }
+
+                    return $checkIn->diffInMinutes($checkOut) / 60;
                 }
 
                 return 0;
@@ -164,9 +223,12 @@ class EmployeePortalController extends Controller
         ];
 
         $settings = AttendanceSettings::getForCenter((int) $employee->center_id);
-        $todayAttendance = Attendance::where('employee_id', $employee->id)
-            ->whereDate('date', Carbon::today()->toDateString())
-            ->first();
+        $todayAttendance = Attendance::where('tenant_id', $employee->tenant_id)
+            ->where('center_id', $employee->center_id)
+            ->where('employee_id', $employee->id)
+            ->whereDate('date', $tenantNow->toDateString())
+            ->first()
+            ?? $this->findOpenOvernightAttendance($employee, $tenantNow);
 
         $correctionRequests = AttendanceCorrectionRequest::query()
             ->where('employee_id', $employee->id)
@@ -210,8 +272,11 @@ class EmployeePortalController extends Controller
             return $geofenceCheck['response'];
         }
 
-        $today = Carbon::today()->toDateString();
-        $existing = Attendance::where('employee_id', $employee->id)
+        $now = $this->resolveTenantNow($employee);
+        $today = $now->toDateString();
+        $existing = Attendance::where('tenant_id', $employee->tenant_id)
+            ->where('center_id', $employee->center_id)
+            ->where('employee_id', $employee->id)
             ->whereDate('date', $today)
             ->first();
 
@@ -219,7 +284,6 @@ class EmployeePortalController extends Controller
             return back()->with('error', __('hr.attendance.already_checked_in'));
         }
 
-        $now = Carbon::now();
         $attendance = $existing ?? new Attendance([
             'tenant_id' => $employee->tenant_id,
             'center_id' => $employee->center_id,
@@ -227,7 +291,7 @@ class EmployeePortalController extends Controller
             'date' => $today,
         ]);
 
-        $attendance->check_in = $now->format('H:i');
+        $attendance->check_in = Carbon::parse($now->format('H:i'));
         $attendance->status = 'present';
         $attendance->latitude = $geofenceCheck['latitude'];
         $attendance->longitude = $geofenceCheck['longitude'];
@@ -271,10 +335,17 @@ class EmployeePortalController extends Controller
             return $geofenceCheck['response'];
         }
 
-        $today = Carbon::today()->toDateString();
-        $attendance = Attendance::where('employee_id', $employee->id)
+        $now = $this->resolveTenantNow($employee);
+        $today = $now->toDateString();
+        $attendance = Attendance::where('tenant_id', $employee->tenant_id)
+            ->where('center_id', $employee->center_id)
+            ->where('employee_id', $employee->id)
             ->whereDate('date', $today)
             ->first();
+
+        if (! $attendance) {
+            $attendance = $this->findOpenOvernightAttendance($employee, $now);
+        }
 
         if (! $attendance || ! $attendance->check_in) {
             return back()->with('error', __('hr.attendance.must_check_in_first'));
@@ -284,7 +355,7 @@ class EmployeePortalController extends Controller
             return back()->with('error', __('hr.attendance.already_checked_out'));
         }
 
-        $attendance->check_out = Carbon::now()->format('H:i');
+        $attendance->check_out = Carbon::parse($now->format('H:i'));
 
         if ($geofenceCheck['latitude'] !== null) {
             $attendance->latitude = $geofenceCheck['latitude'];
@@ -318,8 +389,9 @@ class EmployeePortalController extends Controller
         $this->authorize('viewOwn', Employee::class);
 
         $employee = $this->getEmployee();
+        $tenantToday = $this->resolveTenantNow($employee)->toDateString();
         $validated = $request->validate([
-            'date' => ['required', 'date', 'before_or_equal:today'],
+            'date' => ['required', 'date', 'before_or_equal:'.$tenantToday],
             'requested_check_in' => ['nullable', 'date_format:H:i'],
             'requested_check_out' => ['nullable', 'date_format:H:i'],
             'reason' => ['required', 'string', 'max:1000'],

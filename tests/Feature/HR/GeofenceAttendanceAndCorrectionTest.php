@@ -9,11 +9,13 @@ use App\Models\HR\Attendance;
 use App\Models\HR\AttendanceCorrectionRequest;
 use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
+use App\Models\HR\Shift;
 use App\Models\Nationality;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Permissions;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
@@ -159,5 +161,74 @@ class GeofenceAttendanceAndCorrectionTest extends TestCase
         $this->assertEquals('present', $attendance->status);
         $this->assertEquals('08:00', $attendance->check_in?->format('H:i'));
         $this->assertEquals('17:00', $attendance->check_out?->format('H:i'));
+    }
+
+    public function test_employee_clock_in_and_clock_out_store_exact_times_and_overnight_calculation_works(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-12 08:15:00'));
+
+        try {
+            // Clock-in via Employee Portal
+            $this->actingAs($this->employeeUser)
+                ->post(route('employee.attendance.clock-in'), [
+                    'latitude' => 24.7137000,
+                    'longitude' => 46.6753000,
+                ])
+                ->assertRedirect()
+                ->assertSessionHasNoErrors();
+
+            $attendance = Attendance::where('employee_id', $this->employee->id)
+                ->whereDate('date', '2026-11-12')
+                ->firstOrFail();
+
+            $this->assertSame('08:15', $attendance->check_in?->format('H:i'));
+            $this->assertNull($attendance->check_out);
+
+            // Clock-out via Employee Portal
+            Carbon::setTestNow(Carbon::parse('2026-11-12 17:30:00'));
+
+            $this->actingAs($this->employeeUser)
+                ->post(route('employee.attendance.clock-out'), [
+                    'latitude' => 24.7137000,
+                    'longitude' => 46.6753000,
+                ])
+                ->assertRedirect()
+                ->assertSessionHasNoErrors();
+
+            $attendance->refresh();
+            $this->assertSame('08:15', $attendance->check_in?->format('H:i'));
+            $this->assertSame('17:30', $attendance->check_out?->format('H:i'));
+
+            // Verify overnight shift support in Attendance::calculateTimes()
+            $shift = Shift::create([
+                'tenant_id' => $this->tenant->id,
+                'center_id' => $this->center->id,
+                'name' => 'وردية ليلية',
+                'name_ar' => 'وردية ليلية',
+                'start_time' => '22:00:00',
+                'end_time' => '06:00:00',
+                'is_overnight' => true,
+                'is_active' => true,
+            ]);
+            $this->employee->update(['shift_id' => $shift->id]);
+
+            $overnightAttendance = Attendance::create([
+                'tenant_id' => $this->tenant->id,
+                'center_id' => $this->center->id,
+                'employee_id' => $this->employee->id,
+                'date' => '2026-11-13',
+                'status' => 'present',
+                'check_in' => Carbon::parse('22:00'),
+                'check_out' => Carbon::parse('05:30'),
+            ]);
+            $overnightAttendance->calculateTimes();
+            $overnightAttendance->save();
+
+            $this->assertSame(0, $overnightAttendance->late_minutes);
+            // 05:30 vs 06:00 -> 30 minutes early leave when overnight shift extends to next day
+            $this->assertSame(0, $overnightAttendance->overtime_minutes);
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 }

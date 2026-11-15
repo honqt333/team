@@ -16,6 +16,7 @@ use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
 use App\Models\HR\Leave;
 use App\Models\HR\Payroll;
+use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Inertia\Inertia;
 
@@ -26,6 +27,8 @@ class HRController extends Controller
      */
     public function index()
     {
+        $this->authorize(Permissions::HR_VIEW);
+
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
         $today = now()->toDateString();

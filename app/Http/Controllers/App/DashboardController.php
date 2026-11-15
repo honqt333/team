@@ -12,12 +12,15 @@ use App\Models\Part;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\ServiceBay;
+use App\Models\Tenant;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Support\CountryCurrencyRegistry;
 use App\Support\Permissions;
+use App\Support\TenancyContext;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -28,8 +31,10 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $centerId = $request->attributes->get('center_id') ?? $user?->center_id;
-        $tenantId = $user?->tenant_id;
+        $tenantId = TenancyContext::tenantId() ?? $user?->tenant_id;
+        $centerId = TenancyContext::centerId() ?? $user?->current_center_id;
+
+        abort_if(! $tenantId || ! $centerId, 403, 'No active center selected');
 
         // ─── Authorization & Role Context (Strict Server-Side Privacy) ────
         $isSystemAdmin = (bool) ($user->is_system_admin ?? false);
@@ -57,31 +62,76 @@ class DashboardController extends Controller
             || $isReceptionist
             || (bool) $user?->hasPermissionTo(Permissions::WORK_ORDERS_CREATE);
 
-        // Date ranges & interactive period filter
+        // Date ranges & interactive period filter (resolved in Tenant Timezone, queried in UTC half-open bounds)
         $period = in_array($request->string('period')->toString(), ['today', '7d', 'month', '30d'], true)
             ? $request->string('period')->toString()
             : 'month';
 
-        $today = Carbon::today();
-        $thisMonth = Carbon::now()->startOfMonth();
-        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
-        $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
-        $last30Days = Carbon::now()->subDays(30);
-        $last7Days = Carbon::now()->subDays(7);
+        $tz = $this->resolveTenantTimezone($user?->tenant);
+        $localNow = Carbon::now($tz);
+        $localTodayDate = $localNow->toDateString();
+        $localTodayStart = $localNow->copy()->startOfDay();
+        $localTomorrowStart = $localTodayStart->copy()->addDay();
+        $localThisMonthStart = $localNow->copy()->startOfMonth();
+        $localNextMonthStart = $localThisMonthStart->copy()->addMonth();
+        $localLastMonthStart = $localThisMonthStart->copy()->subMonth();
+        $local7DaysStart = $localTodayStart->copy()->subDays(6);
+        $local30DaysStart = $localTodayStart->copy()->subDays(29);
+        $localOverdueCutoff = $localTodayStart->copy()->subDays(30);
 
-        [$periodStart, $prevPeriodStart, $prevPeriodEnd] = match ($period) {
-            'today' => [Carbon::today(), Carbon::yesterday()->startOfDay(), Carbon::yesterday()->endOfDay()],
-            '7d' => [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->subDays(13)->startOfDay(), Carbon::now()->subDays(7)->endOfDay()],
-            '30d' => [Carbon::now()->subDays(29)->startOfDay(), Carbon::now()->subDays(59)->startOfDay(), Carbon::now()->subDays(30)->endOfDay()],
-            default => [$thisMonth, $lastMonth, $lastMonthEnd],
+        $todayStartUtc = $localTodayStart->copy()->utc();
+        $tomorrowStartUtc = $localTomorrowStart->copy()->utc();
+        $thisMonthStartUtc = $localThisMonthStart->copy()->utc();
+        $nextMonthStartUtc = $localNextMonthStart->copy()->utc();
+        $lastMonthStartUtc = $localLastMonthStart->copy()->utc();
+        $sevenDaysStartUtc = $local7DaysStart->copy()->utc();
+        $thirtyDaysStartUtc = $local30DaysStart->copy()->utc();
+        $overdueCutoffUtc = $localOverdueCutoff->copy()->utc();
+
+        [$localPeriodStart, $localPeriodNextStart, $localPrevPeriodStart, $localPrevPeriodNextStart] = match ($period) {
+            'today' => [
+                $localTodayStart,
+                $localTomorrowStart,
+                $localTodayStart->copy()->subDay(),
+                $localTodayStart,
+            ],
+            '7d' => [
+                $localTodayStart->copy()->subDays(6),
+                $localTomorrowStart,
+                $localTodayStart->copy()->subDays(13),
+                $localTodayStart->copy()->subDays(6),
+            ],
+            '30d' => [
+                $localTodayStart->copy()->subDays(29),
+                $localTomorrowStart,
+                $localTodayStart->copy()->subDays(59),
+                $localTodayStart->copy()->subDays(29),
+            ],
+            default => [
+                $localThisMonthStart,
+                $localNextMonthStart,
+                $localLastMonthStart,
+                $localThisMonthStart,
+            ],
         };
 
+        $periodStartUtc = $localPeriodStart->copy()->utc();
+        $periodNextStartUtc = $localPeriodNextStart->copy()->utc();
+        $prevPeriodStartUtc = $localPrevPeriodStart->copy()->utc();
+        $prevPeriodNextStartUtc = $localPrevPeriodNextStart->copy()->utc();
+        $localPeriodStartDate = $localPeriodStart->toDateString();
+        $localPeriodEndDate = $localPeriodNextStart->copy()->subDay()->toDateString();
+
         $cacheKey = sprintf(
-            'dashboard_v2:%s:%s:%s:%s:%d:%d:%d',
-            (string) $tenantId,
-            (string) ($centerId ?? 'all'),
+            'dashboard_v2:%d:%d:%s:%s:%s:%d:%d:%d:%d:%d:%d',
+            (int) $tenantId,
+            (int) $centerId,
             $period,
-            $isTechnician ? (string) $user?->id : 'team',
+            $tz,
+            $localTodayDate,
+            $user ? (int) $user->id : 0,
+            $isTechnician ? 1 : 0,
+            $isReceptionist ? 1 : 0,
             $canViewFinancials ? 1 : 0,
             $canViewInventory ? 1 : 0,
             $canCreateWorkOrder ? 1 : 0
@@ -104,29 +154,45 @@ class DashboardController extends Controller
             ->where('type', 'invoice')
             ->whereNotIn('status', ['draft', 'cancelled']);
 
+        $netSalesBase = Invoice::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->whereIn('type', ['invoice', 'credit_note'])
+            ->whereNotIn('status', ['draft', 'cancelled']);
+
+        $netSalesExpr = "SUM(CASE WHEN type = 'credit_note' THEN -total_incl_tax ELSE total_incl_tax END)";
+
         $customersBase = Customer::where('tenant_id', $tenantId)
             ->when($centerId, fn ($q) => $q->where('center_id', $centerId));
 
         // ─── Work Orders Stats ─────────────────────────────────────────────
         $workOrdersThisMonth = (clone $workOrdersBase)
-            ->whereDate('created_at', '>=', $thisMonth)->count();
+            ->where('created_at', '>=', $thisMonthStartUtc)
+            ->where('created_at', '<', $nextMonthStartUtc)
+            ->count();
 
         $workOrdersLastMonth = (clone $workOrdersBase)
-            ->whereDate('created_at', '>=', $lastMonth)
-            ->whereDate('created_at', '<=', $lastMonthEnd)->count();
+            ->where('created_at', '>=', $lastMonthStartUtc)
+            ->where('created_at', '<', $thisMonthStartUtc)
+            ->count();
 
         $activeWorkOrders = (clone $workOrdersBase)
             ->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])->count();
 
         $completedToday = (clone $workOrdersBase)
             ->where('status', 'done')
-            ->whereDate('closed_at', $today)->count();
+            ->where('closed_at', '>=', $todayStartUtc)
+            ->where('closed_at', '<', $tomorrowStartUtc)
+            ->count();
 
         $periodWorkOrders = (clone $workOrdersBase)
-            ->where('created_at', '>=', $periodStart)->count();
+            ->where('created_at', '>=', $periodStartUtc)
+            ->where('created_at', '<', $periodNextStartUtc)
+            ->count();
 
         $prevPeriodWorkOrders = (clone $workOrdersBase)
-            ->whereBetween('created_at', [$prevPeriodStart, $prevPeriodEnd])->count();
+            ->where('created_at', '>=', $prevPeriodStartUtc)
+            ->where('created_at', '<', $prevPeriodNextStartUtc)
+            ->count();
 
         // ─── Workshop Intelligence (Service Bays, Cycle Time, On-Time Rate) ─
         $baysTotal = ServiceBay::where('tenant_id', $tenantId)
@@ -136,7 +202,8 @@ class DashboardController extends Controller
 
         $baysBookedToday = Appointment::where('tenant_id', $tenantId)
             ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
-            ->whereDate('scheduled_at', $today)
+            ->where('scheduled_at', '>=', $todayStartUtc)
+            ->where('scheduled_at', '<', $tomorrowStartUtc)
             ->whereNotNull('service_bay_id')
             ->whereNotIn('status', ['cancelled', 'converted'])
             ->distinct('service_bay_id')
@@ -145,7 +212,8 @@ class DashboardController extends Controller
         $doneInPeriod = (clone $workOrdersBase)
             ->where('status', 'done')
             ->whereNotNull('closed_at')
-            ->where('closed_at', '>=', $periodStart)
+            ->where('closed_at', '>=', $periodStartUtc)
+            ->where('closed_at', '<', $periodNextStartUtc)
             ->get(['created_at', 'closed_at', 'expected_end_date']);
 
         $avgCycleHours = $doneInPeriod->isNotEmpty()
@@ -154,13 +222,20 @@ class DashboardController extends Controller
 
         $withExpected = $doneInPeriod->filter(fn ($wo) => $wo->expected_end_date !== null);
         $onTimeRate = $withExpected->isNotEmpty()
-            ? (int) round(($withExpected->filter(fn ($wo) => $wo->closed_at->lte(Carbon::parse($wo->expected_end_date)->endOfDay()))->count() / $withExpected->count()) * 100)
+            ? (int) round(($withExpected->filter(function ($wo) use ($tz) {
+                $expectedDate = $wo->expected_end_date instanceof DateTimeInterface
+                    ? $wo->expected_end_date->format('Y-m-d')
+                    : (string) $wo->expected_end_date;
+
+                return $wo->closed_at->lte(Carbon::parse($expectedDate, $tz)->endOfDay()->utc());
+            })->count() / $withExpected->count()) * 100)
             : null;
 
         // Work Orders by Status (for donut chart)
         $workOrdersByStatus = (clone $workOrdersBase)
             ->select('status', DB::raw('count(*) as count'))
-            ->whereDate('created_at', '>=', $thisMonth)
+            ->where('created_at', '>=', $thisMonthStartUtc)
+            ->where('created_at', '<', $nextMonthStartUtc)
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
@@ -190,45 +265,80 @@ class DashboardController extends Controller
         $overdueInvoices = 0;
 
         if ($canViewFinancials) {
-            $revenueThisMonth = (clone $invoiceBase)
-                ->whereDate('issue_date', '>=', $thisMonth)
-                ->sum('total_incl_tax');
+            $revenueThisMonth = (float) ((clone $netSalesBase)
+                ->where('issue_date', '>=', $thisMonthStartUtc)
+                ->where('issue_date', '<', $nextMonthStartUtc)
+                ->selectRaw("{$netSalesExpr} as net_total")
+                ->value('net_total') ?? 0);
 
-            $revenueLastMonth = (clone $invoiceBase)
-                ->whereDate('issue_date', '>=', $lastMonth)
-                ->whereDate('issue_date', '<=', $lastMonthEnd)
-                ->sum('total_incl_tax');
+            $revenueLastMonth = (float) ((clone $netSalesBase)
+                ->where('issue_date', '>=', $lastMonthStartUtc)
+                ->where('issue_date', '<', $thisMonthStartUtc)
+                ->selectRaw("{$netSalesExpr} as net_total")
+                ->value('net_total') ?? 0);
+
+            $paymentsByInvoiceSub = DB::table('payments')
+                ->where('tenant_id', $tenantId)
+                ->where('center_id', $centerId)
+                ->whereNull('deleted_at')
+                ->select(
+                    'invoice_id',
+                    DB::raw("SUM(CASE WHEN type IN ('payment', 'bad_debt') THEN amount WHEN type = 'refund' THEN -amount ELSE 0 END) as net_paid")
+                )
+                ->groupBy('invoice_id');
+
+            $creditsByInvoiceSub = DB::table('invoices')
+                ->where('tenant_id', $tenantId)
+                ->where('center_id', $centerId)
+                ->where('type', 'credit_note')
+                ->whereNotIn('status', ['draft', 'cancelled'])
+                ->whereNotNull('original_invoice_id')
+                ->whereNull('deleted_at')
+                ->select(
+                    'original_invoice_id',
+                    DB::raw('SUM(total_incl_tax) as credited_total')
+                )
+                ->groupBy('original_invoice_id');
 
             $outstandingBalance = (clone $invoiceBase)
-                ->whereIn('payment_status', ['unpaid', 'partial'])
-                ->sum(DB::raw('total_incl_tax - COALESCE((SELECT SUM(amount) FROM payments WHERE payments.invoice_id = invoices.id), 0)'));
+                ->leftJoinSub($paymentsByInvoiceSub, 'inv_payments', 'inv_payments.invoice_id', '=', 'invoices.id')
+                ->leftJoinSub($creditsByInvoiceSub, 'inv_credits', 'inv_credits.original_invoice_id', '=', 'invoices.id')
+                ->sum(DB::raw('CASE WHEN (invoices.total_incl_tax - COALESCE(inv_credits.credited_total, 0) - COALESCE(inv_payments.net_paid, 0)) > 0 THEN (invoices.total_incl_tax - COALESCE(inv_credits.credited_total, 0) - COALESCE(inv_payments.net_paid, 0)) ELSE 0 END'));
 
             $avgInvoiceValue = (clone $invoiceBase)
-                ->whereDate('issue_date', '>=', $thisMonth)
+                ->where('issue_date', '>=', $thisMonthStartUtc)
+                ->where('issue_date', '<', $nextMonthStartUtc)
                 ->avg('total_incl_tax');
 
             $overdueInvoices = (clone $invoiceBase)
                 ->whereIn('payment_status', ['unpaid', 'partial'])
-                ->whereDate('issue_date', '<', $last30Days)
+                ->where('issue_date', '<', $overdueCutoffUtc)
                 ->count();
 
-            $paymentsToday = Payment::where('tenant_id', $tenantId)
-                ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
-                ->whereDate('payment_date', $today)
-                ->sum('amount');
+            $paymentsToday = (float) (Payment::where('tenant_id', $tenantId)
+                ->where('center_id', $centerId)
+                ->where('payment_date', '>=', $todayStartUtc)
+                ->where('payment_date', '<', $tomorrowStartUtc)
+                ->selectRaw("SUM(CASE WHEN type = 'payment' THEN amount WHEN type = 'refund' THEN -amount ELSE 0 END) as net_cash")
+                ->value('net_cash') ?? 0);
 
-            $periodRevenue = (clone $invoiceBase)
-                ->where('issue_date', '>=', $periodStart->toDateString())
-                ->sum('total_incl_tax');
+            $periodRevenue = (float) ((clone $netSalesBase)
+                ->where('issue_date', '>=', $periodStartUtc)
+                ->where('issue_date', '<', $periodNextStartUtc)
+                ->selectRaw("{$netSalesExpr} as net_total")
+                ->value('net_total') ?? 0);
 
-            $prevPeriodRevenue = (clone $invoiceBase)
-                ->whereBetween('issue_date', [$prevPeriodStart->toDateString(), $prevPeriodEnd->toDateString()])
-                ->sum('total_incl_tax');
+            $prevPeriodRevenue = (float) ((clone $netSalesBase)
+                ->where('issue_date', '>=', $prevPeriodStartUtc)
+                ->where('issue_date', '<', $prevPeriodNextStartUtc)
+                ->selectRaw("{$netSalesExpr} as net_total")
+                ->value('net_total') ?? 0);
 
             $periodExpenses = PurchaseInvoice::where('tenant_id', $tenantId)
                 ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
                 ->whereNotIn('status', ['draft', 'cancelled'])
-                ->where('issue_date', '>=', $periodStart->toDateString())
+                ->whereDate('issue_date', '>=', $localPeriodStartDate)
+                ->whereDate('issue_date', '<=', $localPeriodEndDate)
                 ->sum('total');
 
             $periodNetFlow = round((float) $periodRevenue - (float) $periodExpenses, 2);
@@ -236,52 +346,73 @@ class DashboardController extends Controller
             $paymentMethodsChart = Payment::where('tenant_id', $tenantId)
                 ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
                 ->where('type', 'payment')
-                ->where('payment_date', '>=', $periodStart->toDateString())
+                ->where('payment_date', '>=', $periodStartUtc)
+                ->where('payment_date', '<', $periodNextStartUtc)
                 ->select('payment_method', DB::raw('SUM(amount) as total'))
                 ->groupBy('payment_method')
                 ->orderByDesc('total')
                 ->get()
                 ->map(fn ($row) => [
                     'method' => $row->payment_method ?: 'cash',
-                    'total' => round((float) $row->total, 2),
+                    'total' => round((float) $row->getAttribute('total'), 2),
                 ])
                 ->values()
                 ->toArray();
 
-            // Revenue last 30 days (daily)
-            $dailyRevenue = (clone $invoiceBase)
-                ->whereDate('issue_date', '>=', $last30Days)
-                ->select(
-                    DB::raw('DATE(issue_date) as date'),
-                    DB::raw('SUM(total_incl_tax) as total')
-                )
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get()
-                ->keyBy('date')
-                ->toArray();
+            // Revenue last 30 local calendar days (daily, grouped in tenant timezone)
+            $dailyRevenueMap = [];
+            (clone $netSalesBase)
+                ->where('issue_date', '>=', $thirtyDaysStartUtc)
+                ->where('issue_date', '<', $tomorrowStartUtc)
+                ->get(['issue_date', 'type', 'total_incl_tax'])
+                ->each(function ($inv) use ($tz, &$dailyRevenueMap): void {
+                    $localDate = ($inv->issue_date instanceof Carbon
+                        ? $inv->issue_date->copy()
+                        : Carbon::parse((string) $inv->issue_date, 'UTC'))
+                        ->timezone($tz)
+                        ->format('Y-m-d');
+                    $signed = $inv->type === 'credit_note'
+                        ? -(float) $inv->total_incl_tax
+                        : (float) $inv->total_incl_tax;
+                    $dailyRevenueMap[$localDate] = ($dailyRevenueMap[$localDate] ?? 0.0) + $signed;
+                });
 
             for ($i = 29; $i >= 0; $i--) {
-                $date = Carbon::now()->subDays($i)->format('Y-m-d');
+                $localDay = $localTodayStart->copy()->subDays($i);
+                $date = $localDay->format('Y-m-d');
                 $revenueChart[] = [
                     'date' => $date,
-                    'label' => Carbon::parse($date)->format('d/m'),
-                    'total' => isset($dailyRevenue[$date]) ? round((float) $dailyRevenue[$date]['total'], 2) : 0,
+                    'label' => $localDay->format('d/m'),
+                    'total' => isset($dailyRevenueMap[$date]) ? round((float) $dailyRevenueMap[$date], 2) : 0,
                 ];
             }
 
-            // Monthly revenue (last 6 months) for trend chart
+            // Monthly revenue (last 6 local months, grouped in tenant timezone)
+            $sixMonthsStartUtc = $localThisMonthStart->copy()->subMonths(5)->utc();
+            $monthlyRevenueMap = [];
+            (clone $netSalesBase)
+                ->where('issue_date', '>=', $sixMonthsStartUtc)
+                ->where('issue_date', '<', $nextMonthStartUtc)
+                ->get(['issue_date', 'type', 'total_incl_tax'])
+                ->each(function ($inv) use ($tz, &$monthlyRevenueMap): void {
+                    $localMonth = ($inv->issue_date instanceof Carbon
+                        ? $inv->issue_date->copy()
+                        : Carbon::parse((string) $inv->issue_date, 'UTC'))
+                        ->timezone($tz)
+                        ->format('Y-m');
+                    $signed = $inv->type === 'credit_note'
+                        ? -(float) $inv->total_incl_tax
+                        : (float) $inv->total_incl_tax;
+                    $monthlyRevenueMap[$localMonth] = ($monthlyRevenueMap[$localMonth] ?? 0.0) + $signed;
+                });
+
             for ($i = 5; $i >= 0; $i--) {
-                $start = Carbon::now()->subMonths($i)->startOfMonth();
-                $end = Carbon::now()->subMonths($i)->endOfMonth();
-                $total = (clone $invoiceBase)
-                    ->whereDate('issue_date', '>=', $start)
-                    ->whereDate('issue_date', '<=', $end)
-                    ->sum('total_incl_tax');
+                $start = $localThisMonthStart->copy()->subMonths($i);
+                $monthKey = $start->format('Y-m');
                 $monthlyRevenue[] = [
-                    'month' => $start->format('Y-m'),
-                    'label' => $start->locale(app()->getLocale())->isoFormat('MMM'),
-                    'total' => round((float) $total, 2),
+                    'month' => $monthKey,
+                    'label' => $start->copy()->locale(app()->getLocale())->isoFormat('MMM'),
+                    'total' => round((float) ($monthlyRevenueMap[$monthKey] ?? 0.0), 2),
                 ];
             }
 
@@ -292,14 +423,15 @@ class DashboardController extends Controller
                 ->take(8)
                 ->get(['id', 'invoice_number', 'customer_id', 'total_incl_tax', 'payment_status', 'issue_date', 'status']);
 
-            // Top Customers (by revenue last 30 days)
-            $topCustomers = (clone $invoiceBase)
+            // Top Customers (by net revenue last 30 local days)
+            $topCustomers = (clone $netSalesBase)
                 ->with('customer:id,name')
-                ->whereDate('issue_date', '>=', $last30Days)
+                ->where('issue_date', '>=', $thirtyDaysStartUtc)
+                ->where('issue_date', '<', $tomorrowStartUtc)
                 ->select(
                     'customer_id',
-                    DB::raw('count(*) as invoice_count'),
-                    DB::raw('SUM(total_incl_tax) as total_revenue')
+                    DB::raw("SUM(CASE WHEN type = 'invoice' THEN 1 ELSE 0 END) as invoice_count"),
+                    DB::raw("{$netSalesExpr} as total_revenue")
                 )
                 ->groupBy('customer_id')
                 ->orderByDesc('total_revenue')
@@ -316,11 +448,14 @@ class DashboardController extends Controller
 
         // ─── Customer Stats ────────────────────────────────────────────────
         $customersThisMonth = (clone $customersBase)
-            ->whereDate('created_at', '>=', $thisMonth)->count();
+            ->where('created_at', '>=', $thisMonthStartUtc)
+            ->where('created_at', '<', $nextMonthStartUtc)
+            ->count();
 
         $customersLastMonth = (clone $customersBase)
-            ->whereDate('created_at', '>=', $lastMonth)
-            ->whereDate('created_at', '<=', $lastMonthEnd)->count();
+            ->where('created_at', '>=', $lastMonthStartUtc)
+            ->where('created_at', '<', $thisMonthStartUtc)
+            ->count();
 
         $totalCustomers = (clone $customersBase)->count();
 
@@ -333,7 +468,7 @@ class DashboardController extends Controller
         $overdueWorkOrders = (clone $workOrdersBase)
             ->whereNotIn('status', ['done', 'cancelled'])
             ->whereNotNull('expected_end_date')
-            ->whereDate('expected_end_date', '<', $today)
+            ->whereDate('expected_end_date', '<', $localTodayDate)
             ->count();
 
         $lowStockCount = 0;
@@ -343,21 +478,18 @@ class DashboardController extends Controller
         if ($canViewInventory) {
             $totalParts = Part::where('tenant_id', $tenantId)->count();
             $outOfStockCount = Part::where('tenant_id', $tenantId)
-                ->whereDoesntHave('inventoryBalances', function ($q) use ($centerId) {
-                    if ($centerId) {
-                        $q->where('center_id', $centerId);
-                    }
-                    $q->where('qty_on_hand', '>', 0);
+                ->whereDoesntHave('inventoryBalances', function ($q) use ($tenantId, $centerId) {
+                    $q->where('tenant_id', $tenantId)
+                        ->where('center_id', $centerId)
+                        ->where('qty_on_hand', '>', 0);
                 })
                 ->count();
 
             $lowStockCount = Part::where('parts.tenant_id', $tenantId)
-                ->join('inventory_balances', function ($join) use ($centerId) {
-                    $join->on('inventory_balances.part_id', '=', 'parts.id');
-
-                    if ($centerId) {
-                        $join->where('inventory_balances.center_id', $centerId);
-                    }
+                ->join('inventory_balances', function ($join) use ($tenantId, $centerId) {
+                    $join->on('inventory_balances.part_id', '=', 'parts.id')
+                        ->where('inventory_balances.tenant_id', $tenantId)
+                        ->where('inventory_balances.center_id', $centerId);
                 })
                 ->where(function ($q) {
                     $q->where(function ($sub) {
@@ -394,7 +526,7 @@ class DashboardController extends Controller
         $todaySchedule = (clone $workOrdersBase)
             ->with(['customer:id,name', 'vehicle:id,plate_number'])
             ->whereNotIn('status', ['done', 'cancelled'])
-            ->whereDate('expected_end_date', $today)
+            ->whereDate('expected_end_date', $localTodayDate)
             ->orderBy('expected_end_date')
             ->take(10)
             ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date']);
@@ -402,7 +534,8 @@ class DashboardController extends Controller
         // ─── Today's New Work Orders ───────────────────────────────────────
         $todayNewWorkOrders = (clone $workOrdersBase)
             ->with(['customer:id,name', 'vehicle:id,plate_number'])
-            ->whereDate('created_at', $today)
+            ->where('created_at', '>=', $todayStartUtc)
+            ->where('created_at', '<', $tomorrowStartUtc)
             ->latest()
             ->take(5)
             ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'created_at']);
@@ -425,7 +558,8 @@ class DashboardController extends Controller
         // ─── Today's Appointments (Receptionist / Frontdesk focus) ─────────
         $todayAppointments = Appointment::where('tenant_id', $tenantId)
             ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
-            ->whereDate('scheduled_at', $today)
+            ->where('scheduled_at', '>=', $todayStartUtc)
+            ->where('scheduled_at', '<', $tomorrowStartUtc)
             ->with(['customer:id,name,phone', 'vehicle:id,plate_number'])
             ->orderBy('scheduled_at')
             ->take(8)
@@ -446,35 +580,39 @@ class DashboardController extends Controller
                 ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date']);
         }
 
-        // ─── Work Orders Weekly trend (last 7 days) ─────────────────────────
-        $weeklyWorkOrders = (clone $workOrdersBase)
-            ->whereDate('created_at', '>=', $last7Days)
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('count(*) as count')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date')
-            ->toArray();
+        // ─── Work Orders Weekly trend (last 7 local calendar days) ─────────
+        $weeklyWorkOrdersMap = [];
+        (clone $workOrdersBase)
+            ->where('created_at', '>=', $sevenDaysStartUtc)
+            ->where('created_at', '<', $tomorrowStartUtc)
+            ->get(['id', 'created_at'])
+            ->each(function ($wo) use ($tz, &$weeklyWorkOrdersMap): void {
+                $localDate = ($wo->created_at instanceof Carbon
+                    ? $wo->created_at->copy()
+                    : Carbon::parse((string) $wo->created_at, 'UTC'))
+                    ->timezone($tz)
+                    ->format('Y-m-d');
+                $weeklyWorkOrdersMap[$localDate] = ($weeklyWorkOrdersMap[$localDate] ?? 0) + 1;
+            });
 
         $weeklyChart = [];
 
         for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $localDay = $localTodayStart->copy()->subDays($i);
+            $date = $localDay->format('Y-m-d');
             $weeklyChart[] = [
                 'date' => $date,
-                'label' => Carbon::parse($date)->locale(app()->getLocale())->isoFormat('ddd'),
-                'count' => isset($weeklyWorkOrders[$date]) ? $weeklyWorkOrders[$date]['count'] : 0,
+                'label' => $localDay->copy()->locale(app()->getLocale())->isoFormat('ddd'),
+                'count' => $weeklyWorkOrdersMap[$date] ?? 0,
             ];
         }
 
-        // ─── Top Services (last 30 days) ───────────────────────────────────
-        $topServices = WorkOrderItem::whereHas('workOrder', function ($q) use ($tenantId, $centerId, $last30Days) {
+        // ─── Top Services (last 30 local days) ─────────────────────────────
+        $topServices = WorkOrderItem::whereHas('workOrder', function ($q) use ($tenantId, $centerId, $thirtyDaysStartUtc, $tomorrowStartUtc) {
             $q->where('tenant_id', $tenantId)
                 ->when($centerId, fn ($qq) => $qq->where('center_id', $centerId))
-                ->whereDate('created_at', '>=', $last30Days);
+                ->where('created_at', '>=', $thirtyDaysStartUtc)
+                ->where('created_at', '<', $tomorrowStartUtc);
         })
             ->whereNotNull('service_id')
             ->select(
@@ -504,12 +642,27 @@ class DashboardController extends Controller
                 ->whereNull('deleted_at')
                 ->groupBy('work_order_id');
 
+            $creditNotesSubquery = DB::table('invoices as cn')
+                ->leftJoin('invoices as orig', function ($join) {
+                    $join->on('orig.id', '=', 'cn.original_invoice_id')
+                        ->on('orig.tenant_id', '=', 'cn.tenant_id')
+                        ->on('orig.center_id', '=', 'cn.center_id')
+                        ->whereNull('orig.deleted_at');
+                })
+                ->selectRaw('COALESCE(cn.work_order_id, orig.work_order_id) as work_order_id, COALESCE(SUM(cn.total_incl_tax), 0) as total_credited')
+                ->where('cn.type', 'credit_note')
+                ->whereNotIn('cn.status', ['draft', 'cancelled'])
+                ->whereNull('cn.deleted_at')
+                ->whereRaw('COALESCE(cn.work_order_id, orig.work_order_id) IS NOT NULL')
+                ->groupByRaw('COALESCE(cn.work_order_id, orig.work_order_id)');
+
             $dueRow = (clone $workOrdersBase)
                 ->leftJoinSub($paidSubquery, 'wo_paid', 'wo_paid.work_order_id', '=', 'work_orders.id')
+                ->leftJoinSub($creditNotesSubquery, 'wo_credited', 'wo_credited.work_order_id', '=', 'work_orders.id')
                 ->where('work_orders.status', 'done')
                 ->where('work_orders.total_incl_tax', '>', 0)
-                ->whereRaw('(work_orders.total_incl_tax - COALESCE(wo_paid.net_paid, 0)) > 0.01')
-                ->selectRaw('COUNT(*) as due_count, COALESCE(SUM(work_orders.total_incl_tax - COALESCE(wo_paid.net_paid, 0)), 0) as due_amount')
+                ->whereRaw('(work_orders.total_incl_tax - COALESCE(wo_credited.total_credited, 0) - COALESCE(wo_paid.net_paid, 0)) > 0.01')
+                ->selectRaw('COUNT(*) as due_count, COALESCE(SUM(work_orders.total_incl_tax - COALESCE(wo_credited.total_credited, 0) - COALESCE(wo_paid.net_paid, 0)), 0) as due_amount')
                 ->first();
 
             $checkedOutPaymentDue = [
@@ -562,7 +715,11 @@ class DashboardController extends Controller
             ->join('users as u', 'u.id', '=', 'wit.user_id')
             ->leftJoin('vehicles as v', 'v.id', '=', 'wo.vehicle_id')
             ->where('wo.tenant_id', $tenantId)
-            ->when($centerId, fn ($q) => $q->where('wo.center_id', $centerId))
+            ->where('wo.center_id', $centerId)
+            ->where('woi.tenant_id', $tenantId)
+            ->where('woi.center_id', $centerId)
+            ->where('u.tenant_id', $tenantId)
+            ->whereNull('wo.deleted_at')
             ->whereNotIn('wo.status', ['done', 'cancelled'])
             ->where('woi.status', 'in_progress')
             ->select(
@@ -586,14 +743,19 @@ class DashboardController extends Controller
             ])
             ->toArray();
 
-        // ─── Technician Performance (last 30 days) ─────────────────────────
+        // ─── Technician Performance (last 30 local days) ───────────────────
         $technicianPerformance = DB::table('work_order_item_technician as wit')
             ->join('work_order_items as woi', 'woi.id', '=', 'wit.work_order_item_id')
             ->join('work_orders as wo', 'wo.id', '=', 'woi.work_order_id')
             ->join('users as u', 'u.id', '=', 'wit.user_id')
             ->where('wo.tenant_id', $tenantId)
-            ->when($centerId, fn ($q) => $q->where('wo.center_id', $centerId))
-            ->whereDate('wo.created_at', '>=', $last30Days)
+            ->where('wo.center_id', $centerId)
+            ->where('woi.tenant_id', $tenantId)
+            ->where('woi.center_id', $centerId)
+            ->where('u.tenant_id', $tenantId)
+            ->whereNull('wo.deleted_at')
+            ->where('wo.created_at', '>=', $thirtyDaysStartUtc)
+            ->where('wo.created_at', '<', $tomorrowStartUtc)
             ->select(
                 'u.id',
                 'u.name',
@@ -706,5 +868,25 @@ class DashboardController extends Controller
         }
 
         return Inertia::render('Dashboard', $payload);
+    }
+
+    /**
+     * Resolve and validate the tenant's IANA timezone without mutating global app timezone.
+     */
+    private function resolveTenantTimezone(?Tenant $tenant): string
+    {
+        $candidate = ($tenant !== null ? $tenant->timezone : null)
+            ?? CountryCurrencyRegistry::countryMeta(CountryCurrencyRegistry::tenantCountry($tenant))['timezone']
+            ?? config('app.timezone', 'UTC');
+
+        if (is_string($candidate) && in_array($candidate, timezone_identifiers_list(), true)) {
+            return $candidate;
+        }
+
+        $fallback = config('app.timezone', 'UTC');
+
+        return is_string($fallback) && in_array($fallback, timezone_identifiers_list(), true)
+            ? $fallback
+            : 'UTC';
     }
 }

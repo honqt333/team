@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Models\HR\Attendance;
 use App\Models\HR\BiometricDevice;
 use App\Models\HR\Employee;
+use App\Services\Billing\SubscriptionLifecycleService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -30,27 +32,12 @@ class BiometricAttendanceController extends Controller
      */
     public function clock(Request $request)
     {
-        // Get API token from header
-        $token = $request->bearerToken();
+        $deviceOrResponse = $this->resolveDevice($request);
 
-        if (! $token) {
-            return response()->json([
-                'success' => false,
-                'error' => 'missing_token',
-                'message' => 'API token is required',
-            ], 401);
+        if ($deviceOrResponse instanceof JsonResponse) {
+            return $deviceOrResponse;
         }
-
-        // Find device by token
-        $device = BiometricDevice::findByToken($token);
-
-        if (! $device) {
-            return response()->json([
-                'success' => false,
-                'error' => 'invalid_token',
-                'message' => 'Invalid or inactive API token',
-            ], 401);
-        }
+        $device = $deviceOrResponse;
 
         // Validate request
         $validated = $request->validate([
@@ -97,10 +84,16 @@ class BiometricAttendanceController extends Controller
             ], 403);
         }
 
-        // Parse timestamp
-        $timestamp = isset($validated['timestamp'])
-            ? Carbon::parse($validated['timestamp'])
-            : now();
+        // Parse and validate timestamp window (UTC)
+        $timestamp = $this->parseAndValidateTimestamp($validated['timestamp'] ?? null);
+
+        if (! $timestamp) {
+            return response()->json([
+                'success' => false,
+                'error' => 'timestamp_out_of_window',
+                'message' => 'Attendance timestamp is outside the allowed synchronization window.',
+            ], 422);
+        }
 
         $date = $timestamp->format('Y-m-d');
         $time = $timestamp->format('H:i');
@@ -113,15 +106,24 @@ class BiometricAttendanceController extends Controller
             'date' => $date,
         ]);
 
+        // Prevent duplicate/replay attendance events for the same action & timestamp
+        if (
+            ($validated['action'] === 'check_in' && $attendance->check_in !== null)
+            || ($validated['action'] === 'check_out' && $attendance->check_out === $time)
+        ) {
+            return response()->json([
+                'success' => false,
+                'error' => 'duplicate_attendance_event',
+                'message' => 'Duplicate or replayed attendance event rejected.',
+            ], 409);
+        }
+
         // Update based on action
         if ($validated['action'] === 'check_in') {
-            // Only set check_in if not already set
-            if (! $attendance->check_in) {
-                $attendance->check_in = $time;
-                $attendance->status = 'present';
-            }
+            $attendance->check_in = $time;
+            $attendance->status = 'present';
         } else {
-            // Always update check_out (last one wins)
+            // Always update check_out (last one wins when timestamp differs)
             $attendance->check_out = $time;
         }
 
@@ -161,25 +163,12 @@ class BiometricAttendanceController extends Controller
      */
     public function batch(Request $request)
     {
-        $token = $request->bearerToken();
+        $deviceOrResponse = $this->resolveDevice($request);
 
-        if (! $token) {
-            return response()->json([
-                'success' => false,
-                'error' => 'missing_token',
-                'message' => 'API token is required',
-            ], 401);
+        if ($deviceOrResponse instanceof JsonResponse) {
+            return $deviceOrResponse;
         }
-
-        $device = BiometricDevice::findByToken($token);
-
-        if (! $device) {
-            return response()->json([
-                'success' => false,
-                'error' => 'invalid_token',
-                'message' => 'Invalid or inactive API token',
-            ], 401);
-        }
+        $device = $deviceOrResponse;
 
         $validated = $request->validate([
             'records' => 'required|array|max:50',
@@ -226,7 +215,18 @@ class BiometricAttendanceController extends Controller
                 continue;
             }
 
-            $timestamp = Carbon::parse($record['timestamp']);
+            $timestamp = $this->parseAndValidateTimestamp($record['timestamp']);
+
+            if (! $timestamp) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'index' => $index,
+                    'identifier' => $record['employee_identifier'],
+                    'error' => 'timestamp_out_of_window',
+                ];
+                continue;
+            }
+
             $date = $timestamp->format('Y-m-d');
             $time = $timestamp->format('H:i');
 
@@ -237,11 +237,22 @@ class BiometricAttendanceController extends Controller
                 'date' => $date,
             ]);
 
+            if (
+                ($record['action'] === 'check_in' && $attendance->check_in !== null)
+                || ($record['action'] === 'check_out' && $attendance->check_out === $time)
+            ) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'index' => $index,
+                    'identifier' => $record['employee_identifier'],
+                    'error' => 'duplicate_attendance_event',
+                ];
+                continue;
+            }
+
             if ($record['action'] === 'check_in') {
-                if (! $attendance->check_in) {
-                    $attendance->check_in = $time;
-                    $attendance->status = 'present';
-                }
+                $attendance->check_in = $time;
+                $attendance->status = 'present';
             } else {
                 $attendance->check_out = $time;
             }
@@ -271,17 +282,12 @@ class BiometricAttendanceController extends Controller
      */
     public function ping(Request $request)
     {
-        $token = $request->bearerToken();
+        $deviceOrResponse = $this->resolveDevice($request);
 
-        if (! $token) {
-            return response()->json(['success' => false, 'error' => 'missing_token'], 401);
+        if ($deviceOrResponse instanceof JsonResponse) {
+            return $deviceOrResponse;
         }
-
-        $device = BiometricDevice::findByToken($token);
-
-        if (! $device) {
-            return response()->json(['success' => false, 'error' => 'invalid_token'], 401);
-        }
+        $device = $deviceOrResponse;
 
         return response()->json([
             'success' => true,
@@ -292,5 +298,72 @@ class BiometricAttendanceController extends Controller
                 'last_sync' => $device->last_sync_at?->toIso8601String(),
             ],
         ]);
+    }
+
+    /**
+     * Resolve biometric device from bearer token and verify tenant is active.
+     */
+    private function resolveDevice(Request $request): BiometricDevice|JsonResponse
+    {
+        $token = $request->bearerToken();
+
+        if (! $token) {
+            return response()->json([
+                'success' => false,
+                'error' => 'missing_token',
+                'message' => 'API token is required',
+            ], 401);
+        }
+
+        $device = BiometricDevice::findByToken($token);
+
+        if (! $device) {
+            return response()->json([
+                'success' => false,
+                'error' => 'invalid_token',
+                'message' => 'Invalid or inactive API token',
+            ], 401);
+        }
+
+        $tenant = $device->tenant;
+
+        if (! $tenant || $tenant->trashed()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'tenant_inactive',
+                'message' => 'Tenant account is inactive or suspended.',
+            ], 403);
+        }
+
+        $lifecycle = $tenant->getSubscriptionLifecycle();
+
+        if ($lifecycle['state'] === SubscriptionLifecycleService::STATE_SUSPENDED || ! $lifecycle['can_operate']) {
+            return response()->json([
+                'success' => false,
+                'error' => 'tenant_suspended',
+                'message' => 'Tenant subscription is suspended or inactive.',
+            ], 403);
+        }
+
+        return $device;
+    }
+
+    /**
+     * Parse timestamp and enforce a bounded UTC synchronization window (-7 days .. +15 minutes).
+     */
+    private function parseAndValidateTimestamp(?string $rawTimestamp): ?Carbon
+    {
+        $timestamp = $rawTimestamp !== null
+            ? Carbon::parse($rawTimestamp)
+            : now('UTC');
+
+        $utcTimestamp = $timestamp->copy()->utc();
+        $nowUtc = now('UTC');
+
+        if ($utcTimestamp->lt($nowUtc->copy()->subDays(7)) || $utcTimestamp->gt($nowUtc->copy()->addMinutes(15))) {
+            return null;
+        }
+
+        return $timestamp;
     }
 }

@@ -14,6 +14,7 @@ use App\Models\HR\PayrollItem;
 use App\Models\HR\PayrollRun;
 use App\Services\HR\PayrollAccountingService;
 use App\Services\HR\TechnicianCommissionService;
+use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -646,7 +647,21 @@ class PayrollController extends Controller
      */
     public function employeePayroll(Employee $employee)
     {
-        $this->authorize('view', $employee);
+        $this->authorize(Permissions::HR_PAYROLL_VIEW);
+
+        $user = auth()->user();
+
+        if ((int) $employee->tenant_id !== (int) $user->tenant_id) {
+            abort(403);
+        }
+
+        if (! $user->hasRole('super_admin')) {
+            $activeCenterId = TenancyContext::centerId() ?? $user->current_center_id;
+
+            if ($employee->center_id !== null && $activeCenterId !== null && (int) $employee->center_id !== (int) $activeCenterId) {
+                abort(403);
+            }
+        }
 
         $payrollItems = $employee->payrollItems()
             ->with(['payrollRun:id,period_start,period_end,status', 'createdBy:id,name'])
@@ -663,7 +678,19 @@ class PayrollController extends Controller
      */
     public function printPaySlip(PayrollItem $payrollItem)
     {
-        $this->authorize('view', $payrollItem->employee);
+        $this->authorize(Permissions::HR_PAYROLL_VIEW);
+
+        if ($payrollItem->payrollRun) {
+            $this->authorize('view', $payrollItem->payrollRun);
+        } elseif ($payrollItem->employee) {
+            $user = auth()->user();
+
+            if ((int) $payrollItem->employee->tenant_id !== (int) $user->tenant_id) {
+                abort(403);
+            }
+        } else {
+            abort(403);
+        }
 
         $payrollItem->load([
             'employee.jobTitle',

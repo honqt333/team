@@ -467,6 +467,8 @@ class EmployeeController extends Controller
      */
     public function uploadPhoto(Request $request, Employee $employee)
     {
+        $this->authorize('update', $employee);
+
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);

@@ -11,6 +11,7 @@ use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Support\TenancyContext;
+use App\Support\TenantClock;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class AttendanceController extends Controller
 
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
-        $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
+        $date = TenantClock::parseDate($request->input('date'));
 
         // Get center attendance settings
         $settings = $centerId ? AttendanceSettings::getForCenter((int) $centerId) : null;
@@ -170,7 +171,7 @@ class AttendanceController extends Controller
 
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
-        $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
+        $date = TenantClock::parseDate($request->input('date'));
 
         $employeesQuery = Employee::where('tenant_id', $tenantId)->active();
 
@@ -297,6 +298,7 @@ class AttendanceController extends Controller
     public function approveCorrection(Request $request, AttendanceCorrectionRequest $correctionRequest)
     {
         $this->authorize('create', Attendance::class);
+        $this->ensureCorrectionInScope($request, $correctionRequest);
 
         if ($correctionRequest->status !== AttendanceCorrectionRequest::STATUS_PENDING) {
             return back()->with('error', __('hr.attendance.correction_already_reviewed'));
@@ -315,11 +317,11 @@ class AttendanceController extends Controller
             ]);
 
             if ($correctionRequest->requested_check_in) {
-                $attendance->check_in = $correctionRequest->requested_check_in;
+                $attendance->check_in = Carbon::parse($correctionRequest->requested_check_in);
             }
 
             if ($correctionRequest->requested_check_out) {
-                $attendance->check_out = $correctionRequest->requested_check_out;
+                $attendance->check_out = Carbon::parse($correctionRequest->requested_check_out);
             }
 
             $attendance->status = 'present';
@@ -343,6 +345,7 @@ class AttendanceController extends Controller
     public function rejectCorrection(Request $request, AttendanceCorrectionRequest $correctionRequest)
     {
         $this->authorize('create', Attendance::class);
+        $this->ensureCorrectionInScope($request, $correctionRequest);
 
         if ($correctionRequest->status !== AttendanceCorrectionRequest::STATUS_PENDING) {
             return back()->with('error', __('hr.attendance.correction_already_reviewed'));
@@ -362,5 +365,26 @@ class AttendanceController extends Controller
         $correctionRequest->logActivity('rejected');
 
         return back()->with('success', __('hr.attendance.correction_rejected'));
+    }
+
+    private function ensureCorrectionInScope(Request $request, AttendanceCorrectionRequest $correctionRequest): void
+    {
+        $user = $request->user();
+
+        if ((int) $correctionRequest->tenant_id !== (int) $user->tenant_id) {
+            abort(403);
+        }
+
+        if ($user->hasRole('super_admin')) {
+            return;
+        }
+
+        $activeCenterId = TenancyContext::centerId() ?? $user->current_center_id;
+
+        if ($correctionRequest->center_id !== null
+            && $activeCenterId !== null
+            && (int) $correctionRequest->center_id !== (int) $activeCenterId) {
+            abort(403);
+        }
     }
 }

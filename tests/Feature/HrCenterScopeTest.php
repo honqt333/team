@@ -266,8 +266,12 @@ class HrCenterScopeTest extends TestCase
 
         $response->assertSessionHasNoErrors();
 
-        $attendance = Attendance::where('employee_id', $employee->id)->firstOrFail();
+        $attendance = Attendance::withoutGlobalScopes()
+            ->where('employee_id', $employee->id)
+            ->firstOrFail();
 
-        $this->assertSame($employee->center_id, $attendance->center_id);
+        $this->assertSame($this->centerB->id, $attendance->center_id);
+        $this->assertSame($employee->tenant_id, $attendance->tenant_id);
+        $this->assertSame('absent', $attendance->status);
     }
 }
