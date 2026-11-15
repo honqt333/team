@@ -110,7 +110,10 @@ else
 fi
 
 echo "==> Building Laravel caches in new release"
-php "$RELEASE_DIR/artisan" optimize:clear
+php "$RELEASE_DIR/artisan" config:clear
+php "$RELEASE_DIR/artisan" route:clear
+php "$RELEASE_DIR/artisan" view:clear
+php "$RELEASE_DIR/artisan" event:clear
 php "$RELEASE_DIR/artisan" optimize
 
 # Save previous release before atomic switch

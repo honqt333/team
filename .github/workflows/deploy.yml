@@ -152,5 +152,7 @@ jobs:
             COMMIT_SHA='${{ needs.package.outputs.commit_sha }}' \
             COMMIT_EPOCH='${{ needs.package.outputs.commit_epoch }}' \
             ALLOW_OLDER='${{ inputs.allow_older || 'false' }}' \
+            SKIP_MIGRATIONS='true' \
+            SKIP_DB_BACKUP='true' \
             ARCHIVE_PATH=\$HOME/domains/khidmh.pro/deploy/tmp/release.tar.gz \
             bash \$HOME/domains/khidmh.pro/deploy/tmp/deploy-release.sh"
