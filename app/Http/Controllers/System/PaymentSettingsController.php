@@ -6,8 +6,11 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentSettings;
+use App\Models\Setting;
 use App\Services\System\SystemAuditService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentSettingsController extends Controller
 {
@@ -53,10 +56,12 @@ class PaymentSettingsController extends Controller
             // Bank Transfer
             'bank_transfer_enabled' => 'boolean',
             'bank_accounts' => 'array',
+            'bank_accounts.*.bank_code' => 'nullable|string|max:50',
             'bank_accounts.*.bank_name' => 'required_with:bank_accounts|string|max:255',
             'bank_accounts.*.account_name' => 'required_with:bank_accounts|string|max:255',
             'bank_accounts.*.iban' => 'nullable|string|max:34',
             'bank_accounts.*.account_number' => 'nullable|string|max:50',
+            'bank_accounts.*.logo_url' => 'nullable|string|max:500',
             'bank_transfer_instructions' => 'nullable|string|max:2000',
             'bank_transfer_require_receipt' => 'boolean',
             'bank_transfer_max_days' => 'nullable|integer|min:1|max:90',
@@ -69,6 +74,22 @@ class PaymentSettingsController extends Controller
             'mastercard_enabled' => 'boolean',
             'applepay_enabled' => 'boolean',
             'stcpay_enabled' => 'boolean',
+
+            // Public landing footer visibility
+            'footer_badges' => 'nullable|array',
+            'footer_badges.mada' => 'boolean',
+            'footer_badges.visa' => 'boolean',
+            'footer_badges.mastercard' => 'boolean',
+            'footer_badges.applepay' => 'boolean',
+            'footer_badges.tabby' => 'boolean',
+            'footer_badges.tamara' => 'boolean',
+            'footer_badges.bank_transfer' => 'boolean',
+
+            // Payment method icons customization
+            'payment_icons' => 'nullable|array',
+            'payment_icons.style' => 'nullable|string|in:colored,monochrome',
+            'payment_icons.logos' => 'nullable|array',
+            'payment_icons.logos.*' => 'nullable|string|max:500',
 
             // Company info + Subscription VAT — moved to CompanySettingsController
         ]);
@@ -102,6 +123,30 @@ class PaymentSettingsController extends Controller
 
         $settings->save();
 
+        if (array_key_exists('footer_badges', $validated)) {
+            $badges = [];
+            foreach (PaymentSettings::DEFAULT_FOOTER_BADGES as $key => $default) {
+                $badges[$key] = (bool) ($validated['footer_badges'][$key] ?? $default);
+            }
+            Setting::set('payment.footer_badges', json_encode($badges), 'payment');
+        }
+
+        if (array_key_exists('payment_icons', $validated)) {
+            $rawIcons = $validated['payment_icons'] ?? [];
+            $style = in_array($rawIcons['style'] ?? '', ['colored', 'monochrome'], true)
+                ? (string) $rawIcons['style']
+                : PaymentSettings::DEFAULT_PAYMENT_ICONS['style'];
+            $logos = [];
+            foreach (array_keys(PaymentSettings::DEFAULT_PAYMENT_ICONS['logos']) as $key) {
+                $val = $rawIcons['logos'][$key] ?? null;
+                $logos[$key] = is_string($val) && $val !== '' ? $val : null;
+            }
+            Setting::set('payment.icons_config', json_encode([
+                'style' => $style,
+                'logos' => $logos,
+            ]), 'payment');
+        }
+
         // Clear cache
         PaymentSettings::clearCache();
 
@@ -119,6 +164,46 @@ class PaymentSettingsController extends Controller
         ], $request);
 
         return back()->with('success', __('messages.system.payment_settings.saved'));
+    }
+
+    /**
+     * Upload a custom bank logo image for bank transfer accounts.
+     */
+    public function uploadBankLogo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+        ]);
+
+        $path = $request->file('logo')->store('payment/banks', 'public');
+
+        $this->audit->log('payment_bank_logo_upload', PaymentSettings::class, null, [
+            'path' => $path,
+        ], $request);
+
+        return response()->json([
+            'url' => Storage::url($path),
+        ]);
+    }
+
+    /**
+     * Upload a custom logo image for a payment method badge (mada, visa, tabby, etc.).
+     */
+    public function uploadMethodLogo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
+        ]);
+
+        $path = $request->file('logo')->store('payment/methods', 'public');
+
+        $this->audit->log('payment_method_logo_upload', PaymentSettings::class, null, [
+            'path' => $path,
+        ], $request);
+
+        return response()->json([
+            'url' => Storage::url($path),
+        ]);
     }
 
     /**

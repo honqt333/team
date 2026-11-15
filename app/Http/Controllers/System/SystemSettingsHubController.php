@@ -82,6 +82,8 @@ class SystemSettingsHubController extends Controller
             'mastercard_enabled' => (bool) ($paymentSettingsRow->mastercard_enabled ?? true),
             'applepay_enabled' => (bool) ($paymentSettingsRow->applepay_enabled ?? true),
             'stcpay_enabled' => (bool) ($paymentSettingsRow->stcpay_enabled ?? false),
+            'footer_badges' => PaymentSettings::getFooterBadgesConfig(),
+            'payment_icons' => PaymentSettings::getPaymentIconsConfig(),
         ];
 
         // 4. Dunning Automation Settings & Logs

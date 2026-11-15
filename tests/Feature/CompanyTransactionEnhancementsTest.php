@@ -422,4 +422,39 @@ class CompanyTransactionEnhancementsTest extends TestCase
         $this->assertSame('399999999999993', $data[0]['tax_number']);
         $this->assertTrue($data[0]['has_vat']);
     }
+
+    public function test_approve_defaults_approved_at_to_today_and_preserves_financial_amounts(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-06-18 14:30:00'));
+
+        try {
+            $tx = CompanyTransaction::create([
+                'tenant_id' => $this->tenant->id,
+                'center_id' => $this->center->id,
+                'title' => 'مصروف صيانة عامة',
+                'transaction_date' => '2026-06-15',
+                'transaction_type' => 'expense',
+                'income_category_id' => $this->expenseCategory->id,
+                'amount' => 450.00,
+                'is_taxable' => false,
+                'tax_amount' => 0.00,
+                'total_amount' => 450.00,
+                'status' => 'draft',
+                'updated_by' => $this->user->id,
+            ]);
+
+            $response = $this->post(route('settings.company.transactions.approve', $tx->id));
+            $response->assertRedirect();
+            $response->assertSessionHasNoErrors();
+
+            $tx->refresh();
+            $this->assertSame('approved', $tx->status);
+            $this->assertSame('2026-06-18', $tx->approved_at?->format('Y-m-d'));
+            $this->assertSame('450.00', (string) $tx->amount);
+            $this->assertSame('0.00', (string) $tx->tax_amount);
+            $this->assertSame('450.00', (string) $tx->total_amount);
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
 }

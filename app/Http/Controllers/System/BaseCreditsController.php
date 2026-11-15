@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\Credits\TenantSmsBalance;
+use App\Models\Credits\TenantWhatsappBalance;
 use App\Services\System\SystemAuditService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +31,7 @@ abstract class BaseCreditsController extends Controller
     /** @return class-string<Model> */
     abstract protected function packageModel(): string;
 
-    /** @return class-string<Model> */
+    /** @return class-string<TenantSmsBalance|TenantWhatsappBalance> */
     abstract protected function balanceModel(): string;
 
     /** @return class-string<Model> */
@@ -180,7 +182,7 @@ abstract class BaseCreditsController extends Controller
     {
         $validated = $request->validate([
             'tenant_id' => 'required|exists:tenants,id',
-            'credits' => 'required|integer|min:1',
+            'credits' => 'required|integer|min:1|max:1000000',
             'reason' => 'nullable|string|max:500',
         ]);
 
@@ -188,8 +190,8 @@ abstract class BaseCreditsController extends Controller
         $purchaseModel = $this->purchaseModel();
 
         DB::transaction(function () use ($validated, $balanceModel, $purchaseModel) {
-            $balance = $balanceModel::getOrCreate($validated['tenant_id']);
-            $balance->addCredits($validated['credits']);
+            $balance = $balanceModel::getOrCreate((int) $validated['tenant_id']);
+            $balance->addCredits((int) $validated['credits']);
 
             $purchaseModel::create([
                 'tenant_id' => $validated['tenant_id'],

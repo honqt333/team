@@ -236,14 +236,15 @@ class CompanyTransactionController extends Controller
             ],
         ]);
 
-        $approvedAt = $request->filled('approved_at')
-            ? $request->date('approved_at')->format('Y-m-d')
-            : now()->toDateString();
+        $approvedAtDate = $request->filled('approved_at')
+            ? ($request->date('approved_at') ?? now())
+            : now();
+        $approvedAt = $approvedAtDate->format('Y-m-d');
 
         $tenantId = (int) $transaction->tenant_id;
 
         try {
-            DB::transaction(function () use ($transaction, $tenantId, $approvedAt) {
+            DB::transaction(function () use ($transaction, $tenantId, $approvedAt, $approvedAtDate) {
                 $user = auth()->user();
 
                 if ($transaction->is_taxable) {
@@ -438,7 +439,7 @@ class CompanyTransactionController extends Controller
 
                 $transaction->status = 'approved';
                 $transaction->approved_by = $user->id;
-                $transaction->approved_at = $approvedAt;
+                $transaction->approved_at = $approvedAtDate;
                 $transaction->save();
             });
 

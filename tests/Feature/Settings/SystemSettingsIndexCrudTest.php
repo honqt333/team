@@ -8,8 +8,11 @@ use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\VehicleMake;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class SystemSettingsIndexCrudTest extends TestCase
@@ -50,6 +53,13 @@ class SystemSettingsIndexCrudTest extends TestCase
             'current_center_id' => $this->center->id,
         ]);
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+
+        foreach ([Permissions::VEHICLE_SETTINGS_VIEW, Permissions::VEHICLE_SETTINGS_MANAGE] as $permName) {
+            Permission::findOrCreate($permName, 'web');
+            $this->user->givePermissionTo($permName);
+        }
     }
 
     public function test_user_can_view_makes_models_colors_and_condition_items_sections(): void

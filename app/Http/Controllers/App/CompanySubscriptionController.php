@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
-use App\Events\Billing\ReceiptSubmitted;
+use App\Exceptions\BankTransferException;
 use App\Exceptions\PaymentMismatchException;
 use App\Http\Controllers\Controller;
 use App\Models\BankTransferReceipt;
@@ -13,16 +13,16 @@ use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
+use App\Services\Billing\BankTransferService;
 use App\Services\Billing\PaymentCompletionService;
 use App\Services\Billing\PromoCodeValidator;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Payment\PaymentManager;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use RuntimeException;
 use Throwable;
 
 class CompanySubscriptionController extends Controller
@@ -31,7 +31,8 @@ class CompanySubscriptionController extends Controller
         protected PaymentManager $paymentManager,
         protected PaymentCompletionService $paymentCompletion,
         protected PromoCodeValidator $promoValidator,
-        protected SubscriptionLifecycleService $lifecycle
+        protected SubscriptionLifecycleService $lifecycle,
+        protected BankTransferService $bankTransferService
     ) {}
 
     /**
@@ -46,6 +47,8 @@ class CompanySubscriptionController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         return redirect()->route('app.billing.index');
     }
 
@@ -55,6 +58,8 @@ class CompanySubscriptionController extends Controller
      */
     public function calculatePrice(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'nullable|in:yearly',
@@ -111,6 +116,8 @@ class CompanySubscriptionController extends Controller
      */
     public function validatePromo(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'code' => 'required|string',
         ]);
@@ -142,6 +149,8 @@ class CompanySubscriptionController extends Controller
      */
     public function subscribe(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'nullable|in:yearly',
@@ -154,38 +163,36 @@ class CompanySubscriptionController extends Controller
         $billingCycle = 'yearly';
         $basePrice = (float) $plan->price_yearly;
 
-        // Guard: reject if the tenant already has an in-flight subscription.
-        // Without this, every click on "Subscribe now" creates a new pending
-        // subscription, payment, and (for bank transfer) receipt — so the
-        // history table fills with duplicate "pending" rows for the same
-        // tenant until they realize nothing's working.
         $existingPending = $tenant->subscriptions()
             ->whereIn('status', ['pending', 'pending_payment'])
             ->latest()
             ->first();
 
         if ($existingPending) {
-            // If the pending request has an uploaded bank receipt, it's under admin review
-            $hasReceipt = $existingPending->receipts()->exists();
+            $hasPendingReceipt = $existingPending->receipts()
+                ->where('status', BankTransferReceipt::STATUS_PENDING)
+                ->exists();
 
-            if (! $hasReceipt) {
-                // Online payment attempt or abandoned request: disassociate payment, clean up invoice & subscription
-                SubscriptionPayment::where('subscription_id', $existingPending->id)
-                    ->where('status', 'pending')
-                    ->update([
-                        'status' => 'failed',
-                        'failure_reason' => 'إلغاء تلقائي لبدء محاولة سداد جديدة',
-                        'subscription_id' => null,
-                        'subscription_invoice_id' => null,
-                    ]);
-                SubscriptionInvoice::where('subscription_id', $existingPending->id)->delete();
-                $existingPending->delete();
-            } else {
+            if ($hasPendingReceipt) {
                 $planName = $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en ?? 'المختارة';
 
                 return response()->json([
                     'error' => __('company_profile.subscription.receipt_under_review', ['plan' => $planName]),
                 ], 409);
+            }
+
+            $isSamePlanBankTransfer = $validated['gateway'] === 'bank_transfer'
+                && (int) $existingPending->plan_id === (int) $plan->id;
+
+            if (! $isSamePlanBankTransfer) {
+                try {
+                    $this->bankTransferService->cancelUnpaidPendingSubscription(
+                        $existingPending,
+                        'إلغاء تلقائي لبدء محاولة اشتراك أو وسيلة دفع جديدة'
+                    );
+                } catch (BankTransferException $e) {
+                    return response()->json(['error' => $e->getMessage()], $e->statusCode);
+                }
             }
         }
 
@@ -209,6 +216,65 @@ class CompanySubscriptionController extends Controller
         $vatRate = $paymentSettings?->getSubscriptionVatRate() ?? 0;
         $vatAmount = $vatCalc['vat'];
         $total = $vatCalc['total'];
+
+        // Handle bank transfer BEFORE opening any DB transaction: no orphan
+        // Subscription/Invoice rows are created until the tenant actually
+        // submits the bank transfer receipt.
+        if ($validated['gateway'] === 'bank_transfer') {
+            $policy = $this->bankTransferService->getPolicyConfig($paymentSettings);
+
+            if ($paymentSettings && ! $paymentSettings->bank_transfer_enabled) {
+                return response()->json([
+                    'error' => __('company_profile.subscription.bank_transfer_disabled', [
+                        'default' => 'خدمة التحويل البنكي غير متاحة حالياً.',
+                    ]),
+                ], 422);
+            }
+
+            if ($policy['min_amount_halalas'] > 0 && $this->bankTransferService->toHalalas($total) < $policy['min_amount_halalas']) {
+                return response()->json([
+                    'error' => __('company_profile.subscription.bank_transfer_min_amount_error', [
+                        'min' => $this->bankTransferService->fromHalalas($policy['min_amount_halalas']),
+                        'default' => 'الحد الأدنى لمبلغ التحويل البنكي هو :min.',
+                    ]),
+                ], 422);
+            }
+
+            $pendingInvoices = SubscriptionInvoice::query()
+                ->where('tenant_id', $tenant->id)
+                ->whereIn('status', ['pending', 'pending_payment', 'overdue'])
+                ->orderBy('due_at')
+                ->get(['id', 'invoice_number', 'total', 'due_at', 'status'])
+                ->map(fn (SubscriptionInvoice $inv): array => [
+                    'id' => $inv->id,
+                    'invoice_number' => $inv->invoice_number,
+                    'amount' => (float) $inv->total,
+                    'remaining_amount' => (float) $this->bankTransferService->fromHalalas(
+                        $this->bankTransferService->getRemainingHalalas($inv)
+                    ),
+                    'due_date' => $inv->due_at?->toDateString(),
+                    'status' => $inv->status,
+                ])
+                ->values()
+                ->all();
+
+            return response()->json([
+                'bank_transfer_setup' => true,
+                'plan' => $plan,
+                'billing_cycle' => $billingCycle,
+                'promo_code' => $promo?->code,
+                'subtotal' => $subtotal,
+                'vat' => $vatAmount,
+                'total' => $total,
+                'bank_accounts' => $paymentSettings->bank_accounts ?? [],
+                'bank_instructions' => $paymentSettings->bank_transfer_instructions,
+                'bank_transfer_min_amount' => (float) $this->bankTransferService->fromHalalas($policy['min_amount_halalas']),
+                'bank_transfer_max_days' => $policy['max_days'],
+                'bank_transfer_require_receipt' => $policy['require_receipt'],
+                'pending_invoices' => $pendingInvoices,
+                'message' => __('company_profile.subscription.bank_transfer_setup_ready'),
+            ]);
+        }
 
         $dates = $this->lifecycle->calculateRenewalDates($tenant, $billingCycle);
         $startDate = $dates['starts_at'];
@@ -252,50 +318,6 @@ class CompanySubscriptionController extends Controller
                 'issued_at' => now(),
                 'due_at' => now()->addDays(7),
             ]);
-
-            // Handle bank transfer: do NOT create the subscription/invoice
-            // yet. The tenant has to actually upload a receipt proving they
-            // transferred the money before anything is recorded. Otherwise
-            // a tenant who clicks "Bank transfer" by accident creates a
-            // pending subscription that the admin then has to clean up.
-            // Instead, return the data the upload form needs to compute
-            // price + VAT + bank account list. The receipt POST will
-            // create the subscription + invoice + receipt atomically.
-            if ($validated['gateway'] === 'bank_transfer') {
-                DB::rollBack();
-
-                // Pass any pre-existing unpaid invoices so the upload form
-                // can show an explicit "which invoice are you paying?"
-                // dropdown when the tenant has more than one open invoice.
-                // Empty array = single-invoice case, dropdown is hidden.
-                $pendingInvoices = $tenant->invoices()
-                    ->whereIn('status', ['pending', 'pending_payment', 'overdue'])
-                    ->orderBy('due_at')
-                    ->get(['id', 'invoice_number', 'total', 'due_at', 'status'])
-                    ->map(fn ($inv) => [
-                        'id' => $inv->id,
-                        'invoice_number' => $inv->invoice_number,
-                        'amount' => (float) $inv->total,
-                        'due_date' => $inv->due_at?->toDateString(),
-                        'status' => $inv->status,
-                    ])
-                    ->values()
-                    ->all();
-
-                return response()->json([
-                    'bank_transfer_setup' => true,
-                    'plan' => $plan,
-                    'billing_cycle' => $billingCycle,
-                    'promo_code' => $promo?->code,
-                    'subtotal' => $subtotal,
-                    'vat' => $vatAmount,
-                    'total' => $total,
-                    'bank_accounts' => $paymentSettings->bank_accounts ?? [],
-                    'bank_instructions' => $paymentSettings->bank_transfer_instructions,
-                    'pending_invoices' => $pendingInvoices,
-                    'message' => __('company_profile.subscription.bank_transfer_setup_ready'),
-                ]);
-            }
 
             // Initiate with payment gateway FIRST. For hosted gateways
             // (Tap, Tabby, Tamara) the gateway creates a charge on their
@@ -508,6 +530,8 @@ class CompanySubscriptionController extends Controller
      */
     public function cancelPending(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $tenant = auth()->user()->tenant;
 
         $pendingSub = Subscription::where('tenant_id', $tenant->id)
@@ -516,21 +540,13 @@ class CompanySubscriptionController extends Controller
             ->first();
 
         if ($pendingSub) {
-            // Do NOT delete/cancel if it has an uploaded bank receipt under review
-            $hasReceipt = $pendingSub->receipts()->exists();
-
-            if (! $hasReceipt) {
-                SubscriptionPayment::where('subscription_id', $pendingSub->id)
-                    ->where('status', 'pending')
-                    ->update([
-                        'status' => 'cancelled',
-                        'failure_reason' => 'ملغي من المستخدم',
-                        'subscription_id' => null,
-                        'subscription_invoice_id' => null,
-                    ]);
-
-                SubscriptionInvoice::where('subscription_id', $pendingSub->id)->delete();
-                $pendingSub->delete();
+            try {
+                $this->bankTransferService->cancelUnpaidPendingSubscription(
+                    $pendingSub,
+                    'ملغي من المستخدم'
+                );
+            } catch (BankTransferException $e) {
+                return response()->json(['error' => $e->getMessage()], $e->statusCode);
             }
         }
 
@@ -549,45 +565,85 @@ class CompanySubscriptionController extends Controller
      */
     public function cancel(Request $request, Subscription $subscription)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         if ($subscription->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'reason' => 'nullable|string|max:500',
         ]);
 
-        $isPaidActiveWithRemaining = $subscription->status === 'active'
-            && $subscription->ends_at
-            && $subscription->ends_at->isFuture();
+        try {
+            $result = DB::transaction(function () use ($subscription, $validated): string {
+                $lockedSub = Subscription::query()
+                    ->whereKey($subscription->id)
+                    ->where('tenant_id', $subscription->tenant_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-        if ($isPaidActiveWithRemaining) {
-            $subscription->update([
-                'auto_renew' => false,
-                'cancelled_at' => now(),
+                if (in_array($lockedSub->status, ['pending', 'pending_payment'], true)) {
+                    $this->bankTransferService->cancelUnpaidPendingSubscription(
+                        $lockedSub,
+                        $validated['reason'] ?? 'ملغي من المستخدم'
+                    );
+
+                    return 'cancelled';
+                }
+
+                $isPaidActiveWithRemaining = $lockedSub->status === 'active'
+                    && $lockedSub->ends_at
+                    && $lockedSub->ends_at->isFuture();
+
+                if ($isPaidActiveWithRemaining) {
+                    $lockedSub->update([
+                        'auto_renew' => false,
+                        'cancelled_at' => now(),
+                    ]);
+
+                    return 'auto_renew_cancelled';
+                }
+
+                $lockedSub->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'auto_renew' => false,
+                ]);
+
+                $hasActive = Subscription::where('tenant_id', $lockedSub->tenant_id)
+                    ->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->where(function ($q) {
+                        $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+                    })
+                    ->exists();
+
+                if (! $hasActive) {
+                    $lockedSub->tenant->update(['status' => 'expired']);
+                }
+
+                return 'cancelled';
+            });
+        } catch (BankTransferException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], $e->statusCode);
+            }
+
+            return back()->with('error', $e->getMessage());
+        }
+
+        $message = $result === 'auto_renew_cancelled'
+            ? __('company_profile.subscription.auto_renew_cancelled')
+            : __('company_profile.subscription.cancelled');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
             ]);
-
-            return back()->with('success', __('company_profile.subscription.auto_renew_cancelled'));
         }
 
-        $subscription->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-            'auto_renew' => false,
-        ]);
-
-        $hasActive = Subscription::where('tenant_id', $subscription->tenant_id)
-            ->whereIn('status', ['active', 'trial', 'trialing'])
-            ->where(function ($q) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
-            })
-            ->exists();
-
-        if (! $hasActive) {
-            $subscription->tenant->update(['status' => 'expired']);
-        }
-
-        return back()->with('success', __('company_profile.subscription.cancelled'));
+        return back()->with('success', $message);
     }
 
     /**
@@ -595,6 +651,8 @@ class CompanySubscriptionController extends Controller
      */
     public function toggleAutoRenew(Request $request, Subscription $subscription)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         if ($subscription->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
@@ -614,6 +672,8 @@ class CompanySubscriptionController extends Controller
      */
     public function resume(Request $request, Subscription $subscription)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         if ($subscription->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
@@ -663,62 +723,43 @@ class CompanySubscriptionController extends Controller
      */
     public function uploadReceipt(Request $request, Subscription $subscription)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         // Verify the subscription belongs to this tenant
         if ($subscription->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'transfer_amount' => 'required|numeric|min:0.01',
-            'transfer_reference' => 'required|string|max:255',
-            'transfer_date' => 'required|date',
-            'bank_name' => 'required|string|max:255',
-            'account_name' => 'required|string|max:255',
-            'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        $tenant = auth()->user()->tenant;
+
+        if (! $tenant) {
+            abort(403);
+        }
+
+        $policy = $this->bankTransferService->getPolicyConfig();
+        $idempotencyKey = $request->header('Idempotency-Key') ?: $request->input('idempotency_key');
+        $normalizedKey = is_string($idempotencyKey) ? $idempotencyKey : null;
+        $validated = $request->validate(
+            $this->bankTransferService->buildValidationRules(
+                (int) $subscription->tenant_id,
+                false,
+                $policy['require_receipt'],
+                $normalizedKey
+            )
+        );
 
         try {
-            return DB::transaction(function () use ($request, $subscription, $validated) {
-                $file = $request->file('receipt');
-                $path = $file->store("bank-transfer-receipts/{$subscription->tenant_id}", 'local');
+            $this->bankTransferService->submitReceipt(
+                $tenant,
+                $validated,
+                $request->file('receipt'),
+                $normalizedKey,
+                $subscription
+            );
 
-                throw_unless($path, RuntimeException::class, 'Receipt storage failed.');
-
-                // Find the latest pending payment for this subscription, if any
-                $payment = $subscription->payments()
-                    ->whereIn('status', ['pending', 'pending_payment'])
-                    ->latest()
-                    ->first();
-
-                $receipt = BankTransferReceipt::create([
-                    'tenant_id' => $subscription->tenant_id,
-                    'subscription_id' => $subscription->id,
-                    'subscription_payment_id' => $payment?->id,
-                    'transfer_amount' => $validated['transfer_amount'],
-                    'transfer_reference' => $validated['transfer_reference'],
-                    'transfer_date' => $validated['transfer_date'],
-                    'bank_name' => $validated['bank_name'],
-                    'account_name' => $validated['account_name'],
-                    'receipt_path' => $path,
-                    'status' => 'pending',
-                    'notes' => $validated['notes'] ?? null,
-                ]);
-
-                // Fire the event AFTER the DB::transaction so listeners
-                // see the committed row. We use event() (synchronous) here
-                // because the notification is just an INSERT — no need
-                // for a queue worker on a small system. Switch to
-                // ReceiptSubmitted::dispatch() if you want it queued.
-                event(new ReceiptSubmitted($receipt));
-
-                // Move the subscription to pending_payment while admin reviews
-                if ($subscription->status !== 'pending_payment') {
-                    $subscription->update(['status' => 'pending_payment']);
-                }
-
-                return back()->with('success', __('company_profile.subscription.receipt_uploaded'));
-            });
+            return back()->with('success', __('company_profile.subscription.receipt_uploaded'));
+        } catch (BankTransferException $e) {
+            return back()->withErrors(['receipt' => $e->getMessage()]);
         } catch (Throwable $e) {
             Log::error('Bank transfer receipt upload failed', [
                 'subscription_id' => $subscription->id,
@@ -750,181 +791,52 @@ class CompanySubscriptionController extends Controller
      */
     public function uploadBankTransferReceipt(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $tenant = auth()->user()->tenant;
 
-        $validated = $request->validate([
-            'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'nullable|in:yearly',
-            'promo_code' => 'nullable|string|max:50',
-            'transfer_amount' => 'required|numeric|min:0.01',
-            // The reference is unique per tenant for PENDING receipts.
-            // Once a receipt is approved/rejected, the tenant can re-use
-            // the same reference (e.g. correcting a typo) — only the
-            // active review queue matters for fraud detection.
-            'transfer_reference' => [
-                'required', 'string', 'max:255',
-                Rule::unique('bank_transfer_receipts', 'transfer_reference')
-                    ->where('tenant_id', $tenant->id)
-                    ->where('status', BankTransferReceipt::STATUS_PENDING),
-            ],
-            'transfer_date' => 'required|date|before_or_equal:today',
-            'bank_name' => 'required|string|max:255',
-            'account_name' => 'required|string|max:255',
-            'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB
-            'notes' => 'nullable|string|max:1000',
-            // Optional: link the receipt to a specific invoice instead of
-            // the implicit "latest pending payment" fallback. The invoice
-            // must belong to the same tenant to prevent cross-tenant
-            // receipt routing.
-            'subscription_invoice_id' => [
-                'nullable',
-                Rule::exists('subscription_invoices', 'id')
-                    ->where('tenant_id', $tenant->id),
-            ],
-        ]);
-
-        // Re-validate tenant after the (now tenant-scoped) rules — the
-        // $tenant above was loaded before the validator ran, which is
-        // fine for the unique check but we want to bail out cleanly if
-        // somehow the user has no tenant (defensive).
         if (! $tenant) {
             return response()->json(['error' => 'لا يوجد مستأجر مرتبط بحسابك'], 403);
         }
-        $plan = Plan::findOrFail($validated['plan_id']);
-        $basePrice = (float) $plan->price_yearly;
 
-        // Guard: don't allow creating a second pending subscription.
-        $existingPending = $tenant->subscriptions()
-            ->whereIn('status', ['pending', 'pending_payment'])
-            ->latest()
-            ->first();
-
-        if ($existingPending) {
-            // Same UX as subscribe(): distinguish between `pending`
-            // (payment in flight) and `pending_payment` (receipt
-            // awaiting admin approval).
-            $message = $existingPending->status === 'pending_payment'
-                ? __('company_profile.subscription.receipt_under_review', [
-                    'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
-                    'default' => 'إيصال تحويل بنكي لـ ":plan" قيد المراجعة من الإدارة. انتظر الموافقة أو ألغِ الطلب الحالي.',
-                ])
-                : __('company_profile.subscription.payment_in_progress', [
-                    'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
-                    'default' => 'لديك طلب دفع جارٍ لـ ":plan" — أكمل الدفع أو ألغِه قبل رفع إيصال جديد.',
-                ]);
-
-            return response()->json([
-                'error' => $message,
-                'pending_status' => $existingPending->status,
-                'pending_subscription_id' => $existingPending->id,
-            ], 409);
-        }
-
-        // Apply promo (mirrors subscribe() logic)
-        $discount = 0;
-        $promo = null;
-
-        if (! empty($validated['promo_code'])) {
-            $check = $this->promoValidator->check($validated['promo_code'], $tenant->id);
-            $promo = $check->promo;
-            $discount = $this->promoValidator->discountFor($check, $basePrice);
-        }
-
-        $subtotal = $basePrice - $discount;
-        $paymentSettings = PaymentSettings::first();
-        $vatCalc = $paymentSettings?->calculateVat($subtotal) ?? [
-            'exclusive' => $subtotal,
-            'vat' => 0,
-            'total' => $subtotal,
-        ];
-        $total = $vatCalc['total'];
+        $policy = $this->bankTransferService->getPolicyConfig();
+        $requirePlan = ! $request->filled('subscription_invoice_id');
+        $idempotencyKey = $request->header('Idempotency-Key') ?: $request->input('idempotency_key');
+        $normalizedKey = is_string($idempotencyKey) ? $idempotencyKey : null;
+        $validated = $request->validate(
+            $this->bankTransferService->buildValidationRules(
+                (int) $tenant->id,
+                $requirePlan,
+                $policy['require_receipt'],
+                $normalizedKey
+            )
+        );
 
         try {
-            return DB::transaction(function () use ($request, $tenant, $plan, $validated, $basePrice, $discount, $subtotal, $total, $promo) {
-                $dates = $this->lifecycle->calculateRenewalDates($tenant, 'yearly');
-                $startDate = $dates['starts_at'];
-                $endDate = $dates['ends_at'];
+            $result = $this->bankTransferService->submitReceipt(
+                $tenant,
+                $validated,
+                $request->file('receipt'),
+                $normalizedKey
+            );
 
-                $subscription = Subscription::create([
-                    'tenant_id' => $tenant->id,
-                    'plan_id' => $plan->id,
-                    'status' => 'pending_payment',
-                    'billing_cycle' => 'yearly',
-                    'starts_at' => $startDate,
-                    'ends_at' => $endDate,
-                    'price' => $basePrice,
-                    'discount_amount' => $discount,
-                    'promo_code' => $validated['promo_code'] ?? null,
-                    'auto_renew' => true,
-                ]);
-
-                if ($promo) {
-                    $this->promoValidator->recordUsage($promo, $tenant->id, $subscription->id, $discount);
-                }
-
-                // 2. Invoice
-                $invoice = SubscriptionInvoice::create([
-                    'subscription_id' => $subscription->id,
-                    'tenant_id' => $tenant->id,
-                    'invoice_number' => 'SUB-'.str_pad((string) $subscription->id, 6, '0', STR_PAD_LEFT).'-'.now()->format('Ymd'),
-                    'subtotal' => $subtotal,
-                    'vat' => $total - $subtotal,
-                    'discount' => $discount,
-                    'total' => $total,
-                    'status' => 'pending',
-                    'issued_at' => now(),
-                    'due_at' => now()->addDays(7),
-                ]);
-
-                // 3. Payment (status=pending until admin approves receipt)
-                $payment = SubscriptionPayment::create([
-                    'tenant_id' => $tenant->id,
-                    'subscription_id' => $subscription->id,
-                    'subscription_invoice_id' => $invoice->id,
-                    'amount' => $total,
-                    'currency' => PaymentSettings::getPlatformCurrency(),
-                    'gateway' => 'bank_transfer',
-                    'status' => 'pending',
-                ]);
-
-                // 4. Receipt — the only thing the tenant actively uploads.
-                $file = $request->file('receipt');
-                $path = $file->store("bank-transfer-receipts/{$tenant->id}", 'local');
-                throw_unless($path, RuntimeException::class, 'Receipt storage failed.');
-
-                $receipt = BankTransferReceipt::create([
-                    'tenant_id' => $tenant->id,
-                    'subscription_id' => $subscription->id,
-                    'subscription_payment_id' => $payment->id,
-                    'transfer_amount' => $validated['transfer_amount'],
-                    'transfer_reference' => $validated['transfer_reference'],
-                    'transfer_date' => $validated['transfer_date'],
-                    'bank_name' => $validated['bank_name'],
-                    'account_name' => $validated['account_name'],
-                    'receipt_path' => $path,
-                    'status' => 'pending',
-                    'notes' => $validated['notes'] ?? null,
-                ]);
-
-                // Fire the event AFTER the DB::transaction commits so the
-                // listener can read the row safely. Synchronous — the
-                // listener just writes one row per admin. Move to
-                // ReceiptSubmitted::dispatch() if you want queueing.
-                event(new ReceiptSubmitted($receipt));
-
-                return response()->json([
-                    'success' => true,
-                    'subscription' => $subscription->fresh()->load('plan'),
-                    'invoice' => $invoice,
-                    'payment' => $payment,
-                    'receipt' => $receipt,
-                    'message' => __('company_profile.subscription.receipt_uploaded'),
-                ]);
-            });
+            return response()->json([
+                'success' => true,
+                'idempotent_replay' => $result['idempotent_replay'],
+                'subscription' => $result['subscription'],
+                'invoice' => $result['invoice'],
+                'payment' => $result['payment'],
+                'receipt' => $result['receipt'],
+                'message' => __('company_profile.subscription.receipt_uploaded'),
+            ]);
+        } catch (BankTransferException $e) {
+            return response()->json(array_merge([
+                'error' => $e->getMessage(),
+            ], $e->context), $e->statusCode);
         } catch (Throwable $e) {
             Log::error('Bank transfer receipt+subscription creation failed', [
                 'tenant_id' => $tenant->id,
-                'plan_id' => $plan->id,
+                'plan_id' => $validated['plan_id'] ?? null,
                 'error' => $e->getMessage(),
             ]);
 
@@ -944,6 +856,8 @@ class CompanySubscriptionController extends Controller
      */
     public function checkTransferReference(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'ref' => 'required|string|max:255',
         ]);
@@ -975,6 +889,8 @@ class CompanySubscriptionController extends Controller
      */
     public function myReceipts(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         return redirect()->route('app.billing.index');
     }
 
@@ -989,6 +905,8 @@ class CompanySubscriptionController extends Controller
      */
     public function updateDunningPreferences(Request $request)
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $validated = $request->validate([
             'dunning_opted_out' => ['required', 'boolean'],
             'dunning_language' => ['nullable', 'in:ar,en'],

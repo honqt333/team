@@ -10,6 +10,7 @@ use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
+use App\Services\Billing\BankTransferService;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Payment\PaymentManager;
 use App\Support\Permissions;
@@ -165,9 +166,11 @@ class BillingController extends Controller
             });
 
         // Subscription history — legitimate past subscriptions except the
-        // current one. Only subscriptions with paid payments, uploaded receipts,
-        // or trials are included. Provisional unconfirmed checkout attempts
-        // are excluded (they appear in recentPayments).
+        // current one. Includes paid subscriptions, uploaded receipts,
+        // trials (active or expired), complimentary/manual activations,
+        // and any subscription that reached active/expired/cancelled.
+        // Provisional unconfirmed checkout attempts (pending/failed) are
+        // excluded (they appear in recentPayments).
         $currentSubId = $currentSubscription && ! is_array($currentSubscription)
             ? $currentSubscription->id
             : null;
@@ -178,7 +181,9 @@ class BillingController extends Controller
             ->where(function ($q) {
                 $q->whereHas('payments', fn ($p) => $p->where('status', 'paid'))
                     ->orWhereHas('receipts')
-                    ->orWhereIn('status', ['trial', 'trialing']);
+                    ->orWhereIn('status', ['active', 'trial', 'trialing', 'expired', 'cancelled'])
+                    ->orWhere('payment_method', 'complimentary')
+                    ->orWhereNotNull('trial_ends_at');
             })
             ->orderByDesc('created_at')
             ->limit(50)
@@ -265,6 +270,7 @@ class BillingController extends Controller
         ];
 
         return Inertia::render('Settings/Billing/Index', [
+            'billing_state' => app(BankTransferService::class)->getTenantBillingState($tenant),
             'current_subscription' => $currentSubscription,
             'subscription_lifecycle' => $lifecyclePayload,
             'available_plans' => $plans,
@@ -279,6 +285,7 @@ class BillingController extends Controller
                 'per_page' => $perPage,
             ],
             'enabled_gateways' => $enabledGateways,
+            'payment_icons' => PaymentSettings::getPaymentIconsConfig(),
             'payment_settings' => $paymentSettings->checkoutSettings(),
             'company_info' => $paymentSettings->getCompanyInfo(),
             'vat_settings' => [

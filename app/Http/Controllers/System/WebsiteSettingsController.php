@@ -439,11 +439,13 @@ class WebsiteSettingsController extends Controller
             }
         }
 
-        // Immediate persistence for logo & favicon
+        // Immediate persistence for logo & favicon (clean up old file first)
         if ($request->key === 'website_logo') {
+            $this->deleteStoredWebsiteFile((string) Setting::get('website.logo', ''), $url);
             Setting::set('website.logo', $url, 'website');
             self::flushSettingsCache();
         } elseif ($request->key === 'website_favicon') {
+            $this->deleteStoredWebsiteFile((string) Setting::get('website.favicon', ''), $url);
             Setting::set('website.favicon', $url, 'website');
             self::flushSettingsCache();
         }
@@ -460,6 +462,28 @@ class WebsiteSettingsController extends Controller
         }
 
         return response()->json(['url' => $url]);
+    }
+
+    /**
+     * Delete a previously uploaded website media file from the public disk.
+     */
+    private function deleteStoredWebsiteFile(string $oldUrl, string $newUrl = ''): void
+    {
+        if ($oldUrl === '' || $oldUrl === $newUrl) {
+            return;
+        }
+
+        $parsedPath = (string) parse_url($oldUrl, PHP_URL_PATH);
+
+        if (! str_starts_with($parsedPath, '/storage/website/')) {
+            return;
+        }
+
+        $relativePath = ltrim(substr($parsedPath, strlen('/storage/')), '/');
+
+        if ($relativePath !== '' && Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
+        }
     }
 
     /**

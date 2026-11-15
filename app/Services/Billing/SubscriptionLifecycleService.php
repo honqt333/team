@@ -425,6 +425,43 @@ class SubscriptionLifecycleService
     }
 
     /**
+     * Atomically extend an existing subscription by one calendar billing cycle
+     * (`monthly` -> addMonth(), `yearly` -> addYear()), preserving any remaining
+     * future validity and restoring active status on subscription and tenant.
+     */
+    public function extendSubscriptionByCycle(Subscription $subscription, ?string $billingCycle = null): Subscription
+    {
+        return DB::transaction(function () use ($subscription, $billingCycle) {
+            $subscription->loadMissing(['tenant']);
+            $now = Carbon::now();
+            $cycle = $billingCycle ?: ($subscription->billing_cycle ?: 'yearly');
+
+            $currentEnd = $subscription->ends_at ? Carbon::parse($subscription->ends_at) : null;
+            $baseEnd = ($currentEnd && $currentEnd->isFuture()) ? $currentEnd->copy() : $now->copy();
+            $newEndsAt = $cycle === 'monthly'
+                ? $baseEnd->copy()->addMonth()
+                : $baseEnd->copy()->addYear();
+
+            $subscription->update([
+                'status' => 'active',
+                'ends_at' => $newEndsAt,
+                'cancelled_at' => null,
+            ]);
+
+            if ($subscription->tenant) {
+                $subscription->tenant->update([
+                    'status' => 'active',
+                    'suspended_at' => null,
+                    'auto_suspended_at' => null,
+                    'suspension_reason' => null,
+                ]);
+            }
+
+            return $subscription->fresh();
+        });
+    }
+
+    /**
      * Atomically extend a subscription by N days.
      * If already expired (or null ends_at), starts from now() so the extension takes effect immediately.
      * Restores active/trialing state on both subscription and tenant and clears suspension fields.

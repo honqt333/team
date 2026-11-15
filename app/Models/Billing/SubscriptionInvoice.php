@@ -16,10 +16,17 @@ class SubscriptionInvoice extends Model
 {
     use HasFactory, TenantScoped;
 
+    public const OPERATION_NEW = 'new';
+
+    public const OPERATION_RENEWAL = 'renewal';
+
+    public const OPERATION_UPGRADE = 'upgrade';
+
     protected $fillable = [
         'subscription_id',
         'tenant_id',
         'invoice_number',
+        'operation_type',
         'seller_name_snapshot',
         'seller_name_en_snapshot',
         'seller_vat_snapshot',

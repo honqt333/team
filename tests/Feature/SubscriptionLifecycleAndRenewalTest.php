@@ -18,6 +18,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Billing\SubscriptionRenewalService;
+use App\Support\Permissions;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -68,6 +69,7 @@ class SubscriptionLifecycleAndRenewalTest extends TestCase
             'name' => 'super_admin',
             'guard_name' => 'web',
         ]);
+        $superAdminRole->givePermissionTo(Permissions::COMPANY_MANAGE);
         $user->assignRole($superAdminRole);
 
         return [$tenant, $center, $user];

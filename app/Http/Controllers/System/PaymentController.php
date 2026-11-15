@@ -159,6 +159,8 @@ class PaymentController extends Controller
 
         return Inertia::render('System/Payment/Success', [
             'payment' => $payment,
+            'subscription' => $payment->subscription,
+            'isConfirmedPaid' => $payment->isSuccessful(),
         ]);
     }
 
@@ -171,6 +173,8 @@ class PaymentController extends Controller
 
         return Inertia::render('System/Payment/Failed', [
             'payment' => $payment,
+            'subscription' => $payment->subscription,
+            'isConfirmedPaid' => $payment->isSuccessful(),
         ]);
     }
 
@@ -179,7 +183,7 @@ class PaymentController extends Controller
      */
     public function retry(SubscriptionPayment $payment)
     {
-        if ($payment->status !== 'failed') {
+        if ($payment->status !== 'failed' || ! $payment->subscription_id || ! $payment->subscription) {
             return back()->with('error', __('messages.system.payment.retry_unavailable'));
         }
 

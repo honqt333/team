@@ -14,10 +14,12 @@ use App\Models\PaymentSettings;
 use App\Models\PurchaseInvoice;
 use App\Models\TaxPeriod;
 use App\Models\Tenant;
+use App\Services\Billing\BankTransferService;
 use App\Services\Payment\PaymentManager;
 use App\Services\Zatca\ZatcaOnboardingService;
 use App\Support\CountryCurrencyRegistry;
 use App\Support\Media\ImageType;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -31,8 +33,12 @@ class CompanyProfileController extends Controller
     /**
      * Display the company profile settings page.
      */
-    public function index(): Response
+    public function index(Request $request): Response|RedirectResponse
     {
+        if ($request->query('tab') === 'notifications') {
+            return redirect()->route('app.addons.whatsapp.index', ['tab' => 'templates']);
+        }
+
         $tenant = auth()->user()->tenant;
         $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
 
@@ -241,6 +247,7 @@ class CompanyProfileController extends Controller
 
                 return $sub;
             }),
+            'billing_state' => fn () => app(BankTransferService::class)->getTenantBillingState($tenant),
             'available_plans' => fn () => Plan::where('is_active', true)
                 ->orderBy('price_yearly', 'asc')
                 ->get(),
@@ -303,8 +310,8 @@ class CompanyProfileController extends Controller
 
         // Delete old logo only once the new one is known to be good — a
         // rejected upload must not leave the tenant without a logo.
-        if ($tenant->logo_path && Storage::exists($tenant->logo_path)) {
-            Storage::delete($tenant->logo_path);
+        if ($tenant->logo_path && Storage::disk('public')->exists($tenant->logo_path)) {
+            Storage::disk('public')->delete($tenant->logo_path);
         }
 
         $directory = "tenants/{$tenant->id}";
@@ -328,8 +335,8 @@ class CompanyProfileController extends Controller
     {
         $tenant = auth()->user()->tenant;
 
-        if ($tenant->logo_path && Storage::exists($tenant->logo_path)) {
-            Storage::delete($tenant->logo_path);
+        if ($tenant->logo_path && Storage::disk('public')->exists($tenant->logo_path)) {
+            Storage::disk('public')->delete($tenant->logo_path);
         }
 
         $tenant->update(['logo_path' => null]);
