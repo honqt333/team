@@ -121,8 +121,41 @@ else
   exit 1
 fi
 
-# 5. Document Root & public_html Diagnostic (Strictly Non-Destructive)
-echo "==> 5. Inspecting Document Root ($PUBLIC_HTML)..."
+# 5. Symlink Capability Test
+echo "==> 5. Verifying filesystem symlink support..."
+TEST_SYMLINK_SRC="/tmp/khidmh_symlink_src_$$"
+TEST_SYMLINK_DST="/tmp/khidmh_symlink_dst_$$"
+touch "$TEST_SYMLINK_SRC" 2>/dev/null || true
+if ln -s "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST" 2>/dev/null; then
+  echo "✅ Filesystem supports symbolic links."
+  rm -f "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST"
+else
+  echo "❌ ERROR: Filesystem does NOT support symbolic links! Atomic zero-downtime deployment requires symlink support."
+  rm -f "$TEST_SYMLINK_SRC" 2>/dev/null || true
+  exit 1
+fi
+
+# 6. Disk Space Diagnostic
+echo "==> 6. Checking available disk space..."
+if command -v df >/dev/null 2>&1; then
+  CHECK_PATH="$DEPLOY_ROOT"
+  [ ! -d "$CHECK_PATH" ] && CHECK_PATH="$HOME"
+  df -h "$CHECK_PATH" | awk 'NR==1 || NR==2 {print "  " $0}'
+  echo "✅ Disk space inspected."
+else
+  echo "ℹ️  'df' command not available to check disk space."
+fi
+
+# 7. Cron Scheduler Availability
+echo "==> 7. Checking Cron scheduler availability..."
+if command -v crontab >/dev/null 2>&1; then
+  echo "✅ crontab command is available for Laravel task scheduling."
+else
+  echo "⚠️  WARNING: crontab is not available in PATH. Configure schedule:run via Hostinger hPanel Cron Jobs."
+fi
+
+# 8. Document Root & public_html Diagnostic (Strictly Non-Destructive)
+echo "==> 8. Inspecting Document Root ($PUBLIC_HTML)..."
 
 if [ -L "$PUBLIC_HTML" ]; then
   CURRENT_TARGET=$(readlink -f "$PUBLIC_HTML" || true)
@@ -146,8 +179,8 @@ else
   echo "     ln -s $DEPLOY_ROOT/current/public $PUBLIC_HTML"
 fi
 
-# 6. Deployment Directories: Inspection (--check) vs Scaffolding (--apply)
-echo "==> 6. Deployment Directory Structure..."
+# 9. Deployment Directories: Inspection (--check) vs Scaffolding (--apply)
+echo "==> 9. Deployment Directory Structure & Permissions..."
 REQUIRED_DIRS=(
   "$DEPLOY_ROOT/releases"
   "$DEPLOY_ROOT/tmp"
@@ -163,7 +196,11 @@ if [ "$MODE" = "check" ]; then
   ALL_EXIST=true
   for d in "${REQUIRED_DIRS[@]}"; do
     if [ -d "$d" ]; then
-      echo "  ✅ Exists: $d"
+      if [ -w "$d" ]; then
+        echo "  ✅ Exists and writable: $d"
+      else
+        echo "  ⚠️  Exists but NOT writable: $d"
+      fi
     else
       echo "  ℹ️  Not yet provisioned: $d (Will be created when running with --apply)"
       ALL_EXIST=false
@@ -190,8 +227,8 @@ else
   echo "✅ Scaffolding successfully applied."
 fi
 
-# 7. Shared Environment File Status
-echo "==> 7. Checking shared environment configuration..."
+# 10. Shared Environment File Status
+echo "==> 10. Checking shared environment configuration..."
 if [ -f "$DEPLOY_ROOT/shared/.env" ]; then
   echo "✅ $DEPLOY_ROOT/shared/.env is present."
   if [ "$MODE" = "apply" ]; then

@@ -97,16 +97,15 @@ jobs:
 
       - name: Verify archive security and completeness
         run: |
-          LIST=$(tar -tzf /tmp/release.tar.gz)
-          if echo "$LIST" | grep -qE '(^|\./)(\.env(\.|$)|storage/app/|.*\.sql(\.gz)?$|.*\.pem$|.*\.key$|id_ed25519|id_rsa)'; then
+          if tar -tzf /tmp/release.tar.gz | grep -qE '(^|\./)(\.env(\.|$)|storage/app/|.*\.sql(\.gz)?$|.*\.pem$|.*\.key$|id_ed25519|id_rsa)'; then
             echo "ERROR: Forbidden sensitive file detected inside release archive!"
             exit 1
           fi
-          if ! echo "$LIST" | grep -qE '(^|\./)public/build/manifest\.json$'; then
+          if ! tar -tzf /tmp/release.tar.gz | grep -qE '(^|\./)public/build/manifest\.json$'; then
             echo "ERROR: public/build/manifest.json missing from release archive!"
             exit 1
           fi
-          if ! echo "$LIST" | grep -qE '(^|\./)vendor/autoload\.php$'; then
+          if ! tar -tzf /tmp/release.tar.gz | grep -qE '(^|\./)vendor/autoload\.php$'; then
             echo "ERROR: vendor/autoload.php missing from release archive!"
             exit 1
           fi
