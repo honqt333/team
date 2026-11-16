@@ -666,6 +666,7 @@ class PurchasingService
     ): array {
         $taxCalculator = app(TaxCalculator::class);
         $defaultTaxRate = (float) ($workOrder->tenant?->taxSettings?->default_tax_rate ?? 15.0);
+        /** @var array<int, WorkOrderPurchaseAllocation> $createdAllocations */
         $createdAllocations = [];
 
         $invoice = DB::transaction(function () use (
@@ -752,7 +753,8 @@ class PurchasingService
                     'total' => $entry['total'],
                 ]);
 
-                $createdAllocations[] = $workOrder->purchaseAllocations()->create([
+                /** @var WorkOrderPurchaseAllocation $allocation */
+                $allocation = $workOrder->purchaseAllocations()->create([
                     'tenant_id' => $workOrder->tenant_id,
                     'center_id' => $workOrder->center_id,
                     'purchase_invoice_id' => $purchaseInvoice->id,
@@ -767,6 +769,7 @@ class PurchasingService
                     'total_cost' => $entry['total'],
                     'notes' => $line['notes'] ?? null,
                 ]);
+                $createdAllocations[] = $allocation;
             }
 
             return $purchaseInvoice;

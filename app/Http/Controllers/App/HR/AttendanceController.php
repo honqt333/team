@@ -104,38 +104,40 @@ class AttendanceController extends Controller
         $search = $request->input('search');
         $statusFilter = $request->input('status');
 
-        $filteredEmployees = $employees
-            ->when($search, function ($collection, $search) {
-                $search = mb_strtolower((string) $search);
+        $filteredEmployees = $employees;
 
-                return $collection->filter(function ($e) use ($search) {
-                    return str_contains(mb_strtolower((string) ($e['name_ar'] ?? '')), $search)
-                        || str_contains(mb_strtolower((string) ($e['name_en'] ?? '')), $search)
-                        || str_contains(mb_strtolower((string) ($e['employee_number'] ?? '')), $search);
-                });
-            })
-            ->when($statusFilter, function ($collection, $statusFilter) {
-                return $collection->filter(function ($e) use ($statusFilter) {
-                    if ($statusFilter === 'present') {
-                        return $e['attendance'] && $e['attendance']['status'] === 'present';
-                    }
+        if ($search) {
+            $searchLower = mb_strtolower((string) $search);
+            $filteredEmployees = $filteredEmployees->filter(function ($e) use ($searchLower) {
+                return str_contains(mb_strtolower((string) ($e['name_ar'] ?? '')), $searchLower)
+                    || str_contains(mb_strtolower((string) ($e['name_en'] ?? '')), $searchLower)
+                    || str_contains(mb_strtolower((string) ($e['employee_number'] ?? '')), $searchLower);
+            });
+        }
 
-                    if ($statusFilter === 'absent') {
-                        return (! $e['attendance'] && ! $e['is_on_leave']) || ($e['attendance'] && $e['attendance']['status'] === 'absent');
-                    }
+        if ($statusFilter) {
+            $filteredEmployees = $filteredEmployees->filter(function ($e) use ($statusFilter) {
+                if ($statusFilter === 'present') {
+                    return $e['attendance'] && $e['attendance']['status'] === 'present';
+                }
 
-                    if ($statusFilter === 'late') {
-                        return ($e['attendance']['late_minutes'] ?? 0) > 0;
-                    }
+                if ($statusFilter === 'absent') {
+                    return (! $e['attendance'] && ! $e['is_on_leave']) || ($e['attendance'] && $e['attendance']['status'] === 'absent');
+                }
 
-                    if ($statusFilter === 'leave') {
-                        return $e['is_on_leave'] || ($e['attendance'] && $e['attendance']['status'] === 'leave');
-                    }
+                if ($statusFilter === 'late') {
+                    return ($e['attendance']['late_minutes'] ?? 0) > 0;
+                }
 
-                    return true;
-                });
-            })
-            ->values();
+                if ($statusFilter === 'leave') {
+                    return $e['is_on_leave'] || ($e['attendance'] && $e['attendance']['status'] === 'leave');
+                }
+
+                return true;
+            });
+        }
+
+        $filteredEmployees = $filteredEmployees->values();
 
         return Inertia::render('HR/Attendance/Index', [
             'employees' => $filteredEmployees,

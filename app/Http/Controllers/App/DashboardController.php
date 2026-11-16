@@ -31,6 +31,8 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        /** @var Tenant|null $tenant */
+        $tenant = $user?->tenant;
         $tenantId = TenancyContext::tenantId() ?? $user?->tenant_id;
         $centerId = TenancyContext::centerId() ?? $user?->current_center_id;
 
@@ -860,7 +862,7 @@ class DashboardController extends Controller
             'checkedOutPaymentDue' => $checkedOutPaymentDue,
             'activeWorkshopVehicles' => $activeWorkshopVehicles,
             'workingTechniciansNow' => $workingTechniciansNow,
-            'currency' => CountryCurrencyRegistry::tenantCurrency($user?->tenant),
+            'currency' => CountryCurrencyRegistry::tenantCurrency($tenant),
         ];
 
         if (! app()->runningUnitTests()) {

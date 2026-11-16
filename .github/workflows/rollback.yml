@@ -1,0 +1,47 @@
+name: Rollback Staging Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_release:
+        description: 'Target release folder name (leave empty for previous release)'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Rollback Code & Assets (No DB Changes)
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout rollback script
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/rollback-release.sh
+
+      - name: Setup SSH key and host verification
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.STAGING_SSH_PORT }}" -H "${{ secrets.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Upload and execute rollback script
+        run: |
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.STAGING_SSH_PORT }}" \
+            scripts/rollback-release.sh \
+            "${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}:${{ secrets.STAGING_DEPLOY_PATH }}/tmp/"
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.STAGING_SSH_PORT }}" \
+            "${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}" \
+            "chmod +x ${{ secrets.STAGING_DEPLOY_PATH }}/tmp/rollback-release.sh && \
+            DEPLOY_ROOT='${{ secrets.STAGING_DEPLOY_PATH }}' \
+            TARGET_RELEASE='${{ inputs.target_release }}' \
+            bash ${{ secrets.STAGING_DEPLOY_PATH }}/tmp/rollback-release.sh"

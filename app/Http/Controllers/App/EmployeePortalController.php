@@ -442,9 +442,9 @@ class EmployeePortalController extends Controller
      */
     private function verifyGeofence(Employee $employee, array $validated, string $action = 'clock_in'): array
     {
-        $latitude = isset($validated['latitude']) && $validated['latitude'] !== null ? (float) $validated['latitude'] : null;
-        $longitude = isset($validated['longitude']) && $validated['longitude'] !== null ? (float) $validated['longitude'] : null;
-        $accuracy = isset($validated['accuracy']) && $validated['accuracy'] !== null ? (float) $validated['accuracy'] : null;
+        $latitude = isset($validated['latitude']) ? (float) $validated['latitude'] : null;
+        $longitude = isset($validated['longitude']) ? (float) $validated['longitude'] : null;
+        $accuracy = isset($validated['accuracy']) ? (float) $validated['accuracy'] : null;
         $lowConfidence = $accuracy !== null && $accuracy > 100.0;
 
         $settings = AttendanceSettings::getForCenter((int) $employee->center_id);

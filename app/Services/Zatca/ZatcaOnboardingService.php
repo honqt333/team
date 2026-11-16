@@ -526,7 +526,7 @@ class ZatcaOnboardingService
         $tlv .= chr(7).chr(strlen($rawSignature)).$rawSignature;
         $tlv .= chr(8).chr(strlen($pubKeyDer)).$pubKeyDer;
 
-        if (empty($tlv)) {
+        if (strlen($tlv) === 0) {
             return [
                 'name' => $documentInfo['name'],
                 'code' => $documentInfo['code'],

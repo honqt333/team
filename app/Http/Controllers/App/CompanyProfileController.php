@@ -39,6 +39,7 @@ class CompanyProfileController extends Controller
             return redirect()->route('app.addons.whatsapp.index', ['tab' => 'templates']);
         }
 
+        /** @var Tenant $tenant */
         $tenant = auth()->user()->tenant;
         $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
 
@@ -139,7 +140,7 @@ class CompanyProfileController extends Controller
             'taxPeriods' => TaxPeriod::where('tenant_id', $tenant->id)
                 ->orderByDesc('start_date')
                 ->get(['id', 'name as period_name', 'name', 'start_date', 'end_date']),
-            'vatRate' => (float) ($tenant->taxSettings->vat_rate ?? $tenant->taxSettings->services_vat_rate ?? $defaultVatRate ?? 15),
+            'vatRate' => (float) ($tenant->taxSettings->vat_rate ?? $tenant->taxSettings->services_vat_rate ?? $defaultVatRate),
             'income_categories' => fn () => IncomeCategory::active()
                 ->get()
                 ->map(fn ($cat) => [

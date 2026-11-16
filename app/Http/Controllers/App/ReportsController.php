@@ -346,8 +346,10 @@ class ReportsController extends Controller
             // Write UTF-8 BOM for Excel
             fwrite($output, "\xEF\xBB\xBF");
 
+            /** @var Tenant|null $reportTenant */
+            $reportTenant = auth()->user()?->tenant;
             $currencyLabel = CountryCurrencyRegistry::currencyLabel(
-                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                CountryCurrencyRegistry::tenantCurrency($reportTenant),
                 app()->getLocale()
             );
 
@@ -5621,8 +5623,10 @@ class ReportsController extends Controller
             // Write UTF-8 BOM for Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
 
+            /** @var Tenant|null $reportTenant */
+            $reportTenant = auth()->user()?->tenant;
             $currencyLabel = CountryCurrencyRegistry::currencyLabel(
-                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                CountryCurrencyRegistry::tenantCurrency($reportTenant),
                 app()->getLocale()
             );
 

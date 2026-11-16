@@ -13,6 +13,7 @@ use App\Models\InventoryUnit;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
+use App\Models\Tenant;
 use App\Models\Warehouse;
 use App\Services\PaymentService;
 use App\Support\CountryCurrencyRegistry;
@@ -424,8 +425,10 @@ class SuppliersController extends Controller
         }
 
         if ($amount > $supplierBalance + 0.009) {
+            /** @var Tenant|null $supplierTenant */
+            $supplierTenant = auth()->user()?->tenant;
             $currencyLabel = CountryCurrencyRegistry::currencyLabel(
-                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                CountryCurrencyRegistry::tenantCurrency($supplierTenant),
                 app()->getLocale()
             );
 

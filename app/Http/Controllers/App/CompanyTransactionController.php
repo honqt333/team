@@ -250,7 +250,7 @@ class CompanyTransactionController extends Controller
                 if ($transaction->is_taxable) {
                     $vatRate = (float) ($transaction->amount > 0 && $transaction->tax_amount > 0
                         ? round(((float) $transaction->tax_amount / (float) $transaction->amount) * 100, 2)
-                        : (TenantTaxSetting::where('tenant_id', $tenantId)->value('vat_rate') ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country) ?? 15));
+                        : (TenantTaxSetting::where('tenant_id', $tenantId)->value('vat_rate') ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country)));
 
                     if ($transaction->transaction_type === 'revenue') {
                         // 1. Create Sales Invoice (Simplified type)
@@ -534,8 +534,7 @@ class CompanyTransactionController extends Controller
         }
 
         $vatRate = (float) (TenantTaxSetting::where('tenant_id', $tenantId)->value('vat_rate')
-            ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country)
-            ?? 15);
+            ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country));
 
         if ($isVatInclusive) {
             // If frontend already provided pre-computed net and tax that cleanly add up to total

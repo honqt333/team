@@ -13,6 +13,7 @@ use App\Models\SystemAnnouncement;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\CountryCurrencyRegistry;
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -42,6 +43,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        /** @var Tenant|null $tenant */
         $tenant = $user?->tenant;
 
         // Check if user is a regular tenant User
@@ -161,7 +163,7 @@ class HandleInertiaRequests extends Middleware
                 'tax_settings' => $tenant->taxSettings,
                 'has_paid_subscription' => $tenant->hasPaidSubscription(),
                 'status' => $tenant->status,
-                'trial_ends_at' => $tenant->trial_ends_at ? $tenant->trial_ends_at->toIso8601String() : null,
+                'trial_ends_at' => $tenant->trial_ends_at instanceof DateTimeInterface ? $tenant->trial_ends_at->format(DateTimeInterface::ATOM) : null,
                 'subscription_ends_at' => rescue(fn () => $tenant->subscriptions()->whereIn('status', ['active', 'trial', 'trialing'])->latest()->first()?->ends_at?->toIso8601String()),
                 'subscription_lifecycle' => rescue(function () use ($tenant) {
                     $lifecycle = $tenant->getSubscriptionLifecycle();
