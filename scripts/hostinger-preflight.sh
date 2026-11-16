@@ -2,12 +2,40 @@
 set -euo pipefail
 
 # ==============================================================================
-# Khidmah Pro - Hostinger Preflight & Directory Setup Script
-# STRICT NON-DESTRUCTIVE DIAGNOSTIC & SCAFFOLDING ONLY
+# Khidmah Pro - Hostinger Environment Preflight Diagnostic & Scaffolding
+# STRICT READ-ONLY CHECK BY DEFAULT (--check)
+# SAFE DIRECTORY SCAFFOLDING ONLY WITH EXPLICIT --apply
 # ==============================================================================
 
+MODE="check"
+
+for arg in "$@"; do
+  case "$arg" in
+    --check)
+      MODE="check"
+      ;;
+    --apply)
+      MODE="apply"
+      ;;
+    --help|-h)
+      echo "Usage: $0 [--check | --apply]"
+      echo "  --check  (Default) Strictly read-only diagnostics. Performs ZERO filesystem mutations."
+      echo "  --apply  Creates required directory scaffolding after safety path verification."
+      exit 0
+      ;;
+    *)
+      echo "ERROR: Unknown option '$arg'. Use --check or --apply."
+      exit 1
+      ;;
+  esac
+done
+
 echo "=================================================================="
-echo "🔍 Khidmah Pro - Hostinger Environment Preflight Diagnostic"
+if [ "$MODE" = "check" ]; then
+  echo "🔍 Khidmah Pro - Hostinger Preflight Diagnostic [STRICT READ-ONLY]"
+else
+  echo "🛠️  Khidmah Pro - Hostinger Directory Scaffolding [--apply MODE]"
+fi
 echo "=================================================================="
 
 PROJECT_DIR="$(pwd)"
@@ -15,10 +43,23 @@ PARENT_DIR="$(dirname "$PROJECT_DIR")"
 DEPLOY_ROOT="${DEPLOY_ROOT:-$PROJECT_DIR}"
 PUBLIC_HTML="${PUBLIC_HTML:-$PARENT_DIR/public_html}"
 
-echo "Project Directory: $PROJECT_DIR"
-echo "Deploy Root:       $DEPLOY_ROOT"
+echo "Project Directory:  $PROJECT_DIR"
+echo "Deploy Root:        $DEPLOY_ROOT"
 echo "Target public_html: $PUBLIC_HTML"
+echo "Execution Mode:     $MODE"
 echo "------------------------------------------------------------------"
+
+# Safety Path Guards
+if [ "$DEPLOY_ROOT" = "/" ] || [ "$DEPLOY_ROOT" = "$HOME" ]; then
+  echo "❌ CRITICAL SAFETY ERROR: Refusing to operate on root ('/') or direct home ('$HOME')."
+  echo "   DEPLOY_ROOT must be a dedicated subdirectory (e.g. $HOME/staging)."
+  exit 1
+fi
+
+if echo "$DEPLOY_ROOT" | grep -qi "production"; then
+  echo "❌ CRITICAL SAFETY ERROR: Staging preflight script must NEVER target production path ($DEPLOY_ROOT)."
+  exit 1
+fi
 
 # 1. PHP Version & CLI Check
 echo "==> 1. Checking PHP CLI version..."
@@ -44,7 +85,7 @@ REQUIRED_EXTS=("pdo_mysql" "bcmath" "intl" "mbstring" "gd" "zip" "xml" "curl")
 MISSING_EXTS=()
 
 for ext in "${REQUIRED_EXTS[@]}"; do
-  if ! php -m | grep -qi "^$ext$"; then
+  if ! php -r "exit(extension_loaded('$ext') ? 0 : 1);"; then
     MISSING_EXTS+=("$ext")
   fi
 done
@@ -61,11 +102,27 @@ echo "==> 3. Verifying database client tools..."
 if command -v mysqldump >/dev/null 2>&1; then
   echo "✅ mysqldump is available for pre-deploy backups."
 else
-  echo "⚠️  WARNING: mysqldump is not available in PATH. Pre-deploy backups will be skipped."
+  echo "⚠️  WARNING: mysqldump is not available in PATH. Pre-deploy backups will not be possible."
 fi
 
-# 4. Document Root & public_html Diagnostic (Strictly Non-Destructive)
-echo "==> 4. Inspecting Document Root ($PUBLIC_HTML)..."
+# 4. Archiving Tools Check
+echo "==> 4. Verifying archiving and compression tools..."
+if command -v tar >/dev/null 2>&1; then
+  echo "✅ tar is available."
+else
+  echo "❌ ERROR: tar utility is missing."
+  exit 1
+fi
+
+if command -v gzip >/dev/null 2>&1; then
+  echo "✅ gzip is available."
+else
+  echo "❌ ERROR: gzip utility is missing."
+  exit 1
+fi
+
+# 5. Document Root & public_html Diagnostic (Strictly Non-Destructive)
+echo "==> 5. Inspecting Document Root ($PUBLIC_HTML)..."
 
 if [ -L "$PUBLIC_HTML" ]; then
   CURRENT_TARGET=$(readlink -f "$PUBLIC_HTML" || true)
@@ -76,46 +133,79 @@ if [ -L "$PUBLIC_HTML" ]; then
     echo "⚠️  NOTE: public_html points to an alternate target. Update link to $DEPLOY_ROOT/current/public when ready."
   fi
 elif [ -d "$PUBLIC_HTML" ]; then
-  echo "⚠️  public_html is a REGULAR DIRECTORY (not a symlink)."
-  echo "   [Hostinger Policy Guard]: This script will NOT delete or overwrite your public_html folder."
-  echo "   Options for linking web traffic to Khidmah Pro releases:"
-  echo "     Option A (Recommended): In Hostinger hPanel -> Advanced -> Document Root, set the root to:"
+  echo "ℹ️  public_html is a REGULAR DIRECTORY (not a symlink)."
+  echo "   [Hostinger Policy Guard]: This script will NEVER delete or overwrite your public_html folder."
+  echo "   Recommended configuration for Hostinger:"
+  echo "     Option A (Preferred): In Hostinger hPanel -> Domains/Subdomains -> Document Root, set target to:"
   echo "       $DEPLOY_ROOT/current/public"
-  echo "     Option B: If Document Root cannot be changed in hPanel, back up public_html manually, then link:"
-  echo "       mv $PUBLIC_HTML ${PUBLIC_HTML}_backup"
-  echo "       ln -s $DEPLOY_ROOT/current/public $PUBLIC_HTML"
+  echo "     Option B: Back up existing public_html manually, then replace with symlink:"
+  echo "       mv $PUBLIC_HTML ${PUBLIC_HTML}_backup && ln -s $DEPLOY_ROOT/current/public $PUBLIC_HTML"
 else
   echo "ℹ️  public_html does not exist yet at $PUBLIC_HTML."
-  echo "   You can create the symlink once the first release is deployed:"
+  echo "   Create symlink after first release deployment:"
   echo "     ln -s $DEPLOY_ROOT/current/public $PUBLIC_HTML"
 fi
 
-# 5. Directory Structure Scaffolding
-echo "==> 5. Verifying and scaffolding deployment directories..."
-mkdir -p "$DEPLOY_ROOT/releases"
-mkdir -p "$DEPLOY_ROOT/tmp"
-mkdir -p "$DEPLOY_ROOT/shared/backups"
-mkdir -p "$DEPLOY_ROOT/shared/storage/app/public"
-mkdir -p "$DEPLOY_ROOT/shared/storage/framework/cache/data"
-mkdir -p "$DEPLOY_ROOT/shared/storage/framework/sessions"
-mkdir -p "$DEPLOY_ROOT/shared/storage/framework/views"
-mkdir -p "$DEPLOY_ROOT/shared/storage/logs"
+# 6. Deployment Directories: Inspection (--check) vs Scaffolding (--apply)
+echo "==> 6. Deployment Directory Structure..."
+REQUIRED_DIRS=(
+  "$DEPLOY_ROOT/releases"
+  "$DEPLOY_ROOT/tmp"
+  "$DEPLOY_ROOT/shared/backups"
+  "$DEPLOY_ROOT/shared/storage/app/public"
+  "$DEPLOY_ROOT/shared/storage/framework/cache/data"
+  "$DEPLOY_ROOT/shared/storage/framework/sessions"
+  "$DEPLOY_ROOT/shared/storage/framework/views"
+  "$DEPLOY_ROOT/shared/storage/logs"
+)
 
-chmod -R 775 "$DEPLOY_ROOT/shared/storage" "$DEPLOY_ROOT/shared/backups" "$DEPLOY_ROOT/tmp" 2>/dev/null || true
-echo "✅ Directory structure verified under $DEPLOY_ROOT."
+if [ "$MODE" = "check" ]; then
+  ALL_EXIST=true
+  for d in "${REQUIRED_DIRS[@]}"; do
+    if [ -d "$d" ]; then
+      echo "  ✅ Exists: $d"
+    else
+      echo "  ℹ️  Not yet provisioned: $d (Will be created when running with --apply)"
+      ALL_EXIST=false
+    fi
+  done
+  if [ "$ALL_EXIST" = "true" ]; then
+    echo "✅ All deployment directories are already provisioned."
+  else
+    echo "ℹ️  Read-only mode: Zero directory mutations performed. Run with '--apply' to scaffold missing directories."
+  fi
+else
+  echo "==> Applying directory scaffolding under $DEPLOY_ROOT..."
+  for d in "${REQUIRED_DIRS[@]}"; do
+    if [ ! -d "$d" ]; then
+      mkdir -p "$d"
+      echo "  Created: $d"
+    else
+      echo "  Already exists: $d"
+    fi
+  done
+  # Safe non-recursive permission tuning for scaffolding directories only
+  chmod 775 "$DEPLOY_ROOT/releases" "$DEPLOY_ROOT/tmp" "$DEPLOY_ROOT/shared/backups" "$DEPLOY_ROOT/shared/storage" 2>/dev/null || true
+  chmod -R 775 "$DEPLOY_ROOT/shared/storage/framework" "$DEPLOY_ROOT/shared/storage/logs" 2>/dev/null || true
+  echo "✅ Scaffolding successfully applied."
+fi
 
-# 6. Shared Environment File Status
-echo "==> 6. Checking shared environment configuration..."
+# 7. Shared Environment File Status
+echo "==> 7. Checking shared environment configuration..."
 if [ -f "$DEPLOY_ROOT/shared/.env" ]; then
   echo "✅ $DEPLOY_ROOT/shared/.env is present."
-  # Quick permissions check
-  chmod 600 "$DEPLOY_ROOT/shared/.env" 2>/dev/null || true
+  if [ "$MODE" = "apply" ]; then
+    chmod 600 "$DEPLOY_ROOT/shared/.env" 2>/dev/null || true
+  fi
 else
-  echo "⚠️  ATTENTION: $DEPLOY_ROOT/shared/.env does NOT exist yet!"
-  echo "   Before running the first deployment, you must create $DEPLOY_ROOT/shared/.env"
-  echo "   with staging database credentials, APP_KEY, and environment settings."
+  echo "ℹ️  $DEPLOY_ROOT/shared/.env does NOT exist yet."
+  echo "   Before first release activation, create $DEPLOY_ROOT/shared/.env with staging database & app settings."
 fi
 
 echo "=================================================================="
-echo "🎉 Hostinger Preflight Diagnostic Completed."
+if [ "$MODE" = "check" ]; then
+  echo "🎉 Hostinger Preflight Read-Only Diagnostic Completed Successfully."
+else
+  echo "🎉 Hostinger Directory Scaffolding Completed Successfully."
+fi
 echo "=================================================================="

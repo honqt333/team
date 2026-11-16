@@ -1,9 +1,6 @@
 name: Deploy Staging
 
 on:
-  push:
-    branches:
-      - staging
   workflow_dispatch:
     inputs:
       allow_older:
@@ -20,6 +17,10 @@ on:
 concurrency:
   group: deploy-staging
   cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   ci:
@@ -136,32 +137,62 @@ jobs:
           name: release-package
           path: /tmp
 
-      - name: Setup SSH key and host verification
+      - name: Setup SSH key and host verification (Pinned Key)
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          if [ -z "$SSH_KEY" ]; then
+            echo "ERROR: STAGING_SSH_KEY secret is missing!"
+            exit 1
+          fi
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.STAGING_SSH_PORT }}" -H "${{ secrets.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          if [ -z "$SSH_KNOWN_HOSTS" ]; then
+            echo "ERROR: STAGING_SSH_KNOWN_HOSTS secret is missing! Dynamic ssh-keyscan is prohibited to protect against MitM attacks."
+            exit 1
+          fi
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Upload archive and deploy script
+        env:
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
         run: |
-          scp -i ~/.ssh/deploy_key -P "${{ secrets.STAGING_SSH_PORT }}" \
+          scp -i ~/.ssh/deploy_key -P "$SSH_PORT" \
+            -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=15 \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
             /tmp/release.tar.gz \
             scripts/deploy-release.sh \
-            "${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}:${{ secrets.STAGING_DEPLOY_PATH }}/tmp/"
+            "${SSH_USER}@${SSH_HOST}:${DEPLOY_PATH}/tmp/"
 
       - name: Execute remote atomic release deployment
+        env:
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+          RELEASE_ID: ${{ needs.package.outputs.release_id }}
+          COMMIT_SHA: ${{ needs.package.outputs.commit_sha }}
+          COMMIT_EPOCH: ${{ needs.package.outputs.commit_epoch }}
+          ALLOW_OLDER: ${{ inputs.allow_older || 'false' }}
+          SKIP_MIGRATIONS: ${{ inputs.skip_migrations || 'false' }}
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.STAGING_SSH_PORT }}" \
-            "${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}" \
-            "chmod +x ${{ secrets.STAGING_DEPLOY_PATH }}/tmp/deploy-release.sh && \
-            DEPLOY_ROOT='${{ secrets.STAGING_DEPLOY_PATH }}' \
-            RELEASE_ID='${{ needs.package.outputs.release_id }}' \
-            COMMIT_SHA='${{ needs.package.outputs.commit_sha }}' \
-            COMMIT_EPOCH='${{ needs.package.outputs.commit_epoch }}' \
-            ALLOW_OLDER='${{ inputs.allow_older || 'false' }}' \
-            SKIP_MIGRATIONS='${{ inputs.skip_migrations || 'false' }}' \
-            ARCHIVE_PATH='${{ secrets.STAGING_DEPLOY_PATH }}/tmp/release.tar.gz' \
-            bash ${{ secrets.STAGING_DEPLOY_PATH }}/tmp/deploy-release.sh"
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=15 \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+            "${SSH_USER}@${SSH_HOST}" \
+            "chmod +x '${DEPLOY_PATH}/tmp/deploy-release.sh' && \
+            DEPLOY_ROOT='${DEPLOY_PATH}' \
+            RELEASE_ID='${RELEASE_ID}' \
+            COMMIT_SHA='${COMMIT_SHA}' \
+            COMMIT_EPOCH='${COMMIT_EPOCH}' \
+            ALLOW_OLDER='${ALLOW_OLDER}' \
+            SKIP_MIGRATIONS='${SKIP_MIGRATIONS}' \
+            ARCHIVE_PATH='${DEPLOY_PATH}/tmp/release.tar.gz' \
+            bash '${DEPLOY_PATH}/tmp/deploy-release.sh'"

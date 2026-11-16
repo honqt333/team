@@ -249,7 +249,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 3
+			count: 1
 			path: app/Http/Controllers/App/CompanySubscriptionController.php
 
 		-
@@ -547,42 +547,6 @@ parameters:
 			path: app/Http/Controllers/App/PurchaseReturnsController.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>parts_inclusive" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/PurchasingInvoicesController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>parts_vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/PurchasingInvoicesController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/PurchasingInvoicesController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>vat_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/PurchasingInvoicesController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/PurchasingInvoicesController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:ordered\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/App/Quotes/QuoteController.php
-
-		-
 			message: '#^Property App\\Models\\Quote\:\:\$valid_until \(Carbon\\Carbon\|null\) does not accept string\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -631,12 +595,6 @@ parameters:
 			path: app/Http/Controllers/App/ServiceController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Supplier\:\:\$balance\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Http/Controllers/App/SuppliersController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Supplier\:\:\$payments\.$#'
 			identifier: property.notFound
 			count: 2
@@ -649,12 +607,6 @@ parameters:
 			path: app/Http/Controllers/App/VehicleController.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:ordered\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/App/VehicleController.php
-
-		-
 			message: '#^Class App\\Exports\\VehiclesExport does not have a constructor and must be instantiated without any parameters\.$#'
 			identifier: new.noConstructor
 			count: 1
@@ -663,7 +615,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 3
 			path: app/Http/Controllers/App/VehicleController.php
 
 		-
@@ -745,12 +697,6 @@ parameters:
 			path: app/Http/Controllers/App/WorkshopBoardController.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/App/ZatcaOnboardingController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -785,12 +731,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/Public/CustomerPortalAppointmentActionsController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int, plate_number\: string, label\: string\}, Closure\(App\\Models\\Vehicle\)\: array\{id\: int, plate_number\: string, label\: string\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Public/CustomerPortalAppointmentController.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>display_make" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -1213,12 +1153,6 @@ parameters:
 			path: app/Listeners/WorkOrder/LogActivityOnStatusChange.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''App\\\\Services\\\\NotificationService'' and ''notifyOwner'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Listeners/WorkOrder/NotifyOwnerOnCreation.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1245,12 +1179,6 @@ parameters:
 		-
 			message: '#^Property App\\Models\\HR\\Attendance\:\:\$overtime_minutes \(int\) does not accept float\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: app/Models/HR/Attendance.php
-
-		-
-			message: '#^Variable \$shiftStart might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: app/Models/HR/Attendance.php
 
@@ -1524,10 +1452,6 @@ parameters:
 			count: 1
 			path: app/Services/Developer/Scanners/UiScanner.php
 
-
-
-
-
 		-
 			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
@@ -1559,15 +1483,9 @@ parameters:
 			path: app/Services/InvoiceService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\WorkOrderItem\:\:\$tax_category_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/InvoiceService.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 1
+			count: 2
 			path: app/Services/InvoiceService.php
 
 		-
@@ -1639,7 +1557,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 1
+			count: 3
 			path: app/Services/Zatca/ZatcaOnboardingService.php
 
 		-
@@ -1653,3 +1571,543 @@ parameters:
 			identifier: varTag.misplaced
 			count: 1
 			path: app/Support/TenantWebsite/ThemeRegistry.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>services_vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Billing\\SubscriptionInvoice\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/CompanySubscriptionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>make_other" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>model_other" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>plate_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>year" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>code" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>cr_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_invoice_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_light_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_path" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 6
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>trade_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/App/DealerController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>grace_period_minutes" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>overtime_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>absent" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>late" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>overtime_minutes" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>present" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeOffboardingController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\HR\\EmployeeContract\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\HR\\EmployeeDocument\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>absent_count" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>late_count" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>net_total" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>present_count" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>currency" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/PayrollController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>cr_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>invoice_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_path" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>trade_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>is_active" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/NotificationSettingsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/App/PurchaseInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/App/PurchaseInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>warehouse_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchaseReturnsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/App/ReportsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/ReportsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/ReportsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/ReportsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>type" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/ReportsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>default_tax_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Tenant\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Public/CustomerPortalAuthController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/WorkOrderUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>code" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/HR/PayrollAccountingService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>gosi_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/HR/PayrollAccountingService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>timestamp" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Invoice/SubscriptionInvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>min_sale_price" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>parts_inclusive" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>parts_vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Call to function is_object\(\) with GdImage will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: app/Services/Media/ImageOptimizer.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<1, max\> and 1 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 4
+			path: app/Services/Media/ImageOptimizer.php
+
+		-
+			message: '#^Result of \|\| is always false\.$#'
+			identifier: booleanOr.alwaysFalse
+			count: 2
+			path: app/Services/Media/ImageOptimizer.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>address_line" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>cr_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>delivery_signature" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>iban" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>invoice_terms" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>pricing_mode_snapshot" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>reception_signature" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>stamp_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Print/PrintDocumentDataBuilder.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>default_tax_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>plan" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TenantStorageService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Zatca/ZatcaOnboardingService.php
