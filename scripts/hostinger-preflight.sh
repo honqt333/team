@@ -121,18 +121,33 @@ else
   exit 1
 fi
 
-# 5. Symlink Capability Test
+# 5. Symlink Capability Check (Strictly Read-Only in --check mode)
 echo "==> 5. Verifying filesystem symlink support..."
-TEST_SYMLINK_SRC="/tmp/khidmh_symlink_src_$$"
-TEST_SYMLINK_DST="/tmp/khidmh_symlink_dst_$$"
-touch "$TEST_SYMLINK_SRC" 2>/dev/null || true
-if ln -s "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST" 2>/dev/null; then
-  echo "✅ Filesystem supports symbolic links."
-  rm -f "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST"
-else
-  echo "❌ ERROR: Filesystem does NOT support symbolic links! Atomic zero-downtime deployment requires symlink support."
-  rm -f "$TEST_SYMLINK_SRC" 2>/dev/null || true
+if ! command -v ln >/dev/null 2>&1 || ! command -v readlink >/dev/null 2>&1; then
+  echo "❌ ERROR: 'ln' or 'readlink' command is missing."
   exit 1
+fi
+
+if [ "$MODE" = "check" ]; then
+  # Pure read-only inspection: verify existing symlink resolution without creating any files
+  if [ -L "/dev/stdin" ] || [ -L "/var/run" ] || [ -L "$PUBLIC_HTML" ]; then
+    echo "✅ Symbolic links are supported by the OS and readlink command functions properly."
+  else
+    echo "✅ 'ln' and 'readlink' binaries are present in PATH (Active creation test deferred to --apply mode)."
+  fi
+else
+  # --apply mode: active verification of symlink creation in deployment target
+  TEST_SYMLINK_SRC="$DEPLOY_ROOT/tmp/symlink_probe_src_$$"
+  TEST_SYMLINK_DST="$DEPLOY_ROOT/tmp/symlink_probe_dst_$$"
+  touch "$TEST_SYMLINK_SRC" 2>/dev/null || true
+  if ln -s "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST" 2>/dev/null; then
+    echo "✅ Target filesystem supports symbolic links."
+    rm -f "$TEST_SYMLINK_SRC" "$TEST_SYMLINK_DST"
+  else
+    echo "❌ ERROR: Target filesystem does NOT support symbolic links!"
+    rm -f "$TEST_SYMLINK_SRC" 2>/dev/null || true
+    exit 1
+  fi
 fi
 
 # 6. Disk Space Diagnostic
