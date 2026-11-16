@@ -18,8 +18,24 @@ permissions:
   actions: read
 
 jobs:
+  guard:
+    name: Target Branch Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert Target Branch is staging
+        run: |
+          echo "Target ref is: ${{ github.ref }}"
+          if [ "${{ github.ref }}" != "refs/heads/staging" ]; then
+            echo "❌ CRITICAL SAFETY ERROR: Refusing to rollback from ref '${{ github.ref }}'."
+            echo "Staging rollback is strictly restricted to 'refs/heads/staging'."
+            exit 1
+          fi
+          echo "✅ Target branch verified: staging"
+
   rollback:
     name: Rollback Code & Assets (No DB Changes)
+    needs: guard
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: staging
     steps:

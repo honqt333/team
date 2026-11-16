@@ -23,13 +23,28 @@ permissions:
   actions: read
 
 jobs:
+  guard:
+    name: Target Branch Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert Target Branch is staging
+        run: |
+          echo "Target ref is: ${{ github.ref }}"
+          if [ "${{ github.ref }}" != "refs/heads/staging" ]; then
+            echo "❌ CRITICAL SAFETY ERROR: Refusing to deploy from ref '${{ github.ref }}'."
+            echo "Staging deployment is strictly restricted to 'refs/heads/staging'."
+            exit 1
+          fi
+          echo "✅ Target branch verified: staging"
+
   ci:
     name: Run CI Gate
-    uses: ./.github/workflows/ci.yml
+    needs: guard
+    uses: ./.github/workflows/ci-staging.yml
 
   package:
     name: Build & Package Release
-    needs: ci
+    needs: [guard, ci]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.meta.outputs.release_id }}
@@ -121,6 +136,7 @@ jobs:
   deploy:
     name: Deploy to Hostinger Staging
     needs: package
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: staging
     steps:
