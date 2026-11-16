@@ -38,6 +38,14 @@ class WorkshopBoardAppointmentsTest extends TestCase
         Permission::findOrCreate('crm.vehicles.view', 'web');
 
         $this->scheduler = app(AppointmentSchedulingService::class);
+
+        Carbon::setTestNow(Carbon::parse('2026-11-15 09:00:00'));
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
     }
 
     /**
@@ -109,7 +117,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -136,7 +144,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -166,7 +174,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -217,7 +225,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $base = $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -348,7 +356,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
 
         // The controller caps at TODAY_APPOINTMENTS_LIMIT (8). We
         // book 10 today to make sure only 8 come through.
-        $start = Carbon::now()->addHours(1)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(10, 0, 0);
 
         for ($i = 0; $i < 10; $i++) {
             $s = $start->copy()->addMinutes($i * 10);
@@ -371,7 +379,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         ]);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $appt = $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -394,7 +402,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         ]);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $appt = $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -415,7 +423,7 @@ class WorkshopBoardAppointmentsTest extends TestCase
         ]);
         [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        $start = Carbon::now()->addHours(2)->setMinute(0)->setSecond(0);
+        $start = Carbon::now()->setTime(11, 0, 0);
         $appt = $this->scheduler->create(
             $start, $start->copy()->addMinutes(45),
             $customer, $vehicle, $bay, $tech, []
@@ -427,5 +435,123 @@ class WorkshopBoardAppointmentsTest extends TestCase
         );
 
         $response->assertStatus(422);
+    }
+
+    public function test_board_loads_appointments_matching_tenant_local_day_across_midnight(): void
+    {
+        // Asia/Riyadh tenant where wall-clock in late UTC evening is already next day locally
+        $tenant = Tenant::factory()->create(['timezone' => 'Asia/Riyadh']);
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $owner = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'current_center_id' => $center->id,
+        ]);
+        $owner->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+        $owner->givePermissionTo('crm.work_orders.view');
+
+        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
+
+        // Simulated UTC time: 2026-11-15 22:30:00 UTC -> Local time is 2026-11-16 01:30:00 in Riyadh
+        Carbon::setTestNow(Carbon::parse('2026-11-15 22:30:00', 'UTC'));
+
+        // Appointment scheduled for 2026-11-16 02:00:00 Riyadh (2026-11-15 23:00:00 UTC) -> same local day
+        $todayAppt = Carbon::parse('2026-11-16 02:00:00', 'Asia/Riyadh')->utc();
+        $this->scheduler->create(
+            $todayAppt, $todayAppt->copy()->addMinutes(30),
+            $customer, $vehicle, $bay, $tech, []
+        );
+
+        // Yesterday appointment (persisted directly to bypass scheduler past-booking guard):
+        // 2026-11-15 10:00:00 Riyadh (2026-11-15 07:00:00 UTC) -> yesterday locally
+        $yesterdayAppt = Carbon::parse('2026-11-15 10:00:00', 'Asia/Riyadh')->utc();
+        Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'service_bay_id' => $bay->id,
+            'assigned_user_id' => $tech->id,
+            'scheduled_at' => $yesterdayAppt,
+            'estimated_end_at' => $yesterdayAppt->copy()->addMinutes(30),
+            'status' => Appointment::STATUS_SCHEDULED,
+        ]);
+
+        $response = $this->actingAs($owner)->get('/app/workshop');
+
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Workshop/Board')
+                ->has('todayAppointments', 1)
+                ->where('todayAppointments.0.scheduled_at', $todayAppt->toIso8601String())
+        );
+    }
+
+    public function test_board_handles_different_timezones_correctly(): void
+    {
+        // Dubai (UTC+4): at 20:30 UTC on 2026-11-15, it is 00:30 local on 2026-11-16
+        $tenantDubai = Tenant::factory()->create(['timezone' => 'Asia/Dubai']);
+        $centerDubai = Center::factory()->create(['tenant_id' => $tenantDubai->id]);
+        $ownerDubai = User::factory()->create([
+            'tenant_id' => $tenantDubai->id,
+            'current_center_id' => $centerDubai->id,
+        ]);
+        $ownerDubai->centers()->attach($centerDubai->id, ['tenant_id' => $tenantDubai->id]);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenantDubai->id);
+        $ownerDubai->givePermissionTo('crm.work_orders.view');
+
+        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($ownerDubai);
+
+        Carbon::setTestNow(Carbon::parse('2026-11-15 20:30:00', 'UTC'));
+
+        $apptDubai = Carbon::parse('2026-11-16 02:00:00', 'Asia/Dubai')->utc();
+        $this->scheduler->create(
+            $apptDubai, $apptDubai->copy()->addMinutes(30),
+            $customer, $vehicle, $bay, $tech, []
+        );
+
+        $response = $this->actingAs($ownerDubai)->get('/app/workshop');
+
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Workshop/Board')
+                ->has('todayAppointments', 1)
+        );
+    }
+
+    public function test_board_handles_month_end_and_year_end_boundaries(): void
+    {
+        // New Year Eve in Riyadh: 2026-12-31 22:30:00 UTC is 2027-01-01 01:30:00 Riyadh
+        $tenant = Tenant::factory()->create(['timezone' => 'Asia/Riyadh']);
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $owner = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'current_center_id' => $center->id,
+        ]);
+        $owner->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+        $owner->givePermissionTo('crm.work_orders.view');
+
+        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
+
+        Carbon::setTestNow(Carbon::parse('2026-12-31 22:30:00', 'UTC'));
+
+        // Appointment on New Year day in Riyadh (2027-01-01 10:00:00 Riyadh)
+        $newYearAppt = Carbon::parse('2027-01-01 10:00:00', 'Asia/Riyadh')->utc();
+        $this->scheduler->create(
+            $newYearAppt, $newYearAppt->copy()->addMinutes(30),
+            $customer, $vehicle, $bay, $tech, []
+        );
+
+        $response = $this->actingAs($owner)->get('/app/workshop');
+
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Workshop/Board')
+                ->has('todayAppointments', 1)
+        );
     }
 }

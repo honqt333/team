@@ -6,11 +6,14 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Tenant;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderLaborEntry;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\Permissions;
 use App\Support\TenancyContext;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Inertia\Inertia;
@@ -89,10 +92,13 @@ class WorkshopBoardController extends Controller
             ->whereIn('status', self::BOARD_STATUSES)
             ->get();
 
+        $tenant = $user->tenant ?? Tenant::find($tenantId);
+        $tz = $this->resolveTenantTimezone($tenant);
+
         // Group by status. The Blade-side loop never has to know the
         // underlying SQL order — we shape the data here so the component
         // is purely presentational.
-        $today = now()->startOfDay();
+        $today = Carbon::now($tz)->startOfDay();
         $columns = [];
 
         foreach (self::BOARD_STATUSES as $status) {
@@ -205,7 +211,7 @@ class WorkshopBoardController extends Controller
                 'ready_for_qc' => count($columns[WorkOrderItem::STATUS_READY_FOR_QC]),
                 'total' => $items->count(),
             ],
-            'todayAppointments' => $this->loadTodayAppointments($tenantId, $centerId),
+            'todayAppointments' => $this->loadTodayAppointments($tenantId, $centerId, $tz),
             'canManageAppointments' => $user->can(Permissions::APPOINTMENTS_MANAGE),
         ]);
     }
@@ -250,10 +256,33 @@ class WorkshopBoardController extends Controller
         return $aStart <=> $bStart;
     }
 
-    private function loadTodayAppointments(int $tenantId, int $centerId): array
+    private function resolveTenantTimezone(?Tenant $tenant): string
     {
-        $start = now()->startOfDay();
-        $end = now()->endOfDay();
+        $candidate = ($tenant !== null ? $tenant->timezone : null)
+            ?? CountryCurrencyRegistry::countryMeta(CountryCurrencyRegistry::tenantCountry($tenant))['timezone']
+            ?? config('app.timezone', 'UTC');
+
+        if (is_string($candidate) && in_array($candidate, timezone_identifiers_list(), true)) {
+            return $candidate;
+        }
+
+        $fallback = config('app.timezone', 'UTC');
+
+        return is_string($fallback) && in_array($fallback, timezone_identifiers_list(), true)
+            ? $fallback
+            : 'UTC';
+    }
+
+    private function loadTodayAppointments(int $tenantId, int $centerId, ?string $tz = null): array
+    {
+        if ($tz === null) {
+            $tenant = Tenant::find($tenantId);
+            $tz = $this->resolveTenantTimezone($tenant);
+        }
+
+        $localTodayStart = Carbon::now($tz)->startOfDay();
+        $start = $localTodayStart->copy()->utc();
+        $end = $localTodayStart->copy()->endOfDay()->utc();
 
         $appointments = Appointment::query()
             ->where('center_id', $centerId)

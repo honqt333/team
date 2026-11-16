@@ -50,6 +50,14 @@ class DashboardPrivacyAndRoleAdaptiveTest extends TestCase
         ]);
 
         app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+
+        Carbon::setTestNow(Carbon::parse('2026-11-15 09:00:00'));
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
     }
 
     public function test_super_admin_receives_full_financial_metrics_and_permissions(): void
@@ -163,8 +171,8 @@ class DashboardPrivacyAndRoleAdaptiveTest extends TestCase
             'center_id' => $this->center->id,
             'customer_id' => $customer->id,
             'vehicle_id' => $vehicle->id,
-            'scheduled_at' => Carbon::today()->addHours(10),
-            'estimated_end_at' => Carbon::today()->addHours(11),
+            'scheduled_at' => Carbon::parse('2026-11-15 10:00:00'),
+            'estimated_end_at' => Carbon::parse('2026-11-15 11:00:00'),
             'status' => 'confirmed',
             'source' => 'phone',
         ]);
