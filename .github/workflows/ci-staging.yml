@@ -162,6 +162,29 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Verify Node test dependencies
+        run: node -e 'import("acorn"); import("@vue/compiler-sfc"); import("@vue/compiler-dom"); console.log("Node test dependencies loaded successfully");'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python PDF dependency
+        run: pip install pypdf==6.21.2
+
+      - name: Verify pypdf presence
+        run: python3 -c "import pypdf; print('pypdf version:', pypdf.__version__)"
+
       - name: Download Vite build artifact
         uses: actions/download-artifact@v4
         with:
